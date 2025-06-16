@@ -5,7 +5,7 @@ import { color, radius, size, space, zIndex } from '@tamagui/themes'
 
 // Create Roboto font configuration
 const robotoFont = createFont({
-  family: 'Roboto, system-ui, sans-serif',
+  family: 'Roboto',
   size: {
     1: 11,
     2: 12,
@@ -106,7 +106,7 @@ const customThemes = {
     backgroundFocus: '#e3f2fd',
     backgroundStrong: '#f9f9f9',
     backgroundTransparent: 'rgba(255,255,255,0)',
-    color: '#212121',
+    color: '#9334ea',
     colorHover: '#424242',
     colorPress: '#616161',
     colorFocus: '#1976d2',
@@ -191,6 +191,7 @@ const config = createTamagui({
   },
   tokens,
   themes: customThemes,
+  defaultTheme: 'light',
 })
 
 export type AppConfig = typeof config
