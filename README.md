@@ -1,50 +1,112 @@
-# Welcome to your Expo app 👋
+# BidScents Mobile App (Expo)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Quick Start
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### 1. Clone and Install
 
 ```bash
-npm run reset-project
+git clone https://github.com/BidScents/mobile.git
+
+cd bidscents-mobile
+
+bun install 
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Start Development
 
-## Learn more
+```bash
+bun expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Use the Expo Dev Tools to preview in iOS, Android, or Web.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## Project Structure
 
-Join our community of developers creating universal apps.
+```
+mobile/
+├── app/                    # Route-based screens (expo-router)
+│   ├── _layout.tsx         # Root layout with Tamagui + SafeArea
+│   └── index.tsx           # Home screen
+├── assets/
+│   ├── fonts/              # Roboto font variants
+│   └── images/             # Static images
+├── components/             # Reusable UI components
+├── hooks/                  # Custom React hooks
+├── lib/                    # Utility functions and shared logic
+├── tamagui.config.ts       # Tamagui theme + font config
+├── app.json                # Expo project config
+├── tsconfig.json
+└── README.md
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
+## Technologies Used
+
+| Area       | Stack                                            |
+| ---------- | ------------------------------------------------ |
+| UI Kit     | [`tamagui`](https://tamagui.dev) (native + web)  |
+| Fonts      | Roboto (Expo Font Loader)                        |
+| Navigation | `expo-router`                                    |
+| Theme      | Custom light/dark themes via `Theme` + tokens    |
+| State      | Zustand from shared sdk                          |
+
+---
+
+## Theming with Tamagui
+
+Tamagui is configured with:
+
+* Custom **Roboto font** via `expo-font`
+* Light & dark theme tokens (`tamagui.config.ts`)
+* Global font defaults + scalable sizes
+
+Use `$color`, `$background`, or semantic color tokens in components:
+
+```tsx
+<Button backgroundColor="$color">Place Bid</Button>
+```
+
+---
+
+## Development Tips
+
+* Use `useColorScheme()` to adapt themes
+* Use `useTheme()` to dynamically access theme values in components
+* tbc...
+
+---
+
+## Scripts
+
+```json
+"scripts": {
+  "start": "expo start",
+  "android": "expo run:android",
+  "ios": "expo run:ios",
+  "web": "expo start --web",
+  "lint": "eslint . --ext .ts,.tsx",
+  "format": "prettier --write ."
+}
+```
+
+---
+
+## Fonts
+
+Roboto font files are located in:
+
+```
+assets/fonts/
+├── Roboto-Light.ttf
+├── Roboto-Regular.ttf
+├── Roboto-Medium.ttf
+├── Roboto-SemiBold.ttf
+├── Roboto-Bold.ttf
+├── Roboto-ExtraBold.ttf
+├── Roboto-Black.ttf
+```
+
+And loaded in `app/_layout.tsx` using Expo’s `useFonts()` hook.
