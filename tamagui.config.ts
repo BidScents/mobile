@@ -97,23 +97,89 @@ const tokens = createTokens({
   zIndex,
 })
 
-// Custom theme overrides (optional)
+// Custom themes - light and dark only
 const customThemes = {
   light: {
-    // Override specific light theme colors if needed
-    // background: '#ffffff',
-    // color: '#000000',
-    // borderColor: '#e5e5e5',
+    background: '#ffffff',
+    backgroundHover: '#f5f5f5',
+    backgroundPress: '#eeeeee',
+    backgroundFocus: '#e3f2fd',
+    backgroundStrong: '#f9f9f9',
+    backgroundTransparent: 'rgba(255,255,255,0)',
+    color: '#212121',
+    colorHover: '#424242',
+    colorPress: '#616161',
+    colorFocus: '#1976d2',
+    colorTransparent: 'rgba(33,33,33,0)',
+    borderColor: '#e0e0e0',
+    borderColorHover: '#bdbdbd',
+    borderColorPress: '#9e9e9e',
+    borderColorFocus: '#1976d2',
+    placeholderColor: '#9e9e9e',
+    // Semantic colors
+    blue: '#2196f3',
+    blueHover: '#1976d2',
+    bluePress: '#1565c0',
+    blueFocus: '#0d47a1',
+    green: '#4caf50',
+    greenHover: '#388e3c',
+    greenPress: '#2e7d32',
+    greenFocus: '#1b5e20',
+    red: '#f44336',
+    redHover: '#d32f2f',
+    redPress: '#c62828',
+    redFocus: '#b71c1c',
+    yellow: '#ff9800',
+    yellowHover: '#f57c00',
+    yellowPress: '#ef6c00',
+    yellowFocus: '#e65100',
+    purple: '#9c27b0',
+    purpleHover: '#7b1fa2',
+    purplePress: '#6a1b9a',
+    purpleFocus: '#4a148c',
   },
   dark: {
-    // Override specific dark theme colors if needed
-    // background: '#000000',
-    // color: '#ffffff',
-    // borderColor: '#2a2a2a',
+    background: '#121212',
+    backgroundHover: '#1e1e1e',
+    backgroundPress: '#2a2a2a',
+    backgroundFocus: '#1a237e',
+    backgroundStrong: '#0a0a0a',
+    backgroundTransparent: 'rgba(18,18,18,0)',
+    color: '#ffffff',
+    colorHover: '#e0e0e0',
+    colorPress: '#bdbdbd',
+    colorFocus: '#64b5f6',
+    colorTransparent: 'rgba(255,255,255,0)',
+    borderColor: '#2a2a2a',
+    borderColorHover: '#3a3a3a',
+    borderColorPress: '#4a4a4a',
+    borderColorFocus: '#64b5f6',
+    placeholderColor: '#757575',
+    // Semantic colors
+    blue: '#64b5f6',
+    blueHover: '#42a5f5',
+    bluePress: '#2196f3',
+    blueFocus: '#1976d2',
+    green: '#81c784',
+    greenHover: '#66bb6a',
+    greenPress: '#4caf50',
+    greenFocus: '#388e3c',
+    red: '#e57373',
+    redHover: '#ef5350',
+    redPress: '#f44336',
+    redFocus: '#d32f2f',
+    yellow: '#ffb74d',
+    yellowHover: '#ffa726',
+    yellowPress: '#ff9800',
+    yellowFocus: '#f57c00',
+    purple: '#ba68c8',
+    purpleHover: '#ab47bc',
+    purplePress: '#9c27b0',
+    purpleFocus: '#7b1fa2',
   },
 }
 
-// Create the configuration extending base config
+// Create the configuration extending base config but with custom themes only
 const config = createTamagui({
   ...baseConfig,
   fonts: {
@@ -124,17 +190,7 @@ const config = createTamagui({
     display: robotoFont,
   },
   tokens,
-  themes: {
-    ...baseConfig.themes,
-    // Merge custom theme overrides
-    ...Object.keys(customThemes).reduce((acc, themeName) => {
-      acc[themeName] = {
-        ...baseConfig.themes?.[themeName],
-        ...customThemes[themeName],
-      }
-      return acc
-    }, {} as any),
-  },
+  themes: customThemes,
 })
 
 export type AppConfig = typeof config
