@@ -11,6 +11,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@bid-scents/shared-sdk": "file:../shared-sdk",
     "@expo/vector-icons": "^14.1.0",
     "@hookform/resolvers": "^5.1.1",
     "@react-navigation/bottom-tabs": "^7.3.10",
