@@ -1,17 +1,19 @@
-import React from 'react';
-import { useFonts } from 'expo-font';
-import { useColorScheme } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { TamaguiProvider, Theme } from '@tamagui/core';
-import { Stack } from 'expo-router';
-import config from 'tamagui.config';
-
+import { TamaguiProvider, Theme } from '@tamagui/core'
+import { useFonts } from 'expo-font'
+import { Stack } from 'expo-router'
+import React, { useEffect } from 'react'
+import { useColorScheme } from 'react-native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import config from 'tamagui.config'
 
 // SplashScreen.preventAutoHideAsync()
 
+// Import SDK utilities and providers
+import { initializeAuth } from '@bid-scents/shared-sdk'
+import { QueryProvider } from '../providers/query-provider'
 
 export default function App() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme()
   
   const [loaded] = useFonts({
     'Roboto-Light': require('../assets/fonts/Roboto-Light.ttf'),
@@ -21,25 +23,31 @@ export default function App() {
     'Roboto-Bold': require('../assets/fonts/Roboto-Bold.ttf'),
     'Roboto-ExtraBold': require('../assets/fonts/Roboto-ExtraBold.ttf'),
     'Roboto-Black': require('../assets/fonts/Roboto-Black.ttf'),
-  });
+  })
 
-  // Use when you want to hide the splash screen after fonts are loaded
-  // useEffect(() => { 
-  //   if (loaded) {
-  //     SplashScreen.hideAsync()
-  //   }
-  // }, [loaded])
+  // Initialize SDK auth system once fonts are loaded
+  useEffect(() => {
+    if (loaded) {
+      // To hide splash screen after fonts are loaded
+      // SplashScreen.hideAsync()
 
+      // This configures the API client with stored tokens and sets up auth state
+      initializeAuth()
+    }
+  }, [loaded])
+
+  // Wait for fonts to load before rendering the app
   if (!loaded) return null
 
-
   return (
-    <TamaguiProvider config={config}>
-      <Theme name={colorScheme === 'dark' ? 'dark' : 'light'}>
-        <SafeAreaProvider>
-          <Stack />
-        </SafeAreaProvider>
-      </Theme>
-    </TamaguiProvider>
-  );
+    <QueryProvider>
+      <TamaguiProvider config={config}>
+        <Theme name={colorScheme === 'dark' ? 'dark' : 'light'}>
+          <SafeAreaProvider>
+            <Stack />
+          </SafeAreaProvider>
+        </Theme>
+      </TamaguiProvider>
+    </QueryProvider>
+  )
 }
