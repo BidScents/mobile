@@ -37,3 +37,7 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# But keep android/ and ios/ folders themselves
+!android/
+!ios/

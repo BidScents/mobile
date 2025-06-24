@@ -19,7 +19,10 @@ bun expo start
 ```
 
 Use the Expo Dev Tools to preview in iOS, Android, or Web.
-
+```bash
+bun expo prebuild --clean
+bun expo run:ios
+```
 ---
 
 ## Project Structure
