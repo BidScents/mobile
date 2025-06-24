@@ -14,6 +14,7 @@
         "@tamagui/config": "^1.126.18",
         "@tamagui/core": "^1.126.18",
         "@tamagui/themes": "^1.126.18",
+        "@tanstack/query-async-storage-persister": "^5.81.2",
         "@tanstack/react-query": "^5.81.2",
         "@tanstack/react-query-persist-client": "^5.81.2",
         "expo": "~53.0.11",
@@ -754,6 +755,8 @@
     "@tamagui/z-index-stack": ["@tamagui/z-index-stack@1.126.18", "", {}, "sha512-/XAqBYi083r9xwaz3mdh+Bd6qGBwiD30LhzQhHZcTGWWEJXWJgRYwDOt4QUd+7UyZaTIthfsrJxeB12DejJudw=="],
 
     "@tanstack/eslint-plugin-query": ["@tanstack/eslint-plugin-query@5.81.2", "", { "dependencies": { "@typescript-eslint/utils": "^8.18.1" }, "peerDependencies": { "eslint": "^8.57.0 || ^9.0.0" } }, "sha512-h4k6P6fm5VhKP5NkK+0TTVpGGyKQdx6tk7NYYG7J7PkSu7ClpLgBihw7yzK8N3n5zPaF3IMyErxfoNiXWH/3/A=="],
+
+    "@tanstack/query-async-storage-persister": ["@tanstack/query-async-storage-persister@5.81.2", "", { "dependencies": { "@tanstack/query-persist-client-core": "5.81.2" } }, "sha512-EFfjIke3CGllpK1fVk4aIExA7a3AQvKCchi+YnULJ77pXCX4v2cjTDgfLrVJHEjX2MPZQW0PYw6P/AEuUiudcg=="],
 
     "@tanstack/query-core": ["@tanstack/query-core@5.81.2", "", {}, "sha512-QLYkPdrudoMATDFa3MiLEwRhNnAlzHWDf0LKaXUqJd0/+QxN8uTPi7bahRlxoAyH0UbLMBdeDbYzWALj7THOtw=="],
 
