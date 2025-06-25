@@ -1,7 +1,7 @@
 // tamagui.config.ts
 import { config as baseConfig } from '@tamagui/config/v3'
 import { createFont, createTamagui, createTokens } from '@tamagui/core'
-import { color, radius, size, space, zIndex } from '@tamagui/themes'
+import { color } from '@tamagui/themes'
 
 // Create Roboto font configuration
 const robotoFont = createFont({
@@ -88,38 +88,53 @@ const robotoFont = createFont({
   },
 })
 
-// Create custom tokens using base tokens
+// Create custom tokens extending base tokens with your colors
 const tokens = createTokens({
-  color,
-  radius,
-  size,
-  space,
-  zIndex,
-})
-
-const customThemes = {
-  light: {
-    // Base colors from Figma
-    background: '#ffffff',
-    foreground: '#000000',
-    muted: '#ede8f2',
-    mutedForeground: '#666666',
+  ...baseConfig.tokens,
+  color: {
+    ...color,
+    // Add your custom colors to the existing color tokens
     primary: '#9334ea',
-    
-    // Interactive states
-    backgroundHover: '#f8f9fa',
-    backgroundPress: '#f1f3f4',
-    foregroundHover: '#333333',
-    foregroundPress: '#666666',
     primaryHover: '#7c3aed',
     primaryPress: '#6d28d9',
+    muted: '#ede8f2',
+    mutedForeground: '#666666',
     mutedHover: '#e5ddf0',
     mutedPress: '#ddd2e8',
-    
-    // Semantic colors
-    green: '#00d900',
-    greenHover: '#00c300',
-    greenPress: '#00ad00',
+    success: '#00d900',
+    successHover: '#00c300',
+    successPress: '#00ad00',
+    error: '#ff5a5d',
+    errorHover: '#ff4347',
+    errorPress: '#ff2d31',
+    rating: '#feba17',
+    ratingHover: '#fdb000',
+    ratingPress: '#fca500',
+  },
+})
+
+// Create custom themes that extend base themes
+const customThemes = {
+  light: {
+    ...baseConfig.themes.light,
+    // Override specific colors while keeping base theme structure
+    background: '#ffffff',
+    backgroundHover: '#f8f9fa',
+    backgroundPress: '#f1f3f4',
+    color: '#000000',
+    colorHover: '#333333',
+    colorPress: '#666666',
+    // Add your custom colors
+    primary: '#9334ea',
+    primaryHover: '#7c3aed',
+    primaryPress: '#6d28d9',
+    muted: '#ede8f2',
+    mutedForeground: '#666666',
+    mutedHover: '#e5ddf0',
+    mutedPress: '#ddd2e8',
+    success: '#00d900',
+    successHover: '#00c300',
+    successPress: '#00ad00',
     error: '#ff5a5d',
     errorHover: '#ff4347',
     errorPress: '#ff2d31',
@@ -129,27 +144,25 @@ const customThemes = {
   },
   
   dark: {
-    // Base colors from Figma
+    ...baseConfig.themes.dark,
+    // Override specific colors while keeping base theme structure
     background: '#000000',
-    foreground: '#ffffff',
-    muted: '#2d2d2d',
-    mutedForeground: '#a2a0a0',
-    primary: '#9334ea',
-    
-    // Interactive states
     backgroundHover: '#1a1a1a',
     backgroundPress: '#2d2d2d',
-    foregroundHover: '#e6e6e6',
-    foregroundPress: '#cccccc',
+    color: '#ffffff',
+    colorHover: '#e6e6e6',
+    colorPress: '#cccccc',
+    // Add your custom colors (same as light since they work in both themes)
+    primary: '#9334ea',
     primaryHover: '#7c3aed',
     primaryPress: '#6d28d9',
+    muted: '#2d2d2d',
+    mutedForeground: '#a2a0a0',
     mutedHover: '#404040',
     mutedPress: '#525252',
-    
-    // Semantic colors
-    green: '#00d900',
-    greenHover: '#00c300',
-    greenPress: '#00ad00',
+    success: '#00d900',
+    successHover: '#00c300',
+    successPress: '#00ad00',
     error: '#ff5a5d',
     errorHover: '#ff4347',
     errorPress: '#ff2d31',
@@ -159,10 +172,11 @@ const customThemes = {
   }
 }
 
-// Create the configuration extending base config but with custom themes only
+// Create the configuration extending base config
 const config = createTamagui({
   ...baseConfig,
   fonts: {
+    ...baseConfig.fonts,
     heading: robotoFont,
     body: robotoFont,
     mono: robotoFont,
