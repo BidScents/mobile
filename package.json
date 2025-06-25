@@ -11,16 +11,17 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@bid-scents/shared-sdk": "1.0.0",
+    "@bid-scents/shared-sdk": "1.0.1",
     "@expo/vector-icons": "^14.1.0",
     "@hookform/resolvers": "^5.1.1",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
     "@supabase/supabase-js": "^2.50.1",
-    "@tamagui/config": "^1.126.18",
-    "@tamagui/core": "^1.126.18",
-    "@tamagui/themes": "^1.126.18",
+    "@tamagui/button": "^1.129.2",
+    "@tamagui/config": "^1.129.2",
+    "@tamagui/core": "^1.129.2",
+    "@tamagui/themes": "^1.129.2",
     "@tanstack/query-async-storage-persister": "^5.81.2",
     "@tanstack/react-query": "^5.81.2",
     "@tanstack/react-query-persist-client": "^5.81.2",
@@ -55,7 +56,7 @@
     "react-native-screens": "~4.11.1",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
-    "tamagui": "^1.126.18"
+    "tamagui": "^1.129.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
