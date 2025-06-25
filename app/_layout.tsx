@@ -5,6 +5,7 @@ import React, { useEffect } from 'react'
 import { useColorScheme } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import config from 'tamagui.config'
+import { LoadingOverlay } from '../components/ui/loading-overlay'
 
 // SplashScreen.preventAutoHideAsync()
 
@@ -45,6 +46,7 @@ export default function App() {
         <Theme name={colorScheme === 'dark' ? 'dark' : 'light'}>
           <SafeAreaProvider>
             <Stack />
+            <LoadingOverlay />
           </SafeAreaProvider>
         </Theme>
       </TamaguiProvider>
