@@ -19,6 +19,8 @@ export const LoadingOverlay: React.FC = () => {
           backgroundColor="rgba(255, 255, 255, 1)"
           borderRadius="$5"
           padding="$5"
+          justifyContent='center'
+          alignItems='center'
         >
           <Spinner 
             size="large" 
