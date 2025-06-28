@@ -39,8 +39,6 @@ export interface InputProps {
   numberOfLines?: number
   /** Whether the input is disabled */
   disabled?: boolean
-  /** Current theme object */
-  currentTheme: any
 }
 
 /**
@@ -56,7 +54,6 @@ export const Input: React.FC<InputProps> = ({
   error,
   numberOfLines,
   disabled = false,
-  currentTheme,
 }) => {
   const [showPassword, setShowPassword] = useState(false)
 
@@ -148,10 +145,10 @@ export const Input: React.FC<InputProps> = ({
     height: isMultiline ? undefined : 50,
     borderRadius: "$6",
     width: "100%",
-    color: currentTheme.foreground,
+    color: "$foreground",
     borderWidth: 0,
-    placeholderTextColor: currentTheme.mutedForeground,
-    backgroundColor: currentTheme.muted,
+    placeholderTextColor: "$mutedForeground",
+    backgroundColor: "$background",
     px: "$4",
     py: isMultiline ? "$3" : undefined,
     fontWeight: "400",
@@ -160,7 +157,7 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <YStack borderRadius="$6" width="100%" gap="$2">
-      <Paragraph fontWeight="400" color={currentTheme.mutedForeground}>
+      <Paragraph fontWeight="400" color="$mutedForeground">
         {label}
       </Paragraph>
       
@@ -168,7 +165,7 @@ export const Input: React.FC<InputProps> = ({
         <XStack
           alignItems="center"
           borderRadius="$6"
-          backgroundColor={currentTheme.muted}
+          backgroundColor="$background"
           pr="$3"
         >
           <TamaguiInput
@@ -180,7 +177,7 @@ export const Input: React.FC<InputProps> = ({
           <Ionicons
             name={showPassword ? 'eye-off' : 'eye'}
             size={20}
-            color={currentTheme.mutedForeground}
+            color="$mutedForeground"
             onPress={togglePasswordVisibility}
             style={{ cursor: 'pointer' }}
           />
@@ -195,7 +192,7 @@ export const Input: React.FC<InputProps> = ({
       )}
       
       {touched && error && (
-        <Paragraph size="$2" color={currentTheme.destructive}>
+        <Paragraph size="$2" color="$destructive">
           {error}
         </Paragraph>
       )}
