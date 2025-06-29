@@ -176,7 +176,7 @@ export const Button: React.FC<ButtonProps> = ({
       )}
       
       {!iconOnly && (
-        <Text textTransform="none" fontWeight="600" fontSize={sizeProps[size].fontSize}>
+        <Text textTransform="none" fontWeight="600" fontSize={sizeProps[size].fontSize} color={variantProps[variant].color}>
           {children}
         </Text>
       )}
