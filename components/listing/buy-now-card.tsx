@@ -50,9 +50,9 @@ export function BuyNowCard({ listing, onPress, onFavorite }: CardProps) {
           <Image
             source={{ uri: listing.image_url }}
             width="100%"
-            height={120}
+            height={160}
             borderRadius="$5"
-            backgroundColor="$gray8"
+            backgroundColor="$gray2"
           />
           
           {/* Favorite Button - Bottom Right */}
