@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import type { ButtonProps as TamaguiButtonProps } from 'tamagui'
-import { Button as TamaguiButton } from 'tamagui'
+import { Button as TamaguiButton, Text } from 'tamagui'
 
 /**
  * Button variants for the BidScents marketplace
@@ -61,19 +61,19 @@ export const Button: React.FC<ButtonProps> = ({
     sm: { 
       height: '$3', 
       paddingHorizontal: iconOnly ? '$2' : '$3', 
-      fontSize: '$3',
+      fontSize: '$4',
       width: iconOnly ? '$3' : 'auto'
     },
     md: { 
       height: '$4', 
       paddingHorizontal: iconOnly ? '$2.5' : '$4', 
-      fontSize: '$4',
+      fontSize: '$5',
       width: iconOnly ? '$4' : 'auto'
     },
     lg: { 
       height: '$5', 
       paddingHorizontal: iconOnly ? '$3' : '$5', 
-      fontSize: '$5',
+      fontSize: '$6',
       width: iconOnly ? '$5' : 'auto'
     },
   }
@@ -175,7 +175,11 @@ export const Button: React.FC<ButtonProps> = ({
         />
       )}
       
-      {!iconOnly && children}
+      {!iconOnly && (
+        <Text textTransform="none" fontWeight="600" fontSize={sizeProps[size].fontSize}>
+          {children}
+        </Text>
+      )}
       
       {rightIcon && (
         <Ionicons 
