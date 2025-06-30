@@ -25,6 +25,12 @@ bun expo run:ios
 ```
 ---
 
+### 3. Install Shared SDK
+
+```bash
+bun add @bid-scents/shared-sdk
+```
+
 ## Project Structure
 
 ```
