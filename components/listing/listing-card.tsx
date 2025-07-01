@@ -1,4 +1,3 @@
-// src/components/listing/listing-card.tsx
 import { ListingCard as ListingCardType, ListingType } from '@bid-scents/shared-sdk'
 import { router } from 'expo-router'
 import React from 'react'
