@@ -17,6 +17,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "@shopify/flash-list": "^1.8.3",
     "@supabase/supabase-js": "^2.50.1",
     "@tamagui/button": "^1.129.2",
     "@tamagui/config": "^1.129.2",
