@@ -1,30 +1,13 @@
+// providers/query-provider.tsx
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { QueryClient } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import React from 'react'
-import { MMKV } from 'react-native-mmkv'
 
-// Create MMKV storage instance for React Query cache persistence
-const storage = new MMKV({
-  id: 'react-query-cache',
-})
-
-// Create persister that bridges React Query with MMKV storage
+// Create persister using AsyncStorage - React Query handles the interface automatically
 const asyncStoragePersister = createAsyncStoragePersister({
-  storage: {
-    setItem: (key, value) => {
-      storage.set(key, value)
-      return Promise.resolve()
-    },
-    getItem: (key) => {
-      const value = storage.getString(key)
-      return Promise.resolve(value ?? null)
-    },
-    removeItem: (key) => {
-      storage.delete(key)
-      return Promise.resolve()
-    },
-  },
+  storage: AsyncStorage,
 })
 
 /**
@@ -51,7 +34,7 @@ interface QueryProviderProps {
 }
 
 /**
- * Provides React Query functionality with persistent caching using MMKV.
+ * Provides React Query functionality with persistent caching using AsyncStorage.
  * This ensures cached data (user profiles, listings) persists between app sessions.
  * 
  * @param children - React components that need access to React Query
