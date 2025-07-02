@@ -10,14 +10,15 @@ import { FavoriteButton } from './favorite-button'
 interface ListingCardProps {
   listing: ListingCardType
   onPress?: () => void
-  onFavorite?: (listingId: string, isFavorited: boolean) => void
+  onFavorite?: (listingId: string) => Promise<void>
+  onUnfavorite?: (listingId: string) => Promise<void>
 }
 
 /**
  * Unified vertical listing card component that adapts content based on listing type.
  * Supports FIXED_PRICE, NEGOTIABLE, AUCTION, and SWAP listings with consistent sizing.
  */
-export function ListingCard({ listing, onPress, onFavorite }: ListingCardProps) {
+export function ListingCard({ listing, onPress, onFavorite, onUnfavorite }: ListingCardProps) {
   const handleCardPress = () => {
     onPress?.()
     router.push(`/listing/${listing.id}` as any)
@@ -40,8 +41,12 @@ export function ListingCard({ listing, onPress, onFavorite }: ListingCardProps) 
     }
   }
 
-  const handleFavoriteToggle = (listingId: string, isFavorited: boolean) => {
-    onFavorite?.(listingId, isFavorited)
+  const handleFavorite = async (listingId: string) => {
+    await onFavorite?.(listingId)
+  }
+
+  const handleUnfavorite = async (listingId: string) => {
+    await onUnfavorite?.(listingId)
   }
 
   const formatPrice = (price: number): string => {
@@ -57,6 +62,7 @@ export function ListingCard({ listing, onPress, onFavorite }: ListingCardProps) 
   }
 
   const formatNextBid = (currentBid: number): string => {
+    {/* TODO: use listing bid increment */}
     return `RM ${(currentBid + 0.5).toFixed(1)}`
   }
 
@@ -223,7 +229,8 @@ export function ListingCard({ listing, onPress, onFavorite }: ListingCardProps) 
             <FavoriteButton
               listingId={listing.id}
               initialCount={listing.favorites_count}
-              onToggle={handleFavoriteToggle}
+              onFavorite={handleFavorite}
+              onUnfavorite={handleUnfavorite}
               size="small"
             />
           </XStack>
