@@ -3,8 +3,10 @@ import { useFonts } from 'expo-font'
 import { Stack } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useColorScheme } from 'react-native'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import config from 'tamagui.config'
+import { LoadingOverlay } from '../components/ui/loading-overlay'
 
 // SplashScreen.preventAutoHideAsync()
 
@@ -44,7 +46,10 @@ export default function App() {
       <TamaguiProvider config={config}>
         <Theme name={colorScheme === 'dark' ? 'dark' : 'light'}>
           <SafeAreaProvider>
-            <Stack />
+            <KeyboardProvider>
+              <Stack />
+            </KeyboardProvider>
+            <LoadingOverlay />
           </SafeAreaProvider>
         </Theme>
       </TamaguiProvider>

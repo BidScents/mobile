@@ -1,7 +1,6 @@
-// tamagui.config.ts
-import { createTamagui, createTokens, createFont } from '@tamagui/core'
 import { config as baseConfig } from '@tamagui/config/v3'
-import { color, radius, size, space, zIndex } from '@tamagui/themes'
+import { createFont, createTamagui, createTokens } from '@tamagui/core'
+import { color } from '@tamagui/themes'
 
 // Create Roboto font configuration
 const robotoFont = createFont({
@@ -88,101 +87,95 @@ const robotoFont = createFont({
   },
 })
 
-// Create custom tokens using base tokens
+// Create custom tokens extending base tokens with your colors
 const tokens = createTokens({
-  color,
-  radius,
-  size,
-  space,
-  zIndex,
+  ...baseConfig.tokens,
+  color: {
+    ...color,
+    // Add your custom colors to the existing color tokens
+    primary: '#9334ea',
+    primaryHover: '#7c3aed',
+    primaryPress: '#6d28d9',
+    muted: '#ede8f2',
+    mutedForeground: '#666666',
+    mutedHover: '#e5ddf0',
+    mutedPress: '#ddd2e8',
+    success: '#00d900',
+    successHover: '#00c300',
+    successPress: '#00ad00',
+    error: '#ff5a5d',
+    errorHover: '#ff4347',
+    errorPress: '#ff2d31',
+    rating: '#feba17',
+    ratingHover: '#fdb000',
+    ratingPress: '#fca500',
+  },
 })
 
-// Custom themes - light and dark only
+// Create custom themes that extend base themes
 const customThemes = {
   light: {
+    ...baseConfig.themes.light,
+    // Override specific colors while keeping base theme structure
     background: '#ffffff',
-    backgroundHover: '#f5f5f5',
-    backgroundPress: '#eeeeee',
-    backgroundFocus: '#e3f2fd',
-    backgroundStrong: '#f9f9f9',
-    backgroundTransparent: 'rgba(255,255,255,0)',
-    color: '#9334ea',
-    colorHover: '#424242',
-    colorPress: '#616161',
-    colorFocus: '#1976d2',
-    colorTransparent: 'rgba(33,33,33,0)',
-    borderColor: '#e0e0e0',
-    borderColorHover: '#bdbdbd',
-    borderColorPress: '#9e9e9e',
-    borderColorFocus: '#1976d2',
-    placeholderColor: '#9e9e9e',
-    // Semantic colors
-    blue: '#2196f3',
-    blueHover: '#1976d2',
-    bluePress: '#1565c0',
-    blueFocus: '#0d47a1',
-    green: '#4caf50',
-    greenHover: '#388e3c',
-    greenPress: '#2e7d32',
-    greenFocus: '#1b5e20',
-    red: '#f44336',
-    redHover: '#d32f2f',
-    redPress: '#c62828',
-    redFocus: '#b71c1c',
-    yellow: '#ff9800',
-    yellowHover: '#f57c00',
-    yellowPress: '#ef6c00',
-    yellowFocus: '#e65100',
-    purple: '#9c27b0',
-    purpleHover: '#7b1fa2',
-    purplePress: '#6a1b9a',
-    purpleFocus: '#4a148c',
+    backgroundHover: '#f8f9fa',
+    backgroundPress: '#f1f3f4',
+    foreground: '#000000',
+    foregroundHover: '#333333',
+    foregroundPress: '#666666',
+    // Add your custom colors
+    primary: '#9334ea',
+    primaryHover: '#7c3aed',
+    primaryPress: '#6d28d9',
+    muted: '#ede8f2',
+    mutedForeground: '#666666',
+    mutedHover: '#e5ddf0',
+    mutedPress: '#ddd2e8',
+    success: '#00d900',
+    successHover: '#00c300',
+    successPress: '#00ad00',
+    error: '#ff5a5d',
+    errorHover: '#ff4347',
+    errorPress: '#ff2d31',
+    rating: '#feba17',
+    ratingHover: '#fdb000',
+    ratingPress: '#fca500',
   },
+  
   dark: {
-    background: '#121212',
-    backgroundHover: '#1e1e1e',
-    backgroundPress: '#2a2a2a',
-    backgroundFocus: '#1a237e',
-    backgroundStrong: '#0a0a0a',
-    backgroundTransparent: 'rgba(18,18,18,0)',
-    color: '#ffffff',
-    colorHover: '#e0e0e0',
-    colorPress: '#bdbdbd',
-    colorFocus: '#64b5f6',
-    colorTransparent: 'rgba(255,255,255,0)',
-    borderColor: '#2a2a2a',
-    borderColorHover: '#3a3a3a',
-    borderColorPress: '#4a4a4a',
-    borderColorFocus: '#64b5f6',
-    placeholderColor: '#757575',
-    // Semantic colors
-    blue: '#64b5f6',
-    blueHover: '#42a5f5',
-    bluePress: '#2196f3',
-    blueFocus: '#1976d2',
-    green: '#81c784',
-    greenHover: '#66bb6a',
-    greenPress: '#4caf50',
-    greenFocus: '#388e3c',
-    red: '#e57373',
-    redHover: '#ef5350',
-    redPress: '#f44336',
-    redFocus: '#d32f2f',
-    yellow: '#ffb74d',
-    yellowHover: '#ffa726',
-    yellowPress: '#ff9800',
-    yellowFocus: '#f57c00',
-    purple: '#ba68c8',
-    purpleHover: '#ab47bc',
-    purplePress: '#9c27b0',
-    purpleFocus: '#7b1fa2',
-  },
+    ...baseConfig.themes.dark,
+    // Override specific colors while keeping base theme structure
+    background: '#000000',
+    backgroundHover: '#1a1a1a',
+    backgroundPress: '#2d2d2d',
+    foreground: '#ffffff',
+    foregroundHover: '#e6e6e6',
+    foregroundPress: '#cccccc',
+    // Add your custom colors (same as light since they work in both themes)
+    primary: '#9334ea',
+    primaryHover: '#7c3aed',
+    primaryPress: '#6d28d9',
+    muted: '#2d2d2d',
+    mutedForeground: '#a2a0a0',
+    mutedHover: '#404040',
+    mutedPress: '#525252',
+    success: '#00d900',
+    successHover: '#00c300',
+    successPress: '#00ad00',
+    error: '#ff5a5d',
+    errorHover: '#ff4347',
+    errorPress: '#ff2d31',
+    rating: '#feba17',
+    ratingHover: '#fdb000',
+    ratingPress: '#fca500',
+  }
 }
 
-// Create the configuration extending base config but with custom themes only
+// Create the configuration extending base config
 const config = createTamagui({
   ...baseConfig,
   fonts: {
+    ...baseConfig.fonts,
     heading: robotoFont,
     body: robotoFont,
     mono: robotoFont,

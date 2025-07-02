@@ -6,9 +6,7 @@
 
 ```bash
 git clone https://github.com/BidScents/mobile.git
-
 cd bidscents-mobile
-
 bun install 
 ```
 
@@ -23,6 +21,13 @@ Use the Expo Dev Tools to preview in iOS, Android, or Web.
 bun expo prebuild --clean
 bun expo run:ios
 ```
+
+### 3. Install Shared SDK
+
+```bash
+bun add @bid-scents/shared-sdk
+```
+
 ---
 
 ## Project Structure
@@ -112,4 +117,57 @@ assets/fonts/
 ├── Roboto-Black.ttf
 ```
 
-And loaded in `app/_layout.tsx` using Expo’s `useFonts()` hook.
+And loaded in `app/_layout.tsx` using Expo's `useFonts()` hook.
+
+---
+
+## Troubleshooting
+
+### Build Issues - Quick Fixes
+
+Try these in order when you get red boxes or build errors:
+
+#### 1. Clear Metro Cache (30s) ⚡
+```bash
+bun expo start --clear
+```
+**Use for:** Red boxes, module errors, after installing dependencies
+
+#### 2. Reset All Caches (1-2min) 🔄
+```bash
+pkill -f "expo\|metro"
+bun expo start --clear --reset-cache
+```
+**Use if:** Step 1 failed, after RN/Expo updates
+
+#### 3. Reset Node Modules (2-3min) 📦
+```bash
+rm -rf node_modules && bun install
+bun expo start --clear
+```
+**Use for:** Package conflicts, major dependency changes
+
+#### 4. Full Prebuild (5-10min) 💥
+```bash
+bun expo prebuild --clean
+bun expo run:ios
+```
+**Use for:** Native dependencies, config changes, iOS/Android errors
+
+### Quick Reference
+
+| Issue | Solution | Time |
+|-------|----------|------|
+| Added JS dependencies | Step 1 | 30s |
+| Added native dependencies | Step 4 | 5-10min |
+| Random red box | Step 1 | 30s |
+| Changed expo config | Step 4 | 5-10min |
+| Package conflicts | Step 3 | 2-3min |
+
+### Emergency Reset
+```bash
+rm -rf node_modules ios android .expo
+bun install && bun expo prebuild --clean && bun expo run:ios
+```
+
+**💡 Rule: Always try Step 1 first after adding dependencies!**
