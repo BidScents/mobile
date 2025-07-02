@@ -35,7 +35,7 @@ export interface ButtonProps extends Omit<TamaguiButtonProps, 'size' | 'variant'
   /** Only show icon without text (makes button circular/square) */
   iconOnly?: boolean
   /** Custom border radius */
-  borderRadius?: number
+  borderRadius?: string
   /** Whether to trigger haptic feedback on press */
   haptic?: boolean
 }

@@ -1,4 +1,3 @@
-// tamagui.config.ts
 import { config as baseConfig } from '@tamagui/config/v3'
 import { createFont, createTamagui, createTokens } from '@tamagui/core'
 import { color } from '@tamagui/themes'

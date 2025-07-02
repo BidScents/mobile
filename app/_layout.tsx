@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import { TamaguiProvider, Theme } from '@tamagui/core'
 import { Stack } from 'expo-router'
 import React, { useEffect } from 'react'
@@ -55,7 +54,7 @@ export default function App() {
             <Theme name={colorScheme === 'dark' ? 'dark' : 'light'}>
               <SafeAreaProvider>
                 <BottomSheetModalProvider>
-                  <Stack />
+                  <Stack screenOptions={{ headerShown: false }} />
                   <LoadingOverlay />
                 </BottomSheetModalProvider>
               </SafeAreaProvider>
