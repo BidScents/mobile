@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
+import * as Haptics from 'expo-haptics'
 import React from 'react'
 import type { ButtonProps as TamaguiButtonProps } from 'tamagui'
 import { Button as TamaguiButton, Text } from 'tamagui'
@@ -35,6 +36,8 @@ export interface ButtonProps extends Omit<TamaguiButtonProps, 'size' | 'variant'
   iconOnly?: boolean
   /** Custom border radius */
   borderRadius?: number
+  /** Whether to trigger haptic feedback on press */
+  haptic?: boolean
 }
 
 /**
@@ -52,12 +55,14 @@ export const Button: React.FC<ButtonProps> = ({
   rightIcon,
   iconOnly = false,
   borderRadius = '$6',
+  haptic = true,
   ...rest
 }) => {
   const handlePress = React.useCallback(async () => {
     if (!onPress || disabled) return
+    if (haptic) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     await onPress()
-  }, [onPress, disabled])
+  }, [onPress, disabled, haptic])
 
   // Size configurations
   const sizeProps = {
