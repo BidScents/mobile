@@ -1,5 +1,5 @@
-// src/components/ui/input.tsx
 import { Ionicons } from '@expo/vector-icons'
+import { useTheme } from '@tamagui/core'
 import React, { useState } from 'react'
 import type { KeyboardTypeOptions } from 'react-native'
 import { Paragraph, Input as TamaguiInput, TextArea, XStack, YStack } from 'tamagui'
@@ -55,6 +55,7 @@ export const Input: React.FC<InputProps> = ({
   numberOfLines,
   disabled = false,
 }) => {
+  const theme = useTheme()
   const [showPassword, setShowPassword] = useState(false)
 
   // Get variant-specific configuration
@@ -177,7 +178,7 @@ export const Input: React.FC<InputProps> = ({
           <Ionicons
             name={showPassword ? 'eye-off' : 'eye'}
             size={20}
-            color="$mutedForeground"
+            color={theme.mutedForeground?.val || '#666'}
             onPress={togglePasswordVisibility}
             style={{ cursor: 'pointer' }}
           />
