@@ -33,6 +33,8 @@ export interface ButtonProps extends Omit<TamaguiButtonProps, 'size' | 'variant'
   rightIcon?: keyof typeof Ionicons.glyphMap
   /** Only show icon without text (makes button circular/square) */
   iconOnly?: boolean
+  /** Custom border radius */
+  borderRadius?: number
 }
 
 /**
@@ -49,6 +51,7 @@ export const Button: React.FC<ButtonProps> = ({
   leftIcon,
   rightIcon,
   iconOnly = false,
+  borderRadius = '$6',
   ...rest
 }) => {
   const handlePress = React.useCallback(async () => {
@@ -158,13 +161,12 @@ export const Button: React.FC<ButtonProps> = ({
       width={fullWidth ? '100%' : sizeProps[size].width}
       disabled={disabled}
       opacity={disabled ? 0.6 : 1}
-      borderRadius={iconOnly || fullWidth ? '$10' : '$5'}
-      fontWeight="600"
       cursor={disabled ? 'not-allowed' : 'pointer'}
       gap={iconOnly ? 0 : '$2'}
       alignItems="center"
       justifyContent="center"
       onPress={handlePress}
+      borderRadius={borderRadius}
       {...rest}
     >
       {leftIcon && (

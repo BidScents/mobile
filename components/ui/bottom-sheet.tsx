@@ -70,7 +70,7 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
         }}
         onDismiss={onDismiss}
       >
-        <BottomSheetView style={{ flex: 1, padding: 20 }}>
+        <BottomSheetView style={{ flex: 1,  }}>
           {children}
         </BottomSheetView>
       </BottomSheetModal>
