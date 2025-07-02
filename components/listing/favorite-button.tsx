@@ -112,7 +112,7 @@ export function FavoriteButton({
         />
         <Text 
           fontSize={textSize} 
-          color="$color"
+          color="$foreground"
           fontWeight="500"
         >
           {count}
