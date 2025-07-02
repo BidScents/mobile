@@ -12,6 +12,8 @@ import { LoadingOverlay } from '../components/ui/loading-overlay'
 
 // Import SDK utilities and providers
 import { initializeAuth } from '@bid-scents/shared-sdk'
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { QueryProvider } from '../providers/query-provider'
 
 export default function App() {
@@ -40,19 +42,23 @@ export default function App() {
 
   // Wait for fonts to load before rendering the app
   if (!loaded) return null
-
+  
   return (
-    <QueryProvider>
-      <TamaguiProvider config={config}>
-        <Theme name={colorScheme === 'dark' ? 'dark' : 'light'}>
-          <SafeAreaProvider>
-            <KeyboardProvider>
-              <Stack />
-            </KeyboardProvider>
-            <LoadingOverlay />
-          </SafeAreaProvider>
-        </Theme>
-      </TamaguiProvider>
-    </QueryProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <KeyboardProvider>
+        <QueryProvider>
+          <TamaguiProvider config={config}>
+            <Theme name={colorScheme === 'dark' ? 'dark' : 'light'}>
+              <SafeAreaProvider>
+                <BottomSheetModalProvider>
+                  <Stack />
+                  <LoadingOverlay />
+                </BottomSheetModalProvider>
+              </SafeAreaProvider>
+            </Theme>
+          </TamaguiProvider>
+        </QueryProvider>
+      </KeyboardProvider>
+    </GestureHandlerRootView>
   )
 }
