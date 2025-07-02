@@ -1,4 +1,3 @@
-// src/components/ui/keyboard-aware-scroll.tsx
 import React, { ReactNode } from 'react';
 import { Platform, View, ViewStyle } from 'react-native';
 import { useKeyboardHandler } from 'react-native-keyboard-controller';
