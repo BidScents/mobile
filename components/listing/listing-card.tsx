@@ -61,10 +61,10 @@ export function ListingCard({ listing, onPress, onFavorite, onUnfavorite }: List
     return `${percentage}% full • ${volume}ml`
   }
 
-  const formatNextBid = (currentBid: number): string => {
-    {/* TODO: use listing bid increment */}
-    return `RM ${(currentBid + 0.5).toFixed(1)}`
-  }
+//   const formatNextBid = (currentBid: number): string => {
+//     {/* TODO: use listing bid increment */}
+//     return `RM ${(currentBid + 0.5).toFixed(1)}`
+//   }
 
   const truncateDescription = (text: string, maxLength: number = 50): string => {
     return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
@@ -175,7 +175,8 @@ export function ListingCard({ listing, onPress, onFavorite, onUnfavorite }: List
             variant="secondary"
             onPress={handleActionPress as any}
           >
-            Bid {formatNextBid(listing.current_bid || 0)}
+            {/* Bid {formatNextBid(listing.current_bid || 0)} */}
+            Bid Now
           </Button>
         )
       
