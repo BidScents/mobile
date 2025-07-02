@@ -1,6 +1,7 @@
 import { ListingCard as ListingCardType, ListingType } from '@bid-scents/shared-sdk'
 import { router } from 'expo-router'
 import React from 'react'
+import { GestureResponderEvent } from 'react-native'
 import { Card, Image, Text, XStack, YStack } from 'tamagui'
 import { Button } from '../ui/button'
 import { CountdownTimer } from './countdown-timer'
@@ -22,7 +23,7 @@ export function ListingCard({ listing, onPress, onFavorite }: ListingCardProps) 
     router.push(`/listing/${listing.id}` as any)
   }
 
-  const handleActionPress = (e: any) => {
+  const handleActionPress = (e: GestureResponderEvent) => {
     e.stopPropagation() // Prevent card navigation
     
     switch (listing.listing_type) {
