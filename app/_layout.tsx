@@ -6,26 +6,28 @@
  * Manages font loading, API configuration, and Supabase session management.
  */
 
-import { TamaguiProvider, Theme } from '@tamagui/core'
-import { Stack } from 'expo-router'
-import React, { useEffect, useState } from 'react'
-import { Platform, useColorScheme } from 'react-native'
-import { KeyboardProvider } from 'react-native-keyboard-controller'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
-import config from 'tamagui.config'
-
 import { LoadingOverlay } from '@/components/ui/loading-overlay'
 import { supabase } from '@/lib/supabase'
 import { initializeAuth, OpenAPI, useAuthStore } from '@bid-scents/shared-sdk'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
+import { TamaguiProvider, Theme } from '@tamagui/core'
 import { useFonts } from 'expo-font'
+import { Stack } from 'expo-router'
+import React, { useEffect, useState } from 'react'
+import { Platform, useColorScheme } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import config from 'tamagui.config'
 import { QueryProvider } from '../providers/query-provider'
 import {
   handleExistingSession,
   handleNoSession,
   setupAuthStateListener
 } from '../utils/auth-initialization'
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
+{/* For development purposes only */}
 
 const ANDROID_FONTS = {
   'Roboto-Light': require('../assets/fonts/Roboto-Light.ttf'),
@@ -51,6 +53,10 @@ export default function RootLayout() {
    * Configures SDK, checks existing session, and sets up auth listeners
    */
   useEffect(() => {
+    {/* For development purposes only */}
+    AsyncStorage.clear()
+
+
     const initializeApp = async () => {
       if (!fontsLoaded) return
 
@@ -58,7 +64,8 @@ export default function RootLayout() {
         const { setLoading, setError, setUser, setSession, user, logout } = useAuthStore.getState()
         
         // Configure SDK
-        OpenAPI.BASE = 'http://127.0.0.1:8000'
+        OpenAPI.BASE = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000'
+
         initializeAuth()
         setLoading(true)
 
