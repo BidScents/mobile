@@ -1,4 +1,3 @@
-// app/_layout.tsx
 /**
  * Root Layout Component
  * 
