@@ -1,16 +1,36 @@
-// app/(auth)/sign-up.tsx
+/**
+ * Sign Up Screen Component
+ * 
+ * Handles new user registration with email and password.
+ * Features:
+ * - Form validation with Zod schema
+ * - Real-time form state management
+ * - Comprehensive error handling
+ * - Loading states and user feedback
+ * - Navigation between auth screens
+ */
+
 import { ControlledInput } from '@/components/forms/controlled-input'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { KeyboardAwareView } from '@/components/ui/keyboard-aware-view'
-import { supabase } from '@/lib/supabase'
+import { handleSignUp } from '@/utils/auth-actions'
 import { signUpSchema, type SignUpFormData } from '@bid-scents/shared-sdk'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { router } from 'expo-router'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Alert, ScrollView } from 'react-native'
+import { ScrollView } from 'react-native'
 import { Text, XStack, YStack } from 'tamagui'
+
+/**
+ * Default form values for sign up
+ */
+const DEFAULT_VALUES: SignUpFormData = {
+  email: '',
+  password: '',
+  confirmPassword: ''
+}
 
 export default function SignUpScreen() {
   const [isLoading, setIsLoading] = useState(false)
@@ -22,58 +42,44 @@ export default function SignUpScreen() {
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     mode: 'onSubmit',
-    defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: ''
-    }
+    defaultValues: DEFAULT_VALUES
   })
 
+  /**
+   * Handle form submission
+   * 
+   * Validates form data and attempts to create user account.
+   * Manages loading state and delegates auth logic to utility function.
+   */
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true)
     
     try {
-      const authResult = await supabase.auth.signUp({
-        email: data.email.trim(),
-        password: data.password,
-      })
-
-      const { data: authData, error } = authResult
-      if (error) throw error
-
-      if (authData.user && !authData.session) {
-        // Navigate to email confirmation page
-        router.replace({
-          pathname: '/(auth)/email-confirmation',
-          params: { email: data.email.trim() }
-        })
-        return
-      }
-
-      // If user is immediately signed in (email confirmation disabled)
-      if (authData.session) {
-        router.replace('/(auth)/onboarding')
-      }
-    } catch (error: any) {
-      console.error('Auth error:', error)
-      
-      if (error.message?.includes('User already registered')) {
-        Alert.alert('Account Exists', 'An account with this email already exists. Try signing in instead.', [
-          { text: 'Sign In', onPress: () => router.push('/(auth)/login') },
-          { text: 'Cancel', style: 'cancel' }
-        ])
-      } else if (error.message?.includes('too many requests')) {
-        Alert.alert('Too Many Attempts', 'Please wait a moment before trying again.')
-      } else {
-        Alert.alert('Authentication Error', error.message || 'Failed to create account')
-      }
+      await handleSignUp(data)
+    } catch (error) {
+      // Error handling is done in the utility function
+      // Loading state is cleared here regardless of outcome
     } finally {
       setIsLoading(false)
     }
   }
+
+  /**
+   * Navigate to login screen
+   */
+  const navigateToLogin = () => {
+    router.replace('/(auth)/login')
+  }
+
+  /**
+   * Navigate back to previous screen
+   */
+  const goBack = () => {
+    router.back()
+  }
   
   return (
-    <Container backgroundColor="$background" safeArea={'top'} variant='padded'>
+    <Container backgroundColor="$background" safeArea="top" variant="padded">
       <KeyboardAwareView backgroundColor="$background">
         <ScrollView 
           style={{ flex: 1 }}
@@ -82,9 +88,15 @@ export default function SignUpScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <YStack flex={1} gap="$6" minHeight="100%">
-            {/* Header */}
+            {/* Header Section */}
             <YStack gap="$6">
-              <Button variant='secondary' iconOnly onPress={() => router.back()} leftIcon="arrow-back"/>
+              <Button 
+                variant="secondary" 
+                iconOnly 
+                onPress={goBack} 
+                leftIcon="arrow-back"
+                disabled={isLoading}
+              />
               
               <YStack gap="$2">
                 <Text color="$foreground" fontSize="$8" fontWeight="600">
@@ -97,7 +109,7 @@ export default function SignUpScreen() {
               </YStack>
             </YStack>
 
-            {/* Form */}
+            {/* Form Section */}
             <YStack gap="$4" flex={1}>
               <ControlledInput
                 control={control}
@@ -127,19 +139,25 @@ export default function SignUpScreen() {
               />
             </YStack>
 
-            {/* Actions */}
+            {/* Navigation Section */}
             <YStack gap="$1" paddingBottom="$6">
               <Text color="$mutedForeground" fontSize="$3" textAlign="center">
                 Already have an account?
               </Text>
               
-              <Button variant="ghost" size="sm" onPress={() => router.replace('/(auth)/login')} disabled={isLoading}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onPress={navigateToLogin} 
+                disabled={isLoading}
+              >
                 Sign In Instead
               </Button>
             </YStack>
           </YStack>
         </ScrollView>
         
+        {/* Submit Button - Fixed at bottom */}
         <XStack>
           <Button
             variant="primary"
