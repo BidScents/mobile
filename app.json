@@ -16,6 +16,10 @@
           {
             "CFBundleURLName": "bidscents-oauth",
             "CFBundleURLSchemes": ["com.bidscents.app"]
+          },
+          {
+            "CFBundleURLName": "bidscents-auth",
+            "CFBundleURLSchemes": ["com.bidscents.app"]
           }
         ]
       }
@@ -34,6 +38,10 @@
           "data": [
             {
               "scheme": "com.bidscents.app"
+            },
+            {
+              "scheme": "com.bidscents.app",
+              "host": "auth"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]
