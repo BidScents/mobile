@@ -1,0 +1,122 @@
+/**
+ * Authentication initialization utilities
+ * 
+ * Helper functions for managing app startup authentication logic.
+ * Handles session management, user data fetching, and auth state listeners.
+ */
+
+import { supabase } from '@/lib/supabase'
+import { AuthService, handleAuthStateChange, useAuthStore } from '@bid-scents/shared-sdk'
+
+/**
+ * Handle existing session logic
+ * 
+ * When a valid session exists, this function:
+ * - Syncs session with SDK
+ * - Checks if user data needs refreshing
+ * - Makes API call only if necessary
+ */
+export const handleExistingSession = async (
+  session: any,
+  existingUser: any,
+  setSession: (session: any) => void,
+  setUser: (user: any) => void,
+  setLoading: (loading: boolean) => void
+) => {
+  // Sync session with SDK
+  handleAuthStateChange('SIGNED_IN', session)
+  setSession(session)
+  
+  // Only fetch user data if we don't have it or user isn't onboarded
+  const needsUserData = !existingUser || !existingUser.onboarded_at
+  
+  if (needsUserData) {
+    try {
+      console.log('Fetching user data from API...')
+      const loginResult = await AuthService.loginV1AuthLoginGet()
+      setUser(loginResult.profile)
+    } catch (apiError) {
+      console.log('User needs onboarding or API error:', apiError)
+      setLoading(false)
+    }
+  } else {
+    console.log('Using cached user data')
+    setLoading(false)
+  }
+}
+
+/**
+ * Handle no session logic
+ * 
+ * When no session exists, clear all auth state using the store's logout method
+ */
+export const handleNoSession = async (logout: () => void) => {
+  handleAuthStateChange('SIGNED_OUT', null)
+  logout()
+}
+
+/**
+ * Handle sign in event
+ * 
+ * Called when user signs in - syncs session and fetches user data if needed
+ */
+export const handleSignIn = async (
+  session: any,
+  setSession: (session: any) => void,
+  setUser: (user: any) => void,
+  setLoading: (loading: boolean) => void
+) => {
+  handleAuthStateChange('SIGNED_IN', session)
+  setSession(session)
+  
+  // Check if we need fresh user data
+  const currentUser = useAuthStore.getState().user
+  const needsUserData = !currentUser || !currentUser.onboarded_at
+  
+  if (needsUserData) {
+    try {
+      const loginResult = await AuthService.loginV1AuthLoginGet()
+      setUser(loginResult.profile)
+    } catch (apiError) {
+      console.log('API call failed during auth change:', apiError)
+      setLoading(false)
+    }
+  }
+}
+
+/**
+ * Handle sign out event
+ * 
+ * Called when user signs out - uses store's logout method to clear all state
+ */
+export const handleSignOut = async (logout: () => void) => {
+  handleAuthStateChange('SIGNED_OUT', null)
+  logout()
+}
+
+/**
+ * Set up Supabase auth state change listener
+ * 
+ * Listens for auth events (sign in/out) and updates app state accordingly
+ */
+export const setupAuthStateListener = (
+  setSession: (session: any) => void,
+  setUser: (user: any) => void,
+  setLoading: (loading: boolean) => void,
+  logout: () => void
+) => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    async (event, session) => {
+      console.log('Auth state changed:', event, !!session)
+      
+      if (event === 'SIGNED_IN' && session) {
+        await handleSignIn(session, setSession, setUser, setLoading)
+      } else if (event === 'SIGNED_OUT') {
+        await handleSignOut(logout)
+      }
+    }
+  )
+
+  // Return cleanup function
+  return () => subscription.unsubscribe()
+}

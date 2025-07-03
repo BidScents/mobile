@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		19EB31123D265EC77970B418 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8235991FDB0C402508EF0A9E /* ExpoModulesProvider.swift */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		4CF505ACE4D2ED20416D5766 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = EF4E15785CFD2DAC29981A3C /* PrivacyInfo.xcprivacy */; };
-		AF6AC28DA8C688E61E8ED827 /* libPods-bidscents.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CE63BF672BD570C8BF0C83AB /* libPods-bidscents.a */; };
+		833DE9CC54C85A595CD2DD73 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B946C716BD08337EE458F202 /* ExpoModulesProvider.swift */; };
+		943AD8FB97AAF016A15B780D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DF0C5A4E8094B3E7A3DA05C2 /* PrivacyInfo.xcprivacy */; };
+		AC18E91297368155C781E2D5 /* libPods-bidscents.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C5F1F2EDF6E2720E495BC28C /* libPods-bidscents.a */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
@@ -20,14 +20,14 @@
 		13B07F961A680F5B00A75B9A /* bidscents.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bidscents.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = bidscents/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = bidscents/Info.plist; sourceTree = "<group>"; };
-		453D03CBD605197F3073E557 /* Pods-bidscents.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bidscents.release.xcconfig"; path = "Target Support Files/Pods-bidscents/Pods-bidscents.release.xcconfig"; sourceTree = "<group>"; };
-		6301C3BA09DF8E30978B0C0C /* Pods-bidscents.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bidscents.debug.xcconfig"; path = "Target Support Files/Pods-bidscents/Pods-bidscents.debug.xcconfig"; sourceTree = "<group>"; };
-		8235991FDB0C402508EF0A9E /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-bidscents/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		7B7240320005E2C467E9448A /* Pods-bidscents.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bidscents.debug.xcconfig"; path = "Target Support Files/Pods-bidscents/Pods-bidscents.debug.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = bidscents/SplashScreen.storyboard; sourceTree = "<group>"; };
+		B946C716BD08337EE458F202 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-bidscents/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		CE63BF672BD570C8BF0C83AB /* libPods-bidscents.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-bidscents.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C5F1F2EDF6E2720E495BC28C /* libPods-bidscents.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-bidscents.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF0C5A4E8094B3E7A3DA05C2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = bidscents/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		E5CA11C3DE0FCADD84446476 /* Pods-bidscents.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bidscents.release.xcconfig"; path = "Target Support Files/Pods-bidscents/Pods-bidscents.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		EF4E15785CFD2DAC29981A3C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = bidscents/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = bidscents/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* bidscents-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "bidscents-Bridging-Header.h"; path = "bidscents/bidscents-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -37,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AF6AC28DA8C688E61E8ED827 /* libPods-bidscents.a in Frameworks */,
+				AC18E91297368155C781E2D5 /* libPods-bidscents.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,7 +53,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				EF4E15785CFD2DAC29981A3C /* PrivacyInfo.xcprivacy */,
+				DF0C5A4E8094B3E7A3DA05C2 /* PrivacyInfo.xcprivacy */,
 			);
 			name = bidscents;
 			sourceTree = "<group>";
@@ -62,19 +62,9 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				CE63BF672BD570C8BF0C83AB /* libPods-bidscents.a */,
+				C5F1F2EDF6E2720E495BC28C /* libPods-bidscents.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		6077874D3EE00B9D09752A49 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				6301C3BA09DF8E30978B0C0C /* Pods-bidscents.debug.xcconfig */,
-				453D03CBD605197F3073E557 /* Pods-bidscents.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -91,8 +81,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				6077874D3EE00B9D09752A49 /* Pods */,
-				ABF30DDB13F426177FC9D70B /* ExpoModulesProviders */,
+				BA13EDA8B5EE27849DE24CAE /* Pods */,
+				FF5CEAD853C307ED1F2FA6CE /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -107,12 +97,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		ABF30DDB13F426177FC9D70B /* ExpoModulesProviders */ = {
+		BA13EDA8B5EE27849DE24CAE /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				F585896621CCAEBBACF33AAF /* bidscents */,
+				7B7240320005E2C467E9448A /* Pods-bidscents.debug.xcconfig */,
+				E5CA11C3DE0FCADD84446476 /* Pods-bidscents.release.xcconfig */,
 			);
-			name = ExpoModulesProviders;
+			name = Pods;
+			path = Pods;
 			sourceTree = "<group>";
 		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
@@ -124,12 +116,20 @@
 			path = bidscents/Supporting;
 			sourceTree = "<group>";
 		};
-		F585896621CCAEBBACF33AAF /* bidscents */ = {
+		E2227516FF4B7BA7C524E328 /* bidscents */ = {
 			isa = PBXGroup;
 			children = (
-				8235991FDB0C402508EF0A9E /* ExpoModulesProvider.swift */,
+				B946C716BD08337EE458F202 /* ExpoModulesProvider.swift */,
 			);
 			name = bidscents;
+			sourceTree = "<group>";
+		};
+		FF5CEAD853C307ED1F2FA6CE /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				E2227516FF4B7BA7C524E328 /* bidscents */,
+			);
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -140,13 +140,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "bidscents" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				98270A294953AF64740ECC3C /* [Expo] Configure project */,
+				C2C8B1A3E6E0F0738E85EA5F /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				3F4557481B8531D41CB015A0 /* [CP] Embed Pods Frameworks */,
+				8ADBB4BE5915F1A3A32ACB5E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -196,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				4CF505ACE4D2ED20416D5766 /* PrivacyInfo.xcprivacy in Resources */,
+				943AD8FB97AAF016A15B780D /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,24 +238,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3F4557481B8531D41CB015A0 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-bidscents/Pods-bidscents-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-bidscents/Pods-bidscents-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
@@ -306,7 +288,25 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-bidscents/Pods-bidscents-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		98270A294953AF64740ECC3C /* [Expo] Configure project */ = {
+		8ADBB4BE5915F1A3A32ACB5E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-bidscents/Pods-bidscents-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-bidscents/Pods-bidscents-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C2C8B1A3E6E0F0738E85EA5F /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -333,7 +333,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				19EB31123D265EC77970B418 /* ExpoModulesProvider.swift in Sources */,
+				833DE9CC54C85A595CD2DD73 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,7 +342,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6301C3BA09DF8E30978B0C0C /* Pods-bidscents.debug.xcconfig */;
+			baseConfigurationReference = 7B7240320005E2C467E9448A /* Pods-bidscents.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -367,7 +367,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.shawarma.bidscents;
-				PRODUCT_NAME = "bidscents";
+				PRODUCT_NAME = bidscents;
 				SWIFT_OBJC_BRIDGING_HEADER = "bidscents/bidscents-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -378,7 +378,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 453D03CBD605197F3073E557 /* Pods-bidscents.release.xcconfig */;
+			baseConfigurationReference = E5CA11C3DE0FCADD84446476 /* Pods-bidscents.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -398,7 +398,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.shawarma.bidscents;
-				PRODUCT_NAME = "bidscents";
+				PRODUCT_NAME = bidscents;
 				SWIFT_OBJC_BRIDGING_HEADER = "bidscents/bidscents-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
