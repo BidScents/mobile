@@ -1,16 +1,14 @@
-// src/components/auth/login-bottom-sheet.tsx
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase'
-import { AuthService, handleAuthStateChange } from '@bid-scents/shared-sdk'
+import { OAuthHandler } from '@/utils/oauth-handler'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
-import { makeRedirectUri } from 'expo-auth-session'
 import { router } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import React, { forwardRef, useImperativeHandle, useState } from 'react'
 import { Alert, Linking } from 'react-native'
 import { Text, XStack, YStack } from 'tamagui'
 
+// Complete auth session if needed
 WebBrowser.maybeCompleteAuthSession()
 
 interface LoginBottomSheetMethods extends BottomSheetModalMethods {
@@ -18,11 +16,12 @@ interface LoginBottomSheetMethods extends BottomSheetModalMethods {
 }
 
 /**
- * Login options bottom sheet that properly dismisses after navigation.
- * Provides email, and social authentication options.
+ * Login options bottom sheet with improved OAuth handling.
+ * Provides email and social authentication options with proper navigation.
  */
 export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [loadingProvider, setLoadingProvider] = useState<'google' | 'facebook' | null>(null)
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null)
 
   useImperativeHandle(ref, () => ({
@@ -41,69 +40,25 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
     bottomSheetRef.current?.dismiss()
   }
 
-  const handleAuthSuccess = async (session: any) => {
-    try {
-      handleAuthStateChange('SIGNED_IN', session)
-      const loginResult = await AuthService.loginV1AuthLoginGet()
-      
-      if (loginResult.onboarded) {
-        router.replace('/(tabs)/')
-      } else {
-        router.replace('/(auth)/onboarding')
-      }
-      bottomSheetRef.current?.dismiss()
-    } catch (error) {
-      console.error('Auth success handling failed:', error)
-      Alert.alert('Error', 'Something went wrong. Please try again.')
-    }
-  }
-
   const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
     setIsLoading(true)
+    setLoadingProvider(provider)
+    
     try {
-      const redirectTo = makeRedirectUri()
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo,
-          skipBrowserRedirect: true,
-        },
-      })
-
-      if (error) throw error
-
-      if (data.url) {
-        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
-        
-        if (result.type === 'success') {
-          const url = new URL(result.url)
-          const access_token = url.searchParams.get('access_token')
-          const refresh_token = url.searchParams.get('refresh_token')
-
-          if (access_token && refresh_token) {
-            const { data: sessionData, error: sessionError } = 
-              await supabase.auth.setSession({ access_token, refresh_token })
-
-            if (sessionError) throw sessionError
-            if (sessionData.session) {
-              await handleAuthSuccess(sessionData.session)
-            }
-          }
-        }
-      }
-    } catch (error: any) {
-      Alert.alert('Error', error.message || `Failed to sign in with ${provider}`)
+      await OAuthHandler.signInWithOAuth(provider)
+      // Success handling and navigation is done in OAuthHandler
+      bottomSheetRef.current?.dismiss()
+    } catch (error) {
+      // Error handling is done in OAuthHandler
     } finally {
       setIsLoading(false)
+      setLoadingProvider(null)
     }
   }
 
   const handleTermsPress = async () => {
     try {
-      // Replace with your actual Terms of Service URL
-      const termsUrl = 'https://bidscents.com/terms-of-service'
-      
-      // Check if the device can open the URL
+      const termsUrl = process.env.EXPO_PUBLIC_TERMS_URL || 'https://bidscents.com/terms-of-service'
       const canOpen = await Linking.canOpenURL(termsUrl)
       
       if (canOpen) {
@@ -123,7 +78,7 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
       snapPoints={['60%', '80%']}
       backgroundStyle={{ backgroundColor: 'white' }}
     >
-      <YStack gap="$5" padding="$4" paddingBottom="$8" >
+      <YStack gap="$5" padding="$4" paddingBottom="$8">
         {/* Header */}
         <YStack gap="$2">
           <Text 
@@ -140,7 +95,7 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
             fontSize="$4"
             lineHeight="$5"
           >
-            Register to buy, sell, swap your favorite scents and much more with your account.
+            Register to buy, sell or swap your favorite scents and much more with your account.
           </Text>
         </YStack>
 
@@ -150,7 +105,7 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
             variant="primary"
             size="lg"
             fullWidth
-            onPress={() => dismissAndNavigate('/(auth)/email-login')}
+            onPress={() => dismissAndNavigate('/(auth)/login')}
             disabled={isLoading}
           >
             Continue with Email
@@ -158,26 +113,27 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
 
           <XStack alignItems="center" gap="$3">
             <Button
-                variant="secondary"
-                size="lg"
-                iconOnly
-                leftIcon="logo-google"
-                flex={1}
-                onPress={() => handleOAuthSignIn('google')}
-                disabled={isLoading}
-              />
-
-              <Button
-                variant="secondary"
-                size="lg"
-                iconOnly
-                flex={1}
-                leftIcon="logo-facebook"
-                onPress={() => handleOAuthSignIn('facebook')}
-                disabled={isLoading}
-              />
+              variant="secondary"
+              size="lg"
+              flex={1}
+              leftIcon="logo-google"
+              onPress={() => handleOAuthSignIn('google')}
+              disabled={isLoading}
+            >
+              {loadingProvider === 'google' ? 'Signing in...' : 'Google'}
+            </Button>
+            
+            <Button
+              variant="secondary"
+              size="lg"
+              flex={1}
+              leftIcon="logo-facebook"
+              onPress={() => handleOAuthSignIn('facebook')}
+              disabled={isLoading}
+            >
+              {loadingProvider === 'facebook' ? 'Signing in...' : 'Facebook'}
+            </Button>
           </XStack>
-
         </YStack>
 
         {/* Footer with clickable Terms of Service */}
