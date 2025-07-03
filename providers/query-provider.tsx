@@ -8,8 +8,8 @@ import { Platform } from 'react-native'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000,   // 10 minutes  
       retry: 2,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
@@ -18,6 +18,11 @@ const queryClient = new QueryClient({
       retry: 1,
     },
   },
+})
+
+// Create persister for React Native
+const asyncStoragePersister = createAsyncStoragePersister({
+  storage: AsyncStorage,
 })
 
 interface QueryProviderProps {
@@ -35,14 +40,14 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
   }
 
   // React Native with persistence
-  const asyncStoragePersister = createAsyncStoragePersister({
-    storage: AsyncStorage,
-  })
-
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister: asyncStoragePersister }}
+      persistOptions={{ 
+        persister: asyncStoragePersister,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        buster: '', // Increment this to invalidate cache
+      }}
     >
       {children}
     </PersistQueryClientProvider>
