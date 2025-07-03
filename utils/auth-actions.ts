@@ -7,6 +7,7 @@
 
 import { supabase } from '@/lib/supabase'
 import { AuthService, handleAuthStateChange, type LoginFormData, type SignUpFormData } from '@bid-scents/shared-sdk'
+import { makeRedirectUri } from 'expo-auth-session'
 import { router } from 'expo-router'
 import { Alert } from 'react-native'
 
@@ -21,16 +22,27 @@ import { Alert } from 'react-native'
  */
 export const handleSignUp = async (data: SignUpFormData) => {
   try {
+    // Use environment variable for redirect URL, fallback to generated URI
+    const redirectTo = process.env.EXPO_PUBLIC_EMAIL_REDIRECT_URL || makeRedirectUri({
+      preferLocalhost: false,
+      path: 'confirm',
+    })
+
+    console.log('Email redirect URL:', redirectTo) // Debug log
+
     const authResult = await supabase.auth.signUp({
       email: data.email.trim(),
       password: data.password,
+      options: {
+        emailRedirectTo: redirectTo,
+      },
     })
 
     const { data: authData, error } = authResult
     if (error) throw error
 
     if (authData.user && !authData.session) {
-      // Navigate to email confirmation page
+      // Navigate to email confirmation page with email parameter
       router.replace({
         pathname: '/(auth)/email-confirmation',
         params: { email: data.email.trim() }
@@ -69,7 +81,6 @@ export const handleSignUpError = (error: any) => {
     Alert.alert('Authentication Error', error.message || 'Failed to create account')
   }
 }
-
 
 /**
  * Handle user login with email and password
