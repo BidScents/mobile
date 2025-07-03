@@ -5,12 +5,20 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "bidscents",
+    "scheme": "com.bidscents.app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.shawarma.bidscents"
+      "bundleIdentifier": "com.bidscents.app",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "bidscents-oauth",
+            "CFBundleURLSchemes": ["com.bidscents.app"]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +26,19 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.shawarma.bidscents"
+      "package": "com.bidscents.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "com.bidscents.app"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
