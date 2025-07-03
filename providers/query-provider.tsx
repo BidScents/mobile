@@ -1,4 +1,3 @@
-// providers/query-provider.tsx (simpler version)
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
