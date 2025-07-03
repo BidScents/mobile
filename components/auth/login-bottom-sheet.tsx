@@ -67,7 +67,7 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
         Alert.alert('Error', 'Unable to open Terms of Service')
       }
     } catch (error) {
-      console.error('Failed to open Terms of Service:', error)
+      console.log('Failed to open Terms of Service:', error)
       Alert.alert('Error', 'Unable to open Terms of Service')
     }
   }

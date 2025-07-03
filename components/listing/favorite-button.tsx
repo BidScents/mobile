@@ -51,7 +51,7 @@ export function FavoriteButton({
      // Revert optimistic update on error
      setIsFavorited(!shouldFavorite)
      setCount(prev => shouldFavorite ? prev - 1 : prev + 1)
-     console.error('Failed to toggle favorite:', error)
+     console.log('Failed to toggle favorite:', error)
    } finally {
      setIsLoading(false)
      pendingStateRef.current = null

@@ -55,7 +55,7 @@ export const handleSignUp = async (data: SignUpFormData) => {
       router.replace('/(auth)/onboarding')
     }
   } catch (error: any) {
-    console.error('Auth error:', error)
+    console.log('Auth error:', error)
     handleSignUpError(error)
     throw error // Re-throw to let component handle loading state
   }
@@ -105,7 +105,7 @@ export const handleLogin = async (data: LoginFormData) => {
         await handleAuthSuccess(authData.session)
       }
     } catch (error: any) {
-      console.error('Auth error:', error)
+      console.log('Auth error:', error)
       handleLoginError(error)
       throw error // Re-throw to let component handle loading state
     }
@@ -134,7 +134,7 @@ export const handleLogin = async (data: LoginFormData) => {
         router.replace('/(auth)/onboarding')
       }
     } catch (error) {
-      console.error('Auth success handling failed:', error)
+      console.log('Auth success handling failed:', error)
       Alert.alert('Error', 'Something went wrong. Please try again.')
     }
   }

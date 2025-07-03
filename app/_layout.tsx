@@ -72,7 +72,7 @@ export default function RootLayout() {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError) {
-          console.error('Session retrieval error:', sessionError)
+          console.log('Session retrieval error:', sessionError)
           setError(sessionError.message)
           setIsAppReady(true)
           return
@@ -90,7 +90,7 @@ export default function RootLayout() {
         setIsAppReady(true)
 
       } catch (error) {
-        console.error('App initialization error:', error)
+        console.log('App initialization error:', error)
         useAuthStore.getState().setError(
           error instanceof Error ? error.message : 'Initialization error'
         )

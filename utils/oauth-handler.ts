@@ -24,7 +24,7 @@ export class OAuthHandler {
         router.replace('/(auth)/onboarding')
       }
     } catch (error) {
-      console.error('Auth success handling failed:', error)
+      console.log('Auth success handling failed:', error)
       Alert.alert('Error', 'Something went wrong. Please try again.')
       throw error
     }
@@ -93,7 +93,7 @@ export class OAuthHandler {
         throw new Error('Authentication failed')
       }
     } catch (error: any) {
-      console.error(`OAuth ${provider} error:`, error)
+      console.log(`OAuth ${provider} error:`, error)
       Alert.alert(
         'Sign In Failed', 
         error.message || `Failed to sign in with ${provider}. Please try again.`
