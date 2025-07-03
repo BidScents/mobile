@@ -75,7 +75,7 @@ export default function LoginScreen() {
    * Navigate back to previous screen
    */
   const goBack = () => {
-    router.back()
+    router.replace('/(auth)')
   }
   
   return (
