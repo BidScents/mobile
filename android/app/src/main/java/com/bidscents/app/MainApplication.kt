@@ -1,4 +1,4 @@
-package com.shawarma.bidscents
+package com.bidscents.app
 
 import android.app.Application
 import android.content.res.Configuration
