@@ -41,7 +41,7 @@ export default function SignUpScreen() {
     formState: { isValid }
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
-    mode: 'onSubmit',
+    mode: 'onChange',
     defaultValues: DEFAULT_VALUES
   })
 
