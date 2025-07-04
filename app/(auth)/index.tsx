@@ -13,12 +13,10 @@ export default function WelcomeScreen() {
   }, [])
 
   return (
-    <Container backgroundColor="$background">
+    <Container backgroundColor="$background" variant="padded">
       <YStack 
         flex={1} 
         justifyContent="space-between" 
-        padding="$5"
-        paddingBottom="$3"
         alignItems="center"
       >
         {/* Illustration Section */}

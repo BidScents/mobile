@@ -3,7 +3,7 @@ import { Text } from "tamagui"
 
 export default function ProfileScreen() {
     return (
-        <Container>
+        <Container variant="padded" safeArea={false} backgroundColor="$background">
             <Text>Profile</Text>
         </Container>
     )

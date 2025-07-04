@@ -3,7 +3,7 @@ import { Text } from "tamagui";
 
 export default function SearchScreen() {
     return (
-        <Container>
+        <Container variant="padded" safeArea={false} backgroundColor="$background">
             <Text>Search</Text>
         </Container>
     )

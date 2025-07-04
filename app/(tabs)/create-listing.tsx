@@ -3,7 +3,7 @@ import { Text } from "tamagui";
 
 export default function CreateListingScreen() {
     return (
-        <Container>
+        <Container variant="padded" safeArea={false} backgroundColor="$background">
             <Text>Create Listing</Text>
         </Container>
     )
