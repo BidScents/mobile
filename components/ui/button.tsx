@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
+import * as Haptics from 'expo-haptics'
 import React from 'react'
 import type { ButtonProps as TamaguiButtonProps } from 'tamagui'
 import { Button as TamaguiButton, Text } from 'tamagui'
@@ -33,6 +34,10 @@ export interface ButtonProps extends Omit<TamaguiButtonProps, 'size' | 'variant'
   rightIcon?: keyof typeof Ionicons.glyphMap
   /** Only show icon without text (makes button circular/square) */
   iconOnly?: boolean
+  /** Custom border radius */
+  borderRadius?: string
+  /** Whether to trigger haptic feedback on press */
+  haptic?: boolean
 }
 
 /**
@@ -49,12 +54,15 @@ export const Button: React.FC<ButtonProps> = ({
   leftIcon,
   rightIcon,
   iconOnly = false,
+  borderRadius = '$6',
+  haptic = true,
   ...rest
 }) => {
   const handlePress = React.useCallback(async () => {
     if (!onPress || disabled) return
+    if (haptic) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     await onPress()
-  }, [onPress, disabled])
+  }, [onPress, disabled, haptic])
 
   // Size configurations
   const sizeProps = {
@@ -158,13 +166,12 @@ export const Button: React.FC<ButtonProps> = ({
       width={fullWidth ? '100%' : sizeProps[size].width}
       disabled={disabled}
       opacity={disabled ? 0.6 : 1}
-      borderRadius={iconOnly || fullWidth ? '$10' : '$5'}
-      fontWeight="600"
       cursor={disabled ? 'not-allowed' : 'pointer'}
-      gap={iconOnly ? 0 : '$2'}
+      gap={iconOnly ? 0 : '$1'}
       alignItems="center"
       justifyContent="center"
       onPress={handlePress}
+      borderRadius={borderRadius}
       {...rest}
     >
       {leftIcon && (

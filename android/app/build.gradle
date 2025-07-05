@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.shawarma.bidscents'
+    namespace 'com.bidscents.app'
     defaultConfig {
-        applicationId 'com.shawarma.bidscents'
+        applicationId 'com.bidscents.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

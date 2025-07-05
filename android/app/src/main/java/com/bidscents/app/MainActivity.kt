@@ -1,4 +1,4 @@
-package com.shawarma.bidscents
+package com.bidscents.app
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

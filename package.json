@@ -11,8 +11,9 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@bid-scents/shared-sdk": "^1.0.3",
+    "@bid-scents/shared-sdk": "^1.0.4",
     "@expo/vector-icons": "^14.1.0",
+    "@gorhom/bottom-sheet": "^5.1.6",
     "@hookform/resolvers": "^5.1.1",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
@@ -51,10 +52,10 @@
     "react-dom": "19.0.0",
     "react-hook-form": "^7.58.1",
     "react-native": "0.79.3",
-    "react-native-gesture-handler": "~2.24.0",
+    "react-native-gesture-handler": "^2.27.1",
     "react-native-keyboard-controller": "^1.17.5",
     "react-native-mmkv": "^3.3.0",
-    "react-native-reanimated": "~3.17.4",
+    "react-native-reanimated": "^3.18.0",
     "react-native-safe-area-context": "^5.4.1",
     "react-native-screens": "~4.11.1",
     "react-native-svg": "^15.12.0",

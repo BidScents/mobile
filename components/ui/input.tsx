@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@tamagui/core'
 import React, { useState } from 'react'
 import type { KeyboardTypeOptions } from 'react-native'
-import { Paragraph, Input as TamaguiInput, TextArea, XStack, YStack } from 'tamagui'
+import { Paragraph, Input as TamaguiInput, Text, TextArea, XStack, YStack } from 'tamagui'
 
 /**
  * Input variant types
@@ -149,7 +149,7 @@ export const Input: React.FC<InputProps> = ({
     color: "$foreground",
     borderWidth: 0,
     placeholderTextColor: "$mutedForeground",
-    backgroundColor: "$background",
+    backgroundColor: "$muted",
     px: "$4",
     py: isMultiline ? "$3" : undefined,
     fontWeight: "400",
@@ -166,7 +166,7 @@ export const Input: React.FC<InputProps> = ({
         <XStack
           alignItems="center"
           borderRadius="$6"
-          backgroundColor="$background"
+          backgroundColor="$muted"
           pr="$3"
         >
           <TamaguiInput
@@ -193,9 +193,9 @@ export const Input: React.FC<InputProps> = ({
       )}
       
       {touched && error && (
-        <Paragraph size="$2" color="$destructive">
-          {error}
-        </Paragraph>
+        <Text  textTransform="none" fontSize="$2" color="$error">
+          {error} 
+        </Text>
       )}
     </YStack>
   )
