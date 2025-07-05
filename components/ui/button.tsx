@@ -88,9 +88,9 @@ export const Button: React.FC<ButtonProps> = ({
 
   // Icon sizes based on button size
   const iconSizes = {
-    sm: 16,
-    md: 20,
-    lg: 24,
+    sm: 20,
+    md: 24,
+    lg: 28,
   }
 
   // Variant configurations using theme tokens
