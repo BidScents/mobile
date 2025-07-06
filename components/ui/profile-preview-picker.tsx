@@ -1,12 +1,11 @@
 /**
- * Profile Preview Picker Component
+ * Profile Preview Picker Component with Permissions
  * 
  * Self-contained component that handles both UI display and image picking logic
- * for cover photo and profile avatar. Avatar positioned at bottom edge of cover
- * with partial overlap, matching modern profile designs.
+ * for cover photo and profile avatar. Includes proper permission handling.
  * Features:
  * - Cover photo with bottom-edge positioned profile avatar
- * - Built-in image picking functionality
+ * - Built-in image picking functionality with permission requests
  * - Loading states and error handling
  * - Clean separation from parent component
  */
@@ -15,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import React from 'react'
-import { Alert } from 'react-native'
+import { Alert, Linking } from 'react-native'
 import { Image, Text, YStack } from 'tamagui'
 
 interface ProfilePreviewPickerProps {
@@ -35,14 +34,48 @@ export function ProfilePreviewPicker({
 }: ProfilePreviewPickerProps) {
 
   /**
-   * Handle profile image selection
+   * Request media library permissions
+   */
+  const requestPermissions = async (): Promise<boolean> => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      
+      if (status === 'granted') {
+        return true
+      }
+      
+      if (status === 'denied') {
+        Alert.alert(
+          'Permission Required',
+          'This app needs access to your photo library to select images. Please enable it in Settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+          ]
+        )
+      }
+      
+      return false
+    } catch (error) {
+      console.error('Permission request failed:', error)
+      Alert.alert('Error', 'Failed to request permissions')
+      return false
+    }
+  }
+
+  /**
+   * Handle profile image selection with permission check
    */
   const pickProfileImage = async () => {
     if (disabled) return
     
+    // Check permissions first
+    const hasPermission = await requestPermissions()
+    if (!hasPermission) return
+    
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Fixed deprecated warning
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.3,
@@ -52,19 +85,24 @@ export function ProfilePreviewPicker({
         onProfileImageChange(result.assets[0].uri)
       }
     } catch (error) {
+      console.error('Profile image selection failed:', error)
       Alert.alert('Error', 'Failed to select profile image')
     }
   }
 
   /**
-   * Handle cover image selection
+   * Handle cover image selection with permission check
    */
   const pickCoverImage = async () => {
     if (disabled) return
     
+    // Check permissions first
+    const hasPermission = await requestPermissions()
+    if (!hasPermission) return
+    
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Fixed deprecated warning
         allowsEditing: true,
         aspect: [16, 9],
         quality: 0.3,
@@ -74,6 +112,7 @@ export function ProfilePreviewPicker({
         onCoverImageChange(result.assets[0].uri)
       }
     } catch (error) {
+      console.error('Cover image selection failed:', error)
       Alert.alert('Error', 'Failed to select cover image')
     }
   }
