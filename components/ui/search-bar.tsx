@@ -43,7 +43,7 @@ export function SearchBar({
     setIsFocused(true);
     
     // Animate search bar to be shorter and show cancel button
-    searchBarFlex.value = withSpring(0.99, { damping: 50, stiffness: 100 });
+    searchBarFlex.value = withSpring(0.99, { damping: 500 });
     cancelButtonOpacity.value = withTiming(1, { duration: 300 });
   };
 
@@ -51,7 +51,7 @@ export function SearchBar({
     setIsFocused(false);
     
     // Animate search bar back to full width and hide cancel button
-    searchBarFlex.value = withSpring(1, { damping: 50, stiffness: 100 });
+    searchBarFlex.value = withSpring(1, { damping: 500 });
     cancelButtonOpacity.value = withTiming(0, { duration: 200 });
   };
 
