@@ -174,7 +174,7 @@ export const handleLoginError = (error: any) => {
 const uploadImageWithRetry = async (imageUri: string, variant: 'profile' | 'cover', userId: string): Promise<string> => {
   const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
   const attemptUpload = async (): Promise<string> => {
-    const filePath = `${userId}/${variant}/${Date.now()}.jpg`
+    const filePath = `${variant}/${userId}.jpg`
     
     try {
       const { data, error } = await supabase.storage
