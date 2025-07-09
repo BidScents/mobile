@@ -143,6 +143,7 @@ export function ProfilePreviewPicker({
               source={{ uri: coverImageUri }}
               width="100%"
               height="100%"
+              accessibilityLabel="Cover Photo"
             />
           ) : (
             <YStack 
@@ -182,6 +183,7 @@ export function ProfilePreviewPicker({
             onPress={pickCoverImage}
             disabled={disabled}
             leftIcon="camera"
+            accessibilityLabel="Pick Cover Photo"
           />
         </YStack>
         
