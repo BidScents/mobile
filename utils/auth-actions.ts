@@ -172,8 +172,8 @@ export const handleLoginError = (error: any) => {
  * Upload with user-controlled retry
  */
 const uploadImageWithRetry = async (imageUri: string, variant: 'profile' | 'cover', userId: string): Promise<string> => {
+  const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
   const attemptUpload = async (): Promise<string> => {
-    const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
     const filePath = `${userId}/${variant}/${Date.now()}.jpg`
     
     try {
