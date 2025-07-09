@@ -1,12 +1,15 @@
+import { SearchBar } from '@/components/ui/search-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { Tabs } from "expo-router";
 import { StyleSheet } from 'react-native';
-import { useTheme } from 'tamagui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme, XStack } from 'tamagui';
 
 export default function TabsLayout() {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -44,6 +47,10 @@ export default function TabsLayout() {
         name="index" 
         options={{
           title: "Home",
+          header: () => 
+            <XStack backgroundColor="$background">
+                <SearchBar placeholder="Search" />
+            </XStack>,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "home" : "home-outline"} 
@@ -58,6 +65,10 @@ export default function TabsLayout() {
         name="search" 
         options={{
           title: "Search",
+          header: () => 
+            <XStack backgroundColor="$background">
+              <SearchBar placeholder="Search" />
+            </XStack>,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "search" : "search-outline"} 
