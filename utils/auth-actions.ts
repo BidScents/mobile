@@ -169,10 +169,6 @@ export const handleLoginError = (error: any) => {
 }
 
 /**
- * Improved retry logic - actually retries the upload when user clicks "Try Again"
- */
-
-/**
  * Upload with user-controlled retry
  */
 const uploadImageWithRetry = async (imageUri: string, variant: 'profile' | 'cover', userId: string): Promise<string> => {
