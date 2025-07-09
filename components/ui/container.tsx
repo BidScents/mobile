@@ -18,7 +18,7 @@ interface ContainerProps extends ViewProps {
 export const Container: React.FC<ContainerProps> = ({
   children,
   variant = 'default',
-  safeArea = ['top', 'bottom', 'left', 'right'], // Include bottom by default
+  safeArea = true,
   backgroundColor = '$foreground',
   ...props
 }) => {
