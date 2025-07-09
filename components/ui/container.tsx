@@ -1,63 +1,44 @@
 import React from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { View, ViewProps } from 'tamagui'
+import { Edge, SafeAreaView } from 'react-native-safe-area-context'
+import { View, ViewProps, useTheme } from 'tamagui'
 
-interface ContainerProps extends Omit<ViewProps, 'backgroundColor'> {
+interface ContainerProps extends ViewProps {
   children: React.ReactNode
   variant?: 'default' | 'padded' | 'centered' | 'fullscreen'
-  safeArea?: boolean | 'top' | 'bottom' | 'horizontal'
-  backgroundColor?: string
+  safeArea?: boolean | Edge[]
 }
 
 /**
- * Base container component that provides consistent layout and safe area handling.
- * Used as the foundation for all screen layouts in the app.
+ * Container component that combines SafeAreaView with layout variants.
+ * Provides consistent screen layouts with proper safe area handling.
  * 
- * @param variant - Layout style preset (default, padded, centered, fullscreen)
- * @param safeArea - Safe area configuration (true, false, or specific edges)
- * @param backgroundColor - Background color using Tamagui tokens
+ * @param variant - Layout style preset
+ * @param safeArea - Safe area edges (true for all, array for specific edges, false for none)
  */
 export const Container: React.FC<ContainerProps> = ({
   children,
   variant = 'default',
   safeArea = true,
-  backgroundColor = '$background',
+  backgroundColor = '$foreground',
   ...props
 }) => {
-  const insets = useSafeAreaInsets()
+  const theme = useTheme()
 
-  // Calculate safe area padding based on safeArea prop
-  const getSafeAreaPadding = () => {
-    if (safeArea === false) return {}
-    
-    if (safeArea === true) {
-      return {
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-      }
-    }
-    
-    if (safeArea === 'top') return { paddingTop: insets.top }
-    if (safeArea === 'bottom') return { paddingBottom: insets.bottom }
-    if (safeArea === 'horizontal') {
-      return {
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-      }
-    }
-    
-    return {}
+  // Convert safeArea prop to edges array
+  const getEdges = (): Edge[] => {
+    if (safeArea === false) return []
+    if (safeArea === true) return ['top', 'bottom', 'left', 'right']
+    return safeArea
   }
 
-  // Variant-specific props
+  // Get variant-specific props
   const getVariantProps = () => {
     switch (variant) {
       case 'padded':
         return {
           flex: 1,
           padding: '$4',
+          paddingVertical: '$2',
         }
       case 'centered':
         return {
@@ -79,17 +60,18 @@ export const Container: React.FC<ContainerProps> = ({
     }
   }
 
-  const safeAreaPadding = getSafeAreaPadding()
-  const variantProps = getVariantProps()
-
   return (
-    <View
-      backgroundColor={backgroundColor}
-      style={safeAreaPadding}
-      {...variantProps}
-      {...props}
+    <SafeAreaView 
+      style={{ flex: 1, backgroundColor: theme.background.get() }} 
+      edges={getEdges()}
     >
-      {children}
-    </View>
+      <View
+        backgroundColor={backgroundColor}
+        {...getVariantProps()}
+        {...props}
+      >
+        {children}
+      </View>
+    </SafeAreaView>
   )
 }

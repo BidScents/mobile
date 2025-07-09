@@ -63,7 +63,7 @@ export default function EmailConfirmationHandler() {
   }, [])
 
   return (
-    <Container backgroundColor="$background" flex={1}>
+    <Container backgroundColor="$background" safeArea={['top']} variant="padded">
       <YStack 
         flex={1} 
         justifyContent="center" 

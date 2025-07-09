@@ -13,7 +13,7 @@ export default function EmailConfirmationScreen() {
   }
 
   return (
-    <Container backgroundColor="$background" safeArea={'top'} variant='padded'>
+    <Container backgroundColor="$background" safeArea={['top']} variant='padded'>
       <YStack flex={1} justifyContent="center" gap="$6" alignItems="center">
           <Ionicons name="mail" size={64} color="$foreground" />
           

@@ -79,7 +79,7 @@ export default function LoginScreen() {
   }
   
   return (
-    <Container backgroundColor="$background" safeArea="top" variant="padded">
+    <Container backgroundColor="$background" safeArea={['top']} variant="padded">
       <KeyboardAwareView backgroundColor="$background">
         <ScrollView 
           style={{ flex: 1 }}

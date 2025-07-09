@@ -79,7 +79,7 @@ export default function SignUpScreen() {
   }
   
   return (
-    <Container backgroundColor="$background" safeArea="top" variant="padded">
+    <Container backgroundColor="$background" variant="padded" safeArea={['top']}>
       <KeyboardAwareView backgroundColor="$background">
         <ScrollView 
           style={{ flex: 1 }}
