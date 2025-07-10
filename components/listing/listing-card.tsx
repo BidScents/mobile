@@ -218,7 +218,7 @@ export function ListingCard({ listing, onPress, onFavorite, onUnfavorite }: List
         {/* Product Image */}
         <YStack position="relative">
           <Image
-            source={{ uri: listing.image_url }}
+            source={{ uri: process.env.EXPO_PUBLIC_IMAGE_BASE_URL + listing.image_url }}
             width="100%"
             aspectRatio={1}
             borderRadius="$5"
