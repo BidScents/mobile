@@ -252,7 +252,7 @@ export function ListingCard({ listing, onPress, onFavorite, onUnfavorite }: List
         </YStack>
 
         {/* Dynamic Action Button */}
-        {renderActionButton()}
+        {/* {renderActionButton()} */}
       </YStack>
     </Card>
   )
