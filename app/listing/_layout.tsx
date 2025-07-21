@@ -6,9 +6,7 @@ export default function ListingLayout() {
             <Stack.Screen name="[id]" 
             options={{
                 title: "Listing",
-                headerSearchBarOptions: {
-                    placeholder: "Search listings",
-                },
+                headerBackButtonDisplayMode: "minimal",
             }}
             />
         </Stack>

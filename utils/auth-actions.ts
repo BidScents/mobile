@@ -179,7 +179,7 @@ const uploadImageWithRetry = async (
   const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
   
   const attemptUpload = async (): Promise<string> => {
-    const filePath = `${variant}/${userId}.jpg`
+    const filePath = `${variant}/${userId}`
     
     try {
       const { data, error } = await supabase.storage
