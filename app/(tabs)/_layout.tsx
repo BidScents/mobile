@@ -80,9 +80,9 @@ export default function TabsLayout() {
       />
       
       <Tabs.Screen 
-        name="create-listing" 
+        name="add" 
         options={{
-          title: "Add",
+          headerShown: false,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "add-circle" : "add-circle-outline"} 
