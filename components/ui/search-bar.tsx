@@ -101,10 +101,11 @@ export function SearchBar({
         <XStack
           alignItems="center"
           backgroundColor="$muted"
-          borderRadius="$6"
+          borderRadius="$5"
           paddingHorizontal="$3"
           gap="$3"
           onPress={handleContainerPress}
+          height={40}
         >
           <Pressable onPress={handleSearchIconPress}>
             <Ionicons 
@@ -127,7 +128,7 @@ export function SearchBar({
             backgroundColor="transparent"
             borderWidth={0}
             paddingHorizontal={0}
-            fontSize="$4"
+            fontSize="$5"
             returnKeyType="search"
             clearButtonMode="while-editing"
             onSubmitEditing={() => {
