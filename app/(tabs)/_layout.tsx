@@ -1,21 +1,24 @@
+import { CreateListingSheet } from '@/components/listing/create-listing-sheet';
 import { SearchBar } from '@/components/ui/search-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { Tabs } from "expo-router";
+import React, { useRef } from 'react';
 import { StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, XStack } from 'tamagui';
 
 export default function TabsLayout() {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
+  const CreateListingSheetRef = useRef<BottomSheetModalMethods>(null)
 
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: true,
@@ -91,6 +94,12 @@ export default function TabsLayout() {
             />
           ),
         }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            CreateListingSheetRef.current?.present()
+          },
+        }}
       />
       
       <Tabs.Screen 
@@ -121,5 +130,7 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    <CreateListingSheet ref={CreateListingSheetRef} />
+    </>
   );
 }

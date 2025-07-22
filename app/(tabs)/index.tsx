@@ -173,7 +173,7 @@ export default function Homepage() {
         getItemType={getItemType}
         estimatedItemSize={200}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingVertical: 12 }}
+
       />
     </YStack>
   )
