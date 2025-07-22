@@ -1,17 +1,14 @@
-import { CreateListingSheet } from '@/components/listing/create-listing-sheet';
 import { SearchBar } from '@/components/ui/search-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { Tabs } from "expo-router";
-import React, { useRef } from 'react';
+import { router, Tabs } from "expo-router";
+import React from 'react';
 import { StyleSheet } from 'react-native';
 import { useTheme, XStack } from 'tamagui';
 
 export default function TabsLayout() {
   const theme = useTheme();
-  const CreateListingSheetRef = useRef<BottomSheetModalMethods>(null)
 
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -86,6 +83,7 @@ export default function TabsLayout() {
         name="add" 
         options={{
           headerShown: false,
+          title: "Add",
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "add-circle" : "add-circle-outline"} 
@@ -97,7 +95,7 @@ export default function TabsLayout() {
         listeners={{
           tabPress: (e) => {
             e.preventDefault();
-            CreateListingSheetRef.current?.present()
+            router.push('/add-listing')
           },
         }}
       />
@@ -130,7 +128,6 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
-    <CreateListingSheet ref={CreateListingSheetRef} />
     </>
   );
 }

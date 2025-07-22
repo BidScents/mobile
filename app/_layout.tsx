@@ -5,6 +5,7 @@
  * Manages font loading, API configuration, and Supabase session management.
  */
 
+import { CloseButton } from '@/components/ui/close-button'
 import { LoadingOverlay } from '@/components/ui/loading-overlay'
 import { supabase } from '@/lib/supabase'
 import { initializeAuth, OpenAPI, useAuthStore } from '@bid-scents/shared-sdk'
@@ -25,7 +26,6 @@ import {
   setupAuthStateListener
 } from '../utils/auth-initialization'
 
-import AsyncStorage from '@react-native-async-storage/async-storage'
 {/* For development purposes only */}
 
 const ANDROID_FONTS = {
@@ -53,7 +53,7 @@ export default function RootLayout() {
    */
   useEffect(() => {
     {/* For development purposes only */}
-    AsyncStorage.clear()
+    // AsyncStorage.clear()
 
 
     const initializeApp = async () => {
@@ -113,7 +113,11 @@ export default function RootLayout() {
             <Theme name={colorScheme === 'dark' ? 'dark' : 'light'}>
               <SafeAreaProvider>
                 <BottomSheetModalProvider>
-                  <Stack screenOptions={{ headerShown: false }} />
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="(screens)/add-listing" 
+                    options={{ headerShown: true, title: "Add Listing",  animation: 'slide_from_bottom', headerLeft: () => <CloseButton /> }} />
+                  </Stack>
                   <LoadingOverlay />
                 </BottomSheetModalProvider>
               </SafeAreaProvider>
