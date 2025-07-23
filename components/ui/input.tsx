@@ -16,6 +16,7 @@ export type InputVariant =
   | 'last_name'      
   | 'bio'            
   | 'multiline'
+  | 'numeric'
 
 /**
  * Props for the Input component
@@ -112,6 +113,13 @@ export const Input: React.FC<InputProps> = ({
           autoComplete: 'off' as const,
           autoCapitalize: 'sentences' as const,
           isMultiline: true,
+        }
+      case 'numeric':
+        return {
+          textContentType: 'none' as const,
+          autoComplete: 'off' as const,
+          autoCapitalize: 'none' as const,
+          keyboardType: 'numeric' as const,
         }
       default:
         return {
