@@ -14,4 +14,14 @@ export const queryKeys = {
       all: ['messages'] as const,
       conversation: (id: string) => ['messages', 'conversation', id] as const,
     },
+    dashboard: {
+      all: ['dashboard'] as const,
+      user: (userId: string) => ['dashboard', 'user', userId] as const,
+      listings: {
+        all: ['dashboard', 'listings'] as const,
+        active: ['dashboard', 'listings', 'active'] as const,
+        sold: ['dashboard', 'listings', 'sold'] as const,
+        draft: ['dashboard', 'listings', 'draft'] as const,
+      }
+    }
   } as const
