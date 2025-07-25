@@ -1,55 +1,71 @@
-import type { InputVariant } from '@/components/ui/input'
+import type { InputVariant, SelectOption } from '@/components/ui/input'
 import { Input } from '@/components/ui/input'
+import type { CreateListingFormData } from '@/utils/create-listing-schema'
 import React from 'react'
-import { Controller, type Control, type FieldPath, type FieldValues } from 'react-hook-form'
-import { Text, YStack } from 'tamagui'
+import { Controller, type Control } from 'react-hook-form'
 
-interface ControlledInputProps<T extends FieldValues> {
-  control: Control<T>
-  name: FieldPath<T>
+interface ControlledInputProps {
+  control: Control<CreateListingFormData>
+  name: keyof CreateListingFormData
   variant?: InputVariant
   label: string
   placeholder: string
   disabled?: boolean
   numberOfLines?: number
+  options?: SelectOption[]
+  selectTitle?: string
+  selectSubtitle?: string
 }
 
-export function ControlledInput<T extends FieldValues>({
+export function ControlledInput({
   control,
   name,
   variant = 'text',
   label,
   placeholder,
   disabled = false,
-  numberOfLines
-}: ControlledInputProps<T>) {
+  numberOfLines,
+  options,
+  selectTitle,
+  selectSubtitle,
+}: ControlledInputProps) {
   return (
     <Controller
       control={control}
       name={name}
-      render={({ field: { onChange, value }, fieldState: { error } }) => (
-        <YStack gap="$2">
+      render={({ field: { onChange, value }, fieldState: { error } }) => {
+        const handleChange = (text: string) => {
+          if (variant === 'numeric') {
+            const numValue = text === '' ? undefined : parseFloat(text)
+            onChange(numValue)
+          } else {
+            onChange(text)
+          }
+        }
+
+        const displayValue = () => {
+          if (variant === 'numeric') {
+            return value?.toString() || ''
+          }
+          return (value as string) || ''
+        }
+
+        return (
           <Input
             variant={variant}
             label={label}
             placeholder={placeholder}
-            value={value || ''}
-            onChangeText={onChange}
+            value={displayValue()}
+            onChangeText={handleChange}
             disabled={disabled}
             numberOfLines={numberOfLines}
+            options={options}
+            selectTitle={selectTitle}
+            selectSubtitle={selectSubtitle}
+            error={error?.message}
           />
-          {error && (
-            <Text 
-              fontSize="$2" 
-              color="$error"
-              textTransform="none"
-              fontWeight="400"
-            >
-              {error.message}
-            </Text>
-          )}
-        </YStack>
-      )}
+        )
+      }}
     />
   )
 }
