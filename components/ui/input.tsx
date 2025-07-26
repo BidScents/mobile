@@ -6,11 +6,12 @@ import type { KeyboardTypeOptions } from "react-native";
 import { Keyboard } from "react-native";
 import {
   Paragraph,
+  Switch,
   Input as TamaguiInput,
   Text,
   TextArea,
   XStack,
-  YStack,
+  YStack
 } from "tamagui";
 import { DateTimeBottomSheet } from "../forms/date-time-bottom-sheet";
 import { SelectBottomSheet } from "../forms/select-bottom-sheet";
@@ -29,7 +30,8 @@ export type InputVariant =
   | "multiline"
   | "numeric"
   | "select"
-  | "date";
+  | "date"
+  | "switch";
 
 /**
  * Select option interface
@@ -67,6 +69,10 @@ export interface InputProps {
   selectTitle?: string;
   /** Custom subtitle for select bottom sheet */
   selectSubtitle?: string;
+  /** Whether the switch is checked */
+  switchChecked?: boolean;
+  /** Change handler for switch */
+  onSwitchChange?: (checked: boolean) => void;
 }
 
 /**
@@ -85,6 +91,8 @@ export const Input: React.FC<InputProps> = ({
   options = [],
   selectTitle,
   selectSubtitle,
+  switchChecked,
+  onSwitchChange,
 }) => {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
@@ -226,6 +234,7 @@ export const Input: React.FC<InputProps> = ({
   const isPassword = variant === "password";
   const isSelect = variant === "select";
   const isDate = variant === "date";
+  const isSwitch = variant === "switch";
 
   // Toggle password visibility
   const togglePasswordVisibility = () => {
@@ -262,7 +271,28 @@ export const Input: React.FC<InputProps> = ({
         {label}
       </Paragraph>
 
-      {isPassword ? (
+      {isSwitch ? (
+        <XStack 
+        alignItems="center"
+        justifyContent="space-between"
+        borderRadius="$6"
+        backgroundColor="$muted"
+        px="$4"
+        py="$3"
+        minHeight={50}>
+        <Text
+          fontSize="$5"
+          fontWeight="400"
+          color="$mutedForeground"
+          flex={1}
+        >
+          {label}
+        </Text>
+          <Switch size="$4" disabled={disabled} native defaultChecked={switchChecked} onCheckedChange={onSwitchChange}>
+            <Switch.Thumb animation="bouncy" />
+          </Switch>
+        </XStack>
+      ) : isPassword ? (
         <XStack
           alignItems="center"
           borderRadius="$6"
