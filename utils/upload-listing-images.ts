@@ -98,7 +98,7 @@ export const uploadListingImages = async (
       console.log(`Uploading image ${i + 1} of ${imageUris.length}`)
       
       const url = await uploadSingleImageWithRetry(imageUris[i], userId, i)
-      uploadedUrls.push("listing-images/" + url)
+      uploadedUrls.push(`listing-images/${url}`)
       
       // Call progress callback if provided
       onProgress?.(i + 1, imageUris.length)
