@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { useCreateListing } from "@/hooks/mutations/use-create-listing";
-import { boxConditionOptions, categoryOptions, listingTypeOptions } from "@/types/create-listing-types";
+import {
+  boxConditionOptions,
+  categoryOptions,
+  listingTypeOptions,
+} from "@/types/create-listing-types";
 import { uploadListingImages } from "@/utils/upload-listing-images";
 import {
   CreateListingRequest,
@@ -23,15 +27,14 @@ import { useForm } from "react-hook-form";
 import { Alert, ScrollView } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
-
 /**
  * Default form values for creating a listing
  */
 const DEFAULT_VALUES: CreateListingFormData = {
   type: ListingType.FIXED_PRICE,
-  name: '',
-  brand: '',
-  description: '',
+  name: "",
+  brand: "",
+  description: "",
   category: ListingCategory.DESIGNER,
   volume: 50,
   remaining_percentage: 100,
@@ -40,7 +43,7 @@ const DEFAULT_VALUES: CreateListingFormData = {
   box_condition: ListingBoxCondition.GOOD,
   image_urls: [], // Start empty, will be populated after upload
   is_extendable: false,
-}
+};
 
 export default function AddListingScreen() {
   const [imageUris, setImageUris] = useState<string[]>([]);
@@ -89,11 +92,11 @@ export default function AddListingScreen() {
 
     try {
       showLoading();
-      
+
       // Step 1: Upload images
       console.log("Uploading images...");
       const uploadedImageUrls = await uploadListingImages(
-        imageUris, 
+        imageUris,
         user.id,
         (uploaded, total) => {
           console.log(`Uploaded ${uploaded}/${total} images`);
@@ -104,16 +107,17 @@ export default function AddListingScreen() {
       // Step 2: Update form data with uploaded URLs
       const updatedData = {
         ...data,
-        image_urls: uploadedImageUrls
+        image_urls: uploadedImageUrls,
       };
 
       // Step 3: Transform for API
       const listingData: CreateListingRequest = {
         ...updatedData,
         // For auctions, set price = starting_price
-        price: data.type === ListingType.AUCTION 
-          ? data.starting_price! 
-          : data.price!,
+        price:
+          data.type === ListingType.AUCTION
+            ? data.starting_price!
+            : data.price!,
         // Provide defaults for optional backend fields
         batch_code: data.batch_code || undefined,
         starting_price: data.starting_price || undefined,
@@ -126,11 +130,10 @@ export default function AddListingScreen() {
 
       console.log("Creating listing...");
       await createListingMutation.mutateAsync(listingData);
-
     } catch (error: any) {
       hideLoading();
-      
-      if (error.message === 'USER_CANCELLED') {
+
+      if (error.message === "USER_CANCELLED") {
         // User cancelled during image upload
         setImageUris([]); // Clear images as requested
         Alert.alert("Cancelled", "Listing creation was cancelled");
@@ -196,7 +199,7 @@ export default function AddListingScreen() {
                 numberOfLines={4}
               />
 
-{!isAuction ? (
+              {!isAuction ? (
                 <ControlledInput
                   control={control}
                   name="price"
@@ -258,7 +261,7 @@ export default function AddListingScreen() {
                     variant="switch"
                     label="Extendable (Optional)"
                     placeholder="Extendable"
-                    switchChecked={watch('is_extendable')}
+                    switchChecked={watch("is_extendable")}
                     disabled={loading}
                   />
                 </YStack>
@@ -349,7 +352,6 @@ export default function AddListingScreen() {
                 placeholder="Enter batch code if available"
                 disabled={loading}
               />
-
             </YStack>
 
             {/* Debug: Show validation errors */}
