@@ -4,6 +4,26 @@ import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
 import { Alert } from 'react-native'
 
+
+/**
+ * Get content type and extension from URI
+ */
+const getContentTypeAndExtension = (uri: string) => {
+  const extension = uri.split('.').pop()?.toLowerCase()
+  
+  switch (extension) {
+    case 'png':
+      return { contentType: 'image/png', ext: '.png' }
+    case 'webp':
+      return { contentType: 'image/webp', ext: '.webp' }
+    case 'jpg':
+    case 'jpeg':
+    default:
+      return { contentType: 'image/jpeg', ext: '.jpg' }
+  }
+}
+
+
 /**
  * Upload a single listing image with retry logic
  */
@@ -14,15 +34,16 @@ const uploadSingleImageWithRetry = async (
 ): Promise<string> => {
   const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
   const uuid = Crypto.randomUUID()
+  const { contentType, ext } = getContentTypeAndExtension(imageUri)
   
   const attemptUpload = async (): Promise<string> => {
-    const filePath = `listing_${uuid}.jpg`
+    const filePath = `listing_${uuid}${ext}`
     
     try {
       const { data, error } = await supabase.storage
         .from('listing-images')
         .upload(filePath, decode(base64), {
-          contentType: 'image/jpeg',
+          contentType,
           upsert: false // Don't overwrite, each image should be unique
         })
       
@@ -39,7 +60,7 @@ const uploadSingleImageWithRetry = async (
         const { data, error: retryError } = await supabase.storage
           .from('listing-images')
           .upload(filePath, decode(base64), {
-            contentType: 'image/jpeg',
+            contentType,
             upsert: false
           })
         
