@@ -188,25 +188,6 @@ export default function AddListingScreen() {
 
               <ControlledInput
                 control={control}
-                name="brand"
-                variant="text"
-                label="Brand"
-                placeholder="Enter brand name"
-                disabled={loading}
-              />
-
-              <ControlledInput
-                control={control}
-                variant="select"
-                name="category"
-                label="Category"
-                placeholder="Select category"
-                disabled={loading}
-                options={categoryOptions}
-              />
-
-              <ControlledInput
-                control={control}
                 name="description"
                 variant="multiline"
                 label="Description"
@@ -215,74 +196,7 @@ export default function AddListingScreen() {
                 numberOfLines={4}
               />
 
-              <XStack gap="$3">
-                <YStack flex={1}>
-                  <ControlledInput
-                    control={control}
-                    name="volume"
-                    variant="numeric"
-                    label="Volume (ml)"
-                    placeholder="100"
-                    disabled={loading}
-                  />
-                </YStack>
-
-                <YStack flex={1}>
-                  <ControlledInput
-                    control={control}
-                    name="remaining_percentage"
-                    variant="numeric"
-                    label="Remaining %"
-                    placeholder="100"
-                    disabled={loading}
-                  />
-                </YStack>
-              </XStack>
-
-              <ControlledInput
-                control={control}
-                name="box_condition"
-                variant="select"
-                label="Box Condition"
-                placeholder="Select condition"
-                disabled={loading}
-                options={boxConditionOptions}
-              />
-
-              <ControlledInput
-                control={control}
-                name="batch_code"
-                variant="text"
-                label="Batch Code (Optional)"
-                placeholder="Enter batch code if available"
-                disabled={loading}
-              />
-
-              <XStack gap="$3">
-                <YStack flex={1}>
-                  <ControlledInput
-                    control={control}
-                    name="quantity"
-                    variant="numeric"
-                    label="Quantity"
-                    placeholder="1"
-                    disabled={loading}
-                  />
-                </YStack>
-
-                <YStack flex={1}>
-                  <ControlledInput
-                    control={control}
-                    name="purchase_year"
-                    variant="numeric"
-                    label="Purchase Year"
-                    placeholder={new Date().getFullYear().toString()}
-                    disabled={loading}
-                  />
-                </YStack>
-              </XStack>
-
-              {!isAuction ? (
+{!isAuction ? (
                 <ControlledInput
                   control={control}
                   name="price"
@@ -349,6 +263,93 @@ export default function AddListingScreen() {
                   />
                 </YStack>
               )}
+
+              <ControlledInput
+                control={control}
+                name="brand"
+                variant="text"
+                label="Brand"
+                placeholder="Enter brand name"
+                disabled={loading}
+              />
+
+              <ControlledInput
+                control={control}
+                variant="select"
+                name="category"
+                label="Category"
+                placeholder="Select category"
+                disabled={loading}
+                options={categoryOptions}
+              />
+
+              <XStack gap="$3">
+                <YStack flex={1}>
+                  <ControlledInput
+                    control={control}
+                    name="volume"
+                    variant="numeric"
+                    label="Volume (ml)"
+                    placeholder="100"
+                    disabled={loading}
+                  />
+                </YStack>
+
+                <YStack flex={1}>
+                  <ControlledInput
+                    control={control}
+                    name="remaining_percentage"
+                    variant="numeric"
+                    label="Remaining %"
+                    placeholder="100"
+                    disabled={loading}
+                  />
+                </YStack>
+              </XStack>
+
+              <ControlledInput
+                control={control}
+                name="box_condition"
+                variant="select"
+                label="Box Condition"
+                placeholder="Select condition"
+                disabled={loading}
+                options={boxConditionOptions}
+              />
+
+              <XStack gap="$3">
+                <YStack flex={1}>
+                  <ControlledInput
+                    control={control}
+                    name="quantity"
+                    variant="numeric"
+                    label="Quantity"
+                    placeholder="1"
+                    disabled={loading}
+                  />
+                </YStack>
+
+                <YStack flex={1}>
+                  <ControlledInput
+                    control={control}
+                    name="purchase_year"
+                    variant="numeric"
+                    label="Purchase Year"
+                    placeholder={new Date().getFullYear().toString()}
+                    disabled={loading}
+                  />
+                </YStack>
+              </XStack>
+
+              <ControlledInput
+                control={control}
+                name="batch_code"
+                variant="text"
+                label="Batch Code (Optional)"
+                placeholder="Enter batch code if available"
+                disabled={loading}
+              />
+
             </YStack>
 
             {/* Debug: Show validation errors */}
