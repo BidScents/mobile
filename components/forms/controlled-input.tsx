@@ -15,6 +15,7 @@ interface ControlledInputProps {
   options?: SelectOption[]
   selectTitle?: string
   selectSubtitle?: string
+  switchChecked?: boolean
 }
 
 export function ControlledInput({
@@ -28,6 +29,7 @@ export function ControlledInput({
   options,
   selectTitle,
   selectSubtitle,
+  switchChecked,
 }: ControlledInputProps) {
   return (
     <Controller
@@ -38,8 +40,15 @@ export function ControlledInput({
           if (variant === 'numeric') {
             const numValue = text === '' ? undefined : parseFloat(text)
             onChange(numValue)
-          } else {
+          }
+          else {
             onChange(text)
+          }
+        }
+
+        const handleSwitchChange = (checked: boolean) => {
+          if (variant === 'switch') {
+            onChange(checked)
           }
         }
 
@@ -62,6 +71,8 @@ export function ControlledInput({
             options={options}
             selectTitle={selectTitle}
             selectSubtitle={selectSubtitle}
+            switchChecked={switchChecked}
+            onSwitchChange={handleSwitchChange}
             error={error?.message}
           />
         )
