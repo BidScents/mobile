@@ -4,7 +4,6 @@ import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
 import { Alert } from 'react-native'
 
-
 /**
  * Get content type and extension from URI
  */
@@ -23,6 +22,39 @@ const getContentTypeAndExtension = (uri: string) => {
   }
 }
 
+/**
+ * Delete uploaded images from storage
+ */
+const cleanupUploadedImages = async (filePaths: string[]): Promise<void> => {
+  if (filePaths.length === 0) return
+  
+  try {
+    console.log(`Cleaning up ${filePaths.length} uploaded images...`)
+    
+    // Delete images one by one to ensure it works
+    const deletePromises = filePaths.map(async (filePath) => {
+      try {
+        const { error } = await supabase.storage
+          .from('listing-images')
+          .remove([filePath]) // Supabase remove expects an array
+        
+        if (error) {
+          console.error(`Failed to delete ${filePath}:`, error)
+        } else {
+          console.log(`Successfully deleted ${filePath}`)
+        }
+      } catch (error) {
+        console.error(`Error deleting ${filePath}:`, error)
+      }
+    })
+    
+    await Promise.all(deletePromises)
+    console.log('Cleanup completed')
+    
+  } catch (error) {
+    console.error('Error during image cleanup:', error)
+  }
+}
 
 /**
  * Upload a single listing image with retry logic
@@ -31,24 +63,22 @@ const uploadSingleImageWithRetry = async (
   imageUri: string, 
   userId: string,
   imageIndex: number
-): Promise<string> => {
+): Promise<{ path: string; filePath: string }> => {
   const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
   const uuid = Crypto.randomUUID()
   const { contentType, ext } = getContentTypeAndExtension(imageUri)
+  const filePath = `listing_${uuid}${ext}`
   
   const attemptUpload = async (): Promise<string> => {
-    const filePath = `listing_${uuid}${ext}`
-    
     try {
       const { data, error } = await supabase.storage
         .from('listing-images')
         .upload(filePath, decode(base64), {
           contentType,
-          upsert: false // Don't overwrite, each image should be unique
+          upsert: false
         })
       
       if (error) throw error
-      
       return data.path
       
     } catch (error: any) {
@@ -65,17 +95,17 @@ const uploadSingleImageWithRetry = async (
           })
         
         if (retryError) throw retryError
-        
         return data.path
       }
       throw error
     }
   }
   
-  // Keep trying until user succeeds or chooses to skip
+  // Keep trying until user succeeds or chooses to cancel
   while (true) {
     try {
-      return await attemptUpload()
+      const path = await attemptUpload()
+      return { path, filePath }
     } catch (uploadError: any) {
       console.error(`Image ${imageIndex + 1} upload failed:`, uploadError)
       
@@ -92,10 +122,9 @@ const uploadSingleImageWithRetry = async (
       })
       
       if (choice === 'cancel') {
-        throw new Error('USER_CANCELLED') // Special error to indicate user cancelled
+        throw new Error('USER_CANCELLED')
       }
       
-      // If choice === 'retry', the while loop continues and tries again
       console.log(`User chose to retry image ${imageIndex + 1} upload`)
     }
   }
@@ -113,14 +142,16 @@ export const uploadListingImages = async (
     throw new Error('No images to upload')
   }
   
+  const uploadedResults: { path: string; filePath: string }[] = []
   const uploadedUrls: string[] = []
   
   try {
     for (let i = 0; i < imageUris.length; i++) {
       console.log(`Uploading image ${i + 1} of ${imageUris.length}`)
       
-      const url = await uploadSingleImageWithRetry(imageUris[i], userId, i)
-      uploadedUrls.push(`listing-images/${url}`)
+      const result = await uploadSingleImageWithRetry(imageUris[i], userId, i)
+      uploadedResults.push(result)
+      uploadedUrls.push(`listing-images/${result.path}`)
       
       // Call progress callback if provided
       onProgress?.(i + 1, imageUris.length)
@@ -129,11 +160,11 @@ export const uploadListingImages = async (
     return uploadedUrls
     
   } catch (error: any) {
-    // If user cancelled or any other error, clean up uploaded images
-    if (uploadedUrls.length > 0) {
-      console.log('Cleaning up uploaded images due to error...')
-      // Note: In production, implement cleanup
-      // For now, we'll leave them as orphaned files
+    // Clean up any uploaded images on failure
+    if (uploadedResults.length > 0) {
+      console.log(`Cleaning up ${uploadedResults.length} uploaded images due to error...`)
+      const filePathsToDelete = uploadedResults.map(result => result.filePath)
+      await cleanupUploadedImages(filePathsToDelete)
     }
     
     throw error
