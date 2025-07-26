@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { decode } from 'base64-arraybuffer'
+import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
 import { Alert } from 'react-native'
 
@@ -12,7 +13,7 @@ const uploadSingleImageWithRetry = async (
   imageIndex: number
 ): Promise<string> => {
   const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
-  const uuid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+  const uuid = Crypto.randomUUID()
   
   const attemptUpload = async (): Promise<string> => {
     const filePath = `listing_${uuid}.jpg`
