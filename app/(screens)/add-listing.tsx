@@ -115,7 +115,7 @@ export default function AddListingScreen() {
           ? data.starting_price! 
           : data.price!,
         // Provide defaults for optional backend fields
-        batch_code: data.batch_code || '',
+        batch_code: data.batch_code || undefined,
         starting_price: data.starting_price || undefined,
         reserve_price: data.reserve_price || undefined,
         buy_now_price: data.buy_now_price || undefined,
