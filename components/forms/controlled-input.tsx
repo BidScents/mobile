@@ -1,6 +1,6 @@
 import type { InputVariant, SelectOption } from '@/components/ui/input'
 import { Input } from '@/components/ui/input'
-import type { CreateListingFormData } from '@/utils/create-listing-schema'
+import type { CreateListingFormData } from '@bid-scents/shared-sdk'
 import React from 'react'
 import { Controller, type Control } from 'react-hook-form'
 

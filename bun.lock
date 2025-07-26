@@ -4,11 +4,12 @@
     "": {
       "name": "bidscents",
       "dependencies": {
-        "@bid-scents/shared-sdk": "^1.0.5",
+        "@bid-scents/shared-sdk": "^1.0.7",
         "@expo/vector-icons": "^14.1.0",
         "@gorhom/bottom-sheet": "^5.1.6",
         "@hookform/resolvers": "^5.1.1",
         "@react-native-async-storage/async-storage": "^2.2.0",
+        "@react-native-community/datetimepicker": "react-native-community/datetimepicker",
         "@react-navigation/bottom-tabs": "^7.3.10",
         "@react-navigation/elements": "^2.3.8",
         "@react-navigation/native": "^7.1.6",
@@ -47,7 +48,6 @@
         "react-dom": "19.0.0",
         "react-hook-form": "^7.58.1",
         "react-native": "0.79.3",
-        "@react-native-community/datetimepicker": "react-native-community/datetimepicker",
         "react-native-gesture-handler": "^2.27.1",
         "react-native-keyboard-controller": "^1.17.5",
         "react-native-mmkv": "^3.3.0",
@@ -259,7 +259,7 @@
 
     "@babel/types": ["@babel/types@7.27.6", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.27.1" } }, "sha512-ETyHEk2VHHvl9b9jZP5IHPavHYk57EhanlRRuae9XCpb/j5bDCbPPMOBfCWhnl/7EDJz0jEMCi/RhccCE8r1+Q=="],
 
-    "@bid-scents/shared-sdk": ["@bid-scents/shared-sdk@1.0.5", "", { "dependencies": { "@react-native-async-storage/async-storage": "^2.2.0", "@tanstack/react-query": "^5.80.7", "zod": "^3.25.64", "zustand": "^5.0.5" }, "peerDependencies": { "react": ">=18.0.0", "typescript": "^5.0.0" } }, "sha512-LyVz8g2vo2iW675xRQoEczRd6P+PGpmBSzDwjsKhOlsJUm1XEVS2ZaZ+uSDuOo81S5oxs/403c4oSejbIGg9zQ=="],
+    "@bid-scents/shared-sdk": ["@bid-scents/shared-sdk@1.0.7", "", { "dependencies": { "@react-native-async-storage/async-storage": "^2.2.0", "@tanstack/react-query": "^5.80.7", "zod": "^3.25.64", "zustand": "^5.0.5" }, "peerDependencies": { "react": ">=18.0.0", "typescript": "^5.0.0" } }, "sha512-VtzmBI1ehfEBlGJCB91sJh4RGskLKBn/PeRnFnecXrgMVMN93NQ3NgMREXWX7V4BtWYbgfobBn+VyiD6lhSxzw=="],
 
     "@egjs/hammerjs": ["@egjs/hammerjs@2.0.17", "", { "dependencies": { "@types/hammerjs": "^2.0.36" } }, "sha512-XQsZgjm2EcVUiZQf11UBJQfmZeEmOW8DpI1gsFeln6w0ae0ii4dMQEQ0kjl6DspdWX1aGY1/loyXnP0JS06e/A=="],
 

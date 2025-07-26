@@ -5,18 +5,16 @@ import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { useCreateListing } from "@/hooks/mutations/use-create-listing";
 import { boxConditionOptions, categoryOptions, listingTypeOptions } from "@/types/create-listing-types";
-import {
-  createListingSchema,
-  type CreateListingFormData,
-} from "@/utils/create-listing-schema";
 import { uploadListingImages } from "@/utils/upload-listing-images";
 import {
   CreateListingRequest,
+  createListingSchema,
   ListingBoxCondition,
   ListingCategory,
   ListingType,
   useAuthStore,
-  useLoadingStore
+  useLoadingStore,
+  type CreateListingFormData,
 } from "@bid-scents/shared-sdk";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
