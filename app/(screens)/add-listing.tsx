@@ -1,8 +1,8 @@
 import { ControlledInput } from "@/components/forms/controlled-input";
-import { ControlledMultipleImagePicker } from "@/components/forms/controlled-multiple-image-picker";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
+import { MultipleImagePicker } from "@/components/ui/multiple-image-picker";
 import { useCreateListing } from "@/hooks/mutations/use-create-listing";
 import {
   boxConditionOptions,
@@ -25,7 +25,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, ScrollView } from "react-native";
-import { Text, XStack, YStack } from "tamagui";
+import { XStack, YStack } from "tamagui";
 
 /**
  * Default form values for creating a listing
@@ -158,12 +158,11 @@ export default function AddListingScreen() {
           <YStack flex={1} gap="$5" minHeight="100%">
             {/* Images Section */}
             <YStack gap="$3">
-              <ControlledMultipleImagePicker
+              <MultipleImagePicker
                 imageUris={imageUris}
                 onImagesChange={setImageUris}
                 disabled={loading}
                 maxImages={10}
-                required
                 label="Photos"
               />
             </YStack>
@@ -354,31 +353,12 @@ export default function AddListingScreen() {
               />
             </YStack>
 
-            {/* Debug: Show validation errors */}
-            {Object.keys(errors).length > 0 && (
-              <YStack
-                gap="$2"
-                padding="$3"
-                backgroundColor="$red2"
-                borderRadius="$4"
-              >
-                <Text color="$red10" fontSize="$3" fontWeight="500">
-                  Please fix the following errors:
-                </Text>
-                {Object.entries(errors).map(([key, error]) => (
-                  <Text key={key} color="$red10" fontSize="$2">
-                    • {key}: {error?.message}
-                  </Text>
-                ))}
-              </YStack>
-            )}
-
             <Button
               variant="primary"
               size="lg"
               fullWidth
               onPress={handleSubmit(onSubmit)}
-              disabled={loading || !isValid || imageUris.length === 0}
+              disabled={loading || !isValid}
               borderRadius="$10"
             >
               {loading ? "Creating Listing..." : "Create Listing"}
