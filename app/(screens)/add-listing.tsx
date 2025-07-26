@@ -24,8 +24,6 @@ import { Alert, ScrollView } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 
-
-
 /**
  * Default form values for creating a listing
  */
@@ -41,7 +39,7 @@ const DEFAULT_VALUES: CreateListingFormData = {
   purchase_year: new Date().getFullYear(),
   box_condition: ListingBoxCondition.GOOD,
   image_urls: [], // Start empty, will be populated after upload
-  is_extendable: true,
+  is_extendable: false,
 }
 
 export default function AddListingScreen() {
@@ -59,8 +57,6 @@ export default function AddListingScreen() {
     mode: "onChange",
     defaultValues: DEFAULT_VALUES,
   });
-
-  console.log(watch("is_extendable"));
 
   const listingType = watch("type");
   const isAuction = listingType === ListingType.AUCTION;
@@ -127,18 +123,6 @@ export default function AddListingScreen() {
         ends_at: data.ends_at || undefined,
         is_extendable: data.is_extendable || false,
       };
-
-      console.log("=== API REQUEST DEBUG ===");
-      console.log("Final listing data:", JSON.stringify(listingData, null, 2));
-      console.log("Data types:", {
-        price: typeof listingData.price,
-        volume: typeof listingData.volume,
-        remaining_percentage: typeof listingData.remaining_percentage,
-        quantity: typeof listingData.quantity,
-        purchase_year: typeof listingData.purchase_year,
-        image_urls: Array.isArray(listingData.image_urls),
-        image_urls_length: listingData.image_urls?.length
-      });
 
       console.log("Creating listing...");
       await createListingMutation.mutateAsync(listingData);
