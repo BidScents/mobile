@@ -113,6 +113,9 @@ export const setupAuthStateListener = (
         await handleSignIn(session, setSession, setUser, setLoading)
       } else if (event === 'SIGNED_OUT') {
         await handleSignOut(logout)
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed')
+        handleAuthStateChange('TOKEN_REFRESHED', session)
       }
     }
   )

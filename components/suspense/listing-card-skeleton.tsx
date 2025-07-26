@@ -14,7 +14,7 @@ interface ListingCardSkeletonProps {
  */
 export function ListingCardSkeleton({ 
   width = 170, 
-  height = 280 
+  height = 240
 }: ListingCardSkeletonProps) {
   const colorScheme = useColorScheme()
   
@@ -29,6 +29,7 @@ export function ListingCardSkeleton({
       padding="$0"
       flex={1}
       overflow="hidden"
+      alignSelf='center'
     >
       <ContentLoader
         speed={2}
@@ -60,7 +61,7 @@ export function ListingCardSkeleton({
         <Rect x="12" y="215" rx="4" ry="4" width={width - 80} height="14" />
         
         {/* Action button at bottom */}
-        <Rect x="12" y="240" rx="8" ry="8" width={width - 24} height="32" />
+        {/* <Rect x="12" y="240" rx="8" ry="8" width={width - 24} height="32" /> */}
       </ContentLoader>
     </Card>
   )

@@ -11,11 +11,12 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@bid-scents/shared-sdk": "^1.0.4",
+    "@bid-scents/shared-sdk": "^1.0.7",
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5.1.6",
     "@hookform/resolvers": "^5.1.1",
     "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-community/datetimepicker": "react-native-community/datetimepicker",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
@@ -58,6 +59,7 @@
     "react-native-keyboard-controller": "^1.17.5",
     "react-native-mmkv": "^3.3.0",
     "react-native-reanimated": "^3.18.0",
+    "react-native-reanimated-dnd": "^1.1.0",
     "react-native-safe-area-context": "^5.4.1",
     "react-native-screens": "~4.11.1",
     "react-native-svg": "^15.12.0",

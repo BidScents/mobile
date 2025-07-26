@@ -171,51 +171,49 @@ export const handleLoginError = (error: any) => {
 /**
  * Upload with user-controlled retry
  */
-const uploadImageWithRetry = async (imageUri: string, variant: 'profile' | 'cover', userId: string): Promise<string> => {
+const uploadImageWithRetry = async (
+  imageUri: string, 
+  variant: 'profile' | 'cover', 
+  userId: string
+): Promise<string> => {
   const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
+  
   const attemptUpload = async (): Promise<string> => {
-    const filePath = `${userId}/${variant}/${Date.now()}.jpg`
+    const filePath = `${variant}/${userId}`
     
     try {
       const { data, error } = await supabase.storage
         .from('profile-images')
-        .upload(filePath, decode(base64), { 
+        .upload(filePath, decode(base64), {
           contentType: 'image/jpeg',
           upsert: true
         })
       
       if (error) throw error
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-images')
-        .getPublicUrl(data.path)
       
-      return publicUrl
+      // Return just the path, not the full URL
+      return data.path
+      
     } catch (error: any) {
-      // One automatic retry on network failure
+      // Retry logic...
       if (error.message?.includes('Network request failed')) {
         console.log('Network failed, retrying once automatically...')
         await new Promise(r => setTimeout(r, 2000))
         
         const { data, error: retryError } = await supabase.storage
           .from('profile-images')
-          .upload(filePath, decode(base64), { 
+          .upload(filePath, decode(base64), {
             contentType: 'image/jpeg',
             upsert: true
           })
         
         if (retryError) throw retryError
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('profile-images')
-          .getPublicUrl(data.path)
-        
-        return publicUrl
+        return data.path // Return path, not URL
       }
       throw error
     }
   }
-
+  
   // Keep trying until user succeeds or chooses to skip
   while (true) {
     try {

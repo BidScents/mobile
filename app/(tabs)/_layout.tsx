@@ -1,9 +1,11 @@
+import { SearchBar } from '@/components/ui/search-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
+import React from 'react';
 import { StyleSheet } from 'react-native';
-import { useTheme } from 'tamagui';
+import { useTheme, XStack } from 'tamagui';
 
 export default function TabsLayout() {
   const theme = useTheme();
@@ -13,6 +15,7 @@ export default function TabsLayout() {
   };
 
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: true,
@@ -44,6 +47,10 @@ export default function TabsLayout() {
         name="index" 
         options={{
           title: "Home",
+          header: () => 
+            <XStack backgroundColor="$background">
+                <SearchBar placeholder="Search" />
+            </XStack>,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "home" : "home-outline"} 
@@ -58,6 +65,10 @@ export default function TabsLayout() {
         name="search" 
         options={{
           title: "Search",
+          header: () => 
+            <XStack backgroundColor="$background">
+              <SearchBar placeholder="Search" />
+            </XStack>,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "search" : "search-outline"} 
@@ -69,8 +80,9 @@ export default function TabsLayout() {
       />
       
       <Tabs.Screen 
-        name="create-listing" 
+        name="add" 
         options={{
+          headerShown: false,
           title: "Add",
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
@@ -79,6 +91,12 @@ export default function TabsLayout() {
               color={color} 
             />
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.push('/add-listing')
+          },
         }}
       />
       
@@ -110,5 +128,6 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    </>
   );
 }
