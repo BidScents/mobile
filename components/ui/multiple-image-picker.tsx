@@ -93,7 +93,7 @@ export function MultipleImagePicker({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
         quality: 0.3,
-        selectionLimit: maxImages - imageUris.length,
+        selectionLimit: Math.max(1, maxImages - imageUris.length),
       })
 
       if (!result.canceled && result.assets) {
