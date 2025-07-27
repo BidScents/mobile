@@ -1,6 +1,7 @@
 import { Container } from "@/components/ui/container";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { Avatar, ScrollView, Text, XStack, YStack, useTheme } from "tamagui";
 
@@ -57,6 +58,11 @@ const SettingsSections = [
   },
 ];
 
+const handlePress = (link: string) => {
+  router.push(link as any);
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+};
+
 export default function ProfileScreen() {
   const { user } = useAuthStore();
   const theme = useTheme();
@@ -73,7 +79,10 @@ export default function ProfileScreen() {
           borderRadius="$6"
           px="$4"
           py="$3"
-          onPress={() => router.push("/profile/[id]")}
+          onPress={() => handlePress("/profile/[id]")}
+          pressStyle={{
+            opacity: 0.8,
+          }}
         >
           <XStack alignItems="center" gap="$3">
             <Avatar circular size="$5">
@@ -89,7 +98,11 @@ export default function ProfileScreen() {
                 justifyContent="center"
                 alignItems="center"
               >
-                <Ionicons name="person" size={22} color={theme.background?.val} />
+                <Ionicons
+                  name="person"
+                  size={22}
+                  color={theme.background?.val}
+                />
               </Avatar.Fallback>
             </Avatar>
 
@@ -102,7 +115,11 @@ export default function ProfileScreen() {
               </Text>
             </YStack>
           </XStack>
-          <Ionicons name="chevron-forward" size={20} color={theme.foreground?.val} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={theme.foreground?.val}
+          />
         </XStack>
 
         {/* Settings */}
@@ -120,7 +137,11 @@ export default function ProfileScreen() {
                     justifyContent="space-between"
                     px="$4"
                     py="$4"
-                    onPress={() => router.push(item.src as any)}
+                    borderRadius="$6"
+                    onPress={() => handlePress(item.src)}
+                    pressStyle={{
+                      opacity: 0.8,
+                    }}
                   >
                     <XStack
                       alignItems="center"
