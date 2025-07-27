@@ -35,8 +35,6 @@ export default function TabsLayout() {
             ...StyleSheet.absoluteFillObject,
             overflow: 'hidden',
             backgroundColor: 'transparent',
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
            }} />
         ),
       }}

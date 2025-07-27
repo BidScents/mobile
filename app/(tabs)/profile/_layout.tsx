@@ -6,10 +6,11 @@ export default function ProfileLayout() {
     screenOptions={{
       headerShown: true,
       headerShadowVisible: false,
+      headerBackButtonDisplayMode: 'minimal',
     }}
     >
       <Stack.Screen name="index" options={{ title: "Profile" }} />
-      <Stack.Screen name="[id]" options={{ title: "Profile" }} />
+      <Stack.Screen name="[id]" options={{ title: "Profile", headerShown: false }} />
       <Stack.Screen name="badges" options={{ title: "Badges" }} />
       <Stack.Screen name="favourite-listings" options={{ title: "Favourite Listings" }} />
       <Stack.Screen name="orders" options={{ title: "Orders" }} />
