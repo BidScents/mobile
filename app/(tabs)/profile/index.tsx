@@ -79,7 +79,7 @@ export default function ProfileScreen() {
           borderRadius="$6"
           px="$4"
           py="$3"
-          onPress={() => handlePress("/profile/[id]")}
+          onPress={() => handlePress(`/profile/${user?.id}`)}
           pressStyle={{
             backgroundColor: "$mutedPress",
           }}
