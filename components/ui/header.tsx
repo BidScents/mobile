@@ -1,20 +1,13 @@
-import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
-import { router } from 'expo-router';
-import React from 'react';
-import {
-  Animated,
-  ImageBackground,
-  StyleSheet,
-} from 'react-native';
-import {
-  useSafeAreaInsets
-} from 'react-native-safe-area-context';
-import { Text, View } from 'tamagui';
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { router } from "expo-router";
+import React from "react";
+import { Animated, ImageBackground, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Text, View } from "tamagui";
 
-const AnimatedImageBackground = Animated.createAnimatedComponent(
-  ImageBackground
-);
+const AnimatedImageBackground =
+  Animated.createAnimatedComponent(ImageBackground);
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -41,20 +34,19 @@ export default function Header({
 }) {
   return (
     <>
-
       {/* Back button */}
       <View
         style={{
           zIndex: 2,
-          position: 'absolute',
-          top: insets.top ,
+          position: "absolute",
+          top: insets.top,
           left: 20,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backgroundColor: "rgba(0, 0, 0, 0.6)",
           height: 30,
           width: 30,
           borderRadius: 15,
-          alignItems: 'center',
-          justifyContent: 'center',
+          alignItems: "center",
+          justifyContent: "center",
         }}
         onPress={() => router.back()}
         hitSlop={{
@@ -72,15 +64,15 @@ export default function Header({
         <View
           style={{
             zIndex: 2,
-            position: 'absolute',
+            position: "absolute",
             top: insets.top,
             right: 20,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
             height: 30,
             width: 30,
             borderRadius: 15,
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: "center",
+            justifyContent: "center",
           }}
           onPress={rightIconPress}
           hitSlop={{
@@ -94,44 +86,15 @@ export default function Header({
         </View>
       )}
 
-      
-
-      {/* Refresh arrow */}
+      {/* Name + username */}
       <Animated.View
         style={{
           zIndex: 2,
-          position: 'absolute',
-          top: insets.top + 10,
-          left: 0,
-          right: 0,
-          alignItems: 'center',
-          opacity: scrollY.interpolate({
-            inputRange: [-20, 0],
-            outputRange: [1, 0],
-          }),
-          transform: [
-            {
-              rotate: scrollY.interpolate({
-                inputRange: [-45, -35],
-                outputRange: ['180deg', '0deg'],
-                extrapolate: 'clamp',
-              }),
-            },
-          ],
-        }}
-      >
-        <Ionicons name="arrow-down" color="white" size={24} />
-      </Animated.View>
-
-      {/* Name + tweets count */}
-      <Animated.View
-        style={{
-          zIndex: 2,
-          position: 'absolute',
+          position: "absolute",
           top: insets.top,
           left: 0,
           right: 0,
-          alignItems: 'center',
+          alignItems: "center",
           opacity: scrollY.interpolate({
             inputRange: [90, 110],
             outputRange: [0, 1],
@@ -141,13 +104,15 @@ export default function Header({
               translateY: scrollY.interpolate({
                 inputRange: [90, 120],
                 outputRange: [30, 0],
-                extrapolate: 'clamp',
+                extrapolate: "clamp",
               }),
             },
           ],
         }}
       >
-        <Text color="$background" fontSize="$4">@{username}</Text>
+        <Text color="$background" fontSize="$4">
+          @{username}
+        </Text>
 
         <Text color="$background" fontSize="$4">
           {name}
@@ -160,7 +125,7 @@ export default function Header({
           uri: profile_banner_uri,
         }}
         style={{
-          position: 'absolute',
+          position: "absolute",
           left: 0,
           right: 0,
           height: header_height_expanded + header_height_narrowed,
@@ -169,8 +134,8 @@ export default function Header({
               scale: scrollY.interpolate({
                 inputRange: [-200, 0],
                 outputRange: [5, 1],
-                extrapolateLeft: 'extend',
-                extrapolateRight: 'clamp',
+                extrapolateLeft: "extend",
+                extrapolateRight: "clamp",
               }),
             },
           ],
@@ -189,7 +154,6 @@ export default function Header({
           }}
         />
       </AnimatedImageBackground>
-
     </>
   );
 }
