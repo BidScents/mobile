@@ -1,3 +1,4 @@
+import AnimatedTabBar from "@/components/ui/animated-tab-bar";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import Header from "@/components/ui/header";
@@ -8,7 +9,7 @@ import {
 } from "@/hooks/queries/use-profile";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { ActivityIndicator, Animated, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, XStack, YStack, useTheme } from "tamagui";
@@ -16,7 +17,18 @@ import { Text, View, XStack, YStack, useTheme } from "tamagui";
 const HEADER_HEIGHT_EXPANDED = 35;
 const HEADER_HEIGHT_NARROWED = 110;
 
+const TABS = [
+  "Active",
+  "Featured",
+  "Sold",
+  "Reviews",
+];
+
+type TabType = typeof TABS[number];
+
+
 export default function DetailedProfileScreen() {
+  const [activeTab, setActiveTab] = useState<TabType>("Active");
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
@@ -49,8 +61,6 @@ export default function DetailedProfileScreen() {
       followMutation.mutate(id!);
     }
   };
-
-  console.log(profileData);
 
   if (isLoading) {
     return (
@@ -267,6 +277,17 @@ export default function DetailedProfileScreen() {
                   : "Follow"}
               </Button>
             ) : null}
+
+            <AnimatedTabBar
+              tabs={TABS}
+              activeTab={activeTab}
+              onTabPress={(tab) => setActiveTab(tab as TabType)}
+              marginTop="$4"
+              gap="$2"
+              fontSize="$4"
+              fontWeight="600"
+              paddingHorizontal="$3"
+            />
 
             {/* Profile Tabs - TODO: Add tab navigation here */}
             <View marginTop="$4">
