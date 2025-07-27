@@ -116,7 +116,7 @@ export default function RootLayout() {
                   <Stack screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="index" />
                     <Stack.Screen name="(screens)/add-listing" 
-                    options={{ headerShown: true, title: "Add Listing",  animation: 'slide_from_bottom', headerLeft: () => <CloseButton /> }} />
+                    options={{ headerShown: true, title: "Add Listing", headerShadowVisible: false,  animation: 'slide_from_bottom', headerLeft: () => <CloseButton /> }} />
                   </Stack>
                   <LoadingOverlay />
                 </BottomSheetModalProvider>

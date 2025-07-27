@@ -158,7 +158,7 @@ export function MultipleImagePicker({
   return (
     <YStack gap="$3">
       {label && (
-        <Text color="$foreground" fontSize="$3" fontWeight="500">
+        <Text color="$mutedForeground" fontSize="$4" fontWeight="500">
           {label} ({imageUris.length}/{maxImages})
         </Text>
       )}
