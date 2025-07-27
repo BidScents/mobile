@@ -81,7 +81,7 @@ export default function ProfileScreen() {
           py="$3"
           onPress={() => handlePress("/profile/[id]")}
           pressStyle={{
-            opacity: 0.8,
+            backgroundColor: "$mutedPress",
           }}
         >
           <XStack alignItems="center" gap="$3">
@@ -140,7 +140,7 @@ export default function ProfileScreen() {
                     borderRadius="$6"
                     onPress={() => handlePress(item.src)}
                     pressStyle={{
-                      opacity: 0.8,
+                      backgroundColor: "$mutedPress",
                     }}
                   >
                     <XStack

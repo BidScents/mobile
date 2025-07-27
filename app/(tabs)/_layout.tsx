@@ -18,7 +18,8 @@ export default function TabsLayout() {
     <>
     <Tabs
       screenOptions={{
-        headerShown: true,
+        headerShown: false,
+        headerShadowVisible: false,
         tabBarActiveTintColor: theme.foreground?.val,
         tabBarInactiveTintColor: theme.mutedForeground?.val,
         tabBarLabelStyle: {
@@ -47,6 +48,7 @@ export default function TabsLayout() {
         name="index" 
         options={{
           title: "Home",
+          headerShown: true,
           header: () => 
             <XStack backgroundColor="$background">
                 <SearchBar placeholder="Search" />
@@ -65,6 +67,7 @@ export default function TabsLayout() {
         name="search" 
         options={{
           title: "Search",
+          headerShown: true,
           header: () => 
             <XStack backgroundColor="$background">
               <SearchBar placeholder="Search" />
@@ -82,7 +85,6 @@ export default function TabsLayout() {
       <Tabs.Screen 
         name="add" 
         options={{
-          headerShown: false,
           title: "Add",
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
@@ -104,6 +106,7 @@ export default function TabsLayout() {
         name="inbox" 
         options={{
           title: "Inbox",
+          headerShown: true,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "chatbubbles" : "chatbubbles-outline"} 
@@ -118,7 +121,6 @@ export default function TabsLayout() {
         name="profile" 
         options={{
           title: "Profile",
-          headerShadowVisible: false,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "person" : "person-outline"} 

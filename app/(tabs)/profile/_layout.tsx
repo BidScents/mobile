@@ -2,7 +2,13 @@ import { Stack } from "expo-router";
 
 export default function ProfileLayout() {
   return (
-    <Stack>
+    <Stack
+    screenOptions={{
+      headerShown: true,
+      headerShadowVisible: false,
+    }}
+    >
+      <Stack.Screen name="index" options={{ title: "Profile" }} />
       <Stack.Screen name="[id]" options={{ title: "Profile" }} />
       <Stack.Screen name="badges" options={{ title: "Badges" }} />
       <Stack.Screen name="favourite-listings" options={{ title: "Favourite Listings" }} />
