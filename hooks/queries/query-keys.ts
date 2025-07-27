@@ -1,3 +1,5 @@
+import { ListingSearchRequest, ProfileTab, ReviewSearchRequest } from "@bid-scents/shared-sdk";
+
 export const queryKeys = {
     homepage: ['homepage'] as const,
     listings: {
@@ -6,6 +8,15 @@ export const queryKeys = {
       search: (params: any) => ['listings', 'search', params] as const,
       favorites: ['listings', 'favorites'] as const,
     },
+    profile: {
+      all: ['profile'] as const,
+      detail: (userId: string) => ['profile', 'detail', userId] as const,
+      preview: (userId: string) => ['profile', 'preview', userId] as const,
+      listings: (userId: string, tab: ProfileTab, filters?: ListingSearchRequest) => 
+        ['profile', 'listings', userId, tab, filters] as const,
+      reviews: (userId: string, filters?: ReviewSearchRequest) => 
+        ['profile', 'reviews', userId, filters] as const,
+    },  
     user: {
       profile: (username: string) => ['user', 'profile', username] as const,
       own: ['user', 'own'] as const,
