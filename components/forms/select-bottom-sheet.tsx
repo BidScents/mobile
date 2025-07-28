@@ -1,9 +1,12 @@
 import { BottomSheet } from '@/components/ui/bottom-sheet'
+import { Ionicons } from '@expo/vector-icons'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { useTheme } from '@tamagui/core'
+import * as Haptics from 'expo-haptics'
 import React, { forwardRef, useImperativeHandle } from 'react'
 import { Pressable } from 'react-native'
 import { Text, XStack, YStack } from 'tamagui'
+import { Button } from '../ui/button'
 
 export interface SelectOption {
   label: string
@@ -24,6 +27,7 @@ interface SelectBottomSheetProps {
 export const SelectBottomSheet = forwardRef<SelectBottomSheetMethods, SelectBottomSheetProps>(
   ({ options = [], onSelect, title = "Select Option", subtitle = "Choose from the available options below" }, ref) => {
     const theme = useTheme()
+    const [selectedValue, setSelectedValue] = React.useState<string | null>(null)
     const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null)
 
     useImperativeHandle(ref, () => ({
@@ -38,8 +42,8 @@ export const SelectBottomSheet = forwardRef<SelectBottomSheetMethods, SelectBott
     }))
 
     const handleOptionSelect = (option: SelectOption) => {
-      onSelect(option.value)
-      bottomSheetRef.current?.dismiss()
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+      setSelectedValue(option.value)
     }
 
     return (
@@ -82,10 +86,8 @@ export const SelectBottomSheet = forwardRef<SelectBottomSheetMethods, SelectBott
                 <XStack
                   alignItems="center"
                   justifyContent="space-between"
-                  backgroundColor="$muted"
                   borderRadius="$6"
-                  padding="$4"
-
+                  paddingVertical="$2"
                 >
                   <Text 
                     fontSize="$5" 
@@ -95,9 +97,25 @@ export const SelectBottomSheet = forwardRef<SelectBottomSheetMethods, SelectBott
                   >
                     {option.label}
                   </Text>
+                  <Ionicons name={option.value === selectedValue ? "radio-button-on" : "radio-button-off"} size={24} color={theme.foreground?.val} />
                 </XStack>
               </Pressable>
             ))}
+                <Button
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                    bottomSheetRef.current?.dismiss()
+                    onSelect(selectedValue?.valueOf() || '')
+                  }}
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  disabled={!selectedValue}
+                  borderRadius="$10"
+                  mt="$4"
+                >
+                  Apply
+                </Button>
           </YStack>
         </YStack>
       </BottomSheet>
