@@ -1,4 +1,4 @@
-import { ProfileContentTab } from "@/components/listing/profile-content-tab";
+import { ProfileContentTab } from "@/components/profile/profile-content-tab";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import Header from "@/components/ui/header";
@@ -6,9 +6,18 @@ import TabView from "@/components/ui/tab-view";
 import {
   useFollowUser,
   useProfileDetail,
+  useProfileListings,
+  useProfileReviews,
   useUnfollowUser,
 } from "@/hooks/queries/use-profile";
-import { useAuthStore } from "@bid-scents/shared-sdk";
+import {
+  ListingSearchRequest,
+  ListingSortField,
+  ProfileTab,
+  ReviewSearchRequest,
+  ReviewSortField,
+  useAuthStore
+} from "@bid-scents/shared-sdk";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Animated, RefreshControl } from "react-native";
@@ -17,6 +26,17 @@ import { Text, View, XStack, YStack, useTheme } from "tamagui";
 
 const HEADER_HEIGHT_EXPANDED = 35;
 const HEADER_HEIGHT_NARROWED = 110;
+
+// Default sort configurations
+const DEFAULT_LISTING_SORT: Partial<ListingSearchRequest> = {
+  sort: ListingSortField.CREATED_AT,
+  descending: true,
+};
+
+const DEFAULT_REVIEW_SORT: Partial<ReviewSearchRequest> = {
+  sort: ReviewSortField.CREATED_AT,
+  descending: true,
+};
 
 // Memoized ProfileContentTab to prevent unnecessary re-renders
 const MemoizedProfileContentTab = React.memo(ProfileContentTab);
@@ -28,20 +48,144 @@ export default function DetailedProfileScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const theme = useTheme();
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'active' | 'featured' | 'sold' | 'reviews'>('active');
+
+  // Sort state management
+  const [listingSortParams, setListingSortParams] = useState<Record<string, Partial<ListingSearchRequest>>>({
+    active: DEFAULT_LISTING_SORT,
+    featured: DEFAULT_LISTING_SORT,
+    sold: DEFAULT_LISTING_SORT,
+  });
+  const [reviewSortParams, setReviewSortParams] = useState<Partial<ReviewSearchRequest>>(DEFAULT_REVIEW_SORT);
+
+  // Sort tracking for UI (maps sort params back to option values)
+  const [currentSortValues, setCurrentSortValues] = useState<Record<string, string>>({
+    active: 'newest',
+    featured: 'newest',
+    sold: 'newest',
+    reviews: 'newest',
+  });
 
   const isProfileOwner = id === user?.id;
+
+  // Enhanced queries with sort support
   const {
     data: profileData,
-    isLoading,
-    error,
-    refetch,
+    isLoading: profileLoading,
+    error: profileError,
+    refetch: refetchProfile,
   } = useProfileDetail(id!);
+
+  const {
+    data: activeListingsData,
+    isLoading: activeListingsLoading,
+    isFetchingNextPage: activeListingsFetchingNext,
+    hasNextPage: activeListingsHasNext,
+    fetchNextPage: fetchNextActiveListings,
+    refetch: refetchActiveListings,
+  } = useProfileListings(id!, ProfileTab.ACTIVE, listingSortParams.active);
+
+  const {
+    data: featuredListingsData,
+    isLoading: featuredListingsLoading,
+    isFetchingNextPage: featuredListingsFetchingNext,
+    hasNextPage: featuredListingsHasNext,
+    fetchNextPage: fetchNextFeaturedListings,
+    refetch: refetchFeaturedListings,
+  } = useProfileListings(id!, ProfileTab.FEATURED, listingSortParams.featured);
+
+  const {
+    data: soldListingsData,
+    isLoading: soldListingsLoading,
+    isFetchingNextPage: soldListingsFetchingNext,
+    hasNextPage: soldListingsHasNext,
+    fetchNextPage: fetchNextSoldListings,
+    refetch: refetchSoldListings,
+  } = useProfileListings(id!, ProfileTab.SOLD, listingSortParams.sold);
+
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+    isFetchingNextPage: reviewsFetchingNext,
+    hasNextPage: reviewsHasNext,
+    fetchNextPage: fetchNextReviews,
+    refetch: refetchReviews,
+  } = useProfileReviews(id!, reviewSortParams);
+
   const followMutation = useFollowUser();
   const unfollowMutation = useUnfollowUser();
 
+  // Helper function to map sort params to UI values
+  const getSortValueFromParams = useCallback((params: any, isReview = false) => {
+    const { sort, descending } = params;
+    
+    if (isReview) {
+      if (sort === ReviewSortField.CREATED_AT && descending) return 'newest';
+      if (sort === ReviewSortField.CREATED_AT && !descending) return 'oldest';
+      if (sort === ReviewSortField.RATING && descending) return 'rating_desc';
+      if (sort === ReviewSortField.RATING && !descending) return 'rating_asc';
+    } else {
+      if (sort === ListingSortField.CREATED_AT && descending) return 'newest';
+      if (sort === ListingSortField.CREATED_AT && !descending) return 'oldest';
+      if (sort === ListingSortField.PRICE && !descending) return 'price_asc';
+      if (sort === ListingSortField.PRICE && descending) return 'price_desc';
+    }
+    
+    return 'newest'; // fallback
+  }, []);
+
+  // Sort change handlers
+  const handleListingSortChange = useCallback((tab: 'active' | 'featured' | 'sold', newSortParams: Partial<ListingSearchRequest>) => {
+    setListingSortParams(prev => ({
+      ...prev,
+      [tab]: { ...prev[tab], ...newSortParams }
+    }));
+    
+    const sortValue = getSortValueFromParams(newSortParams);
+    setCurrentSortValues(prev => ({
+      ...prev,
+      [tab]: sortValue
+    }));
+  }, [getSortValueFromParams]);
+
+  const handleReviewSortChange = useCallback((newSortParams: Partial<ReviewSearchRequest>) => {
+    setReviewSortParams(prev => ({ ...prev, ...newSortParams }));
+    
+    const sortValue = getSortValueFromParams(newSortParams, true);
+    setCurrentSortValues(prev => ({
+      ...prev,
+      reviews: sortValue
+    }));
+  }, [getSortValueFromParams]);
+
+  // Flatten data from infinite queries with debugging
+  const flattenedData = useMemo(() => {
+    const active = activeListingsData?.pages.flatMap(page => page.listings) || [];
+    const featured = featuredListingsData?.pages.flatMap(page => page.listings) || [];
+    const sold = soldListingsData?.pages.flatMap(page => page.listings) || [];
+    const reviews = reviewsData?.pages.flatMap(page => page.reviews) || [];
+
+    // Debug logging
+    if (active.length > 0) {
+      console.log('Debug - Active listings:', {
+        totalItems: active.length,
+        pages: activeListingsData?.pages.map(page => ({
+          itemCount: page.listings.length,
+          paginationData: page.pagination_data
+        }))
+      });
+    }
+
+    return {
+      active,
+      featured,
+      sold,
+      reviews,
+    };
+  }, [activeListingsData, featuredListingsData, soldListingsData, reviewsData]);
 
   const handleTabChange = useCallback((tabKey: string) => {
-    console.log("Active tab changed to:", tabKey);
+    setActiveTab(tabKey as typeof activeTab);
   }, []);
 
   // Memoize tab configuration to prevent recreation on every render
@@ -52,8 +196,13 @@ export default function DetailedProfileScreen() {
       content: (
         <MemoizedProfileContentTab
           contentType="active"
-          data={profileData?.active_listings?.listings}
-          isLoading={isLoading || refreshing}
+          data={flattenedData.active}
+          isLoading={activeListingsLoading}
+          isFetchingNextPage={activeListingsFetchingNext}
+          hasNextPage={activeListingsHasNext}
+          onLoadMore={fetchNextActiveListings}
+          onSortChange={(params) => handleListingSortChange('active', params as Partial<ListingSearchRequest>)}
+          currentSort={currentSortValues.active}
         />
       ),
     },
@@ -63,8 +212,13 @@ export default function DetailedProfileScreen() {
       content: (
         <MemoizedProfileContentTab
           contentType="featured"
-          data={profileData?.featured_listings?.listings}
-          isLoading={isLoading || refreshing}
+          data={flattenedData.featured}
+          isLoading={featuredListingsLoading}
+          isFetchingNextPage={featuredListingsFetchingNext}
+          hasNextPage={featuredListingsHasNext}
+          onLoadMore={fetchNextFeaturedListings}
+          onSortChange={(params) => handleListingSortChange('featured', params as Partial<ListingSearchRequest>)}
+          currentSort={currentSortValues.featured}
         />
       ),
     },
@@ -74,8 +228,13 @@ export default function DetailedProfileScreen() {
       content: (
         <MemoizedProfileContentTab
           contentType="sold"
-          data={profileData?.sold_listings?.listings}
-          isLoading={isLoading || refreshing}
+          data={flattenedData.sold}
+          isLoading={soldListingsLoading}
+          isFetchingNextPage={soldListingsFetchingNext}
+          hasNextPage={soldListingsHasNext}
+          onLoadMore={fetchNextSoldListings}
+          onSortChange={(params) => handleListingSortChange('sold', params as Partial<ListingSearchRequest>)}
+          currentSort={currentSortValues.sold}
         />
       ),
     },
@@ -85,18 +244,36 @@ export default function DetailedProfileScreen() {
       content: (
         <MemoizedProfileContentTab
           contentType="reviews"
-          data={profileData?.reviews?.reviews}
-          isLoading={isLoading || refreshing}
+          data={flattenedData.reviews}
+          isLoading={reviewsLoading}
+          isFetchingNextPage={reviewsFetchingNext}
+          hasNextPage={reviewsHasNext}
+          onLoadMore={fetchNextReviews}
+          onSortChange={handleReviewSortChange}
+          currentSort={currentSortValues.reviews}
         />
       ),
     },
-  ], [profileData, isLoading, refreshing]);
+  ], [
+    flattenedData,
+    activeListingsLoading, activeListingsFetchingNext, activeListingsHasNext, fetchNextActiveListings,
+    featuredListingsLoading, featuredListingsFetchingNext, featuredListingsHasNext, fetchNextFeaturedListings,
+    soldListingsLoading, soldListingsFetchingNext, soldListingsHasNext, fetchNextSoldListings,
+    reviewsLoading, reviewsFetchingNext, reviewsHasNext, fetchNextReviews,
+    handleListingSortChange, handleReviewSortChange, currentSortValues
+  ]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([
+      refetchProfile(),
+      refetchActiveListings(),
+      refetchFeaturedListings(),
+      refetchSoldListings(),
+      refetchReviews(),
+    ]);
     setRefreshing(false);
-  }, [refetch]);
+  }, [refetchProfile, refetchActiveListings, refetchFeaturedListings, refetchSoldListings, refetchReviews]);
 
   const handleFollowToggle = () => {
     if (!profileData?.profile || isProfileOwner) return;
@@ -108,7 +285,8 @@ export default function DetailedProfileScreen() {
     }
   };
 
-  if (isLoading && !profileData) {
+  // Loading state
+  if (profileLoading && !profileData) {
     return (
       <Container variant="fullscreen" safeArea backgroundColor="$background">
         <View flex={1} justifyContent="center" alignItems="center">
@@ -121,7 +299,8 @@ export default function DetailedProfileScreen() {
     );
   }
 
-  if (error || !profileData) {
+  // Error state
+  if (profileError || !profileData) {
     return (
       <Container variant="fullscreen" safeArea backgroundColor="$background">
         <View flex={1} justifyContent="center" alignItems="center">
@@ -129,7 +308,7 @@ export default function DetailedProfileScreen() {
             Failed to load profile
           </Text>
           <Text color="$mutedForeground" marginTop="$2">
-            {error?.message || "Profile not found"}
+            {profileError?.message || "Profile not found"}
           </Text>
           <Button
             marginTop="$4"
@@ -290,7 +469,7 @@ export default function DetailedProfileScreen() {
                 >
                   Seller Dashboard
                 </Button>
-              ) : !profile.is_following ? (
+              ) : (
                 <Button
                   variant="secondary"
                   onPress={handleFollowToggle}
@@ -306,11 +485,11 @@ export default function DetailedProfileScreen() {
                     ? "Following"
                     : "Follow"}
                 </Button>
-              ) : null}
+              )}
             </View>
           </View>
 
-          {/* Unified Tab System */}
+          {/* Enhanced Tab System with Sort Support */}
           <TabView
             tabs={tabsConfig}
             initialTab="active"
