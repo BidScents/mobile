@@ -13,7 +13,7 @@ export const ProfileContentEmpty = React.memo(function ProfileContentEmpty({
   const emptyState = EMPTY_STATES[contentType];
 
   return (
-    <View flex={1} justifyContent="center" alignItems="center" paddingHorizontal="$4" minHeight={400}>
+    <View flex={1} justifyContent="center" alignItems="center" paddingHorizontal="$4" minHeight={300}>
       <Text fontSize="$6" fontWeight="600" color="$mutedForeground" textAlign="center">
         {emptyState.title}
       </Text>
