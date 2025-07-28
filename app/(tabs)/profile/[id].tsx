@@ -1,8 +1,8 @@
+import { ProfileDetails } from "@/components/profile/profile-details";
+import { ProfileError, ProfileLoading } from "@/components/profile/profile-loading-states";
 import { Container } from "@/components/ui/container";
 import Header from "@/components/ui/header";
 import TabView from "@/components/ui/tab-view";
-import { ProfileDetails } from "@/components/profile/profile-details";
-import { ProfileLoading, ProfileError } from "@/components/profile/profile-loading-states";
 import { useProfileData } from "@/hooks/use-profile-data";
 import { useProfileSort } from "@/hooks/use-profile-sort";
 import { useProfileTabs } from "@/hooks/use-profile-tabs";
@@ -13,7 +13,7 @@ import { Animated, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View, useTheme } from "tamagui";
 
-const HEADER_HEIGHT_EXPANDED = 35;
+const HEADER_HEIGHT_EXPANDED = 55;
 const HEADER_HEIGHT_NARROWED = 110;
 
 export default function DetailedProfileScreen() {
@@ -175,8 +175,6 @@ export default function DetailedProfileScreen() {
           {/* Profile Details */}
           <ProfileDetails
             profile={profile}
-            scrollY={scrollY}
-            headerHeightExpanded={HEADER_HEIGHT_EXPANDED}
             isProfileOwner={isProfileOwner}
             isFollowLoading={followMutation.isPending || unfollowMutation.isPending}
             onFollowToggle={handleFollowToggle}
