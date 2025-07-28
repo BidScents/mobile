@@ -31,7 +31,7 @@ export default function TabsLayout() {
           position: 'absolute',
         },
         tabBarBackground: () => (
-          <BlurView  intensity={80} style={{ 
+          <BlurView tint="systemThickMaterialLight" style={{ 
             ...StyleSheet.absoluteFillObject,
             overflow: 'hidden',
             backgroundColor: 'transparent',
