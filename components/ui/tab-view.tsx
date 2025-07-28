@@ -142,7 +142,7 @@ export default function TabView({
                 paddingVertical="$2"
                 paddingHorizontal={paddingHorizontal}
                 textAlign="center"
-                lineHeight="$6"
+                lineHeight="$9"
               >
                 {tab.title}
               </Text>

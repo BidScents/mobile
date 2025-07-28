@@ -47,7 +47,7 @@ export const ProfileContentHeader = React.memo(function ProfileContentHeader({
           hitSlop={16}
           pressStyle={{ opacity: 0.7 }}
         >
-          <Text fontSize="$4" fontWeight="500" color="$mutedForeground">
+          <Text fontSize="$4" fontWeight="500" color="$foreground">
             {currentSortLabel}
           </Text>
           <Ionicons name="chevron-down" size={16} color={theme.mutedForeground?.val} />

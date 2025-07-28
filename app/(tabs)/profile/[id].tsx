@@ -114,7 +114,7 @@ export default function DetailedProfileScreen() {
   const handleFollowToggle = () => {
     if (!profileData?.profile || isProfileOwner) return;
 
-    if (profileData.profile.is_following) {
+  if (profileData.profile.is_following) {
       unfollowMutation.mutate(id!);
     } else {
       followMutation.mutate(id!);

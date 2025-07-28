@@ -4,11 +4,12 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { router, Tabs } from "expo-router";
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, useColorScheme } from 'react-native';
 import { useTheme, XStack } from 'tamagui';
 
 export default function TabsLayout() {
   const theme = useTheme();
+  const colorScheme = useColorScheme()
 
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -31,7 +32,7 @@ export default function TabsLayout() {
           position: 'absolute',
         },
         tabBarBackground: () => (
-          <BlurView tint="systemThickMaterialLight" style={{ 
+          <BlurView tint={colorScheme === 'light' ? 'systemThickMaterialLight' : 'systemThickMaterialDark'} style={{ 
             ...StyleSheet.absoluteFillObject,
             overflow: 'hidden',
             backgroundColor: 'transparent',

@@ -2,9 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import React from "react";
-import { Animated, ImageBackground, StyleSheet } from "react-native";
+import { Animated, ImageBackground, StyleSheet, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, View } from "tamagui";
+import { Text, View, useTheme } from "tamagui";
 
 const AnimatedImageBackground =
   Animated.createAnimatedComponent(ImageBackground);
@@ -32,16 +32,18 @@ export default function Header({
   rightIcon?: keyof typeof Ionicons.glyphMap;
   rightIconPress?: () => void;
 }) {
+  const colorScheme = useColorScheme()
+  const theme = useTheme()
   return (
     <>
       {/* Back button */}
       <View
+        backgroundColor="$background"
         style={{
           zIndex: 2,
           position: "absolute",
           top: insets.top,
           left: 20,
-          backgroundColor: "rgba(0, 0, 0, 0.6)",
           height: 30,
           width: 30,
           borderRadius: 15,
@@ -56,18 +58,18 @@ export default function Header({
           right: 10,
         }}
       >
-        <Ionicons name="chevron-back" color="white" size={22} />
+        <Ionicons name="chevron-back" color={theme.foreground.val} size={20} />
       </View>
 
       {/* Right icon */}
       {rightIcon && (
         <View
+          backgroundColor="$background"
           style={{
             zIndex: 2,
             position: "absolute",
             top: insets.top,
             right: 20,
-            backgroundColor: "rgba(0, 0, 0, 0.6)",
             height: 30,
             width: 30,
             borderRadius: 15,
@@ -82,7 +84,7 @@ export default function Header({
             right: 10,
           }}
         >
-          <Ionicons name={rightIcon} color="white" size={22} />
+          <Ionicons name={rightIcon} color={theme.foreground.val} size={20} />
         </View>
       )}
 
@@ -96,13 +98,13 @@ export default function Header({
           right: 0,
           alignItems: "center",
           opacity: scrollY.interpolate({
-            inputRange: [90, 110],
+            inputRange: [65, 110],
             outputRange: [0, 1],
           }),
           transform: [
             {
               translateY: scrollY.interpolate({
-                inputRange: [90, 120],
+                inputRange: [65, 120],
                 outputRange: [30, 0],
                 extrapolate: "clamp",
               }),
@@ -110,11 +112,11 @@ export default function Header({
           ],
         }}
       >
-        <Text color="$background" fontSize="$4">
+        <Text color="$foreground" fontSize="$4" fontWeight="bold">
           @{username}
         </Text>
 
-        <Text color="$background" fontSize="$4">
+        <Text color="$foreground" fontSize="$4" fontWeight="bold">
           {name}
         </Text>
       </Animated.View>
@@ -142,8 +144,8 @@ export default function Header({
         }}
       >
         <AnimatedBlurView
-          tint="dark"
-          intensity={96}
+          tint={colorScheme === 'light' ? 'systemThickMaterialLight' : 'systemThickMaterialDark'}
+          intensity={80}
           style={{
             ...StyleSheet.absoluteFillObject,
             zIndex: 2,

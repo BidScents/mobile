@@ -7,6 +7,12 @@ export default function ProfileLayout() {
       headerShown: true,
       headerShadowVisible: false,
       headerBackButtonDisplayMode: 'minimal',
+      headerStyle: {
+        backgroundColor: '$background',
+      },
+      headerTitleStyle: {
+        color: '$foreground',
+      },
     }}
     >
       <Stack.Screen name="index" options={{ title: "Profile" }} />

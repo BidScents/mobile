@@ -32,7 +32,7 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({
   onFollowToggle,
 }) => {
   return (
-    <View paddingHorizontal="$4" mt="$4">
+    <View paddingHorizontal="$4" mt="$4" gap="$4">
       <XStack alignItems="center" justifyContent="space-between">
         <View gap="$2">
           {/* Profile Info */}
