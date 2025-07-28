@@ -1,9 +1,10 @@
 import { ListingCard } from '@/components/listing/listing-card';
 import { ListingCardSkeleton } from '@/components/suspense/listing-card-skeleton';
 import type { ListingCard as ListingCardType } from '@bid-scents/shared-sdk';
+import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import React, { useCallback, useMemo } from 'react';
-import { Text, View } from 'tamagui';
+import { Text, View, XStack, useTheme } from 'tamagui';
 
 type ContentType = 'active' | 'featured' | 'sold' | 'reviews';
 
@@ -59,7 +60,7 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
   data = [], 
   isLoading = false 
 }: ProfileContentTabProps) {
-  
+  const theme = useTheme();
   const isListingType = useMemo(() => 
     ['active', 'featured', 'sold'].includes(contentType), [contentType]
   );
@@ -128,6 +129,7 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
             data={skeletonData}
             renderItem={renderListingSkeleton}
             estimatedItemSize={estimatedSize}
+            keyExtractor={(item, index) => `${index}`}
             numColumns={2}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ padding: 16 }}
@@ -141,6 +143,7 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
             data={skeletonData}
             renderItem={renderReviewSkeleton}
             estimatedItemSize={estimatedSize}
+            keyExtractor={(item, index) => `${index}`}
             numColumns={1}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ padding: 16 }}
@@ -167,7 +170,18 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
   // Content state for listings
   if (isListingType && isListingData(data, contentType)) {
     return (
-      <View flex={1}>
+      <View flex={1} gap="$2">
+        <XStack alignItems="center" justifyContent="space-between" paddingHorizontal="$4">
+          <Text fontSize="$4" fontWeight="500" color="$mutedForeground">
+            {data.length} Results
+          </Text>
+          <XStack alignItems="center" justifyContent="center" onPress={() => {}} hitSlop={16}>
+            <Text fontSize="$4" fontWeight="500" color="$mutedForeground" >
+              Sort
+            </Text>
+            <Ionicons name="chevron-down" size={16} color={theme.mutedForeground?.val} />
+          </XStack>
+        </XStack>
         <FlashList
           data={data}
           renderItem={renderListingItem}
@@ -188,6 +202,11 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
   if (contentType === 'reviews' && isReviewData(data, contentType)) {
     return (
       <View flex={1}>
+        <XStack>
+          <Text fontSize="$6" fontWeight="600" color="$foreground">
+            {data.length}+ Reviews
+          </Text>
+        </XStack>
         <FlashList
           data={data}
           renderItem={renderReviewItem}

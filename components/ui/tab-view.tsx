@@ -1,3 +1,4 @@
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, LayoutChangeEvent } from 'react-native';
 import { Text, View, XStack, useTheme } from 'tamagui';
@@ -36,6 +37,8 @@ export default function TabView({
   const [tabLayouts, setTabLayouts] = useState<Record<string, TabLayout>>({});
   const [containerWidth, setContainerWidth] = useState(0);
   const [loadedTabs, setLoadedTabs] = useState<Set<string>>(new Set([initialTab || tabs[0]?.key || '']));
+
+  const tabBarHeight = useBottomTabBarHeight();
   
   // Animation values for the indicator
   const indicatorPosition = useRef(new Animated.Value(0)).current;
@@ -100,7 +103,7 @@ export default function TabView({
   } = headerProps;
 
   return (
-    <View>
+    <View gap="$3">
       {/* Tab Header */}
       <View marginTop={marginTop} paddingHorizontal={paddingHorizontal}>
         <XStack
@@ -149,7 +152,7 @@ export default function TabView({
       </View>
 
       {/* Tab Content - Render all loaded tabs but only show active one */}
-      <View>
+      <View marginBottom={tabBarHeight}>
         {tabs.map((tab) => (
           <View
             key={tab.key}

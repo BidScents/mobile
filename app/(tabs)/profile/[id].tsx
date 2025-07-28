@@ -39,7 +39,6 @@ export default function DetailedProfileScreen() {
   const followMutation = useFollowUser();
   const unfollowMutation = useUnfollowUser();
 
-  console.log(refreshing)
 
   const handleTabChange = useCallback((tabKey: string) => {
     console.log("Active tab changed to:", tabKey);
