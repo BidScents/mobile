@@ -14,7 +14,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
   return (
     <Image
       source={{
-        uri: profilePicture || "https://avatar.iran.liara.run/public",
+        uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${profilePicture}` || "https://avatar.iran.liara.run/public",
       }}
       style={{
         width: 120,
