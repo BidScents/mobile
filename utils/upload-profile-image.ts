@@ -65,7 +65,7 @@ export const uploadProfileImage = async (
           `${uploadError.message}\n\nWhat would you like to do?`,
           [
             { text: 'Try Again', onPress: () => resolve('retry') },
-            { text: 'Cancel Listing', onPress: () => resolve('cancel'), style: 'cancel' }
+            { text: 'Cancel Upload', onPress: () => resolve('cancel'), style: 'cancel' }
           ]
         )
       })
