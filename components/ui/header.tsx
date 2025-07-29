@@ -134,11 +134,11 @@ export default function Header({
           ],
         }}
       >
-        <Text color="$foreground" fontSize="$4" fontWeight="bold">
+        <Text color="$foreground" fontSize="$4" fontWeight="500">
           @{username}
         </Text>
 
-        <Text color="$foreground" fontSize="$4" fontWeight="bold">
+        <Text color="$foreground" fontSize="$4" fontWeight="500">
           {name}
         </Text>
       </Animated.View>
