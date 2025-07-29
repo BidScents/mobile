@@ -1,3 +1,4 @@
+import { darkBlur, lightBlur } from "@/tamagui.config";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
@@ -60,7 +61,7 @@ export default function Header({
         }}
       >
         <BlurView
-          tint={colorScheme === 'light' ? 'systemThickMaterialLight' : 'systemThickMaterialDark'}
+          tint={colorScheme === 'light' ? lightBlur : darkBlur}
           intensity={80}
           style={{
             flex: 1,
@@ -97,7 +98,7 @@ export default function Header({
           }}
         >
           <BlurView
-            tint={colorScheme === 'light' ? 'systemThickMaterialLight' : 'systemThickMaterialDark'}
+            tint={colorScheme === 'light' ? lightBlur : darkBlur}
             intensity={80}
             style={{
               flex: 1,
@@ -166,7 +167,7 @@ export default function Header({
         }}
       >
         <AnimatedBlurView
-          tint={colorScheme === 'light' ? 'systemThickMaterialLight' : 'systemThickMaterialDark'}
+          tint={colorScheme === 'light' ? lightBlur : darkBlur}
           intensity={80}
           style={{
             ...StyleSheet.absoluteFillObject,

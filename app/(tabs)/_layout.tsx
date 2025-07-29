@@ -1,4 +1,5 @@
 import { SearchBar } from '@/components/ui/search-bar';
+import { darkBlur, lightBlur } from '@/tamagui.config';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
@@ -33,7 +34,7 @@ export default function TabsLayout() {
           position: 'absolute',
         },
         tabBarBackground: () => (
-          <BlurView tint={colorScheme === 'light' ? 'systemThickMaterialLight' : 'systemThickMaterialDark'} style={{ 
+          <BlurView tint={colorScheme === 'light' ? lightBlur : darkBlur} style={{ 
             ...StyleSheet.absoluteFillObject,
             overflow: 'hidden',
             backgroundColor: 'transparent',
