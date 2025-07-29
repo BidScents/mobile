@@ -149,9 +149,9 @@ export default function DetailedProfileScreen() {
         rightIcon={isProfileOwner ? "settings-outline" : "ellipsis-horizontal"}
         rightIconPress={() => {
           if (isProfileOwner) {
-            router.push("/(tabs)");
+            router.push("/(tabs)/profile/edit-profile");
           } else {
-            console.log("Show options menu");
+            router.push("/(tabs)/profile/report-profile");
           }
         }}
       />
