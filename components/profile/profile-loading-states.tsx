@@ -1,26 +1,8 @@
-import React from 'react';
-import { ActivityIndicator } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { router } from 'expo-router';
+import React from 'react';
 import { Text, View } from 'tamagui';
-
-interface ProfileLoadingProps {
-  theme: any;
-}
-
-export const ProfileLoading: React.FC<ProfileLoadingProps> = ({ theme }) => {
-  return (
-    <Container variant="fullscreen" safeArea backgroundColor="$background">
-      <View flex={1} justifyContent="center" alignItems="center">
-        <ActivityIndicator size="large" color={theme.foreground?.val} />
-        <Text marginTop="$4" color="$mutedForeground">
-          Loading profile...
-        </Text>
-      </View>
-    </Container>
-  );
-};
 
 interface ProfileErrorProps {
   error?: { message?: string };

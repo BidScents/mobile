@@ -1,5 +1,6 @@
 import { ProfileDetails } from "@/components/profile/profile-details";
-import { ProfileError, ProfileLoading } from "@/components/profile/profile-loading-states";
+import { ProfileError } from "@/components/profile/profile-loading-states";
+import { ProfileSkeleton } from "@/components/suspense/profile-skeleton";
 import { Container } from "@/components/ui/container";
 import Header from "@/components/ui/header";
 import TabView from "@/components/ui/tab-view";
@@ -122,8 +123,8 @@ export default function DetailedProfileScreen() {
   };
 
   // Loading state
-  if (profileLoading && !profileData) {
-    return <ProfileLoading theme={theme} />;
+  if (profileLoading && profileData) {
+    return <ProfileSkeleton />;
   }
 
   // Error state
@@ -132,7 +133,6 @@ export default function DetailedProfileScreen() {
   }
 
   const profile = profileData.profile;
-  console.log(profile);
 
   return (
     <Container variant="fullscreen" safeArea={false}>
