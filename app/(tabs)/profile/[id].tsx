@@ -123,7 +123,7 @@ export default function DetailedProfileScreen() {
   };
 
   // Loading state
-  if (profileLoading && profileData) {
+  if (profileLoading && !profileData) {
     return <ProfileSkeleton />;
   }
 
