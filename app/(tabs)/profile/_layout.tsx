@@ -1,3 +1,4 @@
+import { BackButton } from "@/components/ui/back-button";
 import { Stack } from "expo-router";
 
 export default function ProfileLayout() {
@@ -6,14 +7,15 @@ export default function ProfileLayout() {
     screenOptions={{
       headerShown: true,
       headerShadowVisible: false,
-      headerBackButtonDisplayMode: 'minimal',
       headerStyle: {
         backgroundColor: '$background',
       },
       headerTitleStyle: {
         color: '$foreground',
       },
+      headerLeft: () => <BackButton />,
     }}
+    
     >
       <Stack.Screen name="index" options={{ title: "Profile" }} />
       <Stack.Screen name="[id]" options={{ title: "Profile", headerShown: false }} />
@@ -25,6 +27,8 @@ export default function ProfileLayout() {
       <Stack.Screen name="help" options={{ title: "Help" }} />
       <Stack.Screen name="about-us" options={{ title: "About Us" }} />
       <Stack.Screen name="legal" options={{ title: "Legal" }} />
+      <Stack.Screen name="edit-profile" options={{ title: "Edit Profile", headerLargeTitle: true }} />
+      <Stack.Screen name="report-profile" options={{ title: "Report Profile", headerLargeTitle: true }} />
     </Stack>
   );
 }
