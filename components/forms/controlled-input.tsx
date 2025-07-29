@@ -15,7 +15,6 @@ interface ControlledInputProps<T extends FieldValues> {
   selectTitle?: string
   selectSubtitle?: string
   switchChecked?: boolean
-  setIsDisabled?: (disabled: boolean) => void
 }
 
 export function ControlledInput<T extends FieldValues>({
@@ -30,7 +29,6 @@ export function ControlledInput<T extends FieldValues>({
   selectTitle,
   selectSubtitle,
   switchChecked,
-  setIsDisabled,
 }: ControlledInputProps<T>) {
   return (
     <Controller
@@ -75,7 +73,6 @@ export function ControlledInput<T extends FieldValues>({
             switchChecked={switchChecked}
             onSwitchChange={handleSwitchChange}
             error={error?.message}
-            setIsDisabled={setIsDisabled}
           />
         )
       }}

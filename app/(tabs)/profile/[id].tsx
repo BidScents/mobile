@@ -132,6 +132,7 @@ export default function DetailedProfileScreen() {
   }
 
   const profile = profileData.profile;
+  console.log(profile);
 
   return (
     <Container variant="fullscreen" safeArea={false}>
