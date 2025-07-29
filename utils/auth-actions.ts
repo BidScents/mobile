@@ -6,6 +6,7 @@
  */
 
 import { supabase } from '@/lib/supabase'
+import { uploadProfileImage } from '@/utils/upload-profile-image'
 import {
   AuthService,
   handleAuthStateChange,
@@ -13,9 +14,7 @@ import {
   type OnboardingFormData,
   type SignUpFormData
 } from '@bid-scents/shared-sdk'
-import { decode } from 'base64-arraybuffer'
 import { makeRedirectUri } from 'expo-auth-session'
-import * as FileSystem from 'expo-file-system'
 import { router } from 'expo-router'
 import { Alert } from 'react-native'
 
@@ -168,80 +167,6 @@ export const handleLoginError = (error: any) => {
   }
 }
 
-/**
- * Upload with user-controlled retry
- */
-const uploadImageWithRetry = async (
-  imageUri: string, 
-  variant: 'profile' | 'cover', 
-  userId: string
-): Promise<string> => {
-  const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
-  
-  const attemptUpload = async (): Promise<string> => {
-    const filePath = `${variant}/${userId}`
-    
-    try {
-      const { data, error } = await supabase.storage
-        .from('profile-images')
-        .upload(filePath, decode(base64), {
-          contentType: 'image/jpeg',
-          upsert: true
-        })
-      
-      if (error) throw error
-      
-      // Return just the path, not the full URL
-      return data.path
-      
-    } catch (error: any) {
-      // Retry logic...
-      if (error.message?.includes('Network request failed')) {
-        console.log('Network failed, retrying once automatically...')
-        await new Promise(r => setTimeout(r, 2000))
-        
-        const { data, error: retryError } = await supabase.storage
-          .from('profile-images')
-          .upload(filePath, decode(base64), {
-            contentType: 'image/jpeg',
-            upsert: true
-          })
-        
-        if (retryError) throw retryError
-        return data.path // Return path, not URL
-      }
-      throw error
-    }
-  }
-  
-  // Keep trying until user succeeds or chooses to skip
-  while (true) {
-    try {
-      return await attemptUpload()
-    } catch (uploadError: any) {
-      console.error(`${variant} image upload failed:`, uploadError)
-      
-      // Ask user what to do
-      const choice = await new Promise<'retry' | 'skip'>((resolve) => {
-        Alert.alert(
-          `${variant === 'profile' ? 'Profile' : 'Cover'} Image Upload Failed`,
-          `${uploadError.message}\n\nWhat would you like to do?`,
-          [
-            { text: 'Try Again', onPress: () => resolve('retry') },
-            { text: 'Skip Image', onPress: () => resolve('skip') }
-          ]
-        )
-      })
-      
-      if (choice === 'skip') {
-        throw new Error('USER_SKIPPED') // Special error to indicate user chose to skip
-      }
-      
-      // If choice === 'retry', the while loop continues and tries again
-      console.log(`User chose to retry ${variant} image upload`)
-    }
-  }
-}
 
 /**
  * Updated onboarding handler with proper retry logic
@@ -266,19 +191,19 @@ export const handleOnboarding = async (data: OnboardingFormData & {
       return
     }
 
-    let profileImageUrl: string | undefined
-    let coverImageUrl: string | undefined
+    let profileImagePath: string | undefined
+    let coverImagePath: string | undefined
 
     // Upload profile image with retry
     if (data.profileImageUri) {
       try {
         console.log('Uploading profile image...')
-        profileImageUrl = await uploadImageWithRetry(data.profileImageUri, 'profile', user.id)
+        profileImagePath = await uploadProfileImage(data.profileImageUri, 'profile')
         console.log('Profile image uploaded successfully')
       } catch (error: any) {
         if (error.message === 'USER_SKIPPED') {
           console.log('User chose to skip profile image')
-          profileImageUrl = undefined
+          profileImagePath = undefined
         } else {
           throw error // Some other error occurred
         }
@@ -289,12 +214,12 @@ export const handleOnboarding = async (data: OnboardingFormData & {
     if (data.coverImageUri) {
       try {
         console.log('Uploading cover image...')
-        coverImageUrl = await uploadImageWithRetry(data.coverImageUri, 'cover', user.id)
+        coverImagePath = await uploadProfileImage(data.coverImageUri, 'cover')
         console.log('Cover image uploaded successfully')
       } catch (error: any) {
         if (error.message === 'USER_SKIPPED') {
           console.log('User chose to skip cover image')
-          coverImageUrl = undefined
+          coverImagePath = undefined
         } else {
           throw error // Some other error occurred
         }
@@ -308,8 +233,8 @@ export const handleOnboarding = async (data: OnboardingFormData & {
       username: data.username.trim(),
       first_name: data.first_name.trim(),
       last_name: data.last_name.trim(),
-      profile_image_url: profileImageUrl,
-      cover_image_url: coverImageUrl,
+      profile_image_url: profileImagePath,
+      cover_image_url: coverImagePath,
       bio: data.bio?.trim() || undefined
     })
 
