@@ -12,10 +12,13 @@
 
 import { Button } from '@/components/ui/button'
 import { Ionicons } from '@expo/vector-icons'
+import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
 import * as ImagePicker from 'expo-image-picker'
-import React from 'react'
+import React, { useRef } from 'react'
 import { Alert, Linking } from 'react-native'
 import { Image, Text, YStack } from 'tamagui'
+import { QuickActionBottomSheet } from '../forms/quick-action-bottom-sheet'
+
 
 interface ProfilePreviewPickerProps {
   profileImageUri?: string | null
@@ -23,6 +26,7 @@ interface ProfilePreviewPickerProps {
   onProfileImageChange: (uri: string | null) => void
   onCoverImageChange: (uri: string | null) => void
   disabled?: boolean
+  setIsDisabled?: (disabled: boolean) => void
 }
 
 export function ProfilePreviewPicker({
@@ -30,8 +34,15 @@ export function ProfilePreviewPicker({
   coverImageUri,
   onProfileImageChange,
   onCoverImageChange,
-  disabled = false
+  disabled = false,
+  setIsDisabled,
 }: ProfilePreviewPickerProps) {
+
+  const quickActionBottomSheetRef = useRef<BottomSheetModalMethods>(null)
+
+  const quickActionEdit = () => {
+    quickActionBottomSheetRef.current?.present()
+  }
 
   /**
    * Request media library permissions
@@ -67,8 +78,6 @@ export function ProfilePreviewPicker({
    * Handle profile image selection with permission check
    */
   const pickProfileImage = async () => {
-    if (disabled) return
-    
     // Check permissions first
     const hasPermission = await requestPermissions()
     if (!hasPermission) return
@@ -94,8 +103,6 @@ export function ProfilePreviewPicker({
    * Handle cover image selection with permission check
    */
   const pickCoverImage = async () => {
-    if (disabled) return
-    
     // Check permissions first
     const hasPermission = await requestPermissions()
     if (!hasPermission) return
@@ -180,8 +187,7 @@ export function ProfilePreviewPicker({
             variant="ghost"
             iconOnly
             size="sm"
-            onPress={pickCoverImage}
-            disabled={disabled}
+            onPress={disabled ? quickActionEdit : pickCoverImage}
             leftIcon="camera"
             accessibilityLabel="Pick Cover Photo"
           />
@@ -239,13 +245,23 @@ export function ProfilePreviewPicker({
               variant="ghost"
               iconOnly
               size="sm"
-              onPress={pickProfileImage}
-              disabled={disabled}
+              onPress={disabled ? quickActionEdit : pickProfileImage}
               leftIcon="camera"
             />
           </YStack>
         </YStack>
       </YStack>
+      {disabled && (
+              <QuickActionBottomSheet
+                ref={quickActionBottomSheetRef}
+                primaryOption="Edit"
+                secondaryOption="Cancel"
+                onSelectPrimary={() => setIsDisabled?.(false)}
+                onSelectSecondary={() => setIsDisabled?.(true)}
+                title={"Edit your profile details?"}
+                subtitle={`Choose to edit or cancel the profile details`}
+              />
+            )}
     </YStack>
   )
 }

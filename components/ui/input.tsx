@@ -14,6 +14,7 @@ import {
   YStack
 } from "tamagui";
 import { DateTimeBottomSheet } from "../forms/date-time-bottom-sheet";
+import { QuickActionBottomSheet } from "../forms/quick-action-bottom-sheet";
 import { SelectBottomSheet } from "../forms/select-bottom-sheet";
 
 /**
@@ -63,6 +64,8 @@ export interface InputProps {
   numberOfLines?: number;
   /** Whether the input is disabled */
   disabled?: boolean;
+  /** Whether the input is disabled */
+  setIsDisabled?: (disabled: boolean) => void;
   /** Options for select variants */
   options?: SelectOption[];
   /** Custom title for select bottom sheet */
@@ -88,6 +91,7 @@ export const Input: React.FC<InputProps> = ({
   error,
   numberOfLines,
   disabled = false,
+  setIsDisabled = () => {},
   options = [],
   selectTitle,
   selectSubtitle,
@@ -99,6 +103,7 @@ export const Input: React.FC<InputProps> = ({
 
   const selectBottomSheetRef = useRef<BottomSheetModalMethods>(null);
   const dateTimeBottomSheetRef = useRef<BottomSheetModalMethods>(null);
+  const quickActionBottomSheetRef = useRef<BottomSheetModalMethods>(null);
 
   const handleSelect = useCallback(() => {
     if (!disabled) {
@@ -131,18 +136,18 @@ export const Input: React.FC<InputProps> = ({
 
   const getDateTimeDisplayText = useCallback(() => {
     if (!value) return placeholder;
-  
+
     try {
       const date = new Date(value);
-      
+
       // Use device's locale automatically
       return date.toLocaleString(undefined, {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: undefined // Let device decide 12/24 hour format
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: undefined, // Let device decide 12/24 hour format
       });
     } catch {
       return value;
@@ -263,7 +268,8 @@ export const Input: React.FC<InputProps> = ({
     px: "$4",
     py: isMultiline ? "$3" : undefined,
     fontWeight: "400",
-    disabled,
+    textTransform: "none" as const,
+    disabled
   };
 
   return (
@@ -273,23 +279,31 @@ export const Input: React.FC<InputProps> = ({
       </Paragraph>
 
       {isSwitch ? (
-        <XStack 
-        alignItems="center"
-        justifyContent="space-between"
-        borderRadius="$6"
-        backgroundColor="$muted"
-        px="$4"
-        py="$3"
-        minHeight={50}>
-        <Text
-          fontSize="$5"
-          fontWeight="400"
-          color="$mutedForeground"
-          flex={1}
+        <XStack
+          alignItems="center"
+          justifyContent="space-between"
+          borderRadius="$6"
+          backgroundColor="$muted"
+          px="$4"
+          py="$3"
+          minHeight={50}
+          onPress={disabled ? () => quickActionBottomSheetRef.current?.present() : undefined}
         >
-          {label}
-        </Text>
-          <Switch size="$4" disabled={disabled} native defaultChecked={switchChecked} onCheckedChange={onSwitchChange}>
+          <Text
+            fontSize="$5"
+            fontWeight="400"
+            color="$mutedForeground"
+            flex={1}
+          >
+            {label}
+          </Text>
+          <Switch
+            size="$4"
+            disabled={disabled}
+            native
+            defaultChecked={switchChecked}
+            onCheckedChange={onSwitchChange}
+          >
             <Switch.Thumb animation="bouncy" />
           </Switch>
         </XStack>
@@ -299,12 +313,14 @@ export const Input: React.FC<InputProps> = ({
           borderRadius="$6"
           backgroundColor="$muted"
           pr="$3"
+          onPress={disabled ? () => quickActionBottomSheetRef.current?.present() : undefined}
         >
           <TamaguiInput
             flex={1}
             {...inputProps}
             backgroundColor="transparent"
             borderRadius="$6"
+            disabled={disabled}
           />
           <Ionicons
             name={showPassword ? "eye-off" : "eye"}
@@ -323,16 +339,9 @@ export const Input: React.FC<InputProps> = ({
           px="$4"
           py="$3"
           minHeight={50}
-          onPress={
-            isDate
-              ? () => {
-                  if (!disabled) {
-                    Keyboard.dismiss();
-                    dateTimeBottomSheetRef.current?.present();
-                  }
-                }
-              : handleSelect
-          }
+          onPress={disabled ? () => quickActionBottomSheetRef.current?.present() : 
+            isDate ? () => {Keyboard.dismiss();dateTimeBottomSheetRef.current?.present();}
+            : () => handleSelect()}
           style={{ cursor: disabled ? "not-allowed" : "pointer" }}
           opacity={disabled ? 0.6 : 1}
         >
@@ -355,9 +364,20 @@ export const Input: React.FC<InputProps> = ({
           />
         </XStack>
       ) : isMultiline ? (
-        <TextArea numberOfLines={finalNumberOfLines} {...inputProps} />
+        <XStack onPress={disabled ? () => quickActionBottomSheetRef.current?.present() : undefined}>
+          <TextArea 
+            numberOfLines={finalNumberOfLines} 
+            {...inputProps} 
+            pointerEvents={disabled ? "none" : "auto"}
+          />
+        </XStack>
       ) : (
-        <TamaguiInput {...inputProps} />
+        <XStack onPress={disabled ? () => quickActionBottomSheetRef.current?.present() : undefined}>
+          <TamaguiInput 
+            {...inputProps} 
+            pointerEvents={disabled ? "none" : "auto"}
+          />
+        </XStack>
       )}
 
       {error && (
@@ -391,6 +411,17 @@ export const Input: React.FC<InputProps> = ({
           initialValue={value}
           title={selectTitle || `Select ${label}`}
           subtitle={selectSubtitle || `Choose the ${label.toLowerCase()}`}
+        />
+      )}
+      {disabled && (
+        <QuickActionBottomSheet
+          ref={quickActionBottomSheetRef}
+          primaryOption="Edit"
+          secondaryOption="Cancel"
+          onSelectPrimary={() => setIsDisabled?.(false)}
+          onSelectSecondary={() => setIsDisabled?.(true)}
+          title={"Edit your profile details?"}
+          subtitle={`Choose to edit or cancel the profile details`}
         />
       )}
     </YStack>
