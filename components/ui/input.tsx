@@ -244,6 +244,7 @@ export const Input: React.FC<InputProps> = ({
   // Input props for Tamagui component
   const inputProps = {
     placeholder,
+    value,
     onChangeText,
     keyboardType: config.keyboardType || "default",
     textContentType: config.textContentType,
