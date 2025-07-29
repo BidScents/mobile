@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { MultipleImagePicker } from "@/components/ui/multiple-image-picker";
-import { useCreateListing } from "@/hooks/mutations/use-create-listing";
+import { useCreateListing } from "@/hooks/queries/use-create-listing";
 import {
   boxConditionOptions,
   categoryOptions,
