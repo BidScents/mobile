@@ -38,7 +38,6 @@ export default function Header({
     <>
       {/* Back button */}
       <View
-        backgroundColor="$background"
         style={{
           zIndex: 2,
           position: "absolute",
@@ -47,8 +46,7 @@ export default function Header({
           height: 30,
           width: 30,
           borderRadius: 15,
-          alignItems: "center",
-          justifyContent: "center",
+          overflow: 'hidden',
         }}
         onPress={() => router.back()}
         hitSlop={{
@@ -57,14 +55,26 @@ export default function Header({
           left: 10,
           right: 10,
         }}
+        pressStyle={{
+          opacity: 0.7,
+        }}
       >
-        <Ionicons name="chevron-back" color={theme.foreground.val} size={20} />
+        <BlurView
+          tint={colorScheme === 'light' ? 'systemThickMaterialLight' : 'systemThickMaterialDark'}
+          intensity={80}
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Ionicons name="chevron-back" color={theme.foreground.val} size={20} />
+        </BlurView>
       </View>
 
       {/* Right icon */}
       {rightIcon && (
         <View
-          backgroundColor="$background"
           style={{
             zIndex: 2,
             position: "absolute",
@@ -73,8 +83,7 @@ export default function Header({
             height: 30,
             width: 30,
             borderRadius: 15,
-            alignItems: "center",
-            justifyContent: "center",
+            overflow: 'hidden',
           }}
           onPress={rightIconPress}
           hitSlop={{
@@ -83,8 +92,21 @@ export default function Header({
             left: 10,
             right: 10,
           }}
+          pressStyle={{
+            opacity: 0.7,
+          }}
         >
-          <Ionicons name={rightIcon} color={theme.foreground.val} size={20} />
+          <BlurView
+            tint={colorScheme === 'light' ? 'systemThickMaterialLight' : 'systemThickMaterialDark'}
+            intensity={80}
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ionicons name={rightIcon} color={theme.foreground.val} size={20} />
+          </BlurView>
         </View>
       )}
 
