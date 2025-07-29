@@ -173,7 +173,7 @@ export function MultipleImagePicker({
               borderWidth={2}
               borderStyle="dashed"
               borderColor="$mutedForeground"
-              borderRadius="$4"
+              borderRadius="$6"
               justifyContent="center"
               alignItems="center"
               backgroundColor="$background"
