@@ -2,6 +2,7 @@ import { ListingCard } from '@/components/listing/listing-card';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { FlashList } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Image } from 'react-native';
 import { Text, View } from 'tamagui';
 import type { ProfileContentTabProps } from '../../types/profile-content-tab.types';
 import {
@@ -84,22 +85,39 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
   const renderReviewItem = useCallback(({ item }: { item: any }) => (
     <View paddingHorizontal="$4" paddingVertical="$3">
       <View backgroundColor="$background" borderRadius="$4" padding="$4" gap="$3">
-        <View flexDirection="row" alignItems="center" justifyContent="space-between">
-          <Text fontWeight="600" fontSize="$5" color="$foreground">
-            {item.reviewer_name || 'Anonymous'}
-          </Text>
-          <Text fontSize="$4" color="$mutedForeground">
-            {item.rating ? `⭐ ${item.rating}/5` : ''}
-          </Text>
+        <View flexDirection="row" alignItems="center" gap="$3">
+          <View width={40} height={40} borderRadius={20} overflow="hidden" backgroundColor="$gray3">
+            {item.reviewer?.profile_image_url ? (
+              <Image
+                source={{ uri: item.reviewer.profile_image_url }}
+                style={{ width: 40, height: 40 }}
+                resizeMode="cover"
+              />
+            ) : (
+              <View flex={1} alignItems="center" justifyContent="center">
+                <Text fontSize="$4" color="$mutedForeground">
+                  {(item.reviewer?.username || 'A').charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
+          </View>
+          <View flex={1} flexDirection="row" alignItems="center" justifyContent="space-between">
+            <Text fontWeight="600" fontSize="$5" color="$foreground">
+              {item.reviewer?.username || 'Anonymous'}
+            </Text>
+            <Text fontSize="$4" color="$mutedForeground">
+              {item.rating ? `⭐ ${item.rating}/5` : ''}
+            </Text>
+          </View>
         </View>
-        {item.content && (
+        {item.comment && (
           <Text fontSize="$4" color="$foreground" lineHeight="$5">
-            {item.content}
+            {item.comment}
           </Text>
         )}
-        {item.created_at && (
+        {item.reviewed_at && (
           <Text fontSize="$3" color="$mutedForeground">
-            {new Date(item.created_at).toLocaleDateString()}
+            {new Date(item.reviewed_at).toLocaleDateString()}
           </Text>
         )}
       </View>
