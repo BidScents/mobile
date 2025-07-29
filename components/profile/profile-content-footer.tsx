@@ -15,7 +15,7 @@ export const ProfileContentFooter = React.memo(function ProfileContentFooter({
   if (isFetchingNextPage) {
     return (
       <View paddingVertical="$4" alignItems="center">
-        <Text color="$mutedForeground">Loading more...</Text>
+        <Text color="$mutedForeground" fontWeight="500">Loading more...</Text>
       </View>
     );
   }
@@ -29,6 +29,10 @@ export const ProfileContentFooter = React.memo(function ProfileContentFooter({
           onPress={onLoadMore}
           hitSlop={16}
           pressStyle={{ opacity: 0.7 }}
+          paddingHorizontal="$4"
+          paddingVertical="$2"
+          backgroundColor="$muted"
+          borderRadius="$6"
         >
           <Text color="$foreground" fontWeight="500">
             Load More
