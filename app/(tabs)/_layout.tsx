@@ -19,6 +19,7 @@ export default function TabsLayout() {
     <>
     <Tabs
       screenOptions={{
+        animation: 'shift',
         headerShown: false,
         headerShadowVisible: false,
         tabBarActiveTintColor: theme.foreground?.val,

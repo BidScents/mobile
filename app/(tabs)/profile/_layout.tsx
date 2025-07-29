@@ -17,7 +17,7 @@ export default function ProfileLayout() {
     }}
     
     >
-      <Stack.Screen name="index" options={{ title: "Profile" }} />
+      <Stack.Screen name="index" options={{ title: "Profile", headerLeft: () => null }} />
       <Stack.Screen name="[id]" options={{ title: "Profile", headerShown: false }} />
       <Stack.Screen name="badges" options={{ title: "Badges" }} />
       <Stack.Screen name="favourite-listings" options={{ title: "Favourite Listings" }} />
