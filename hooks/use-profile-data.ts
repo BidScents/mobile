@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
   useFollowUser,
   useProfileDetail,
@@ -11,6 +10,7 @@ import {
   ProfileTab,
   ReviewSearchRequest,
 } from '@bid-scents/shared-sdk';
+import { useMemo } from 'react';
 
 interface UseProfileDataProps {
   userId: string;
@@ -79,17 +79,6 @@ export const useProfileData = ({
     const featured = featuredListingsData?.pages.flatMap(page => page.listings) || [];
     const sold = soldListingsData?.pages.flatMap(page => page.listings) || [];
     const reviews = reviewsData?.pages.flatMap(page => page.reviews) || [];
-
-    // Debug logging
-    if (active.length > 0) {
-      console.log('Debug - Active listings:', {
-        totalItems: active.length,
-        pages: activeListingsData?.pages.map(page => ({
-          itemCount: page.listings.length,
-          paginationData: page.pagination_data
-        }))
-      });
-    }
 
     return {
       active,

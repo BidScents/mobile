@@ -64,18 +64,10 @@ const searchRequest: ListingSearchRequest = {
   ...sortParams, // Override with user preferences
 }
 
-// Debug logging
-console.log('Profile listings request:', {
-  tab,
-  searchRequest,
-  sortParams
-});
-
 return useInfiniteQuery({
   queryKey: queryKeys.profile.listings(userId, tab, searchRequest),
   queryFn: ({ pageParam = 1 }) => {
     const requestWithPage = { ...searchRequest, page: pageParam };
-    console.log('Making API call with request:', requestWithPage);
     
     return ProfileService.getUserListingsV1ProfileUserIdTabNamePost(
       userId,
@@ -85,7 +77,6 @@ return useInfiniteQuery({
   },
   getNextPageParam: (lastPage) => {
     const { page, total_pages } = lastPage.pagination_data
-    console.log('Pagination info:', { page, total_pages, hasNext: page < total_pages });
     return page < total_pages ? page + 1 : undefined
   },
   initialPageParam: 1,
