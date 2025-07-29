@@ -105,7 +105,7 @@ export const SelectBottomSheet = forwardRef<SelectBottomSheetMethods, SelectBott
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
                     bottomSheetRef.current?.dismiss()
-                    onSelect(selectedValue?.valueOf() || '')
+                    onSelect(selectedValue || '')
                   }}
                   variant="primary"
                   size="md"
