@@ -31,12 +31,12 @@ export const ProfileContentHeader = React.memo(function ProfileContentHeader({
     if (contentType === 'reviews') {
       return { fontSize: "$6", fontWeight: "600" } as const;
     }
-    return { fontSize: "$4", fontWeight: "500", color: "$mutedForeground" } as const;
+    return { fontSize: "$4", fontWeight: "500", color: "$foreground" } as const;
   };
 
   return (
     <XStack alignItems="center" justifyContent="space-between" paddingHorizontal="$4">
-      <Text {...getHeaderStyle()} color="$foreground">
+      <Text {...getHeaderStyle()}>
         {getHeaderText()}
       </Text>
       {showSort && (
@@ -50,7 +50,7 @@ export const ProfileContentHeader = React.memo(function ProfileContentHeader({
           <Text fontSize="$4" fontWeight="500" color="$foreground">
             {currentSortLabel}
           </Text>
-          <Ionicons name="chevron-down" size={16} color={theme.mutedForeground?.val} />
+          <Ionicons name="chevron-down" size={16} color={theme.foreground?.val} />
         </XStack>
       )}
     </XStack>
