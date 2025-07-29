@@ -44,7 +44,7 @@ export const QuickActionBottomSheet = forwardRef<QuickActionBottomSheetMethods, 
     return (
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={['50%', '80%']}
+        snapPoints={['50%']}
         backgroundStyle={{ backgroundColor: theme.background?.val || 'white' }}
       >
         <YStack gap="$4" padding="$4" paddingBottom="$8" flex={1}>
