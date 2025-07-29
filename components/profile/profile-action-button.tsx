@@ -1,6 +1,6 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { router } from 'expo-router';
+import React from 'react';
 
 interface ProfileActionButtonProps {
   isProfileOwner: boolean;
@@ -20,7 +20,7 @@ export const ProfileActionButton: React.FC<ProfileActionButtonProps> = ({
       {isProfileOwner ? (
         <Button
           variant="secondary"
-          onPress={() => router.push("/(tabs)")}
+          onPress={() => router.replace("/(tabs)/profile/seller-dashboard")}
           marginTop="$3"
           fullWidth
         >
