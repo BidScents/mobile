@@ -89,7 +89,7 @@ export default function ProfileScreen() {
               {user?.profile_image_url &&
               user.profile_image_url.trim() !== "" ? (
                 <Avatar.Image
-                  source={{ uri: user.profile_image_url }}
+                  source={{ uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${user.profile_image_url}` }}
                   onError={() => console.log("Avatar image failed to load")}
                 />
               ) : null}
