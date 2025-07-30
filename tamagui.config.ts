@@ -3,6 +3,11 @@ import { createFont, createTamagui, createTokens } from '@tamagui/core'
 import { color } from '@tamagui/themes'
 import { Platform } from 'react-native'
 
+
+export const lightBlur = "systemThickMaterialLight"
+export const darkBlur = "systemThickMaterialDark"
+
+
 // Create platform-specific font configuration
 const createPlatformFont = () => {
   const baseFont = {

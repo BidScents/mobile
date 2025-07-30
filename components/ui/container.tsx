@@ -6,6 +6,7 @@ interface ContainerProps extends ViewProps {
   children: React.ReactNode
   variant?: 'default' | 'padded' | 'centered' | 'fullscreen'
   safeArea?: boolean | Edge[]
+  backgroundColor?: string
 }
 
 /**
@@ -19,7 +20,7 @@ export const Container: React.FC<ContainerProps> = ({
   children,
   variant = 'default',
   safeArea = true,
-  backgroundColor = '$foreground',
+  backgroundColor = '$background',
   ...props
 }) => {
   const theme = useTheme()

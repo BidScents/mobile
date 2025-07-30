@@ -1,12 +1,11 @@
 import type { InputVariant, SelectOption } from '@/components/ui/input'
 import { Input } from '@/components/ui/input'
-import type { CreateListingFormData } from '@bid-scents/shared-sdk'
 import React from 'react'
-import { Controller, type Control } from 'react-hook-form'
+import { Controller, type Control, type FieldPath, type FieldValues } from 'react-hook-form'
 
-interface ControlledInputProps {
-  control: Control<CreateListingFormData>
-  name: keyof CreateListingFormData
+interface ControlledInputProps<T extends FieldValues> {
+  control: Control<T>
+  name: FieldPath<T>
   variant?: InputVariant
   label: string
   placeholder: string
@@ -18,7 +17,7 @@ interface ControlledInputProps {
   switchChecked?: boolean
 }
 
-export function ControlledInput({
+export function ControlledInput<T extends FieldValues>({
   control,
   name,
   variant = 'text',
@@ -30,7 +29,7 @@ export function ControlledInput({
   selectTitle,
   selectSubtitle,
   switchChecked,
-}: ControlledInputProps) {
+}: ControlledInputProps<T>) {
   return (
     <Controller
       control={control}

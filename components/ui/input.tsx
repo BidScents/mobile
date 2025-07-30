@@ -244,6 +244,7 @@ export const Input: React.FC<InputProps> = ({
   // Input props for Tamagui component
   const inputProps = {
     placeholder,
+    value,
     onChangeText,
     keyboardType: config.keyboardType || "default",
     textContentType: config.textContentType,
@@ -263,10 +264,12 @@ export const Input: React.FC<InputProps> = ({
     py: isMultiline ? "$3" : undefined,
     fontWeight: "400",
     disabled,
+    textTransform: "none" as const,
+    pointerEvents: disabled ? "none" as const : "auto" as const,
   };
 
   return (
-    <YStack borderRadius="$6" width="100%" gap="$2">
+    <YStack borderRadius="$6" width="100%" gap="$2" opacity={disabled ? 0.8 : 1}>
       <Paragraph fontWeight="400" color="$mutedForeground">
         {label}
       </Paragraph>

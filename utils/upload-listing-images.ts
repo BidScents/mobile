@@ -3,24 +3,9 @@ import { decode } from 'base64-arraybuffer'
 import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
 import { Alert } from 'react-native'
+import { getImgExtension } from './getImgExtension'
 
-/**
- * Get content type and extension from URI
- */
-const getContentTypeAndExtension = (uri: string) => {
-  const extension = uri.split('.').pop()?.toLowerCase()
-  
-  switch (extension) {
-    case 'png':
-      return { contentType: 'image/png', ext: '.png' }
-    case 'webp':
-      return { contentType: 'image/webp', ext: '.webp' }
-    case 'jpg':
-    case 'jpeg':
-    default:
-      return { contentType: 'image/jpeg', ext: '.jpg' }
-  }
-}
+
 
 /**
  * Delete uploaded images from storage
@@ -66,7 +51,7 @@ const uploadSingleImageWithRetry = async (
 ): Promise<{ path: string; filePath: string }> => {
   const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
   const uuid = Crypto.randomUUID()
-  const { contentType, ext } = getContentTypeAndExtension(imageUri)
+  const { contentType, ext } = getImgExtension(imageUri)
   const filePath = `listing_${uuid}${ext}`
   
   const attemptUpload = async (): Promise<string> => {
