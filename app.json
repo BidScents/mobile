@@ -15,11 +15,15 @@
         "CFBundleURLTypes": [
           {
             "CFBundleURLName": "bidscents-oauth",
-            "CFBundleURLSchemes": ["com.bidscents.app"]
+            "CFBundleURLSchemes": [
+              "com.bidscents.app"
+            ]
           },
           {
             "CFBundleURLName": "bidscents-auth",
-            "CFBundleURLSchemes": ["com.bidscents.app"]
+            "CFBundleURLSchemes": [
+              "com.bidscents.app"
+            ]
           }
         ]
       }
@@ -44,7 +48,10 @@
               "host": "auth"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -63,10 +70,18 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "575b76bf-846e-4bc8-95a7-033d66167237"
+      }
+    },
+    "owner": "bidscents"
   }
 }
