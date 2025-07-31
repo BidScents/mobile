@@ -102,25 +102,6 @@ Use `$color`, `$background`, or semantic color tokens in components:
 
 ---
 
-## Fonts
-
-Roboto font files are located in:
-
-```
-assets/fonts/
-├── Roboto-Light.ttf
-├── Roboto-Regular.ttf
-├── Roboto-Medium.ttf
-├── Roboto-SemiBold.ttf
-├── Roboto-Bold.ttf
-├── Roboto-ExtraBold.ttf
-├── Roboto-Black.ttf
-```
-
-And loaded in `app/_layout.tsx` using Expo's `useFonts()` hook.
-
----
-
 ## Troubleshooting
 
 ### Build Issues - Quick Fixes
@@ -171,3 +152,85 @@ bun install && bun expo prebuild --clean && bun expo run:ios
 ```
 
 **💡 Rule: Always try Step 1 first after adding dependencies!**
+
+
+---
+
+## Running on Device or Simulator
+
+### Local Backend Access
+
+You can run the app on your simulator or physical device and connect it to the local FastAPI backend with proper setup.
+
+### Prerequisites
+
+| Requirement | Description |
+|-------------|-------------|
+| Xcode | Required for `expo run:ios` (Mac only) |
+| iOS Dev Account | Needed to run on real iPhone (`expo run:ios` with dev client) |
+| FastAPI Backend | Must be running locally on `0.0.0.0:8000` |
+| Same Wi-Fi | Device and computer must be on the same local network |
+
+### Steps to Run
+
+#### 1. Install Dependencies
+
+```bash
+bun install
+```
+
+#### 2. Find Your Local IP
+
+```bash
+ipconfig getifaddr en0  # macOS only
+```
+
+Copy the output (e.g., `192.168.0.10`).
+
+#### 3. Update Environment Variables
+
+```bash
+EXPO_PUBLIC_API_BASE_URL=http://192.168.0.10:8000
+```
+
+#### 4. Start FastAPI Server
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+#### 5. Launch a Dev Build
+
+```bash
+bun expo run:android
+# or
+bun expo run:ios
+# or if you want to build on your phone for expo notifications(may need ios dev account)
+bun expo run:ios --device 
+```
+
+#### 6. Clear and Start Expo
+
+```bash
+bun expo start --clear
+```
+
+### Verify Backend Connectivity
+
+Open Safari/Chrome on your phone and visit:
+
+```
+http://{YOUR_LOCAL_IP}:8000/docs
+```
+
+If it loads, the API is reachable from your phone.
+
+### Device Connection Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Network request failed | Use correct local IP (not `127.0.0.1` or `localhost`) |
+| No response from API | Check FastAPI is running on `0.0.0.0` |
+| Can't install on device | Make sure iOS Dev Account is active in Xcode |
+
+**Note:** For a toggle system to auto-switch between dev/staging/prod URLs, consider implementing environment-based configuration.
