@@ -35,6 +35,11 @@ ipconfig
 Create `.env` file with your IP:
 ```bash
 EXPO_PUBLIC_API_BASE_URL=http://192.168.1.XXX:8000  # Your IP here
+EXPO_PUBLIC_SUPABASE_URL=your-supabase-url
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+EXPO_PUBLIC_TERMS_URL=https://bidscents.com/terms-of-service
+EXPO_PUBLIC_IMAGE_BASE_URL= base url for supabase storage imgs
+EXPO_PUBLIC_PROJECT_ID = get form expo project dashboard
 ```
 
 #### Start Backend:
