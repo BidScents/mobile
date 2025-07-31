@@ -5,30 +5,30 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "com.bidscents.app",
+    "scheme": "com.bidscents.mobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "buildNumber": "1",
-      "bundleIdentifier": "com.bidscents.app",
+      "bundleIdentifier": "com.bidscents.mobile",
       "infoPlist": {
         "CFBundleURLTypes": [
           {
             "CFBundleURLName": "bidscents-oauth",
             "CFBundleURLSchemes": [
-              "com.bidscents.app"
+              "com.bidscents.mobile"
             ]
           },
           {
             "CFBundleURLName": "bidscents-auth",
             "CFBundleURLSchemes": [
-              "com.bidscents.app"
+              "com.bidscents.mobile"
             ]
           }
         ]
       },
-      "appleTeamId": "LMWA584W8R"
+      "appleTeamId": "BRHM2L7C9T"
     },
     "android": {
       "adaptiveIcon": {
@@ -36,17 +36,17 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.bidscents.app",
+      "package": "com.bidscents.mobile",
       "intentFilters": [
         {
           "action": "VIEW",
           "autoVerify": true,
           "data": [
             {
-              "scheme": "com.bidscents.app"
+              "scheme": "com.bidscents.mobile"
             },
             {
-              "scheme": "com.bidscents.app",
+              "scheme": "com.bidscents.mobile",
               "host": "auth"
             }
           ],

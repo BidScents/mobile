@@ -1,53 +1,92 @@
-# BidScents Mobile App (Expo)
+# BidScents Mobile App
 
-## Quick Start
+## Quick Team Setup
 
 ### 1. Clone and Install
-
 ```bash
 git clone https://github.com/BidScents/mobile.git
 cd bidscents-mobile
 bun install 
 ```
 
-### 2. Start Development
+### 2. Get Development Build
 
+**iOS:** Download and install from here:
+https://expo.dev/accounts/bidscents/projects/bidscents/builds/5c9e4537-0e35-413e-b8cd-0173fff79be2
+
+**Android:** Build yourself:
 ```bash
-bun expo start
+bun add -g eas-cli && eas login
+eas build --platform android --profile development
 ```
 
-Use the Expo Dev Tools to preview in iOS, Android, or Web.
+### 3. Connect to Local Backend
+
+#### Find Your IP Address:
 ```bash
-bun expo prebuild --clean
-bun expo run:ios
+# macOS/Linux
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Windows  
+ipconfig
 ```
 
-### 3. Install Shared SDK
-
+#### Update Environment (Without Rebuilding):
+Create `.env` file with your IP:
 ```bash
-bun add @bid-scents/shared-sdk
+EXPO_PUBLIC_API_BASE_URL=http://192.168.1.XXX:8000  # Your IP here
 ```
+
+#### Start Backend:
+```bash
+# In backend directory - MUST use --host 0.0.0.0
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+#### Start Mobile Development:
+```bash
+bun expo start --dev-client --clear
+```
+
+**Scan QR code with your phone's camera → Opens in development build**
+
+### 4. Test Connection
+Open Safari on your phone: `http://YOUR_IP:8000/docs`
+If you see FastAPI docs, you're connected! ✅
 
 ---
 
-## Project Structure
+## Development vs Production
 
-```
-mobile/
-├── app/                    # Route-based screens (expo-router)
-│   ├── _layout.tsx         # Root layout with Tamagui + SafeArea
-│   └── index.tsx           # Home screen
-├── assets/
-│   ├── fonts/              # Roboto font variants
-│   └── images/             # Static images
-├── components/             # Reusable UI components
-├── hooks/                  # Custom React hooks
-├── lib/                    # Utility functions and shared logic
-├── tamagui.config.ts       # Tamagui theme + font config
-├── app.json                # Expo project config
-├── tsconfig.json
-└── README.md
-```
+| Method | Features | Setup Time |
+|--------|----------|------------|
+| **Development Build** | ✅ Push notifications, ✅ All features | 5 min (download) |
+| **Simulator/Local** | ❌ Limited features | 30 sec |
+
+**Use development builds for testing notifications and real app features.**
+
+---
+
+## Daily Workflow
+1. `git pull && bun install`
+2. Update `.env` with your IP if changed  
+3. Start backend: `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
+4. Start mobile: `bun expo start --dev-client --clear`
+5. Scan QR code with development build
+6. Code with hot reload 🔥
+
+---
+
+## Quick Fixes
+
+| Problem | Solution |
+|---------|----------|
+| Red boxes after `bun install` | `bun expo start --clear` |
+| "Network request failed" | Check IP in `.env` matches your computer |
+| Can't reach backend from phone | Backend must use `--host 0.0.0.0` |
+| Need to change IP | Update `.env` and restart: `bun expo start --dev-client --clear` |
+
+**💡 Environment changes (`.env`) don't require rebuilding - just restart the dev server!**
 
 ---
 
@@ -155,80 +194,3 @@ bun install && bun expo prebuild --clean && bun expo run:ios
 
 
 ---
-
-## Running on Device or Simulator
-
-### Local Backend Access
-
-You can run the app on your simulator or physical device and connect it to the local FastAPI backend with proper setup.
-
-### Prerequisites
-
-| Requirement | Description |
-|-------------|-------------|
-| Xcode | Required for `expo run:ios` (Mac only) |
-| iOS Dev Account | Needed to run on real iPhone (`expo run:ios` with dev client) |
-| FastAPI Backend | Must be running locally on `0.0.0.0:8000` |
-| Same Wi-Fi | Device and computer must be on the same local network |
-
-### Steps to Run
-
-#### 1. Install Dependencies
-
-```bash
-bun install
-```
-
-#### 2. Find Your Local IP
-
-```bash
-ipconfig getifaddr en0  # macOS only
-```
-
-Copy the output (e.g., `192.168.0.10`).
-
-#### 3. Update Environment Variables
-
-```bash
-EXPO_PUBLIC_API_BASE_URL=http://192.168.0.10:8000
-```
-
-#### 4. Start FastAPI Server
-
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-#### 5. Launch a Dev Build
-
-```bash
-bun expo run:android
-# or
-bun expo run:ios
-# or if you want to build on your phone for expo notifications(may need ios dev account)
-bun expo run:ios --device 
-```
-
-#### 6. Clear and Start Expo
-
-```bash
-bun expo start --clear
-```
-
-### Verify Backend Connectivity
-
-Open Safari/Chrome on your phone and visit:
-
-```
-http://{YOUR_LOCAL_IP}:8000/docs
-```
-
-If it loads, the API is reachable from your phone.
-
-### Device Connection Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| Network request failed | Use correct local IP (not `127.0.0.1` or `localhost`) |
-| No response from API | Check FastAPI is running on `0.0.0.0` |
-| Can't install on device | Make sure iOS Dev Account is active in Xcode |
