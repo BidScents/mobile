@@ -232,5 +232,3 @@ If it loads, the API is reachable from your phone.
 | Network request failed | Use correct local IP (not `127.0.0.1` or `localhost`) |
 | No response from API | Check FastAPI is running on `0.0.0.0` |
 | Can't install on device | Make sure iOS Dev Account is active in Xcode |
-
-**Note:** For a toggle system to auto-switch between dev/staging/prod URLs, consider implementing environment-based configuration.
