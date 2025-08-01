@@ -19,8 +19,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import config from 'tamagui.config'
-import { useUserFavorites } from '../hooks/queries/use-listing'
-import { getDeviceToken } from '../hooks/use-notifications'
 import { QueryProvider } from '../providers/query-provider'
 import {
   handleExistingSession,
@@ -41,23 +39,6 @@ const ANDROID_FONTS = {
 } as const
 
 
-/**
- * Component to initialize notifications within the app context
- * Should be placed high in the component tree after authentication is set up
- */
-export function NotificationsInitializer() {
-  getDeviceToken();
-  return null;
-}
-
-/**
- * Component to initialize user favorites within QueryProvider context
- */
-function FavoritesInitializer() {
-  useUserFavorites()
-  return null
-}
-
 export default function RootLayout() {
   const colorScheme = useColorScheme()
   const [isAppReady, setIsAppReady] = useState(false)
@@ -65,8 +46,6 @@ export default function RootLayout() {
   const [fontsLoaded] = useFonts(
     Platform.OS === 'android' ? ANDROID_FONTS : {}
   )
-
-
 
   /**
    * Initialize application on mount
@@ -132,8 +111,6 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
         <QueryProvider>
-          <FavoritesInitializer />
-          <NotificationsInitializer />
           <TamaguiProvider config={config}>
             <Theme name={colorScheme === 'dark' ? 'dark' : 'light'}>
               <SafeAreaProvider>
