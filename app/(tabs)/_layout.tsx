@@ -130,6 +130,22 @@ export default function TabsLayout() {
             />
           ),
         }}
+        listeners={{
+          tabPress: async (e) => {
+            if (router.canDismiss()) {
+              e.preventDefault();
+              try {
+                await router.dismissAll();
+                router.replace('/profile');
+              } catch (error) {
+                // Fallback if dismissAll fails
+                router.push('/profile');
+              }
+            }
+
+
+          },
+        }}
       />
     </Tabs>
     </>
