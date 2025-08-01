@@ -13,8 +13,6 @@ import { FavoriteButton } from "./favorite-button";
 interface ListingCardProps {
   listing: ListingCardType;
   onPress?: () => void;
-  onFavorite?: (listingId: string) => Promise<void>;
-  onUnfavorite?: (listingId: string) => Promise<void>;
 }
 
 /**
@@ -24,9 +22,8 @@ interface ListingCardProps {
 export function ListingCard({
   listing,
   onPress,
-  onFavorite,
-  onUnfavorite,
 }: ListingCardProps) {
+
   const handleCardPress = () => {
     onPress?.();
     router.push(`/listing/${listing.id}` as any);
@@ -50,14 +47,6 @@ export function ListingCard({
         );
         break;
     }
-  };
-
-  const handleFavorite = async (listingId: string) => {
-    await onFavorite?.(listingId);
-  };
-
-  const handleUnfavorite = async (listingId: string) => {
-    await onUnfavorite?.(listingId);
   };
 
   const formatPrice = (price: number): string => {
@@ -320,8 +309,6 @@ export function ListingCard({
             <FavoriteButton
               listingId={listing.id}
               initialCount={listing.favorites_count}
-              onFavorite={handleFavorite}
-              onUnfavorite={handleUnfavorite}
               size="small"
             />
           </XStack>
