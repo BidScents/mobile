@@ -1,5 +1,5 @@
 import { useUserFavorites } from "@/hooks/queries/use-listing";
-import { getDeviceToken } from "@/hooks/use-notifications";
+import { useNotifications } from "@/hooks/use-notifications";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { Redirect } from "expo-router";
 import { View } from "react-native";
@@ -12,8 +12,13 @@ export default function RootIndex() {
    */
   function StartupInitializer() {
     console.log("Initializing startup actions.....");
-    getDeviceToken();
+
+    // Initialize notifications (includes device token registration)
+    useNotifications();
+
+    // Initialize user favorites
     useUserFavorites();
+
     return null;
   }
 
