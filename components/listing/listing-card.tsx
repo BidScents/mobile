@@ -27,7 +27,6 @@ export function ListingCard({
   const handleCardPress = () => {
     onPress?.();
     router.push(`/listing/${listing.id}` as any);
-    console.log(listing);
   };
 
   const handleActionPress = (e: GestureResponderEvent) => {
