@@ -156,7 +156,7 @@ export default function EditProfileScreen() {
             flex={1}
             gap="$3"
             minHeight="100%"
-            onPress={handleEditProfile}
+            onPress={disabled ? handleEditProfile : undefined}
           >
             {/* Profile Image Section */}
             <ProfilePreviewPicker
