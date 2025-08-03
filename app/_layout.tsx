@@ -5,7 +5,6 @@
  * Manages font loading, API configuration, and Supabase session management.
  */
 
-import { CloseButton } from "@/components/ui/close-button";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { handleNotificationNavigation } from "@/hooks/use-notifications";
 import { supabase } from "@/lib/supabase";
@@ -162,16 +161,6 @@ export default function RootLayout() {
                 <BottomSheetModalProvider>
                   <Stack screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="index" />
-                    <Stack.Screen
-                      name="(screens)/add-listing"
-                      options={{
-                        headerShown: true,
-                        title: "Add Listing",
-                        headerShadowVisible: false,
-                        animation: "slide_from_bottom",
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
                   </Stack>
                   <LoadingOverlay />
                 </BottomSheetModalProvider>

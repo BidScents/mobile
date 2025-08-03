@@ -23,6 +23,12 @@ export default function TabsLayout() {
         animation: 'shift',
         headerShown: false,
         headerShadowVisible: false,
+        headerStyle: {
+          backgroundColor: theme.background?.val,
+        },
+        headerTitleStyle: {
+          color: theme.foreground?.val,
+        },
         tabBarActiveTintColor: theme.foreground?.val,
         tabBarInactiveTintColor: theme.mutedForeground?.val,
         tabBarLabelStyle: {
