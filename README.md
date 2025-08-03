@@ -12,7 +12,7 @@ bun install
 ### 2. Get Development Build
 
 **iOS:** Download and install from here:
-https://expo.dev/accounts/bidscents/projects/bidscents/builds/5c9e4537-0e35-413e-b8cd-0173fff79be2
+https://expo.dev/accounts/bidscents/projects/bidscents/builds
 
 **Android:** Build yourself:
 ```bash
