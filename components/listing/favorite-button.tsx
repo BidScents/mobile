@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Text, XStack } from 'tamagui'
 import { useFavoriteListing, useUnfavoriteListing } from '../../hooks/queries/use-listing'
-import { useFavoriteStatus } from '../../hooks/use-favorite'
+import { useIsFavorited } from '../../hooks/use-favorite'
 
 interface FavoriteButtonProps {
   listingId: string
@@ -14,11 +14,8 @@ interface FavoriteButtonProps {
 }
 
 /**
- * Favorite button component with optimistic updates and haptic feedback.
- * Shows heart icon that fills/unfills when tapped, with live count updates.
- * When count is 0, shows only circular favorite button. When count > 0, shows count next to heart.
- * Debounces API calls to prevent spam tapping.
- * Automatically detects favorite status from user's favorites list.
+ * Simplified favorite button with optimistic updates and debouncing.
+ * Uses only the favorites list to determine status - no detailed listing calls.
  */
 export function FavoriteButton({ 
   listingId, 
@@ -28,24 +25,23 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   const theme = useTheme()
   
-  // Get favorite status and count from the favorites list
-  const { isFavorited: serverIsFavorited, favoritesCount: serverCount, isLoading: favoritesLoading } = useFavoriteStatus(listingId, initialCount)
+  // Only check if favorited - no detailed data needed
+  const { isFavorited: serverIsFavorited, isLoading: favoritesLoading } = useIsFavorited(listingId)
   
   // Mutation hooks
   const favoriteMutation = useFavoriteListing()
   const unfavoriteMutation = useUnfavoriteListing()
   
-  // Local optimistic state - initialize with server values
+  // Simple optimistic state
   const [isFavorited, setIsFavorited] = useState(serverIsFavorited)
-  const [count, setCount] = useState(serverCount)
-  const [isLoading, setIsLoading] = useState(false)
+  const [count, setCount] = useState(initialCount)
   
-  // Update local state when server state changes, but only if there's no pending operation
+  // Sync with server state
   useEffect(() => {
     setIsFavorited(serverIsFavorited)
   }, [serverIsFavorited])
   
-  // Update count from mutation responses
+  // Update count from successful mutations
   useEffect(() => {
     if (favoriteMutation.data) {
       setCount(favoriteMutation.data.favorites_count)
@@ -58,13 +54,11 @@ export function FavoriteButton({
     }
   }, [unfavoriteMutation.data])
   
-  // Track the pending state to determine which API call to make
+  // Debouncing logic
   const pendingStateRef = useRef<boolean | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const executeApiCall = useCallback(async (shouldFavorite: boolean) => {
-    setIsLoading(true)
-    
     try {
       if (shouldFavorite) {
         await favoriteMutation.mutateAsync(listingId)
@@ -72,46 +66,34 @@ export function FavoriteButton({
         await unfavoriteMutation.mutateAsync(listingId)
       }
     } catch (error) {
-      // Only revert if this is still the pending operation
-      // If user clicked again, pendingStateRef.current will be different
-      if (pendingStateRef.current === shouldFavorite) {
-        // Revert optimistic update on error
-        setIsFavorited(!shouldFavorite)
-        setCount(prev => shouldFavorite ? prev - 1 : prev + 1)
-      }
+      // Simple error handling - just revert the optimistic update
+      setIsFavorited(!shouldFavorite)
+      setCount(prev => shouldFavorite ? prev - 1 : prev + 1)
       console.error('Failed to toggle favorite:', error)
     } finally {
-      setIsLoading(false)
-      // Only clear if this was the pending operation
-      if (pendingStateRef.current === shouldFavorite) {
-        pendingStateRef.current = null
-      }
+      pendingStateRef.current = null
     }
   }, [listingId, favoriteMutation, unfavoriteMutation])
 
   const handleToggle = async () => {
-    // Only prevent clicks while initial favorites are loading
-    // Allow clicks even during API execution for continuous responsiveness
     if (favoritesLoading) return
 
     const newIsFavorited = !isFavorited
     
-    // Optimistic update
+    // Immediate optimistic update
     setIsFavorited(newIsFavorited)
     setCount(prev => newIsFavorited ? prev + 1 : prev - 1)
     
     // Haptic feedback
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     
-    // Update pending state
+    // Debounced API call
     pendingStateRef.current = newIsFavorited
     
-    // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
     
-    // Set new timeout for API call
     timeoutRef.current = setTimeout(() => {
       const finalState = pendingStateRef.current
       if (finalState !== null) {
@@ -120,7 +102,7 @@ export function FavoriteButton({
     }, debounceMs)
   }
 
-  // Clean up timeout on unmount
+  // Cleanup
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -142,12 +124,9 @@ export function FavoriteButton({
   }[size]
 
   const heartColor = isFavorited ? 'red' : (theme.foreground?.val || '#000')
-  
-  // Only disable while favorites are loading initially
-  // Don't disable during mutations - we want rapid tapping to work
   const isDisabled = favoritesLoading
 
-  // If count is 0, show circular button only
+  // Show just icon if count is 0
   if (count === 0) {
     return (
       <Button
@@ -167,7 +146,7 @@ export function FavoriteButton({
     )
   }
 
-  // If count > 0, show button with count
+  // Show icon + count
   return (
     <Button
       size="$2"
