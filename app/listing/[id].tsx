@@ -10,16 +10,43 @@ export default function ListingScreen() {
   const { data: listing, isLoading, error } = useListingDetail(id!);
   const theme = useTheme();
 
+  console.log("useListingDetail called with ID:", id); // Add this
 
   const handlePress = (link: string) => {
     router.push(link as any);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  if (isLoading) return <Text>Loading...</Text>;
-  if (error) return <Text>Error loading listing</Text>;
-  if (!listing) return <Text>Listing not found</Text>;
-  console.log(listing);
+  if (isLoading)
+    return (
+      <Container
+        variant="padded"
+        safeArea={false}
+        backgroundColor="$background"
+      >
+        <Text>Loading...</Text>
+      </Container>
+    );
+  if (error)
+    return (
+      <Container
+        variant="padded"
+        safeArea={false}
+        backgroundColor="$background"
+      >
+        <Text>Error loading listing</Text>
+      </Container>
+    );
+  if (!listing)
+    return (
+      <Container
+        variant="padded"
+        safeArea={false}
+        backgroundColor="$background"
+      >
+        <Text>Listing not found</Text>
+      </Container>
+    );
 
   return (
     <Container variant="padded" safeArea={false} backgroundColor="$background">
@@ -62,8 +89,15 @@ export default function ListingScreen() {
             </Text>
           </YStack>
         </XStack>
-        
-        <XStack alignItems="center" gap="$2" px="$3" py="$3" bg="$muted" borderRadius="$5">
+
+        <XStack
+          alignItems="center"
+          gap="$2"
+          px="$3"
+          py="$3"
+          bg="$muted"
+          borderRadius="$5"
+        >
           <Ionicons
             name="bag-outline"
             size={20}
@@ -73,11 +107,9 @@ export default function ListingScreen() {
             View Store
           </Text>
         </XStack>
-
       </XStack>
 
       {/* Listing Details */}
-
     </Container>
   );
 }
