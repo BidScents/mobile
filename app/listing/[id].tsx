@@ -2,16 +2,36 @@ import { Container } from "@/components/ui/container";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import { Avatar, Text, useTheme, XStack, YStack } from "tamagui";
+import React from "react";
+import { Dimensions } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
+import Carousel, {
+  ICarouselInstance,
+  Pagination,
+} from "react-native-reanimated-carousel";
+import { Avatar, Text, useTheme, View, XStack, YStack } from "tamagui";
 import { useListingDetail } from "../../hooks/queries/use-listing";
+
 
 export default function ListingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: listing, isLoading, error } = useListingDetail(id!);
   const theme = useTheme();
-
-  console.log("useListingDetail called with ID:", id); // Add this
-
+  const ref = React.useRef<ICarouselInstance>(null);
+  const progress = useSharedValue<number>(0);
+  const width = Dimensions.get("window").width;
+  
+  const onPressPagination = (index: number) => {
+    ref.current?.scrollTo({
+      /**
+       * Calculate the difference between the current index and the target index
+       * to ensure that the carousel scrolls to the nearest index
+      */
+     count: index - progress.value,
+     animated: true,
+    });
+  };
+  
   const handlePress = (link: string) => {
     router.push(link as any);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -50,7 +70,36 @@ export default function ListingScreen() {
 
   return (
     <Container variant="padded" safeArea={false} backgroundColor="$background">
-      <Text>{listing.listing.name}</Text>
+      {/* Image Carousel */}
+      <Carousel
+        ref={ref}
+        width={width}
+        height={width / 2}
+        data={listing?.image_urls || []}
+        onProgressChange={progress}
+        renderItem={({ index }) => (
+          <View
+            style={{
+              flex: 1,
+              borderWidth: 1,
+              justifyContent: "center",
+              backgroundColor: "#fff",
+            }}
+          >
+            <Text style={{ textAlign: "center", fontSize: 30, color: "#000" }}>{index}</Text>
+          </View>
+        )}
+      />
+ 
+      <Pagination.Basic
+        progress={progress}
+        data={listing?.image_urls || []}
+        dotStyle={{ backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 50 }}
+        containerStyle={{ gap: 5, marginTop: 10 }}
+        onPress={onPressPagination}
+      />
+
+
 
       {/* Seller Card */}
       <XStack
