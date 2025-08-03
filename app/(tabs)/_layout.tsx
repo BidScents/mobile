@@ -20,7 +20,6 @@ export default function TabsLayout() {
     <>
     <Tabs
       screenOptions={{
-        animation: 'shift',
         headerShown: false,
         headerShadowVisible: false,
         headerStyle: {
@@ -38,6 +37,7 @@ export default function TabsLayout() {
         },
         tabBarStyle: {
           position: 'absolute',
+          borderTopWidth: 0,
         },
         tabBarBackground: () => (
           <BlurView tint={colorScheme === 'light' ? lightBlur : darkBlur} style={{ 
