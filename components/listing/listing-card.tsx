@@ -1,3 +1,4 @@
+import { currency } from "@/constants/constants";
 import {
   ListingCard as ListingCardType,
   ListingType,
@@ -49,11 +50,11 @@ export function ListingCard({
   };
 
   const formatPrice = (price: number): string => {
-    return `RM ${price.toFixed(0)}`;
+    return `${currency} ${price.toFixed(0)}`;
   };
 
   const formatCurrentBid = (bid: number): string => {
-    return `RM ${bid.toFixed(0)}`;
+    return `${currency} ${bid.toFixed(0)}`;
   };
 
   const formatVolume = (volume: number, percentage: number): string => {
@@ -62,7 +63,7 @@ export function ListingCard({
 
   //   const formatNextBid = (currentBid: number): string => {
   //     {/* TODO: use listing bid increment */}
-  //     return `RM ${(currentBid + 0.5).toFixed(1)}`
+  //     return `${currency} ${(currentBid + 0.5).toFixed(1)}`
   //   }
 
   const truncateDescription = (
