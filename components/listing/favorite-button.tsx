@@ -120,7 +120,13 @@ export function FavoriteButton({
   const textSize = {
     small: '$3',
     medium: '$4',
-    large: '$5'
+    large: '$6'
+  }[size]
+
+  const buttonSize = {
+    small: '$2',
+    medium: '$3',
+    large: '$4'
   }[size]
 
   const heartColor = isFavorited ? 'red' : (theme.foreground?.val || '#000')
@@ -130,12 +136,14 @@ export function FavoriteButton({
   if (count === 0) {
     return (
       <Button
-        size="$2"
+        size={buttonSize}
         borderRadius="$5"
         backgroundColor="$muted"
         onPress={handleToggle}
         disabled={isDisabled}
         opacity={isDisabled ? 0.6 : 1}
+        paddingHorizontal="$2"
+        paddingVertical="$1"
       >
         <Ionicons 
           name={isFavorited ? "heart" : "heart-outline"}
@@ -149,7 +157,7 @@ export function FavoriteButton({
   // Show icon + count
   return (
     <Button
-      size="$2"
+      size={buttonSize}
       backgroundColor="$muted"
       onPress={handleToggle}
       disabled={isDisabled}
