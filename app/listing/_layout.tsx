@@ -16,6 +16,7 @@ export default function ListingLayout() {
         >
             <Stack.Screen name="[id]" 
             options={{
+                headerShown: false,
                 title: "Listing",
                 headerBackButtonDisplayMode: "minimal",
             }}

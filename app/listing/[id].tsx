@@ -1,6 +1,7 @@
 import { Container } from "@/components/ui/container";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -9,7 +10,7 @@ import Carousel, {
   ICarouselInstance,
   Pagination,
 } from "react-native-reanimated-carousel";
-import { Avatar, Text, useTheme, View, XStack, YStack } from "tamagui";
+import { Avatar, Text, useTheme, View, XStack, YStack, } from "tamagui";
 import { useListingDetail } from "../../hooks/queries/use-listing";
 
 
@@ -20,6 +21,7 @@ export default function ListingScreen() {
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
   const width = Dimensions.get("window").width;
+  const height = Dimensions.get("window").height * 0.6;
   
   const onPressPagination = (index: number) => {
     ref.current?.scrollTo({
@@ -68,38 +70,36 @@ export default function ListingScreen() {
       </Container>
     );
 
+    console.log(listing?.image_urls)
+
   return (
-    <Container variant="padded" safeArea={false} backgroundColor="$background">
+    <>
       {/* Image Carousel */}
-      <Carousel
+      <View >
+        <Carousel
         ref={ref}
         width={width}
-        height={width / 2}
+        height={height}
         data={listing?.image_urls || []}
         onProgressChange={progress}
-        renderItem={({ index }) => (
-          <View
-            style={{
-              flex: 1,
-              borderWidth: 1,
-              justifyContent: "center",
-              backgroundColor: "#fff",
-            }}
-          >
-            <Text style={{ textAlign: "center", fontSize: 30, color: "#000" }}>{index}</Text>
-          </View>
+        renderItem={({ index, item }) => (
+          <Image
+            source={{ uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${item}` }}
+            style={{ width, height }}
+          />
         )}
       />
  
       <Pagination.Basic
         progress={progress}
         data={listing?.image_urls || []}
-        dotStyle={{ backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 50 }}
-        containerStyle={{ gap: 5, marginTop: 10 }}
+        dotStyle={{ backgroundColor: theme.mutedForeground.val, borderRadius: 5 }}
+        activeDotStyle={{ backgroundColor: theme.background?.val, overflow: "hidden", borderRadius: 5 }}
+        containerStyle={{ gap: 5, marginTop: 10, position: "absolute", bottom: 20 }}
         onPress={onPressPagination}
       />
-
-
+      </View>
+    <Container variant="padded" safeArea={false} backgroundColor="$background" >
 
       {/* Seller Card */}
       <XStack
@@ -160,5 +160,6 @@ export default function ListingScreen() {
 
       {/* Listing Details */}
     </Container>
+    </>
   );
 }
