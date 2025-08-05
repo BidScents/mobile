@@ -7,7 +7,6 @@ import Carousel, {
   Pagination,
 } from "react-native-reanimated-carousel";
 import { useTheme, View } from "tamagui";
-import { BlurBackButton } from "../ui/blur-back-button";
 
 export function ImageCarousel({
   imageUrls,
@@ -82,8 +81,7 @@ export function ImageCarousel({
           size="medium"
         />
       </View>
-      {/* Back button */}
-      <BlurBackButton />
+
     </View>
   );
 }
