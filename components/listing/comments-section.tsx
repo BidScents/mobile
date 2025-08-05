@@ -1,8 +1,19 @@
 import { CommentDetails } from "@bid-scents/shared-sdk";
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useState } from "react";
-import { Text, View, XStack, YStack } from "tamagui";
+import { router } from "expo-router";
+import { useRef, useState } from "react";
+import { Text, View, XStack, YStack, useTheme } from "tamagui";
+import {
+  useAddComment,
+  useDeleteComment,
+  useUpdateComment,
+} from "../../hooks/queries/use-listing";
 import { formatDate } from "../../utils/utility-functions";
+import {
+  EditBottomSheet,
+  EditBottomSheetMethods,
+} from "../forms/edit-bottom-sheet";
 import { AvatarIcon } from "../ui/avatar-icon";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -11,21 +22,32 @@ export function CommentsSection({
   comments,
   userId,
   sellerId,
+  listingId,
 }: {
   comments: CommentDetails[] | null | undefined;
   userId: string | undefined;
   sellerId: string;
+  listingId: string;
 }) {
   const [newComment, setNewComment] = useState("");
+  const [visibleCommentsCount, setVisibleCommentsCount] = useState(5);
+  const [selectedComment, setSelectedComment] = useState<CommentDetails | null>(
+    null
+  );
+  const theme = useTheme();
+  const editBottomSheetRef = useRef<EditBottomSheetMethods>(null);
 
   // Helper function to determine if user is seller
   const isUserSeller = (commenterId: string) => commenterId === sellerId;
   const isCurrentUser = (commenterId: string) => commenterId === userId;
+  const addComment = useAddComment();
+  const updateComment = useUpdateComment();
+  const deleteComment = useDeleteComment();
 
   const handlePostComment = () => {
     if (newComment.trim()) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      // TODO: Implement comment posting logic
+      addComment.mutate({ listingId, content: newComment });
       console.log("Posting comment:", newComment);
       setNewComment("");
     }
@@ -33,20 +55,51 @@ export function CommentsSection({
 
   const handleEditComment = (commentId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Implement comment editing logic
-    console.log("Editing comment:", commentId);
+    const comment = comments?.find((c) => c.id === commentId);
+    if (comment) {
+      setSelectedComment(comment);
+      editBottomSheetRef.current?.present();
+    }
   };
 
+  const handleEditConfirm = (newText: string) => {
+    if (selectedComment) {
+      updateComment.mutate({
+        commentId: selectedComment.id,
+        content: newText,
+        listingId,
+      });
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedComment) {
+      deleteComment.mutate({
+        commentId: selectedComment.id,
+        listingId,
+      });
+    }
+  };
+
+  const handleShowMore = () => {
+    setVisibleCommentsCount((prev) => prev + 5);
+  };
+
+  // Get the comments to display based on visible count
+  const visibleComments = comments?.slice(0, visibleCommentsCount) || [];
+  const hasMoreComments = (comments?.length || 0) > visibleCommentsCount;
+
   return (
-    <View gap="$4">
+    <View gap="$3">
       {/* Comments List */}
       {comments?.length ? (
         <YStack gap="$3">
-          {comments.map((comment) => (
+          {visibleComments.map((comment) => (
             <XStack key={comment.id} gap="$3" width="100%">
               <AvatarIcon
                 url={comment.commenter?.profile_image_url}
                 size="$4"
+                onClick={() => router.push(`/profile/${comment.commenter?.id}`)}
               />
 
               <YStack gap="$1" flex={1} minWidth={0}>
@@ -93,12 +146,20 @@ export function CommentsSection({
                   {isCurrentUser(comment.commenter?.id || "") && (
                     <View
                       onPress={() => handleEditComment(comment.id)}
-                      hitSlop={20}
-                      pressStyle={{ opacity: 0.6 }}
+                      hitSlop={30}
+                      pressStyle={{ opacity: 0.6, scale: 0.93 }}
+                      position="absolute"
+                      right="0"
+                      top="0"
+                      borderRadius="$10"
+                      padding="$2"
                     >
-                      <Text fontSize="$2" fontWeight="bold" color="$blue10">
-                        Edit
-                      </Text>
+                      <Ionicons
+                        name="pencil"
+                        size={20}
+                        color={theme.foreground?.val}
+                        pointerEvents="box-only"
+                      />
                     </View>
                   )}
                 </XStack>
@@ -115,6 +176,22 @@ export function CommentsSection({
               </YStack>
             </XStack>
           ))}
+
+          {/* Show More Button */}
+          {hasMoreComments && (
+            <View alignItems="center" flex={1}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onPress={handleShowMore}
+                fullWidth
+              >
+                <Text fontSize="$3" fontWeight="500" color="$foreground">
+                  Show More
+                </Text>
+              </Button>
+            </View>
+          )}
         </YStack>
       ) : (
         <View
@@ -140,57 +217,46 @@ export function CommentsSection({
       )}
 
       {/* Add Comment Section */}
-      <XStack alignItems="flex-end" gap="$3" paddingTop="$2">
+      <XStack alignItems="center" gap="$2" paddingTop="$2">
         {/* <AvatarIcon url={user?.profile_image_url} size="$4" /> */}
         <View flex={1}>
           <Input
             placeholder="Add a comment..."
-            variant="text"
+            variant="multiline"
             value={newComment}
             onChangeText={setNewComment}
             numberOfLines={2}
           />
         </View>
-        <Button
-          variant="primary"
-          size="md"
+        <View
+          hitSlop={30}
+          pressStyle={{ opacity: 0.6, scale: 0.93 }}
           onPress={handlePostComment}
-          disabled={!newComment.trim()}
+          px={"$2"}
         >
-          Post
-        </Button>
+          <Ionicons
+            name="send"
+            size={30}
+            color={
+              !newComment.trim()
+                ? theme.mutedForeground?.val
+                : theme.foreground?.val
+            }
+          />
+        </View>
       </XStack>
-    </View>
-  );
-}
 
-// Debug version to check your data structure
-export function CommentsDebugSection({
-  comments,
-  userId,
-  sellerId,
-}: {
-  comments: CommentDetails[] | null | undefined;
-  userId: string;
-  sellerId: string;
-}) {
-  console.log("Comments data:", JSON.stringify(comments, null, 2));
-
-  return (
-    <View gap="$3">
-      <Text fontSize="$7" fontWeight="500">
-        Comments Debug
-      </Text>
-
-      <Text fontSize="$3" fontFamily="$mono">
-        {JSON.stringify(comments, null, 2)}
-      </Text>
-
-      {/* Use the fixed component above */}
-      <CommentsSection
-        comments={comments}
-        userId={userId}
-        sellerId={sellerId}
+      {/* Edit Bottom Sheet */}
+      <EditBottomSheet
+        ref={editBottomSheetRef}
+        initialText={selectedComment?.content || ""}
+        onEdit={handleEditConfirm}
+        onDelete={handleDeleteConfirm}
+        placeholder="Edit your comment..."
+        title="Edit Comment"
+        subtitle="Choose what you'd like to do with your comment"
+        editButtonText="Edit Comment"
+        deleteButtonText="Delete Comment"
       />
     </View>
   );
