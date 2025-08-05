@@ -11,7 +11,7 @@ import {
   Text,
   TextArea,
   XStack,
-  YStack
+  YStack,
 } from "tamagui";
 import { DateTimeBottomSheet } from "../forms/date-time-bottom-sheet";
 import { SelectBottomSheet } from "../forms/select-bottom-sheet";
@@ -48,7 +48,7 @@ export interface InputProps {
   /** Input variant that determines behavior and styling */
   variant?: InputVariant;
   /** Input label displayed above the field */
-  label: string;
+  label?: string;
   /** Placeholder text */
   placeholder: string;
   /** Input value (controlled by forms component) */
@@ -131,18 +131,18 @@ export const Input: React.FC<InputProps> = ({
 
   const getDateTimeDisplayText = useCallback(() => {
     if (!value) return placeholder;
-  
+
     try {
       const date = new Date(value);
-      
+
       // Use device's locale automatically
       return date.toLocaleString(undefined, {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: undefined // Let device decide 12/24 hour format
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: undefined, // Let device decide 12/24 hour format
       });
     } catch {
       return value;
@@ -265,33 +265,47 @@ export const Input: React.FC<InputProps> = ({
     fontWeight: "400",
     disabled,
     textTransform: "none" as const,
-    pointerEvents: disabled ? "none" as const : "auto" as const,
+    pointerEvents: disabled ? ("none" as const) : ("auto" as const),
   };
 
   return (
-    <YStack borderRadius="$6" width="100%" gap="$2" opacity={disabled ? 0.8 : 1}>
-      <Paragraph fontWeight="400" color="$mutedForeground">
-        {label}
-      </Paragraph>
+    <YStack
+      borderRadius="$6"
+      width="100%"
+      gap="$2"
+      opacity={disabled ? 0.8 : 1}
+    >
+      {label && (
+        <Paragraph fontWeight="400" color="$mutedForeground">
+          {label}
+        </Paragraph>
+      )}
 
       {isSwitch ? (
-        <XStack 
-        alignItems="center"
-        justifyContent="space-between"
-        borderRadius="$6"
-        backgroundColor="$muted"
-        px="$4"
-        py="$3"
-        minHeight={50}>
-        <Text
-          fontSize="$5"
-          fontWeight="400"
-          color="$mutedForeground"
-          flex={1}
+        <XStack
+          alignItems="center"
+          justifyContent="space-between"
+          borderRadius="$6"
+          backgroundColor="$muted"
+          px="$4"
+          py="$3"
+          minHeight={50}
         >
-          {label}
-        </Text>
-          <Switch size="$4" disabled={disabled} native defaultChecked={switchChecked} onCheckedChange={onSwitchChange}>
+          <Text
+            fontSize="$5"
+            fontWeight="400"
+            color="$mutedForeground"
+            flex={1}
+          >
+            {label}
+          </Text>
+          <Switch
+            size="$4"
+            disabled={disabled}
+            native
+            defaultChecked={switchChecked}
+            onCheckedChange={onSwitchChange}
+          >
             <Switch.Thumb animation="bouncy" />
           </Switch>
         </XStack>
@@ -382,7 +396,7 @@ export const Input: React.FC<InputProps> = ({
           title={selectTitle || `Select ${label}`}
           subtitle={
             selectSubtitle ||
-            `Choose from the available ${label.toLowerCase()} options`
+            `Choose from the available ${label?.toLowerCase()} options`
           }
         />
       )}
@@ -392,7 +406,7 @@ export const Input: React.FC<InputProps> = ({
           onSelect={handleDateTimeSelect}
           initialValue={value}
           title={selectTitle || `Select ${label}`}
-          subtitle={selectSubtitle || `Choose the ${label.toLowerCase()}`}
+          subtitle={selectSubtitle || `Choose the ${label?.toLowerCase()}`}
         />
       )}
     </YStack>
