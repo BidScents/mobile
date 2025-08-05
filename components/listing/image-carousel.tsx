@@ -3,10 +3,11 @@ import { Image } from "expo-image";
 import React from "react";
 import { useSharedValue } from "react-native-reanimated";
 import Carousel, {
-    ICarouselInstance,
-    Pagination,
+  ICarouselInstance,
+  Pagination,
 } from "react-native-reanimated-carousel";
 import { useTheme, View } from "tamagui";
+import { BlurBackButton } from "../ui/blur-back-button";
 
 export function ImageCarousel({
   imageUrls,
@@ -44,7 +45,7 @@ export function ImageCarousel({
         height={height}
         data={imageUrls || []}
         onProgressChange={progress}
-        renderItem={({ index, item }) => (
+        renderItem={({ item }) => (
           <Image
             source={{
               uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${item}`,
@@ -81,6 +82,8 @@ export function ImageCarousel({
           size="medium"
         />
       </View>
+      {/* Back button */}
+      <BlurBackButton />
     </View>
   );
 }
