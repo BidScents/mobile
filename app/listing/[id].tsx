@@ -6,20 +6,24 @@ import { ListingDetailsSection } from "@/components/listing/listing-details-sect
 import { SellerCard } from "@/components/listing/sellar-card";
 import { VoteButtons } from "@/components/listing/vote-buttons";
 import { Container } from "@/components/ui/container";
+import { ShowMoreText } from "@/components/ui/show-more-text";
 import { currency } from "@/constants/constants";
-import { ListingType } from "@bid-scents/shared-sdk";
+import { ListingType, useAuthStore } from "@bid-scents/shared-sdk";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Dimensions } from "react-native";
-import { ScrollView, Text, View, YStack } from "tamagui";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { Separator, Text, View, XStack } from "tamagui";
 import { useListingDetail } from "../../hooks/queries/use-listing";
 
 export default function ListingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: listing, isLoading, error } = useListingDetail(id!);
   const width = Dimensions.get("window").width;
-  const height = Dimensions.get("window").height * 0.5;
+  const height = Dimensions.get("window").height * 0.55;
   const listingType = listing?.listing.listing_type;
+  const { user } = useAuthStore();
+  const isUserSeller = user?.id === listing?.seller.id;
 
   const contactSeller = () => {
     console.log("Contact seller");
@@ -66,7 +70,7 @@ export default function ListingScreen() {
       safeArea={false}
       backgroundColor="$background"
     >
-      <ScrollView>
+      <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
         {/* Image Carousel */}
         <ImageCarousel
           imageUrls={listing.image_urls}
@@ -76,57 +80,86 @@ export default function ListingScreen() {
           favoritesCount={listing.favorites_count}
         />
 
-        <View paddingHorizontal="$4" paddingVertical="$2" marginBottom="$12">
-          {/* Seller Card */}
-          <SellerCard seller={listing.seller} />
+        <View
+          paddingHorizontal="$4"
+          paddingVertical="$2"
+          marginBottom="$12"
+          gap="$5"
+        >
+          <View gap="$2">
+            {/* Seller Card */}
+            <SellerCard seller={listing.seller} />
 
-          {/* Listing Details */}
-          <YStack gap="$1">
-            <Text fontSize="$7" fontWeight="500">
-              {listing.listing.name}
-            </Text>
-            <Text fontSize="$6" fontWeight="400">
-              {listing.listing.brand}
-            </Text>
-            <Text fontSize="$6" fontWeight="500">
+            {/* Listing Details */}
+            <XStack alignItems="flex-end" justifyContent="flex-start" gap="$2">
+              <Text fontSize="$7" fontWeight="500" color="$foreground">
+                {listing.listing.name}
+              </Text>
+              <Separator vertical height={20} borderColor="$mutedForeground" />
+              <Text fontSize="$5" fontWeight="400" color="$mutedForeground">
+                {listing.listing.brand}
+              </Text>
+            </XStack>
+            <Text fontSize="$7" fontWeight="500" color="$foreground">
               {currency}{" "}
               {listingType === ListingType.FIXED_PRICE ||
               listingType === ListingType.NEGOTIABLE
                 ? listing.listing.price
                 : listingType}
             </Text>
-          </YStack>
 
-          {/* Listing Description */}
-          <YStack gap="$1">
-            <Text fontSize="$5" fontWeight="400">
+            <ShowMoreText
+              lines={3}
+              more="Show more"
+              less="Show less"
+              fontSize="$5"
+              color="$foreground"
+              fontWeight="400"
+              buttonColor="$blue10"
+            >
               {listing.listing.description}
-            </Text>
+            </ShowMoreText>
+          </View>
 
-            {/*Listing Details*/}
-            <ListingDetailsSection listing={listing.listing} />
-          </YStack>
-
-          {/* Like/Dislike Buttons */}
-          <VoteButtons
-            totalVotes={listing.total_votes}
-            isUpvoted={listing.is_upvoted}
-            listingId={listing.listing.id}
-          />
+          {/*Listing Details*/}
+          <ListingDetailsSection listing={listing.listing} />
 
           {/* Auction Data */}
           {listingType === ListingType.AUCTION && (
             <AuctionSection auctionDetails={listing.auction_details} />
           )}
 
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontSize="$7" fontWeight="500">
+              Comments
+            </Text>
+
+            {/* Like/Dislike Buttons */}
+            <VoteButtons
+              totalVotes={listing.total_votes}
+              isUpvoted={listing.is_upvoted}
+              listingId={listing.listing.id}
+            />
+          </XStack>
+
           {/* Comments */}
-          <CommentsSection comments={listing.comments} />
+          <CommentsSection
+            comments={listing.comments}
+            userId={user?.id}
+            sellerId={listing.seller.id}
+          />
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Submit Button - Fixed at bottom */}
-     <BottomButton listingType={listingType!} isLoading={isLoading} auctionPress={bidNow} onPress={contactSeller}/>
-
+      {!isUserSeller && (
+        <BottomButton
+          listingType={listingType!}
+          isLoading={isLoading}
+          auctionPress={bidNow}
+          onPress={contactSeller}
+        />
+      )}
     </Container>
   );
 }
