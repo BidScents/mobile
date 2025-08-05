@@ -12,7 +12,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
 import { Animated, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { View, useTheme } from "tamagui";
+import { View } from "tamagui";
 
 const HEADER_HEIGHT_EXPANDED = 55;
 const HEADER_HEIGHT_NARROWED = 110;
@@ -22,7 +22,6 @@ export default function DetailedProfileScreen() {
   const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
-  const theme = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'featured' | 'sold' | 'reviews'>('active');
 

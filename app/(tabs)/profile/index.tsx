@@ -1,9 +1,10 @@
+import { AvatarIcon } from "@/components/ui/avatar-icon";
 import { Container } from "@/components/ui/container";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { Avatar, ScrollView, Text, XStack, YStack, useTheme } from "tamagui";
+import { ScrollView, Text, XStack, YStack, useTheme } from "tamagui";
 
 const SettingsSections = [
   {
@@ -85,26 +86,7 @@ export default function ProfileScreen() {
           }}
         >
           <XStack alignItems="center" gap="$3">
-            <Avatar circular size="$5">
-              {user?.profile_image_url &&
-              user.profile_image_url.trim() !== "" ? (
-                <Avatar.Image
-                  source={{ uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${user.profile_image_url}` }}
-                  onError={() => console.log("Avatar image failed to load")}
-                />
-              ) : null}
-              <Avatar.Fallback
-                backgroundColor="$foreground"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Ionicons
-                  name="person"
-                  size={22}
-                  color={theme.background?.val}
-                />
-              </Avatar.Fallback>
-            </Avatar>
+            <AvatarIcon url={user?.profile_image_url} size="$5" />
 
             <YStack alignSelf="center" gap="$1">
               <Text fontSize="$5" fontWeight="500">
