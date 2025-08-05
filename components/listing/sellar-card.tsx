@@ -2,7 +2,8 @@ import { UserPreview } from "@bid-scents/shared-sdk";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { Avatar, Text, XStack, YStack, useTheme } from "tamagui";
+import { Text, XStack, YStack, useTheme } from "tamagui";
+import { AvatarIcon } from "../ui/avatar-icon";
 
 export function SellerCard({ seller }: { seller: UserPreview }) {
   const theme = useTheme();
@@ -21,24 +22,7 @@ export function SellerCard({ seller }: { seller: UserPreview }) {
       onPress={() => handlePress(`/profile/${seller.id}`)}
     >
       <XStack alignItems="center" gap="$3">
-        <Avatar circular size="$5">
-          {seller.profile_image_url &&
-          seller.profile_image_url.trim() !== "" ? (
-            <Avatar.Image
-              source={{
-                uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${seller.profile_image_url}`,
-              }}
-              onError={() => console.log("Avatar image failed to load")}
-            />
-          ) : null}
-          <Avatar.Fallback
-            backgroundColor="$foreground"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Ionicons name="person" size={22} color={theme.background?.val} />
-          </Avatar.Fallback>
-        </Avatar>
+        <AvatarIcon url={seller.profile_image_url} size="$5" />
 
         <YStack alignSelf="center" gap="$1">
           <Text fontSize="$5" fontWeight="500">
