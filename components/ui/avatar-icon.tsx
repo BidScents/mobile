@@ -1,10 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Avatar, useTheme } from "tamagui";
 
-export function AvatarIcon({ url, size }: { url: string | null | undefined; size: string }) {
+export function AvatarIcon({
+  url,
+  size,
+  onClick,
+}: {
+  url: string | null | undefined;
+  size: string;
+  onClick?: () => void;
+}) {
   const theme = useTheme();
   return (
-    <Avatar circular size={size}>
+    <Avatar circular size={size} onPress={onClick}>
       {url && url.trim() !== "" ? (
         <Avatar.Image
           source={{
