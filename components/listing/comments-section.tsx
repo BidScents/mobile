@@ -146,7 +146,7 @@ export function CommentsSection({
                   {isCurrentUser(comment.commenter?.id || "") && (
                     <View
                       onPress={() => handleEditComment(comment.id)}
-                      hitSlop={30}
+                      hitSlop={20}
                       pressStyle={{ opacity: 0.6, scale: 0.93 }}
                       position="absolute"
                       right="0"
@@ -158,7 +158,7 @@ export function CommentsSection({
                         name="pencil"
                         size={20}
                         color={theme.foreground?.val}
-                        pointerEvents="box-only"
+                        pointerEvents="none"
                       />
                     </View>
                   )}
