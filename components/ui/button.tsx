@@ -172,6 +172,7 @@ export const Button: React.FC<ButtonProps> = ({
       justifyContent="center"
       onPress={handlePress}
       borderRadius={borderRadius}
+      hitSlop={20}
       {...rest}
     >
       {leftIcon && (
