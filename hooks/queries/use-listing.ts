@@ -281,52 +281,13 @@ export function useVoteListing() {
       isUpvote: boolean;
     }) =>
       ListingService.voteListingV1ListingListingIdVotePost(listingId, isUpvote),
-    onMutate: async ({ listingId, isUpvote }) => {
-      // Cancel outgoing queries
-      await queryClient.cancelQueries({
-        queryKey: queryKeys.listings.detail(listingId),
-      });
-
-      // Get current data
-      const previousData = queryClient.getQueryData<ListingDetailsResponse>(
-        queryKeys.listings.detail(listingId)
-      );
-
-      // Optimistically update vote
-      if (previousData) {
-        queryClient.setQueryData<ListingDetailsResponse>(
-          queryKeys.listings.detail(listingId),
-          (old) => {
-            if (!old) return old;
-
-            let voteDiff = 0;
-            // If user had opposite vote, remove it and add new vote (+2 or -2)
-            // If user had no vote, just add new vote (+1 or -1)
-            if (old.is_upvoted === !isUpvote) {
-              voteDiff = isUpvote ? 2 : -2;
-            } else if (old.is_upvoted === null) {
-              voteDiff = isUpvote ? 1 : -1;
-            }
-
-            return {
-              ...old,
-              total_votes: old.total_votes + voteDiff,
-              is_upvoted: isUpvote,
-            };
-          }
-        );
-      }
-
-      return { previousData };
-    },
-    onError: (err, { listingId }, context) => {
-      // Rollback on error
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          queryKeys.listings.detail(listingId),
-          context.previousData
-        );
-      }
+    onSuccess: (_, { listingId }) => {
+      // Delay invalidation to prevent immediate conflicts with optimistic updates
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.listings.detail(listingId),
+        });
+      }, 100);
     },
   });
 }
@@ -340,47 +301,13 @@ export function useUnvoteListing() {
   return useMutation({
     mutationFn: (listingId: string) =>
       ListingService.unvoteListingV1ListingListingIdUnvoteDelete(listingId),
-    onMutate: async (listingId) => {
-      // Cancel outgoing queries
-      await queryClient.cancelQueries({
-        queryKey: queryKeys.listings.detail(listingId),
-      });
-
-      // Get current data
-      const previousData = queryClient.getQueryData<ListingDetailsResponse>(
-        queryKeys.listings.detail(listingId)
-      );
-
-      // Optimistically remove vote
-      if (previousData) {
-        queryClient.setQueryData<ListingDetailsResponse>(
-          queryKeys.listings.detail(listingId),
-          (old) => {
-            if (!old) return old;
-
-            // Remove the current vote
-            const voteDiff =
-              old.is_upvoted === true ? -1 : old.is_upvoted === false ? 1 : 0;
-
-            return {
-              ...old,
-              total_votes: old.total_votes + voteDiff,
-              is_upvoted: null,
-            };
-          }
-        );
-      }
-
-      return { previousData };
-    },
-    onError: (err, listingId, context) => {
-      // Rollback on error
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          queryKeys.listings.detail(listingId),
-          context.previousData
-        );
-      }
+    onSuccess: (_, listingId) => {
+      // Delay invalidation to prevent immediate conflicts with optimistic updates
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.listings.detail(listingId),
+        });
+      }, 100);
     },
   });
 }
@@ -506,9 +433,7 @@ export function useUpdateComment() {
             return {
               ...old,
               comments: old.comments?.map((comment) =>
-                comment.id === commentId
-                  ? { ...comment, content }
-                  : comment
+                comment.id === commentId ? { ...comment, content } : comment
               ),
             };
           }
