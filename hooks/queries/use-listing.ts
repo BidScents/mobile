@@ -476,16 +476,61 @@ export function useUpdateComment() {
     mutationFn: ({
       commentId,
       content,
+      listingId,
     }: {
       commentId: string;
       content: string;
+      listingId: string;
     }) =>
       ListingService.updateCommentV1ListingCommentCommentIdPatch(commentId, {
         content,
       }),
-    onSuccess: (response: CommentResponse, { commentId }) => {
-      // Invalidate all listing details that might contain this comment
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all });
+    onMutate: async ({ commentId, content, listingId }) => {
+      // Cancel outgoing queries for this listing
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
+
+      // Get current listing data
+      const previousData = queryClient.getQueryData<ListingDetailsResponse>(
+        queryKeys.listings.detail(listingId)
+      );
+
+      // Optimistically update the comment content
+      if (previousData) {
+        queryClient.setQueryData<ListingDetailsResponse>(
+          queryKeys.listings.detail(listingId),
+          (old) => {
+            if (!old) return old;
+
+            return {
+              ...old,
+              comments: old.comments?.map((comment) =>
+                comment.id === commentId
+                  ? { ...comment, content }
+                  : comment
+              ),
+            };
+          }
+        );
+      }
+
+      return { previousData };
+    },
+    onSuccess: (response: CommentResponse, { listingId }) => {
+      // Invalidate and refetch to get the real updated comment data from server
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
+    },
+    onError: (err, { listingId }, context) => {
+      // Rollback optimistic update on error
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          queryKeys.listings.detail(listingId),
+          context.previousData
+        );
+      }
     },
   });
 }
@@ -497,11 +542,58 @@ export function useDeleteComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (commentId: string) =>
+    mutationFn: ({
+      commentId,
+      listingId,
+    }: {
+      commentId: string;
+      listingId: string;
+    }) =>
       ListingService.deleteCommentV1ListingCommentCommentIdDelete(commentId),
-    onSuccess: (_, commentId) => {
-      // Invalidate all listing details that might contain this comment
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all });
+    onMutate: async ({ commentId, listingId }) => {
+      // Cancel outgoing queries for this listing
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
+
+      // Get current listing data
+      const previousData = queryClient.getQueryData<ListingDetailsResponse>(
+        queryKeys.listings.detail(listingId)
+      );
+
+      // Optimistically remove the comment
+      if (previousData) {
+        queryClient.setQueryData<ListingDetailsResponse>(
+          queryKeys.listings.detail(listingId),
+          (old) => {
+            if (!old) return old;
+
+            return {
+              ...old,
+              comments: old.comments?.filter(
+                (comment) => comment.id !== commentId
+              ),
+            };
+          }
+        );
+      }
+
+      return { previousData };
+    },
+    onSuccess: (_, { listingId }) => {
+      // Invalidate and refetch to ensure consistency
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
+    },
+    onError: (err, { listingId }, context) => {
+      // Rollback optimistic update on error
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          queryKeys.listings.detail(listingId),
+          context.previousData
+        );
+      }
     },
   });
 }
