@@ -197,7 +197,6 @@ export function CommentsSection({
       ) : (
         <View
           padding="$6"
-          backgroundColor="$gray1"
           borderRadius="$4"
           alignItems="center"
           justifyContent="center"
@@ -205,13 +204,13 @@ export function CommentsSection({
           <Text
             fontSize="$5"
             fontWeight="600"
-            color="$gray11"
+            color="$mutedForeground"
             textAlign="center"
             marginBottom="$2"
           >
             No Comments Yet
           </Text>
-          <Text fontSize="$3" color="$gray10" textAlign="center">
+          <Text fontSize="$3" color="$mutedForeground" textAlign="center">
             Be the first to leave a comment about this listing.
           </Text>
         </View>
