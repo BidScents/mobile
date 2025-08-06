@@ -1,3 +1,4 @@
+import AuctionButton from "@/components/listing/auction-button";
 import { AuctionSection } from "@/components/listing/auction-section";
 import BottomButton from "@/components/listing/bottom-button";
 import { CommentsSection } from "@/components/listing/comments-section";
@@ -5,6 +6,8 @@ import { ImageCarousel } from "@/components/listing/image-carousel";
 import { ListingDetailsSection } from "@/components/listing/listing-details-section";
 import { SellerCard } from "@/components/listing/sellar-card";
 import { VoteButtons } from "@/components/listing/vote-buttons";
+import { ListingDetailSkeleton } from "@/components/suspense/listing-detail-skeleton";
+import { BlurBackButton } from "@/components/ui/blur-back-button";
 import { Container } from "@/components/ui/container";
 import { ShowMoreText } from "@/components/ui/show-more-text";
 import { currency } from "@/constants/constants";
@@ -13,7 +16,7 @@ import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Dimensions } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Separator, Text, View, XStack } from "tamagui";
+import { Text, View, XStack } from "tamagui";
 import { useListingDetail } from "../../hooks/queries/use-listing";
 
 export default function ListingScreen() {
@@ -25,6 +28,8 @@ export default function ListingScreen() {
   const { user } = useAuthStore();
   const isUserSeller = user?.id === listing?.seller.id;
 
+  console.log("Votes", listing?.total_votes);
+
   const contactSeller = () => {
     console.log("Contact seller");
   };
@@ -33,16 +38,9 @@ export default function ListingScreen() {
     console.log("Bid now");
   };
 
-  if (isLoading)
-    return (
-      <Container
-        variant="padded"
-        safeArea={["top", "bottom"]}
-        backgroundColor="$background"
-      >
-        <Text>Loading...</Text>
-      </Container>
-    );
+  if (isLoading) {
+    return <ListingDetailSkeleton width={width} />;
+  }
   if (error)
     return (
       <Container
@@ -70,7 +68,13 @@ export default function ListingScreen() {
       safeArea={false}
       backgroundColor="$background"
     >
-      <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
+      {/* Back Button */}
+      <BlurBackButton />
+
+      <KeyboardAwareScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Image Carousel */}
         <ImageCarousel
           imageUrls={listing.image_urls}
@@ -84,29 +88,41 @@ export default function ListingScreen() {
           paddingHorizontal="$4"
           paddingVertical="$2"
           marginBottom="$12"
-          gap="$5"
+          gap="$6"
         >
           <View gap="$2">
             {/* Seller Card */}
             <SellerCard seller={listing.seller} />
 
             {/* Listing Details */}
-            <XStack alignItems="flex-end" justifyContent="flex-start" gap="$2">
-              <Text fontSize="$7" fontWeight="500" color="$foreground">
-                {listing.listing.name}
+            <View gap="$3">
+              <View>
+                <Text
+                  fontSize="$8"
+                  fontWeight="600"
+                  color="$foreground"
+                  lineHeight="$8"
+                >
+                  {listing.listing.name}
+                </Text>
+                <Text
+                  fontSize="$4"
+                  fontWeight="400"
+                  color="$mutedForeground"
+                  marginTop="$1"
+                >
+                  {listing.listing.brand}
+                </Text>
+              </View>
+
+              <Text fontSize="$7" fontWeight="600" color="$foreground">
+                {currency}
+                {listingType === ListingType.FIXED_PRICE ||
+                listingType === ListingType.NEGOTIABLE
+                  ? listing.listing.price
+                  : listingType}
               </Text>
-              <Separator vertical height={20} borderColor="$mutedForeground" />
-              <Text fontSize="$5" fontWeight="400" color="$mutedForeground">
-                {listing.listing.brand}
-              </Text>
-            </XStack>
-            <Text fontSize="$7" fontWeight="500" color="$foreground">
-              {currency}{" "}
-              {listingType === ListingType.FIXED_PRICE ||
-              listingType === ListingType.NEGOTIABLE
-                ? listing.listing.price
-                : listingType}
-            </Text>
+            </View>
 
             <ShowMoreText
               lines={3}
@@ -129,36 +145,36 @@ export default function ListingScreen() {
             <AuctionSection auctionDetails={listing.auction_details} />
           )}
 
-          <XStack alignItems="center" justifyContent="space-between">
-            <Text fontSize="$7" fontWeight="500">
-              Comments
-            </Text>
+          <View gap="$4">
+            <XStack alignItems="center" justifyContent="space-between">
+              <Text fontSize="$8" fontWeight="600" color="$foreground">
+                Comments
+              </Text>
 
-            {/* Like/Dislike Buttons */}
-            <VoteButtons
-              totalVotes={listing.total_votes}
-              isUpvoted={listing.is_upvoted}
+              {/* Like/Dislike Buttons */}
+              <VoteButtons
+                totalVotes={listing.total_votes}
+                isUpvoted={listing.is_upvoted}
+                listingId={listing.listing.id}
+              />
+            </XStack>
+
+            {/* Comments */}
+            <CommentsSection
+              comments={listing.comments}
+              userId={user?.id}
+              sellerId={listing.seller.id}
               listingId={listing.listing.id}
             />
-          </XStack>
-
-          {/* Comments */}
-          <CommentsSection
-            comments={listing.comments}
-            userId={user?.id}
-            sellerId={listing.seller.id}
-          />
+          </View>
         </View>
       </KeyboardAwareScrollView>
 
       {/* Submit Button - Fixed at bottom */}
-      {!isUserSeller && (
-        <BottomButton
-          listingType={listingType!}
-          isLoading={isLoading}
-          auctionPress={bidNow}
-          onPress={contactSeller}
-        />
+      {listingType === ListingType.AUCTION ? (
+        <AuctionButton isLoading={isLoading} onPress={contactSeller} />
+      ) : (
+        <BottomButton isLoading={isLoading} onPress={contactSeller} />
       )}
     </Container>
   );
