@@ -1,4 +1,5 @@
 import { Text, XStack } from "tamagui";
+import { formatAllCapsText } from "../../utils/utility-functions";
 
 interface AuctionStatusProps {
   status: string;
@@ -15,7 +16,7 @@ export function AuctionStatus({ status }: AuctionStatusProps) {
       px="$3"
     >
       <Text fontSize="$5" fontWeight="500" color="$foreground">
-        {status}
+        {formatAllCapsText(status)}
       </Text>
     </XStack>
   );
