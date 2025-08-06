@@ -91,7 +91,7 @@ export default function Homepage() {
     switch (item.type) {
       case 'header':
         return (
-          <XStack paddingHorizontal="$4" paddingVertical="$2" justifyContent="space-between" alignItems="center">
+          <XStack paddingHorizontal="0" paddingVertical="$2" justifyContent="space-between" alignItems="center">
             <Text fontSize="$8" fontWeight="600" color="$foreground">{item.title}</Text>
             {item.showViewAll && (
               <Text fontSize="$3" color="$mutedForeground">View all</Text>
@@ -115,7 +115,7 @@ export default function Homepage() {
 
   return (
     <Container
-      variant="fullscreen"
+      variant="padded"
       safeArea={["bottom"]}
       backgroundColor="$background"
     >
@@ -147,7 +147,7 @@ function FeaturedGridSection({ listings, isLoading }: { listings: ListingCardTyp
   }, [listings])
 
   return (
-    <YStack gap="$3" paddingHorizontal="$4">
+    <YStack gap="$3" paddingHorizontal="0">
       {rows.map((row, rowIndex) => (
         <XStack key={rowIndex} gap="$3" justifyContent="space-between">
           {row.map((listing, itemIndex) => (
@@ -174,7 +174,7 @@ function FeaturedGridSection({ listings, isLoading }: { listings: ListingCardTyp
 function HorizontalListSection({ listings, isLoading }: { listings: ListingCardType[]; isLoading: boolean }) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      <XStack gap="$3" paddingHorizontal="$4">
+      <XStack gap="$3" paddingHorizontal="0">
         {listings.map((listing, index) => (
           <YStack key={isLoading ? `skeleton-${index}` : listing.id} width={200}>
             {isLoading ? (
