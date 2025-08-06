@@ -1,9 +1,9 @@
 import { CommentDetails } from "@bid-scents/shared-sdk";
 import { View } from "tamagui";
+import { useCommentsLogic } from "../../hooks/use-comments-logic";
 import { EditBottomSheet } from "../forms/edit-bottom-sheet";
 import { AddCommentForm } from "./add-comment-form";
 import { CommentsList } from "./comments-list";
-import { useCommentsLogic } from "./use-comments-logic";
 
 interface CommentsSectionProps {
   comments: CommentDetails[] | null | undefined;

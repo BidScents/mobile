@@ -1,8 +1,8 @@
 import { CommentDetails } from "@bid-scents/shared-sdk";
 import * as Haptics from "expo-haptics";
 import { useRef, useState } from "react";
-import { useDeleteComment, useUpdateComment } from "../../hooks/queries/use-listing";
-import { EditBottomSheetMethods } from "../forms/edit-bottom-sheet";
+import { EditBottomSheetMethods } from "../components/forms/edit-bottom-sheet";
+import { useDeleteComment, useUpdateComment } from "./queries/use-listing";
 
 interface UseCommentsLogicProps {
   listingId: string;
