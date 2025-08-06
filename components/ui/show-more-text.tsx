@@ -1,3 +1,4 @@
+import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import { Text, TextProps, View } from "tamagui";
 
@@ -80,6 +81,7 @@ export const ShowMoreText: React.FC<ShowMoreTextProps> = ({
    * Supports both controlled and uncontrolled component patterns
    */
   const handleToggle = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
     if (isControlled) {
       // In controlled mode, notify parent of state change
       onToggle?.(!expanded);
@@ -107,6 +109,7 @@ export const ShowMoreText: React.FC<ShowMoreTextProps> = ({
           marginTop="$1"
           onPress={handleToggle}
           cursor="pointer"
+          hitSlop={10}
         >
           {expanded ? less : more}
         </Text>

@@ -1,5 +1,5 @@
 import { ListingDetails } from "@bid-scents/shared-sdk";
-import { Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack, useTheme } from "tamagui";
 import { formatAllCapsText } from "../../utils/utility-functions";
 
 export function ListingDetailsSection({
@@ -7,6 +7,7 @@ export function ListingDetailsSection({
 }: {
   listing: ListingDetails;
 }) {
+  const theme = useTheme();
   const listingDetails = [
     {
       title: "Category",
@@ -38,28 +39,27 @@ export function ListingDetailsSection({
     },
   ];
   return (
-    <YStack gap="$3">
-      <Text fontSize="$7" fontWeight="500">
-        Listing Details
-      </Text>
-      <YStack gap="$1" bg="$muted" borderRadius="$6" px="$4" py="$2">
-        {listingDetails.map((detail) => (
-          <XStack
-            key={detail.title}
-            alignItems="center"
-            justifyContent="space-between"
-            gap="$2"
-            py="$2.5"
-          >
-            <Text fontSize="$5" fontWeight="500">
-              {detail.title}
-            </Text>
+    <YStack gap="$1" bg="$muted" borderRadius="$6" px="$4" py="$2">
+      {listingDetails.map((detail) => (
+        <XStack
+          key={detail.title}
+          alignItems="center"
+          justifyContent="space-between"
+          gap="$2"
+          py="$3"
+        >
+          <Text fontSize="$5" fontWeight="500">
+            {detail.title}
+          </Text>
+
+          <XStack alignItems="center" gap="$3">
             <Text fontSize="$5" fontWeight="400">
               {detail.value}
             </Text>
+            {/* <Ionicons name="chevron-forward" size={20} color={theme.foreground?.val} /> */}
           </XStack>
-        ))}
-      </YStack>
+        </XStack>
+      ))}
     </YStack>
   );
 }
