@@ -267,11 +267,9 @@ export function useUnfavoriteListing() {
 // ========================================
 
 /**
- * Vote listing mutation (upvote/downvote) with optimistic updates
+ * Vote listing mutation - UI updates handled locally in component
  */
 export function useVoteListing() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       listingId,
@@ -281,34 +279,18 @@ export function useVoteListing() {
       isUpvote: boolean;
     }) =>
       ListingService.voteListingV1ListingListingIdVotePost(listingId, isUpvote),
-    onSuccess: (_, { listingId }) => {
-      // Delay invalidation to prevent immediate conflicts with optimistic updates
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.listings.detail(listingId),
-        });
-      }, 100);
-    },
+    // No invalidation - local state handles UI updates
   });
 }
 
 /**
- * Remove vote mutation with optimistic updates
+ * Remove vote mutation - UI updates handled locally in component
  */
 export function useUnvoteListing() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (listingId: string) =>
       ListingService.unvoteListingV1ListingListingIdUnvoteDelete(listingId),
-    onSuccess: (_, listingId) => {
-      // Delay invalidation to prevent immediate conflicts with optimistic updates
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.listings.detail(listingId),
-        });
-      }, 100);
-    },
+    // No invalidation - local state handles UI updates
   });
 }
 

@@ -1,8 +1,8 @@
 import { useUnvoteListing, useVoteListing } from "@/hooks/queries/use-listing";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useCallback, useRef, useState } from "react";
-import { Text, XStack, useTheme } from "tamagui";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Text, useTheme, View, XStack } from "tamagui";
 
 export function VoteButtons({
   totalVotes,
@@ -17,26 +17,30 @@ export function VoteButtons({
   const voteListing = useVoteListing();
   const unvoteListing = useUnvoteListing();
 
-  // Initialize state only once - don't sync with props after that
+  // Local state for instant UI updates
   const [currentVotes, setCurrentVotes] = useState(totalVotes);
   const [currentIsUpvoted, setCurrentIsUpvoted] = useState(isUpvoted);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [lastListingId, setLastListingId] = useState(listingId);
 
-  // Initialize state only on first render or when listingId changes
-  if (!isInitialized || currentVotes === 0) {
-    setCurrentVotes(totalVotes);
-    setCurrentIsUpvoted(isUpvoted);
-    setIsInitialized(true);
-  }
+  // Sync with props when listingId changes or when props update from server
+  useEffect(() => {
+    if (listingId !== lastListingId) {
+      setCurrentVotes(totalVotes);
+      setCurrentIsUpvoted(isUpvoted);
+      setLastListingId(listingId);
+    }
+  }, [listingId, totalVotes, isUpvoted, lastListingId]);
 
   // Debounce refs
   const debounceTimeoutRef = useRef<number | null>(null);
 
   // Determine icon names and colors based on current vote state
   const upvoteIcon =
-    currentIsUpvoted === true ? "thumbs-up" : "thumbs-up-outline";
+    currentIsUpvoted === true ? "caret-up-circle" : "caret-up-circle-outline";
   const downvoteIcon =
-    currentIsUpvoted === false ? "thumbs-down" : "thumbs-down-outline";
+    currentIsUpvoted === false
+      ? "caret-down-circle"
+      : "caret-down-circle-outline";
 
   const debouncedVote = useCallback(
     (action: "upvote" | "downvote" | "unvote") => {
@@ -64,9 +68,9 @@ export function VoteButtons({
   );
 
   const handleUpvote = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
 
-    // Immediate UI update
+    // Instant UI update
     if (currentIsUpvoted === true) {
       // Remove upvote
       setCurrentVotes((prev) => prev - 1);
@@ -82,9 +86,9 @@ export function VoteButtons({
   }, [currentIsUpvoted, debouncedVote]);
 
   const handleDownvote = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
 
-    // Immediate UI update
+    // Instant UI update
     if (currentIsUpvoted === false) {
       // Remove downvote
       setCurrentVotes((prev) => prev + 1);
@@ -102,21 +106,23 @@ export function VoteButtons({
   return (
     <XStack alignItems="center" justifyContent="center" gap="$2">
       <XStack alignItems="center" gap="$2">
-        <Ionicons
-          name={upvoteIcon}
-          size={28}
-          color={theme.foreground?.val}
-          onPress={() => handleUpvote()}
-        />
-        <Text fontSize="$4" fontWeight="400">
+        <View onPress={() => handleUpvote()} hitSlop={10}>
+          <Ionicons name={upvoteIcon} size={30} color={theme.foreground?.val} />
+        </View>
+        <Text fontSize="$5" fontWeight="500">
           {currentVotes}
         </Text>
-        <Ionicons
-          name={downvoteIcon}
-          size={28}
-          color={theme.foreground?.val}
+        <View
           onPress={() => handleDownvote()}
-        />
+          hitSlop={10}
+          pressStyle={{ opacity: 0.6, scale: 0.95 }}
+        >
+          <Ionicons
+            name={downvoteIcon}
+            size={30}
+            color={theme.foreground?.val}
+          />
+        </View>
       </XStack>
     </XStack>
   );
