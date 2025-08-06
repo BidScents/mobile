@@ -4,16 +4,16 @@ import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/typ
 import { useTheme } from "@tamagui/core";
 import * as Haptics from "expo-haptics";
 import React, {
-    forwardRef,
-    useEffect,
-    useImperativeHandle,
-    useState,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
 } from "react";
 import { Pressable } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text, View, XStack, YStack } from "tamagui";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { KeyboardAwareView } from "../ui/keyboard-aware-view";
 
 export interface EditBottomSheetMethods extends BottomSheetModalMethods {
   dismiss: () => void;
@@ -90,16 +90,6 @@ export const EditBottomSheet = forwardRef<
       setIsEditing(true);
     };
 
-    // // Effect to handle snapping and focusing when entering edit mode
-    // useEffect(() => {
-    //   if (isEditing) {
-    //     // Snap to 80% when entering edit mode
-    //     setTimeout(() => {
-    //       bottomSheetRef.current?.snapToIndex(0); // 0 index = 80% (first snap point)
-    //     }, 100);
-    //   }
-    // }, [isEditing]);
-
     const handleDeletePress = () => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       bottomSheetRef.current?.dismiss();
@@ -116,8 +106,8 @@ export const EditBottomSheet = forwardRef<
 
     const handleBackToOptions = () => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      setIsEditing(false);
       setEditText(initialText);
+      setIsEditing(false);
     };
 
     return (
@@ -126,16 +116,11 @@ export const EditBottomSheet = forwardRef<
         snapPoints={isEditing ? ["75%"] : ["40%", "60%"]}
         backgroundStyle={{ backgroundColor: theme.background?.val || "white" }}
         onDismiss={() => {
-          setIsEditing(false);
           setEditText(initialText);
+          setIsEditing(false);
         }}
       >
-        <KeyboardAwareScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          extraKeyboardSpace={20}
-        >
+        <KeyboardAwareView>
           <YStack gap="$4" padding="$4" paddingBottom="$8" flex={1}>
             {/* Header */}
             <YStack gap="$2">
@@ -310,7 +295,7 @@ export const EditBottomSheet = forwardRef<
               </YStack>
             )}
           </YStack>
-        </KeyboardAwareScrollView>
+        </KeyboardAwareView>
       </BottomSheet>
     );
   }
