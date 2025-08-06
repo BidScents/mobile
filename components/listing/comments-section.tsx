@@ -17,6 +17,7 @@ import {
 import { AvatarIcon } from "../ui/avatar-icon";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { ShowMoreText } from "../ui/show-more-text";
 
 export function CommentsSection({
   comments,
@@ -148,31 +149,31 @@ export function CommentsSection({
                       onPress={() => handleEditComment(comment.id)}
                       hitSlop={20}
                       pressStyle={{ opacity: 0.6, scale: 0.93 }}
-                      position="absolute"
-                      right="0"
-                      top="0"
                       borderRadius="$10"
-                      padding="$2"
                     >
-                      <Ionicons
-                        name="pencil"
-                        size={20}
-                        color={theme.foreground?.val}
-                        pointerEvents="none"
-                      />
+                      <Text
+                        fontSize="$1"
+                        fontWeight="500"
+                        color="$mutedForeground"
+                      >
+                        Edit
+                      </Text>
                     </View>
                   )}
                 </XStack>
 
                 {/* Comment Content */}
-                <Text
+                <ShowMoreText
+                  lines={1}
+                  more="Show more"
+                  less="Show less"
+                  buttonColor="$blue10"
                   fontSize="$4"
                   fontWeight="400"
-                  lineHeight="$4"
-                  flexWrap="wrap"
+                  color="$foreground"
                 >
                   {comment.content}
-                </Text>
+                </ShowMoreText>
               </YStack>
             </XStack>
           ))}
@@ -232,7 +233,6 @@ export function CommentsSection({
           hitSlop={30}
           pressStyle={{ opacity: 0.6, scale: 0.93 }}
           onPress={handlePostComment}
-          px={"$2"}
         >
           <Ionicons
             name="send"
