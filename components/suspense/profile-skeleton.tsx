@@ -138,19 +138,31 @@ export function ProfileSkeleton({ width = 390 }: ProfileSkeletonProps) {
           </ContentLoader>
         </View>
 
-        {/* Listings Grid */}
+        {/* Listings Grid - Multiple rows to fill screen */}
         <YStack flex={1} paddingHorizontal="$4">
           <XStack gap="$3" marginBottom="$3">
-            <ListingCardSkeleton width={170} height={220} />
-            <ListingCardSkeleton width={170} height={220} />
+            <ListingCardSkeleton width={170} height={240} />
+            <ListingCardSkeleton width={170} height={240} />
           </XStack>
           <XStack gap="$3" marginBottom="$3">
-            <ListingCardSkeleton width={170} height={220} />
-            <ListingCardSkeleton width={170} height={220} />
+            <ListingCardSkeleton width={170} height={240} />
+            <ListingCardSkeleton width={170} height={240} />
           </XStack>
           <XStack gap="$3" marginBottom="$3">
-            <ListingCardSkeleton width={170} height={220} />
-            <ListingCardSkeleton width={170} height={220} />
+            <ListingCardSkeleton width={170} height={240} />
+            <ListingCardSkeleton width={170} height={240} />
+          </XStack>
+          <XStack gap="$3" marginBottom="$3">
+            <ListingCardSkeleton width={170} height={240} />
+            <ListingCardSkeleton width={170} height={240} />
+          </XStack>
+          <XStack gap="$3" marginBottom="$3">
+            <ListingCardSkeleton width={170} height={240} />
+            <ListingCardSkeleton width={170} height={240} />
+          </XStack>
+          <XStack gap="$3" marginBottom="$3">
+            <ListingCardSkeleton width={170} height={240} />
+            <ListingCardSkeleton width={170} height={240} />
           </XStack>
         </YStack>
       </Container>
@@ -159,7 +171,8 @@ export function ProfileSkeleton({ width = 390 }: ProfileSkeletonProps) {
 }
 
 /**
- * Simplified listing card skeleton for use within profile grid
+ * Enhanced listing card skeleton matching the actual listing layout
+ * Includes auction timer, bid count, and proper spacing
  */
 function ListingCardSkeleton({ width, height }: { width: number; height: number }) {
   const colorScheme = useColorScheme()
@@ -183,22 +196,26 @@ function ListingCardSkeleton({ width, height }: { width: number; height: number 
         foregroundColor={foregroundColor}
       >
         {/* Image area */}
-        <Rect x="0" y="0" rx="8" ry="8" width={width} height="140" />
+        <Rect x="0" y="0" rx="8" ry="8" width={width} height="150" />
         
-        {/* Fixed Price badge */}
-        <Rect x="8" y="8" rx="4" ry="4" width="50" height="14" />
+        {/* Auction timer (1d 19h 7m) - top left */}
+        <Rect x="8" y="8" rx="4" ry="4" width="60" height="16" />
         
-        {/* Heart icon */}
-        <Circle cx={width - 18} cy="25" r="8" />
+        {/* Bid count (0 bids) - top right */}
+        <Rect x={width - 50} y="8" rx="4" ry="4" width="42" height="16" />
+        
+        {/* Heart icon with count */}
+        <Circle cx={width - 25} cy={height - 70} r="12" />
+        <Rect x={width - 35} y={height - 55} rx="2" ry="2" width="20" height="8" />
         
         {/* Title */}
-        <Rect x="8" y="155" rx="3" ry="3" width={width - 40} height="12" />
+        <Rect x="8" y="165" rx="3" ry="3" width={width - 40} height="14" />
         
         {/* Details (100% full • 50ml) */}
-        <Rect x="8" y="172" rx="3" ry="3" width={width - 60} height="10" />
+        <Rect x="8" y="185" rx="3" ry="3" width={width - 60} height="10" />
         
-        {/* Price */}
-        <Rect x="8" y="190" rx="3" ry="3" width="50" height="11" />
+        {/* Current bid price */}
+        <Rect x="8" y="205" rx="3" ry="3" width="80" height="12" />
       </ContentLoader>
     </View>
   )
