@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Text, View } from "tamagui";
+import { Text, TextProps, View } from "tamagui";
 
 /**
  * Props for the ShowMoreText component
  */
-interface ShowMoreTextProps {
+interface ShowMoreTextProps extends Omit<TextProps, 'children' | 'numberOfLines'> {
   /** The text content to display */
   children: string;
   /** Maximum number of lines to show when collapsed (default: 3) */
@@ -17,12 +17,6 @@ interface ShowMoreTextProps {
   expanded?: boolean;
   /** Callback fired when expand/collapse state changes */
   onToggle?: (expanded: boolean) => void;
-  /** Font size for both text and button (default: "$4") */
-  fontSize?: string;
-  /** Text color (default: "$foreground") */
-  color?: string;
-  /** Font weight for both text and button (default: "400") */
-  fontWeight?: string;
   /** Color for the show more/less button (default: "$blue10") */
   buttonColor?: string;
 }
@@ -58,11 +52,9 @@ export const ShowMoreText: React.FC<ShowMoreTextProps> = ({
   more = "Show more",
   less = "Show less",
   expanded: controlledExpanded,
-  fontSize = "$4",
-  color = "$foreground",
-  fontWeight = "400",
   buttonColor = "$blue10",
   onToggle,
+  ...textProps
 }) => {
   const [internalExpanded, setInternalExpanded] = useState(false);
   const [needsTruncation, setNeedsTruncation] = useState(false);
@@ -102,19 +94,17 @@ export const ShowMoreText: React.FC<ShowMoreTextProps> = ({
     <View>
       <Text
         ref={textRef}
-        fontSize={fontSize}
-        color={color}
-        fontWeight={fontWeight}
         numberOfLines={expanded ? undefined : lines}
+        {...textProps}
       >
         {children}
       </Text>
       {needsTruncation && (
         <Text
-          fontSize={fontSize}
+          fontSize={textProps.fontSize || "$4"}
           color={buttonColor}
-          fontWeight={fontWeight}
-          marginTop="$2"
+          fontWeight={textProps.fontWeight || "400"}
+          marginTop="$1"
           onPress={handleToggle}
           cursor="pointer"
         >
