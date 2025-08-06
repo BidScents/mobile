@@ -3,7 +3,7 @@ import { VoteButtons } from "./vote-buttons";
 
 interface CommentsHeaderProps {
   totalVotes: number;
-  isUpvoted: boolean | null;
+  isUpvoted: boolean | null | undefined;
   listingId: string;
 }
 
