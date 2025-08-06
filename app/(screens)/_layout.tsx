@@ -18,6 +18,7 @@ export default function ProfileLayout() {
       <Stack.Screen
         name="add-listing"
         options={{
+          title: "Add Listing",
           headerShadowVisible: false,
           animation: "slide_from_bottom",
           headerLeft: () => <CloseButton />,
