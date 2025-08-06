@@ -1,4 +1,3 @@
-// capitalize first letter and lowercase the rest
 export const formatAllCapsText = (text: string) => {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };
