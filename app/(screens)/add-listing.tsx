@@ -154,7 +154,7 @@ export default function AddListingScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <YStack flex={1} gap="$5" minHeight="100%">
+        <YStack flex={1} gap="$5">
           {/* Images Section */}
           <YStack gap="$3">
             <MultipleImagePicker
