@@ -6,6 +6,7 @@ import Carousel, {
   ICarouselInstance,
   Pagination,
 } from "react-native-reanimated-carousel";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme, View } from "tamagui";
 
 export function ImageCarousel({
@@ -24,6 +25,7 @@ export function ImageCarousel({
   const theme = useTheme();
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
+  const insets = useSafeAreaInsets();
 
   const onPressPagination = (index: number) => {
     ref.current?.scrollTo({
@@ -74,7 +76,7 @@ export function ImageCarousel({
         }}
         onPress={onPressPagination}
       />
-      <View style={{ position: "absolute", bottom: 20, right: 20 }}>
+      <View style={{ position: "absolute", top: insets.top + 10, right: 20 }}>
         <FavoriteButton
           listingId={listingId}
           initialCount={favoritesCount}
