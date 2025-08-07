@@ -1,5 +1,6 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { useTheme } from "@tamagui/core";
 import * as Haptics from "expo-haptics";
@@ -9,11 +10,9 @@ import React, {
   useImperativeHandle,
   useState,
 } from "react";
-import { Pressable } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { Text, View, XStack, YStack } from "tamagui";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { KeyboardAwareView } from "../ui/keyboard-aware-view";
 
 export interface EditBottomSheetMethods {
   present: () => void;
@@ -106,15 +105,16 @@ export const EditBottomSheet = forwardRef<
     return (
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={isEditing ? ["75%"] : ["40%", "60%"]}
-        backgroundStyle={{ backgroundColor: theme.background?.val || "white" }}
+        snapPoints={isEditing ? ["30%"] : ["40%"]}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+        enableDynamicSizing={true}
         onDismiss={() => {
           setEditText(initialText);
           setIsEditing(false);
         }}
       >
-        <KeyboardAwareView>
-          <YStack gap="$4" padding="$4" paddingBottom="$8" flex={1}>
+          <YStack gap="$4" padding="$4" paddingBottom="$8" >
             {/* Header */}
             <YStack gap="$2">
               <XStack alignItems="center" justifyContent="space-between">
@@ -150,13 +150,22 @@ export const EditBottomSheet = forwardRef<
               /* Edit Mode */
               <YStack gap="$4" flex={1}>
                 <View flex={1}>
-                  <Input
-                    variant="multiline"
+                  <BottomSheetTextInput
+                    style={[
+                      styles.textInput,
+                      {
+                        backgroundColor: theme.muted?.val,
+                        color: theme.foreground?.val,
+                        borderColor: theme.border?.val,
+                      },
+                    ]}
                     placeholder={placeholder}
+                    placeholderTextColor={theme.mutedForeground?.val}
                     value={editText}
                     onChangeText={setEditText}
+                    multiline={true}
                     numberOfLines={4}
-                    key={isEditing ? "editing" : "not-editing"} // Force re-render to trigger focus
+                    textAlignVertical="top"
                   />
                 </View>
 
@@ -288,10 +297,22 @@ export const EditBottomSheet = forwardRef<
               </YStack>
             )}
           </YStack>
-        </KeyboardAwareView>
       </BottomSheet>
     );
   }
 );
 
 EditBottomSheet.displayName = "EditBottomSheet";
+
+const styles = StyleSheet.create({
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderRadius: 14,
+    minHeight: 10,
+    maxHeight: 200,
+  },
+});

@@ -10,6 +10,9 @@ interface BottomSheetProps {
   backgroundStyle?: object
   handleStyle?: object
   onDismiss?: () => void
+  keyboardBehavior?: 'extend' | 'fillParent' | 'interactive'
+  keyboardBlurBehavior?: 'none' | 'restore'
+  enableDynamicSizing?: boolean
 }
 
 /**
@@ -23,7 +26,10 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
     enablePanDownToClose = true,
     backgroundStyle,
     handleStyle,
-    onDismiss 
+    onDismiss,
+    keyboardBehavior = 'interactive',
+    keyboardBlurBehavior = 'restore',
+    enableDynamicSizing = false
   }, ref) => {
     const theme = useTheme()
     const snapPointsMemo = useMemo(() => snapPoints, [snapPoints])
@@ -68,6 +74,9 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
           width: 40,
           height: 4,
         }}
+        keyboardBehavior={keyboardBehavior}
+        keyboardBlurBehavior={keyboardBlurBehavior}
+        enableDynamicSizing={enableDynamicSizing}
         onDismiss={onDismiss}
       >
         <BottomSheetView style={{ flex: 1,  }}>
