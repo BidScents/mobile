@@ -15,7 +15,8 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { KeyboardAwareView } from "../ui/keyboard-aware-view";
 
-export interface EditBottomSheetMethods extends BottomSheetModalMethods {
+export interface EditBottomSheetMethods {
+  present: () => void;
   dismiss: () => void;
 }
 
@@ -70,14 +71,6 @@ export const EditBottomSheet = forwardRef<
         bottomSheetRef.current?.present();
       },
       dismiss: () => bottomSheetRef.current?.dismiss(),
-      close: () => bottomSheetRef.current?.close(),
-      collapse: () => bottomSheetRef.current?.collapse(),
-      expand: () => bottomSheetRef.current?.expand(),
-      snapToIndex: (index: number) =>
-        bottomSheetRef.current?.snapToIndex(index),
-      snapToPosition: (position: string | number) =>
-        bottomSheetRef.current?.snapToPosition(position),
-      forceClose: () => bottomSheetRef.current?.forceClose(),
     }));
 
     // Update editText when initialText changes (for different comments)

@@ -11,7 +11,8 @@ import { Text, XStack, YStack } from 'tamagui'
 // Complete auth session if needed
 WebBrowser.maybeCompleteAuthSession()
 
-interface LoginBottomSheetMethods extends BottomSheetModalMethods {
+interface LoginBottomSheetMethods {
+  present: () => void
   dismiss: () => void
 }
 
@@ -27,12 +28,6 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
   useImperativeHandle(ref, () => ({
     present: () => bottomSheetRef.current?.present(),
     dismiss: () => bottomSheetRef.current?.dismiss(),
-    close: () => bottomSheetRef.current?.close(),
-    collapse: () => bottomSheetRef.current?.collapse(),
-    expand: () => bottomSheetRef.current?.expand(),
-    snapToIndex: (index: number) => bottomSheetRef.current?.snapToIndex(index),
-    snapToPosition: (position: string | number) => bottomSheetRef.current?.snapToPosition(position),
-    forceClose: () => bottomSheetRef.current?.forceClose(),
   }))
 
   const dismissAndNavigate = (route: string) => {
