@@ -2,7 +2,7 @@ import { Container } from '@/components/ui/container'
 import React from 'react'
 import ContentLoader, { Circle, Rect } from 'react-content-loader/native'
 import { Dimensions, useColorScheme } from 'react-native'
-import { View, XStack, YStack } from 'tamagui'
+import { View, YStack } from 'tamagui'
 
 interface ListingDetailSkeletonProps {
   width?: number
@@ -34,8 +34,8 @@ export function ListingDetailSkeleton({ width = Dimensions.get('window').width }
           width={40}
           height={40}
           viewBox="0 0 40 40"
-          backgroundColor={backgroundColor}
-          foregroundColor={foregroundColor}
+          backgroundColor={foregroundColor}
+          foregroundColor={backgroundColor}
         >
           <Circle cx="20" cy="20" r="20" />
         </ContentLoader>
@@ -48,8 +48,8 @@ export function ListingDetailSkeleton({ width = Dimensions.get('window').width }
           width={40}
           height={40}
           viewBox="0 0 40 40"
-          backgroundColor={backgroundColor}
-          foregroundColor={foregroundColor}
+          backgroundColor={foregroundColor}
+          foregroundColor={backgroundColor}
         >
           <Circle cx="20" cy="20" r="20" />
         </ContentLoader>
@@ -68,9 +68,6 @@ export function ListingDetailSkeleton({ width = Dimensions.get('window').width }
           >
             {/* Main Image */}
             <Rect x="0" y="0" rx="0" ry="0" width={width} height={height} />
-            
-            {/* Volume indicator (100ml lvl) - top left */}
-            <Rect x="20" y="20" rx="4" ry="4" width="80" height="20" />
             
             {/* Page indicators - bottom center */}
             <Circle cx={width/2 - 20} cy={height - 30} r="4" />
