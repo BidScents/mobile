@@ -128,6 +128,8 @@ export default function ListingScreen() {
       {/* Action Buttons */}
       <ListingActions
         listingType={listing.listing.listing_type}
+        listingId={listing.listing.id}
+        auctionDetails={listing.auction_details}
         isLoading={isLoading}
         onAction={handleContactSeller}
       />
