@@ -1,11 +1,12 @@
 import type {
+  BidResponse,
   CommentResponse,
   FavoriteResponse,
   ListingDetailsResponse,
   SearchRequest,
   SearchResponse,
 } from "@bid-scents/shared-sdk";
-import { ListingService, useAuthStore } from "@bid-scents/shared-sdk";
+import { AuctionsService, ListingService, useAuthStore } from "@bid-scents/shared-sdk";
 import {
   useInfiniteQuery,
   useMutation,
@@ -501,6 +502,96 @@ export function useDeleteComment() {
           context.previousData
         );
       }
+    },
+  });
+}
+
+// ========================================
+// BID MUTATIONS
+// ========================================
+
+/**
+ * Place bid mutation with optimistic updates
+ * Updates bid count and recent bids list optimistically for immediate feedback
+ */
+export function usePlaceBid() {
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+
+  return useMutation({
+    mutationFn: ({
+      listingId,
+      amount,
+    }: {
+      listingId: string;
+      amount: number;
+    }) =>
+      AuctionsService.placeBidV1AuctionsListingIdBidPost(listingId, {
+        amount,
+      }),
+    onMutate: async ({ listingId, amount }) => {
+      // Cancel outgoing queries for this listing
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
+
+      // Get current listing data
+      const previousData = queryClient.getQueryData<ListingDetailsResponse>(
+        queryKeys.listings.detail(listingId)
+      );
+
+      // Create optimistic bid with current user data
+      const optimisticBid = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        amount,
+        bidder: {
+          id: user?.id || "current-user",
+          username: user?.username || "You",
+          profile_image_url: user?.profile_image_url || null,
+        },
+        created_at: new Date().toISOString(),
+      };
+
+      // Optimistically update listing detail with new bid
+      if (previousData && previousData.auction_details) {
+        queryClient.setQueryData<ListingDetailsResponse>(
+          queryKeys.listings.detail(listingId),
+          (old) => {
+            if (!old || !old.auction_details) return old;
+
+            return {
+              ...old,
+              auction_details: {
+                ...old.auction_details,
+                bid_count: (old.auction_details.bid_count || 0) + 1,
+                bids: [optimisticBid, ...(old.auction_details.bids || []).slice(0, 4)],
+              },
+            };
+          }
+        );
+      }
+
+      return { previousData };
+    },
+    onSuccess: (response: BidResponse, { listingId }) => {
+      // Invalidate and refetch to get the real bid data from server
+      // This ensures we have the correct bid ID, timestamps, and any server-side updates
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
+    },
+    onError: (err, { listingId }, context) => {
+      // Rollback optimistic update on error
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          queryKeys.listings.detail(listingId),
+          context.previousData
+        );
+      }
+      // Also invalidate to ensure we have correct state
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
     },
   });
 }
