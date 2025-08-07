@@ -7,9 +7,15 @@ import { CountdownTicker } from "./countdown-ticker";
 
 interface AuctionSectionProps {
   auctionDetails: AuctionDetails | null | undefined;
+  isLive?: boolean;
+  currentViewers?: number;
 }
 
-export function AuctionSection({ auctionDetails }: AuctionSectionProps) {
+export function AuctionSection({ 
+  auctionDetails,
+  isLive = false,
+  currentViewers
+}: AuctionSectionProps) {
   return (
     <YStack gap="$4">
       <YStack gap="$1">
@@ -19,7 +25,11 @@ export function AuctionSection({ auctionDetails }: AuctionSectionProps) {
           <CountdownTicker endsAt={auctionDetails.ends_at} />
         )}
 
-        <AuctionDetailsSection auctionDetails={auctionDetails} />
+        <AuctionDetailsSection 
+          auctionDetails={auctionDetails}
+          isLive={isLive}
+          currentViewers={currentViewers}
+        />
       </YStack>
 
       <BiddingHistory auctionDetails={auctionDetails} />

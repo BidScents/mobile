@@ -16,6 +16,8 @@ interface ListingContentProps {
   totalVotes: number;
   isUpvoted: boolean | null | undefined;
   userId: string | undefined;
+  isAuctionLive?: boolean;
+  currentViewers?: number;
 }
 
 /**
@@ -30,6 +32,8 @@ export function ListingContent({
   totalVotes,
   isUpvoted,
   userId,
+  isAuctionLive = false,
+  currentViewers,
 }: ListingContentProps) {
   return (
     <View
@@ -69,7 +73,11 @@ export function ListingContent({
 
       {/* Auction Section */}
       {listing.listing.listing_type === ListingType.AUCTION && auctionDetails && (
-        <AuctionSection auctionDetails={auctionDetails} />
+        <AuctionSection 
+          auctionDetails={auctionDetails}
+          isLive={isAuctionLive}
+          currentViewers={currentViewers}
+        />
       )}
 
       {/* Comments Section */}
