@@ -1,4 +1,4 @@
-import { useAuthStore } from '@bid-scents/shared-sdk'
+import { BidResData, useAuthStore, WSBidResponse, WSJoinResponse, WSType } from '@bid-scents/shared-sdk'
 import { useEffect, useRef } from 'react'
 
 const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:8000'
@@ -18,7 +18,7 @@ interface UseStableWebSocketOptions {
   /** Callback fired when viewer count updates are received */
   onViewerCount?: (count: number) => void
   /** Callback fired when new bid data is received */
-  onBid?: (bidData: any) => void
+  onBid?: (bidData: BidResData) => void
 }
 
 /**
@@ -106,14 +106,16 @@ export function useStableWebSocket({
 
     ws.onmessage = (event) => {
       try {
-        const message = JSON.parse(event.data)
+        const message: WSBidResponse | WSJoinResponse = JSON.parse(event.data)
         
-        if (message.type === 'JOIN') {
-          console.log('Viewer count updated:', message.current_viewers)
-          onViewerCount?.(message.current_viewers)
-        } else if (message.type === 'BID') {
-          console.log('New bid received:', message.data)
-          onBid?.(message.data)
+        if (message.type === WSType.JOIN) {
+          const joinMessage = message as WSJoinResponse
+          console.log('Viewer count updated:', joinMessage.current_viewers)
+          onViewerCount?.(joinMessage.current_viewers)
+        } else if (message.type === WSType.BID) {
+          const bidMessage = message as WSBidResponse
+          console.log('New bid received:', bidMessage.data)
+          onBid?.(bidMessage.data)
         }
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error)

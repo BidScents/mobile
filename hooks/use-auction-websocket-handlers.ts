@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
-import { ListingDetailsResponse } from '@bid-scents/shared-sdk'
+import { ListingDetailsResponse, BidResData } from '@bid-scents/shared-sdk'
 import { queryKeys } from './queries/query-keys'
 
 /**
@@ -20,6 +20,20 @@ interface UseAuctionWebSocketHandlersOptions {
 }
 
 /**
+ * Return type for the auction WebSocket handlers hook
+ */
+interface UseAuctionWebSocketHandlersReturn {
+  /** Handler for WebSocket connection establishment */
+  handleConnect: () => void
+  /** Handler for WebSocket connection termination */
+  handleDisconnect: () => void
+  /** Handler for viewer count updates */
+  handleViewerCount: (count: number) => void
+  /** Handler for new bid updates */
+  handleBid: (bidData: BidResData) => Promise<void>
+}
+
+/**
  * Custom hook that provides modular handlers for auction WebSocket events.
  * 
  * This hook encapsulates the business logic for handling auction WebSocket events
@@ -34,7 +48,7 @@ export function useAuctionWebSocketHandlers({
   currentUserId,
   onUIUpdate,
   viewerCountRef
-}: UseAuctionWebSocketHandlersOptions) {
+}: UseAuctionWebSocketHandlersOptions): UseAuctionWebSocketHandlersReturn {
   const queryClient = useQueryClient()
 
   /**
@@ -65,7 +79,7 @@ export function useAuctionWebSocketHandlers({
   /**
    * Handles new bid updates with optimistic cache updates and user feedback
    */
-  const handleBid = useCallback(async (bidData: any) => {
+  const handleBid = useCallback(async (bidData: BidResData) => {
     console.log('New bid received:', bidData)
 
     // Skip processing if it's the current user's own bid
