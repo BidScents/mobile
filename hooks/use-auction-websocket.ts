@@ -1,12 +1,12 @@
-import { BidResData, useAuthStore, WSBidResponse, WSJoinResponse, WSType } from '@bid-scents/shared-sdk'
+import { BidResData, useAuthStore, WSBidResponse, WSJoinResponse, WSExtensionResponse, WSType } from '@bid-scents/shared-sdk'
 import { useEffect, useRef } from 'react'
 
 const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:8000'
 
 /**
- * Configuration options for the stable WebSocket hook
+ * Configuration options for the auction WebSocket hook
  */
-interface UseStableWebSocketOptions {
+interface UseAuctionWebSocketOptions {
   /** The ID of the auction listing to connect to */
   listingId: string
   /** Whether the WebSocket connection should be enabled */
@@ -19,18 +19,20 @@ interface UseStableWebSocketOptions {
   onViewerCount?: (count: number) => void
   /** Callback fired when new bid data is received */
   onBid?: (bidData: BidResData) => void
+  /** Callback fired when auction extension is received */
+  onExtension?: (newEndTime: string) => void
 }
 
 /**
- * Return type for the stable WebSocket hook
+ * Return type for the auction WebSocket hook
  */
-interface UseStableWebSocketReturn {
+interface UseAuctionWebSocketReturn {
   /** Whether the WebSocket is currently connected */
   isConnected: boolean
 }
 
 /**
- * A stable WebSocket hook for real-time auction updates that prevents reconnection loops.
+ * An auction WebSocket hook for real-time auction updates that prevents reconnection loops.
  * 
  * This hook is designed to maintain a persistent WebSocket connection for auction listings
  * without causing React re-renders that would trigger reconnection cycles. It uses refs
@@ -39,7 +41,7 @@ interface UseStableWebSocketReturn {
  * Features:
  * - Automatic connection management with authentication
  * - Periodic ping messages to maintain connection
- * - Message handling for JOIN (viewer count) and BID events  
+ * - Message handling for JOIN (viewer count), BID, and AUCTION_EXTENDED events  
  * - Prevents re-render loops by using refs instead of state
  * - Graceful error handling and connection cleanup
  * 
@@ -48,22 +50,24 @@ interface UseStableWebSocketReturn {
  * 
  * @example
  * ```tsx
- * const { isConnected } = useStableWebSocket({
+ * const { isConnected } = useAuctionWebSocket({
  *   listingId: '123',
  *   enabled: true,
  *   onConnect: () => console.log('Connected'),
- *   onBid: (bidData) => handleNewBid(bidData)
+ *   onBid: (bidData) => handleNewBid(bidData),
+ *   onExtension: (newEndTime) => handleAuctionExtension(newEndTime)
  * })
  * ```
  */
-export function useStableWebSocket({
+export function useAuctionWebSocket({
   listingId,
   enabled,
   onConnect,
   onDisconnect,
   onViewerCount,
-  onBid
-}: UseStableWebSocketOptions): UseStableWebSocketReturn {
+  onBid,
+  onExtension
+}: UseAuctionWebSocketOptions): UseAuctionWebSocketReturn {
   const wsRef = useRef<WebSocket | null>(null)
   const enabledRef = useRef(enabled)
   const listingIdRef = useRef(listingId)
@@ -106,7 +110,7 @@ export function useStableWebSocket({
 
     ws.onmessage = (event) => {
       try {
-        const message: WSBidResponse | WSJoinResponse = JSON.parse(event.data)
+        const message: WSBidResponse | WSJoinResponse | WSExtensionResponse = JSON.parse(event.data)
         
         if (message.type === WSType.JOIN) {
           const joinMessage = message as WSJoinResponse
@@ -116,6 +120,10 @@ export function useStableWebSocket({
           const bidMessage = message as WSBidResponse
           console.log('New bid received:', bidMessage.data)
           onBid?.(bidMessage.data)
+        } else if (message.type === WSType.AUCTION_EXTENDED) {
+          const extensionMessage = message as WSExtensionResponse
+          console.log('Auction extended, new end time:', extensionMessage.new_end_time)
+          onExtension?.(extensionMessage.new_end_time)
         }
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error)

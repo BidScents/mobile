@@ -6,6 +6,7 @@ interface ListingActionsProps {
   listingType: ListingType;
   listingId: string;
   auctionDetails?: AuctionDetails | null | undefined;
+  isCurrentUserHighestBidder?: boolean;
   isLoading: boolean;
   onAction: () => void;
 }
@@ -18,6 +19,7 @@ export function ListingActions({
   listingType, 
   listingId,
   auctionDetails,
+  isCurrentUserHighestBidder,
   isLoading, 
   onAction 
 }: ListingActionsProps) {
@@ -25,6 +27,7 @@ export function ListingActions({
     <AuctionButton 
       listingId={listingId}
       auctionDetails={auctionDetails}
+      isCurrentUserHighestBidder={isCurrentUserHighestBidder}
       isActive={!isLoading}
       onBidPlaced={() => onAction()}
     />

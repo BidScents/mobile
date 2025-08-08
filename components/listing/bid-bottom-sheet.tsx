@@ -1,7 +1,7 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { currency } from "@/constants/constants";
-import { AuctionDetails } from "@bid-scents/shared-sdk";
+import { AuctionDetails, useAuthStore } from "@bid-scents/shared-sdk";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
@@ -22,6 +22,8 @@ export interface BidBottomSheetProps {
   listingId: string;
   /** Full auction details including bids, status, etc. */
   auctionDetails: AuctionDetails | null | undefined;
+  /** Whether the current user is the highest bidder */
+  isCurrentUserHighestBidder?: boolean;
   /** Optional callback when bid is placed successfully */
   onBidPlaced?: (amount: number) => void;
 }
@@ -29,11 +31,12 @@ export interface BidBottomSheetProps {
 export const BidBottomSheet = forwardRef<
   BidBottomSheetMethods,
   BidBottomSheetProps
->(({ listingId, auctionDetails, onBidPlaced }, ref) => {
+>(({ listingId, auctionDetails, isCurrentUserHighestBidder = false, onBidPlaced }, ref) => {
   const theme = useTheme();
   const [bidAmount, setBidAmount] = useState("");
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
   const placeBidMutation = usePlaceBid();
+  const { user, session } = useAuthStore();
 
   // Extract auction data
   const startingPrice = auctionDetails?.starting_price || 0;
@@ -42,10 +45,12 @@ export const BidBottomSheet = forwardRef<
     : startingPrice;
   const bidIncrement = auctionDetails?.bid_increment || 1;
   
+  // Note: isCurrentUserHighestBidder is now passed as a prop to avoid duplicate logic
+  
   // Calculate minimum bid (always current bid + increment)
   const minimumBid = currentBid + bidIncrement;
   const numericBidAmount = parseFloat(bidAmount) || 0;
-  const isValidBid = bidAmount.trim().length > 0 && numericBidAmount >= minimumBid;
+  const isValidBid = bidAmount.trim().length > 0 && numericBidAmount >= minimumBid && !isCurrentUserHighestBidder;
   const isLoading = placeBidMutation.isPending;
 
   useImperativeHandle(ref, () => ({
@@ -82,6 +87,15 @@ export const BidBottomSheet = forwardRef<
   const handlePlaceBid = async () => {
     if (!isValidBid) return;
 
+    // Client-side validation: prevent API call if user is already highest bidder
+    if (isCurrentUserHighestBidder) {
+      console.log("⚠️ Client-side validation: User is already the highest bidder, preventing API call");
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      return;
+    }
+
+    console.log("Placing bid:", numericBidAmount, "for listing:", listingId);
+
     try {
       // Haptic feedback for bid action
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -92,15 +106,18 @@ export const BidBottomSheet = forwardRef<
         amount: numericBidAmount,
       });
 
+      console.log("✅ Bid placed successfully");
+
       // Success feedback
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       bottomSheetRef.current?.dismiss();
       setBidAmount("");
       onBidPlaced?.(numericBidAmount);
-    } catch (error) {
+    } catch (error: any) {
+      console.log("❌ Failed to place bid:", error?.body?.detail || error?.message || error);
+      
       // Error feedback
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      console.error("Failed to place bid:", error);
     }
   };
 
@@ -124,7 +141,7 @@ export const BidBottomSheet = forwardRef<
         {/* Header */}
         <YStack gap="$3" marginBottom="$4">
           <Text fontSize="$6" fontWeight="700" color="$foreground" textAlign="center">
-            Place Your Bid
+            {isCurrentUserHighestBidder ? "You're the Highest Bidder" : "Place Your Bid"}
           </Text>
           <Text fontSize="$4" color="$mutedForeground" textAlign="center">
             Current bid: {currency} {currentBid}
@@ -133,94 +150,98 @@ export const BidBottomSheet = forwardRef<
 
         {/* Bid input section */}
         <YStack gap="$4" flex={1}>
-          <YStack gap="$3">
-            <XStack alignItems="center" gap="$3">
-              <View
-                p="$3"
-                backgroundColor="$muted"
-                borderRadius="$6"
-                pressStyle={{ backgroundColor: "$mutedPress" }}
-                onPress={handleDecreaseBid}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Ionicons
-                  name="remove-outline"
-                  size={24}
-                  color={theme.foreground.val}
+          {!isCurrentUserHighestBidder && (
+            <YStack gap="$3">
+              <XStack alignItems="center" gap="$3">
+                <View
+                  p="$3"
+                  backgroundColor="$muted"
+                  borderRadius="$6"
+                  pressStyle={{ backgroundColor: "$mutedPress" }}
+                  onPress={handleDecreaseBid}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Ionicons
+                    name="remove-outline"
+                    size={24}
+                    color={theme.foreground.val}
+                  />
+                </View>
+
+                <BottomSheetTextInput
+                  style={[
+                    styles.bidInput,
+                    {
+                      backgroundColor: theme.muted?.val,
+                      color: theme.foreground?.val,
+                      borderColor:
+                        bidAmount && !isValidBid
+                          ? theme.error?.val
+                          : "transparent",
+                    },
+                  ]}
+                  placeholder={`${currency} 0`}
+                  value={bidAmount ? `${currency} ${bidAmount}` : ""}
+                  onChangeText={(text) => setBidAmount(text.replace(currency, "").trim())}
+                  keyboardType="numeric"
+                  textAlign="center"
+                  editable={!isLoading}
                 />
-              </View>
 
-              <BottomSheetTextInput
-                style={[
-                  styles.bidInput,
-                  {
-                    backgroundColor: theme.muted?.val,
-                    color: theme.foreground?.val,
-                    borderColor:
-                      bidAmount && !isValidBid
-                        ? theme.error?.val
-                        : "transparent",
-                  },
-                ]}
-                placeholder={`${currency} 0`}
-                value={bidAmount ? `${currency} ${bidAmount}` : ""}
-                onChangeText={(text) => setBidAmount(text.replace(currency, "").trim())}
-                keyboardType="numeric"
-                textAlign="center"
-                editable={!isLoading}
-              />
+                <View
+                  p="$3"
+                  backgroundColor="$muted"
+                  borderRadius="$6"
+                  pressStyle={{ backgroundColor: "$mutedPress" }}
+                  onPress={handleIncreaseBid}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Ionicons
+                    name="add-outline"
+                    size={24}
+                    color={theme.foreground.val}
+                  />
+                </View>
+              </XStack>
 
-              <View
-                p="$3"
-                backgroundColor="$muted"
-                borderRadius="$6"
-                pressStyle={{ backgroundColor: "$mutedPress" }}
-                onPress={handleIncreaseBid}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Ionicons
-                  name="add-outline"
-                  size={24}
-                  color={theme.foreground.val}
-                />
-              </View>
-            </XStack>
-
-            <Text fontSize="$3" color="$mutedForeground" textAlign="center">
-              Min bid: {currency} {minimumBid}
-            </Text>
-
-            {/* Error messages */}
-            {bidAmount && !isValidBid && (
-              <Text fontSize="$3" color="$error" textAlign="center">
-                Minimum bid is {currency} {minimumBid}
+              <Text fontSize="$3" color="$mutedForeground" textAlign="center">
+                Min bid: {currency} {minimumBid}
               </Text>
-            )}
 
-            {placeBidMutation.isError && (
-              <Text fontSize="$3" color="$error" textAlign="center">
-                Failed to place bid. Please try again.
-              </Text>
-            )}
-          </YStack>
+              {/* Error messages */}
+              {bidAmount && !isValidBid && !isCurrentUserHighestBidder && (
+                <Text fontSize="$3" color="$error" textAlign="center">
+                  Minimum bid is {currency} {minimumBid}
+                </Text>
+              )}
 
-          {/* Action button */}
-          <Button
-            onPress={handlePlaceBid}
-            variant="primary"
-            size="lg"
-            fullWidth
-            disabled={!isValidBid || isLoading}
-            borderRadius="$10"
-            marginTop="auto"
-          >
-            {isLoading
-              ? "Placing Bid..."
-              : `Place Bid • ${currency} ${bidAmount || minimumBid}`}
-          </Button>
+              {placeBidMutation.isError && (
+                <Text fontSize="$3" color="$error" textAlign="center">
+                  {(placeBidMutation.error as any)?.body?.detail || "Failed to place bid. Please try again."}
+                </Text>
+              )}
+            </YStack>
+          )}
         </YStack>
+
+        {/* Action button */}
+        <Button
+          onPress={isCurrentUserHighestBidder ? () => bottomSheetRef.current?.dismiss() : handlePlaceBid}
+          variant={isCurrentUserHighestBidder ? "secondary" : "primary"}
+          size="lg"
+          fullWidth
+          disabled={(!isValidBid || isLoading) && !isCurrentUserHighestBidder}
+          borderRadius="$10"
+          marginTop="auto"
+        >
+          {isCurrentUserHighestBidder
+            ? "Close"
+            : isLoading
+            ? "Placing Bid..."
+            : `Place Bid • ${currency} ${bidAmount || minimumBid}`}
+        </Button>
       </YStack>
     </BottomSheet>
   );

@@ -13,6 +13,7 @@ import { Text } from "tamagui";
 import { useListingDetail } from "../../hooks/queries/use-listing";
 import { useAuctionWebSocket } from "../../hooks/use-auction-websocket";
 import { useAuctionWebSocketHandlers } from "../../hooks/use-auction-websocket-handlers";
+import { isCurrentUserHighestBidder as checkIsCurrentUserHighestBidder } from "../../utils/auction-helpers";
 
 /**
  * Listing detail screen component
@@ -37,6 +38,11 @@ export default function ListingScreen() {
     const hasAuctionDetails = !!listing?.auction_details;
     return isAuctionListing && hasAuctionDetails && !!id;
   }, [listing?.listing?.listing_type, listing?.auction_details, id]);
+
+  // Check if current user is highest bidder (calculated once here to avoid duplication)
+  const isCurrentUserHighestBidder = useMemo(() => {
+    return checkIsCurrentUserHighestBidder(listing?.auction_details, user?.id);
+  }, [listing?.auction_details, user?.id]);
 
   // Get modular WebSocket event handlers
   const {
@@ -132,6 +138,7 @@ export default function ListingScreen() {
         listingType={listing.listing.listing_type}
         listingId={listing.listing.id}
         auctionDetails={listing.auction_details}
+        isCurrentUserHighestBidder={isCurrentUserHighestBidder}
         isLoading={isLoading}
         onAction={handleContactSeller}
       />

@@ -31,14 +31,16 @@ interface UseAuctionWebSocketHandlersReturn {
   handleViewerCount: (count: number) => void
   /** Handler for new bid updates */
   handleBid: (bidData: BidResData) => Promise<void>
+  /** Handler for auction extension updates */
+  handleExtension: (newEndTime: string) => Promise<void>
 }
 
 /**
  * Custom hook that provides modular handlers for auction WebSocket events.
  * 
  * This hook encapsulates the business logic for handling auction WebSocket events
- * including viewer count updates and new bid processing. It provides optimistic
- * cache updates, haptic feedback, and toast notifications.
+ * including viewer count updates, new bid processing, and auction extensions.
+ * It provides optimistic cache updates, haptic feedback, and toast notifications.
  * 
  * @param options Configuration object for the handlers
  * @returns Object containing event handler functions
@@ -127,10 +129,40 @@ export function useAuctionWebSocketHandlers({
     })
   }, [currentUserId, queryClient, listingId])
 
+  /**
+   * Handles auction extension updates by optimistically updating cached listing data
+   */
+  const handleExtension = useCallback(async (newEndTime: string) => {
+    console.log('Auction extended, new end time:', newEndTime)
+
+    // Provide haptic feedback for auction extension
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+
+    // Optimistically update cache with new end time
+    queryClient.setQueryData<ListingDetailsResponse>(
+      queryKeys.listings.detail(listingId),
+      (old) => {
+        if (!old || !old.auction_details) return old
+
+        return {
+          ...old,
+          auction_details: {
+            ...old.auction_details,
+            ends_at: newEndTime,
+          },
+        }
+      }
+    )
+
+    // Note: Push notification is already sent by backend to all bidders and seller
+    // No need to show additional toast notification here
+  }, [queryClient, listingId])
+
   return {
     handleConnect,
     handleDisconnect,
     handleViewerCount,
     handleBid,
+    handleExtension,
   }
 }

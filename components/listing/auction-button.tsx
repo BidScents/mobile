@@ -12,6 +12,8 @@ interface AuctionButtonProps {
   auctionDetails: AuctionDetails | null | undefined;
   /** Whether the auction is currently active */
   isActive?: boolean;
+  /** Whether the current user is the highest bidder */
+  isCurrentUserHighestBidder?: boolean;
   /** Optional callback when bid is placed successfully */
   onBidPlaced?: (amount: number) => void;
 }
@@ -23,6 +25,7 @@ export default function AuctionButton({
   listingId,
   auctionDetails,
   isActive = true,
+  isCurrentUserHighestBidder = false,
   onBidPlaced
 }: AuctionButtonProps) {
   const bidBottomSheetRef = useRef<BidBottomSheetMethods>(null);
@@ -46,14 +49,18 @@ export default function AuctionButton({
         right={0}
       >
         <Button
-          variant="primary"
+          variant={isCurrentUserHighestBidder ? "success" : "primary"}
           size="lg"
           fullWidth
           onPress={handleBidPress}
           disabled={!isActive}
           borderRadius="$10"
         >
-          {isActive ? "Place a Bid" : "Auction Ended"}
+          {!isActive 
+            ? "Auction Ended" 
+            : isCurrentUserHighestBidder 
+            ? "Winning" 
+            : "Place a Bid"}
         </Button>
       </View>
 
@@ -61,6 +68,7 @@ export default function AuctionButton({
         ref={bidBottomSheetRef}
         listingId={listingId}
         auctionDetails={auctionDetails}
+        isCurrentUserHighestBidder={isCurrentUserHighestBidder}
         onBidPlaced={onBidPlaced}
       />
     </>
