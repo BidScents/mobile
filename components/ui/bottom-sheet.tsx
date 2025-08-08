@@ -29,7 +29,7 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
     onDismiss,
     keyboardBehavior = 'interactive',
     keyboardBlurBehavior = 'restore',
-    enableDynamicSizing = false
+    enableDynamicSizing = true
   }, ref) => {
     const theme = useTheme()
     const snapPointsMemo = useMemo(() => snapPoints, [snapPoints])
