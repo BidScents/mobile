@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
+import { Keyboard } from "react-native";
 import { View, XStack, useTheme } from "tamagui";
 import { useAddComment } from "../../hooks/queries/use-listing";
 import { Input } from "../ui/input";
@@ -23,6 +24,7 @@ export function AddCommentForm({ listingId }: AddCommentFormProps) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       addComment.mutate({ listingId, content: newComment });
       setNewComment("");
+      Keyboard.dismiss();
     }
   };
 

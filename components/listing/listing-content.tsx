@@ -18,6 +18,7 @@ interface ListingContentProps {
   userId: string | undefined;
   isAuctionLive?: boolean;
   currentViewers?: number;
+  isUserSeller?: boolean;
 }
 
 /**
@@ -34,12 +35,13 @@ export function ListingContent({
   userId,
   isAuctionLive = false,
   currentViewers,
+  isUserSeller = false,
 }: ListingContentProps) {
   return (
     <View
       paddingHorizontal="$4"
       paddingVertical="$2"
-      marginBottom="$12"
+      marginBottom={isUserSeller ? "$5" : "$12"}
       gap="$6"
     >
       <View gap="$2">

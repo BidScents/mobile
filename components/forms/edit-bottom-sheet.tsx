@@ -10,7 +10,7 @@ import React, {
   useImperativeHandle,
   useState,
 } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { Keyboard, Pressable, StyleSheet } from "react-native";
 import { Text, View, XStack, YStack } from "tamagui";
 import { Button } from "../ui/button";
 
@@ -91,8 +91,11 @@ export const EditBottomSheet = forwardRef<
     const handleSendEdit = () => {
       if (editText.trim()) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        bottomSheetRef.current?.dismiss();
-        onEdit(editText.trim());
+        Keyboard.dismiss();
+        setTimeout(() => {
+          bottomSheetRef.current?.dismiss();
+          onEdit(editText.trim());
+        }, 120);
       }
     };
 

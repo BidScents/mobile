@@ -44,6 +44,10 @@ export default function ListingScreen() {
     return checkIsCurrentUserHighestBidder(listing?.auction_details, user?.id);
   }, [listing?.auction_details, user?.id]);
 
+  const isUserSeller = useMemo(() => {
+    return listing?.seller.id === user?.id;
+  }, [listing?.seller.id, user?.id]);
+
   // Get modular WebSocket event handlers
   const {
     handleConnect,
@@ -109,6 +113,7 @@ export default function ListingScreen() {
       <KeyboardAwareScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        bottomOffset={15}
       >
         {/* Image Carousel */}
         <ImageCarousel
@@ -130,18 +135,21 @@ export default function ListingScreen() {
           userId={user?.id}
           isAuctionLive={isConnected}
           currentViewers={currentViewersRef.current}
+          isUserSeller={isUserSeller}
         />
       </KeyboardAwareScrollView>
 
       {/* Action Buttons */}
-      <ListingActions
-        listingType={listing.listing.listing_type}
-        listingId={listing.listing.id}
-        auctionDetails={listing.auction_details}
-        isCurrentUserHighestBidder={isCurrentUserHighestBidder}
-        isLoading={isLoading}
-        onAction={handleContactSeller}
-      />
+      { !isUserSeller && (
+        <ListingActions
+          listingType={listing.listing.listing_type}
+          listingId={listing.listing.id}
+          auctionDetails={listing.auction_details}
+          isCurrentUserHighestBidder={isCurrentUserHighestBidder}
+          isLoading={isLoading}
+          onAction={handleContactSeller}
+        />
+      )}
     </Container>
   );
 }

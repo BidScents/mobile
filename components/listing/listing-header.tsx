@@ -1,6 +1,6 @@
+import { currency } from "@/constants/constants";
 import { ListingType } from "@bid-scents/shared-sdk";
 import { Text, View } from "tamagui";
-import { currency } from "@/constants/constants";
 
 interface ListingHeaderProps {
   name: string;
@@ -17,7 +17,7 @@ export function ListingHeader({ name, brand, price, listingType }: ListingHeader
   const displayPrice = 
     listingType === ListingType.FIXED_PRICE || listingType === ListingType.NEGOTIABLE
       ? price
-      : listingType;
+      : undefined;
 
   return (
     <View gap="$3">
@@ -40,9 +40,11 @@ export function ListingHeader({ name, brand, price, listingType }: ListingHeader
         </Text>
       </View>
 
-      <Text fontSize="$7" fontWeight="600" color="$foreground">
-        {currency}{displayPrice}
-      </Text>
+      {displayPrice && (
+        <Text fontSize="$7" fontWeight="600" color="$foreground">
+          {currency}{displayPrice}
+        </Text>
+      )}
     </View>
   );
 }
