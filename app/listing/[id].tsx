@@ -11,7 +11,7 @@ import { Dimensions } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text } from "tamagui";
 import { useListingDetail } from "../../hooks/queries/use-listing";
-import { useStableWebSocket } from "../../hooks/use-auction-websocket";
+import { useAuctionWebSocket } from "../../hooks/use-auction-websocket";
 import { useAuctionWebSocketHandlers } from "../../hooks/use-auction-websocket-handlers";
 
 /**
@@ -44,6 +44,7 @@ export default function ListingScreen() {
     handleDisconnect,
     handleViewerCount,
     handleBid,
+    handleExtension,
   } = useAuctionWebSocketHandlers({
     listingId: id!,
     currentUserId: user?.id,
@@ -52,13 +53,14 @@ export default function ListingScreen() {
   });
 
   // Connect to auction WebSocket for real-time updates
-  const { isConnected } = useStableWebSocket({
+  const { isConnected } = useAuctionWebSocket({
     listingId: id!,
     enabled: shouldConnectToAuction,
     onConnect: handleConnect,
     onDisconnect: handleDisconnect,
     onViewerCount: handleViewerCount,
     onBid: handleBid,
+    onExtension: handleExtension,
   });
 
   const handleContactSeller = () => {

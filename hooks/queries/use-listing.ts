@@ -519,16 +519,24 @@ export function usePlaceBid() {
   const { user } = useAuthStore();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       listingId,
       amount,
     }: {
       listingId: string;
       amount: number;
-    }) =>
-      AuctionsService.placeBidV1AuctionsListingIdBidPost(listingId, {
-        amount,
-      }),
+    }) => {
+      try {
+        const response = await AuctionsService.placeBidV1AuctionsListingIdBidPost(listingId, {
+          amount,
+        });
+        console.log("✅ Bid placed successfully:", amount);
+        return response;
+      } catch (error: any) {
+        console.log("❌ API bid failed:", error?.body?.detail || error?.message);
+        throw error; // Re-throw to maintain error handling flow
+      }
+    },
     onMutate: async ({ listingId, amount }) => {
       // Cancel outgoing queries for this listing
       await queryClient.cancelQueries({
