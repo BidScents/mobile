@@ -107,7 +107,7 @@ export const BidBottomSheet = forwardRef<
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      snapPoints={["35%"]}
+      snapPoints={["37%"]}
       enablePanDownToClose={true}
       keyboardBehavior="interactive"
       enableDynamicSizing={true}
@@ -127,7 +127,7 @@ export const BidBottomSheet = forwardRef<
             Place Your Bid
           </Text>
           <Text fontSize="$4" color="$mutedForeground" textAlign="center">
-            Current bid: ${currentBid}
+            Current bid: {currency} {currentBid}
           </Text>
         </YStack>
 
@@ -189,13 +189,13 @@ export const BidBottomSheet = forwardRef<
             </XStack>
 
             <Text fontSize="$3" color="$mutedForeground" textAlign="center">
-              Min bid: ${minimumBid}
+              Min bid: {currency} {minimumBid}
             </Text>
 
             {/* Error messages */}
             {bidAmount && !isValidBid && (
               <Text fontSize="$3" color="$error" textAlign="center">
-                Minimum bid is ${minimumBid}
+                Minimum bid is {currency} {minimumBid}
               </Text>
             )}
 
