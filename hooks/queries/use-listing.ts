@@ -1,10 +1,9 @@
 import type {
   BidResponse,
-  CommentResponse,
   FavoriteResponse,
   ListingDetailsResponse,
   SearchRequest,
-  SearchResponse,
+  SearchResponse
 } from "@bid-scents/shared-sdk";
 import { AuctionsService, ListingService, useAuthStore } from "@bid-scents/shared-sdk";
 import {
@@ -357,13 +356,6 @@ export function useAddComment() {
 
       return { previousData };
     },
-    onSuccess: (response: CommentResponse, { listingId }) => {
-      // Invalidate and refetch to get the real comment data from server
-      // This ensures we have the correct comment ID, user data, timestamps, etc.
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.listings.detail(listingId),
-      });
-    },
     onError: (err, { listingId }, context) => {
       // Rollback optimistic update on error
       if (context?.previousData) {
@@ -425,12 +417,6 @@ export function useUpdateComment() {
 
       return { previousData };
     },
-    onSuccess: (response: CommentResponse, { listingId }) => {
-      // Invalidate and refetch to get the real updated comment data from server
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.listings.detail(listingId),
-      });
-    },
     onError: (err, { listingId }, context) => {
       // Rollback optimistic update on error
       if (context?.previousData) {
@@ -487,12 +473,6 @@ export function useDeleteComment() {
       }
 
       return { previousData };
-    },
-    onSuccess: (_, { listingId }) => {
-      // Invalidate and refetch to ensure consistency
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.listings.detail(listingId),
-      });
     },
     onError: (err, { listingId }, context) => {
       // Rollback optimistic update on error
