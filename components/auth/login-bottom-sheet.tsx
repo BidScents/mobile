@@ -71,7 +71,6 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={['60%', '80%']}
-      backgroundStyle={{ backgroundColor: 'white' }}
     >
       <YStack gap="$5" padding="$4" paddingBottom="$8">
         {/* Header */}
