@@ -1,18 +1,85 @@
 import type {
   BidResponse,
   FavoriteResponse,
+  HomepageResponse,
+  ListingCard,
   ListingDetailsResponse,
   SearchRequest,
   SearchResponse
 } from "@bid-scents/shared-sdk";
 import { AuctionsService, ListingService, useAuthStore } from "@bid-scents/shared-sdk";
 import {
+  QueryClient,
   useInfiniteQuery,
   useMutation,
   useQuery,
-  useQueryClient,
+  useQueryClient
 } from "@tanstack/react-query";
 import { queryKeys } from "./query-keys";
+
+// ========================================
+// CACHE SEEDING HELPERS
+// ========================================
+
+/**
+ * Transforms ListingCard data into a partial ListingDetailsResponse
+ * Used to pre-populate detail cache for instant loading
+ */
+export function seedListingDetailCache(
+  queryClient: QueryClient,
+  listingCard: ListingCard
+): void {
+  const partialDetailResponse: ListingDetailsResponse & { __seeded?: boolean } = {
+    listing: {
+      id: listingCard.id,
+      name: listingCard.name,
+      brand: listingCard.brand,
+      price: listingCard.price,
+      volume: listingCard.volume,
+      remaining_percentage: listingCard.remaining_percentage,
+      listing_type: listingCard.listing_type,
+      // Placeholder values for missing required fields  
+      description: '', // Will be loaded by full query
+      status: 'ACTIVE' as any, // Default assumption
+      category: 'FRAGRANCE' as any, // Default assumption
+      purchase_year: new Date().getFullYear(), // Default assumption
+      box_condition: 'GOOD' as any, // Default assumption
+      quantity: 1, // Default assumption
+      batch_code: null,
+    },
+    seller: listingCard.seller,
+    image_urls: listingCard.image_url ? [listingCard.image_url] : [],
+    favorites_count: listingCard.favorites_count,
+    total_votes: 0, // Will be loaded by full query
+    is_upvoted: null, // Will be loaded by full query
+    comments: null, // Will be loaded by full query
+    auction_details: listingCard.listing_type === 'AUCTION' ? {
+      id: `temp-${listingCard.id}`,
+      listing_id: listingCard.id,
+      current_bid: listingCard.current_bid || 0,
+      bid_count: listingCard.bid_count || 0,
+      ends_at: listingCard.ends_at || null,
+      bids: [], // Will be loaded by full query
+      is_extended: false,
+      extension_count: 0,
+      bid_increment: 0.5, // Default assumption
+    } : null,
+    // Marker to identify this as seeded data
+    __seeded: true,
+  } as ListingDetailsResponse;
+
+  // Seed the cache with partial data
+  queryClient.setQueryData(
+    queryKeys.listings.detail(listingCard.id),
+    partialDetailResponse
+  );
+  
+  // Mark the seeded data as stale to ensure background refetch
+  queryClient.invalidateQueries({
+    queryKey: queryKeys.listings.detail(listingCard.id),
+    refetchType: 'none' // Don't immediately refetch, just mark as stale
+  });
+}
 
 // ========================================
 // LISTING DETAIL QUERIES
@@ -21,6 +88,7 @@ import { queryKeys } from "./query-keys";
 /**
  * Listing detail query - gets complete listing details including comments, votes, auction data
  * This is the main query for the listing detail screen
+ * Can be pre-seeded with ListingCard data for instant loading
  */
 export function useListingDetail(listingId: string) {
   return useQuery({
@@ -29,6 +97,7 @@ export function useListingDetail(listingId: string) {
       ListingService.getListingDetailsV1ListingListingIdDetailsGet(listingId),
     staleTime: 3 * 60 * 1000, // 3 minutes - listings can change frequently
     enabled: !!listingId,
+    // Background refetch will happen due to invalidation in cache seeding
   });
 }
 
@@ -91,12 +160,122 @@ export function useSimpleSearchListings(searchParams: SearchRequest) {
 }
 
 // ========================================
+// FAVORITE CACHE HELPERS
+// ========================================
+
+/**
+ * Helper function to update favorite count across all cache types
+ * Ensures consistent favorite count synchronization everywhere
+ */
+function updateFavoriteCountInAllCaches(
+  queryClient: QueryClient,
+  listingId: string,
+  newCount: number
+) {
+  // 1. Update listing detail cache
+  queryClient.setQueryData<ListingDetailsResponse>(
+    queryKeys.listings.detail(listingId),
+    (old) =>
+      old
+        ? {
+            ...old,
+            favorites_count: newCount,
+          }
+        : old
+  );
+
+  // 2. Update homepage cache - all listing arrays
+  queryClient.setQueryData<HomepageResponse>(
+    queryKeys.homepage,
+    (old) => {
+      if (!old) return old;
+      return {
+        ...old,
+        featured: old.featured.map((listing) =>
+          listing.id === listingId
+            ? { ...listing, favorites_count: newCount }
+            : listing
+        ),
+        recent_auctions: old.recent_auctions.map((listing) =>
+          listing.id === listingId
+            ? { ...listing, favorites_count: newCount }
+            : listing
+        ),
+        recent_listings: old.recent_listings.map((listing) =>
+          listing.id === listingId
+            ? { ...listing, favorites_count: newCount }
+            : listing
+        ),
+        sellers_you_follow: old.sellers_you_follow?.map((listing) =>
+          listing.id === listingId
+            ? { ...listing, favorites_count: newCount }
+            : listing
+        ) || null,
+        recent_swaps: old.recent_swaps.map((listing) =>
+          listing.id === listingId
+            ? { ...listing, favorites_count: newCount }
+            : listing
+        ),
+      };
+    }
+  );
+
+  // 3. Update all search result caches
+  queryClient.setQueriesData<SearchResponse>(
+    { queryKey: queryKeys.listings.search({}) },
+    (old) => {
+      if (!old) return old;
+      return {
+        ...old,
+        listings: old.listings.map((listing) =>
+          listing.id === listingId
+            ? { ...listing, favorites_count: newCount }
+            : listing
+        ),
+      };
+    }
+  );
+
+  // 4. Update infinite search caches
+  queryClient.setQueriesData<any>(
+    { queryKey: queryKeys.listings.infiniteSearch({}) },
+    (old: any) => {
+      if (!old?.pages) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: SearchResponse) => ({
+          ...page,
+          listings: page.listings.map((listing) =>
+            listing.id === listingId
+              ? { ...listing, favorites_count: newCount }
+              : listing
+          ),
+        })),
+      };
+    }
+  );
+
+  // 5. Update favorites cache
+  queryClient.setQueryData<any>(
+    queryKeys.listings.favorites,
+    (old: any) => {
+      if (!old) return old;
+      return old.map((listing: any) =>
+        listing.id === listingId
+          ? { ...listing, favorites_count: newCount }
+          : listing
+      );
+    }
+  );
+}
+
+// ========================================
 // FAVORITE MUTATIONS
 // ========================================
 
 /**
  * Favorite listing mutation with optimistic updates
- * Updates both listing detail cache and favorites list cache
+ * Updates favorite count across ALL cache types for consistency
  */
 export function useFavoriteListing() {
   const queryClient = useQueryClient();
@@ -105,80 +284,51 @@ export function useFavoriteListing() {
     mutationFn: (listingId: string) =>
       ListingService.favoriteListingV1ListingListingIdFavoritePost(listingId),
     onMutate: async (listingId) => {
-      // Cancel outgoing queries for this listing
+      // Cancel outgoing queries to prevent race conditions
       await queryClient.cancelQueries({
         queryKey: queryKeys.listings.detail(listingId),
       });
 
-      // Get current listing data
+      // Get current listing data for rollback
       const previousData = queryClient.getQueryData<ListingDetailsResponse>(
         queryKeys.listings.detail(listingId)
       );
 
-      // Optimistically update listing detail
-      if (previousData) {
-        queryClient.setQueryData<ListingDetailsResponse>(
-          queryKeys.listings.detail(listingId),
-          (old) => ({
-            ...old!,
-            favorites_count: old!.favorites_count + 1,
-            // Note: Backend should include is_favorited in response for consistency
-          })
-        );
-      }
+      // Get current count for optimistic update
+      const currentCount = previousData?.favorites_count ?? 0;
+      
+      // Optimistically increment count across ALL caches
+      updateFavoriteCountInAllCaches(queryClient, listingId, currentCount + 1);
 
-      // Optimistically update any search results containing this listing
-      queryClient.setQueriesData<SearchResponse>(
-        { queryKey: queryKeys.listings.search({}) },
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            listings: old.listings.map((listing) =>
-              listing.id === listingId
-                ? { ...listing, favorites_count: listing.favorites_count + 1 }
-                : listing
-            ),
-          };
-        }
-      );
-
-      return { previousData };
+      return { previousData, previousCount: currentCount };
     },
     onSuccess: (response: FavoriteResponse, listingId) => {
-      // Update with actual server response
-      queryClient.setQueryData<ListingDetailsResponse>(
-        queryKeys.listings.detail(listingId),
-        (old) =>
-          old
-            ? {
-                ...old,
-                favorites_count: response.favorites_count,
-              }
-            : old
-      );
-
-      // Invalidate favorites list to refresh it
+      // Use server response to sync count across ALL caches
+      updateFavoriteCountInAllCaches(queryClient, listingId, response.favorites_count);
+      
+      // Invalidate favorites list only to add/remove the listing itself
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.favorites });
     },
     onError: (err, listingId, context) => {
-      // Rollback optimistic updates on error
+      // Rollback optimistic count update across ALL caches
+      if (context?.previousCount !== undefined) {
+        updateFavoriteCountInAllCaches(queryClient, listingId, context.previousCount);
+      }
+      
+      // Rollback detail cache specifically
       if (context?.previousData) {
         queryClient.setQueryData(
           queryKeys.listings.detail(listingId),
           context.previousData
         );
       }
-      // Invalidate to refetch correct state
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.listings.detail(listingId),
-      });
     },
   });
 }
 
 /**
  * Unfavorite listing mutation with optimistic updates
+ * Updates favorite count across ALL cache types for consistency
  */
 export function useUnfavoriteListing() {
   const queryClient = useQueryClient();
@@ -189,75 +339,44 @@ export function useUnfavoriteListing() {
         listingId
       ),
     onMutate: async (listingId) => {
-      // Cancel outgoing queries
+      // Cancel outgoing queries to prevent race conditions
       await queryClient.cancelQueries({
         queryKey: queryKeys.listings.detail(listingId),
       });
 
-      // Get current data
+      // Get current listing data for rollback
       const previousData = queryClient.getQueryData<ListingDetailsResponse>(
         queryKeys.listings.detail(listingId)
       );
 
-      // Optimistically update listing detail
-      if (previousData) {
-        queryClient.setQueryData<ListingDetailsResponse>(
-          queryKeys.listings.detail(listingId),
-          (old) => ({
-            ...old!,
-            favorites_count: Math.max(0, old!.favorites_count - 1),
-          })
-        );
-      }
+      // Get current count for optimistic update
+      const currentCount = previousData?.favorites_count ?? 0;
+      
+      // Optimistically decrement count across ALL caches
+      updateFavoriteCountInAllCaches(queryClient, listingId, Math.max(0, currentCount - 1));
 
-      // Optimistically update search results
-      queryClient.setQueriesData<SearchResponse>(
-        { queryKey: queryKeys.listings.search({}) },
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            listings: old.listings.map((listing) =>
-              listing.id === listingId
-                ? {
-                    ...listing,
-                    favorites_count: Math.max(0, listing.favorites_count - 1),
-                  }
-                : listing
-            ),
-          };
-        }
-      );
-
-      return { previousData };
+      return { previousData, previousCount: currentCount };
     },
     onSuccess: (response: FavoriteResponse, listingId) => {
-      // Update with server response
-      queryClient.setQueryData<ListingDetailsResponse>(
-        queryKeys.listings.detail(listingId),
-        (old) =>
-          old
-            ? {
-                ...old,
-                favorites_count: response.favorites_count,
-              }
-            : old
-      );
-
-      // Invalidate favorites list
+      // Use server response to sync count across ALL caches
+      updateFavoriteCountInAllCaches(queryClient, listingId, response.favorites_count);
+      
+      // Invalidate favorites list only to add/remove the listing itself
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.favorites });
     },
     onError: (err, listingId, context) => {
-      // Rollback on error
+      // Rollback optimistic count update across ALL caches
+      if (context?.previousCount !== undefined) {
+        updateFavoriteCountInAllCaches(queryClient, listingId, context.previousCount);
+      }
+      
+      // Rollback detail cache specifically
       if (context?.previousData) {
         queryClient.setQueryData(
           queryKeys.listings.detail(listingId),
           context.previousData
         );
       }
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.listings.detail(listingId),
-      });
     },
   });
 }
