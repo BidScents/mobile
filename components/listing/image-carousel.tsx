@@ -15,12 +15,14 @@ export function ImageCarousel({
   height,
   listingId,
   favoritesCount,
+  hidePagination = false,
 }: {
   imageUrls: string[];
   width: number;
   height: number;
   listingId: string;
   favoritesCount: number;
+  hidePagination?: boolean;
 }) {
   const theme = useTheme();
   const ref = React.useRef<ICarouselInstance>(null);
@@ -56,27 +58,30 @@ export function ImageCarousel({
         )}
       />
 
-      <Pagination.Basic
-        progress={progress}
-        data={imageUrls || []}
-        dotStyle={{
-          backgroundColor: theme.mutedForeground.val,
-          borderRadius: 5,
-        }}
-        activeDotStyle={{
-          backgroundColor: theme.background?.val,
-          overflow: "hidden",
-          borderRadius: 5,
-        }}
-        containerStyle={{
-          gap: 5,
-          marginTop: 10,
-          position: "absolute",
-          bottom: 20,
-        }}
-        onPress={onPressPagination}
-      />
-      <View style={{ position: "absolute", top: insets.top + 10, right: 20 }}>
+      {/* Hide pagination when loading new data or only single image */}
+      {!hidePagination && imageUrls.length > 1 && (
+        <Pagination.Basic
+          progress={progress}
+          data={imageUrls || []}
+          dotStyle={{
+            backgroundColor: theme.mutedForeground.val,
+            borderRadius: 5,
+          }}
+          activeDotStyle={{
+            backgroundColor: theme.background?.val,
+            overflow: "hidden",
+            borderRadius: 5,
+          }}
+          containerStyle={{
+            gap: 5,
+            marginTop: 10,
+            position: "absolute",
+            bottom: 20,
+          }}
+          onPress={onPressPagination}
+        />
+      )}
+      <View style={{ position: "absolute", bottom: 0, right: 20 }}>
         <FavoriteButton
           listingId={listingId}
           initialCount={favoritesCount}

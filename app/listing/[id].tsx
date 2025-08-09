@@ -21,11 +21,11 @@ import { isCurrentUserHighestBidder as checkIsCurrentUserHighestBidder } from ".
  */
 export default function ListingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: listing, isLoading, error } = useListingDetail(id!);
+  const { data: listing, isLoading, error, isFetching } = useListingDetail(id!);
   const { user } = useAuthStore();
 
   const width = Dimensions.get("window").width;
-  const height = Dimensions.get("window").height * 0.55;
+  const height = Dimensions.get("window").height * 0.5;
 
   // Track auction viewer count using ref to prevent re-renders
   const currentViewersRef = useRef<number | undefined>(undefined);
@@ -77,10 +77,12 @@ export default function ListingScreen() {
     console.log("Contact seller");
   };
 
-  if (isLoading) {
+  // Show skeleton only if no data at all (no seeded cache)
+  if (isLoading && !listing) {
     return <ListingDetailSkeleton width={width} />;
   }
-  if (error)
+  
+  if (error && !listing)
     return (
       <Container
         variant="padded"
@@ -90,6 +92,7 @@ export default function ListingScreen() {
         <Text>Error loading listing</Text>
       </Container>
     );
+    
   if (!listing)
     return (
       <Container
@@ -122,6 +125,7 @@ export default function ListingScreen() {
           height={height}
           listingId={listing.listing.id}
           favoritesCount={listing.favorites_count}
+          hidePagination={(listing as any)?.__seeded === true}
         />
 
         {/* Listing Content */}
@@ -136,17 +140,18 @@ export default function ListingScreen() {
           isAuctionLive={isConnected}
           currentViewers={currentViewersRef.current}
           isUserSeller={isUserSeller}
+          isLoadingFullData={isFetching}
         />
       </KeyboardAwareScrollView>
 
       {/* Action Buttons */}
-      { !isUserSeller && (
+      {!isUserSeller && (
         <ListingActions
           listingType={listing.listing.listing_type}
           listingId={listing.listing.id}
           auctionDetails={listing.auction_details}
           isCurrentUserHighestBidder={isCurrentUserHighestBidder}
-          isLoading={isLoading}
+          isLoading={isLoading || (listing as any)?.__seeded === true}
           onAction={handleContactSeller}
         />
       )}

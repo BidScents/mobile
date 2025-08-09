@@ -49,7 +49,7 @@ export default function AuctionButton({
         right={0}
       >
         <Button
-          variant={isCurrentUserHighestBidder ? "success" : "primary"}
+          variant="primary"
           size="lg"
           fullWidth
           onPress={handleBidPress}

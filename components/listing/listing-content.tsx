@@ -1,5 +1,10 @@
 import { AuctionDetails, CommentDetails, ListingDetailsResponse, ListingType, UserPreview } from "@bid-scents/shared-sdk";
 import { View } from "tamagui";
+import { AuctionDetailsSkeleton } from "../suspense/auction-details-skeleton";
+import { CommentsHeaderSkeleton } from "../suspense/comments-header-skeleton";
+import { CommentsSkeleton } from "../suspense/comments-skeleton";
+import { DescriptionSkeleton } from "../suspense/description-skeleton";
+import { ListingDetailsSkeleton } from "../suspense/listing-details-skeleton";
 import { ShowMoreText } from "../ui/show-more-text";
 import { AuctionSection } from "./auction-section";
 import { CommentsHeader } from "./comments-header";
@@ -19,6 +24,7 @@ interface ListingContentProps {
   isAuctionLive?: boolean;
   currentViewers?: number;
   isUserSeller?: boolean;
+  isLoadingFullData?: boolean;
 }
 
 /**
@@ -36,7 +42,10 @@ export function ListingContent({
   isAuctionLive = false,
   currentViewers,
   isUserSeller = false,
+  isLoadingFullData = false,
 }: ListingContentProps) {
+  // Check if this is seeded data (indicates we need skeletons for missing sections)
+  const isSeededData = (listing as any)?.__seeded === true;
   return (
     <View
       paddingHorizontal="$4"
@@ -55,47 +64,74 @@ export function ListingContent({
           price={listing.listing.price}
           listingType={listing.listing.listing_type}
         />
+        <View gap="$4">
+          {/* Description */}
+          {isSeededData || !listing.listing.description ? (
+            <DescriptionSkeleton />
+          ) : (
+            <ShowMoreText
+              lines={3}
+              more="Show more"
+              less="Show less"
+              fontSize="$5"
+              color="$foreground"
+              fontWeight="400"
+              buttonColor="$blue10"
+            >
+              {listing.listing.description}
+            </ShowMoreText>
+          )}
 
-        {/* Description */}
-        <ShowMoreText
-          lines={3}
-          more="Show more"
-          less="Show less"
-          fontSize="$5"
-          color="$foreground"
-          fontWeight="400"
-          buttonColor="$blue10"
-        >
-          {listing.listing.description}
-        </ShowMoreText>
+          {/* Listing Details */}
+          {isSeededData ? (
+            <ListingDetailsSkeleton />
+          ) : (
+            <ListingDetailsSection listing={listing.listing} />
+          )}
+        </View>
+
       </View>
-
-      {/* Listing Details */}
-      <ListingDetailsSection listing={listing.listing} />
+      
 
       {/* Auction Section */}
-      {listing.listing.listing_type === ListingType.AUCTION && auctionDetails && (
-        <AuctionSection 
-          auctionDetails={auctionDetails}
-          isLive={isAuctionLive}
-          currentViewers={currentViewers}
-        />
+      {listing.listing.listing_type === ListingType.AUCTION && (
+        <>
+          {auctionDetails && !isSeededData ? (
+            <AuctionSection 
+              auctionDetails={auctionDetails}
+              isLive={isAuctionLive}
+              currentViewers={currentViewers}
+            />
+          ) : (isSeededData || isLoadingFullData) ? (
+            <AuctionDetailsSkeleton />
+          ) : null}
+        </>
       )}
 
       {/* Comments Section */}
       <View gap="$4">
-        <CommentsHeader
-          totalVotes={totalVotes}
-          isUpvoted={isUpvoted}
-          listingId={listing.listing.id}
-        />
+        {/* Show skeleton for comments header if using seeded data */}
+        {isSeededData || (isLoadingFullData && totalVotes === 0 && isUpvoted === null) ? (
+          <CommentsHeaderSkeleton />
+        ) : (
+          <CommentsHeader
+            totalVotes={totalVotes}
+            isUpvoted={isUpvoted}
+            listingId={listing.listing.id}
+          />
+        )}
 
-        <CommentsSection
-          comments={comments}
-          userId={userId}
-          sellerId={seller.id}
-          listingId={listing.listing.id}
-        />
+        {/* Show skeleton for comments if using seeded data */}
+        {isSeededData || (isLoadingFullData && comments === null) ? (
+          <CommentsSkeleton />
+        ) : (
+          <CommentsSection
+            comments={comments}
+            userId={userId}
+            sellerId={seller.id}
+            listingId={listing.listing.id}
+          />
+        )}
       </View>
     </View>
   );
