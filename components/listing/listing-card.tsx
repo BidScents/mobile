@@ -4,9 +4,12 @@ import {
   ListingType,
 } from "@bid-scents/shared-sdk";
 import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { GestureResponderEvent } from "react-native";
 import { Card, Image, Text, XStack, YStack } from "tamagui";
+import { seedListingDetailCache } from "../../hooks/queries/use-listing";
+import { queryKeys } from "../../hooks/queries/query-keys";
 import { Button } from "../ui/button";
 import { CountdownTimer } from "./countdown-timer";
 import { FavoriteButton } from "./favorite-button";
@@ -24,9 +27,21 @@ export function ListingCard({
   listing,
   onPress,
 }: ListingCardProps) {
+  const queryClient = useQueryClient();
 
   const handleCardPress = () => {
     onPress?.();
+    
+    // Only seed cache if no data exists or existing data is also seeded
+    const existingData = queryClient.getQueryData(
+      queryKeys.listings.detail(listing.id)
+    ) as any;
+    
+    if (!existingData || existingData?.__seeded === true) {
+      // Seed cache with listing card data for instant loading
+      seedListingDetailCache(queryClient, listing);
+    }
+    
     router.push(`/listing/${listing.id}` as any);
   };
 
