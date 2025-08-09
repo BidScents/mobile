@@ -3,13 +3,13 @@ import {
   ListingCard as ListingCardType,
   ListingType,
 } from "@bid-scents/shared-sdk";
-import { router } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
 import React from "react";
 import { GestureResponderEvent } from "react-native";
 import { Card, Image, Text, XStack, YStack } from "tamagui";
-import { seedListingDetailCache } from "../../hooks/queries/use-listing";
 import { queryKeys } from "../../hooks/queries/query-keys";
+import { seedListingDetailCache } from "../../hooks/queries/use-listing";
 import { Button } from "../ui/button";
 import { CountdownTimer } from "./countdown-timer";
 import { FavoriteButton } from "./favorite-button";
@@ -288,7 +288,7 @@ export function ListingCard({
       size="$3"
       backgroundColor="$background"
       borderRadius="$6"
-      padding="$2"
+      py="$2"
       pressStyle={{ scale: 0.99 }}
       onPress={handleCardPress}
       flex={1}
