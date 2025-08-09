@@ -5,7 +5,12 @@ import { useHomepage } from '@/hooks/queries/use-homepage'
 import type { ListingCard as ListingCardType } from '@bid-scents/shared-sdk'
 import { FlashList } from '@shopify/flash-list'
 import React, { useMemo } from 'react'
+import { Dimensions } from 'react-native'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
+
+const screenWidth = Dimensions.get('window').width
+const cardWidth = (screenWidth - 32 - 12) / 2; // 32 for padding, 12 for gap
+const cardHeight = cardWidth * 1.4; // Maintain aspect ratio
 
 /**
  * Feed item types for FlashList optimization
@@ -153,7 +158,7 @@ function FeaturedGridSection({ listings, isLoading }: { listings: ListingCardTyp
           {row.map((listing, itemIndex) => (
             <YStack key={isLoading ? `skeleton-${rowIndex}-${itemIndex}` : listing.id} flex={1}>
               {isLoading ? (
-                <ListingCardSkeleton width={170} height={240} />
+                <ListingCardSkeleton width={cardWidth} height={cardHeight} />
               ) : (
                 <ListingCard listing={listing} />
               )}
@@ -178,7 +183,7 @@ function HorizontalListSection({ listings, isLoading }: { listings: ListingCardT
         {listings.map((listing, index) => (
           <YStack key={isLoading ? `skeleton-${index}` : listing.id} width={200}>
             {isLoading ? (
-              <ListingCardSkeleton width={170} height={240} />
+              <ListingCardSkeleton width={cardWidth} height={cardHeight} />
             ) : (
               <ListingCard listing={listing} />
             )}
