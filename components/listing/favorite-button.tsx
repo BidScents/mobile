@@ -14,7 +14,7 @@ interface FavoriteButtonProps {
 }
 
 /**
- * Simplified favorite button with optimistic updates and debouncing.
+ * Simplified favorite button with optimistic updates and simple debouncing.
  * Uses only the favorites list to determine status - no detailed listing calls.
  */
 export function FavoriteButton({ 
@@ -36,46 +36,15 @@ export function FavoriteButton({
   const [isFavorited, setIsFavorited] = useState(serverIsFavorited)
   const [count, setCount] = useState(initialCount)
   
+  // Simple debounce timeout ref
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  
   // Sync with server state
   useEffect(() => {
     setIsFavorited(serverIsFavorited)
   }, [serverIsFavorited])
-  
-  // Update count from successful mutations
-  useEffect(() => {
-    if (favoriteMutation.data) {
-      setCount(favoriteMutation.data.favorites_count)
-    }
-  }, [favoriteMutation.data])
-  
-  useEffect(() => {
-    if (unfavoriteMutation.data) {
-      setCount(unfavoriteMutation.data.favorites_count)
-    }
-  }, [unfavoriteMutation.data])
-  
-  // Debouncing logic
-  const pendingStateRef = useRef<boolean | null>(null)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const executeApiCall = useCallback(async (shouldFavorite: boolean) => {
-    try {
-      if (shouldFavorite) {
-        await favoriteMutation.mutateAsync(listingId)
-      } else {
-        await unfavoriteMutation.mutateAsync(listingId)
-      }
-    } catch (error) {
-      // Simple error handling - just revert the optimistic update
-      setIsFavorited(!shouldFavorite)
-      setCount(prev => shouldFavorite ? prev - 1 : prev + 1)
-      console.error('Failed to toggle favorite:', error)
-    } finally {
-      pendingStateRef.current = null
-    }
-  }, [listingId, favoriteMutation, unfavoriteMutation])
-
-  const handleToggle = async () => {
+  const handleToggle = useCallback(async () => {
     if (favoritesLoading) return
 
     const newIsFavorited = !isFavorited
@@ -87,22 +56,29 @@ export function FavoriteButton({
     // Haptic feedback
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     
-    // Debounced API call
-    pendingStateRef.current = newIsFavorited
-    
+    // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
     
-    timeoutRef.current = setTimeout(() => {
-      const finalState = pendingStateRef.current
-      if (finalState !== null) {
-        executeApiCall(finalState)
+    // Debounced API call
+    timeoutRef.current = setTimeout(async () => {
+      try {
+        if (newIsFavorited) {
+          await favoriteMutation.mutateAsync(listingId)
+        } else {
+          await unfavoriteMutation.mutateAsync(listingId)
+        }
+      } catch (error) {
+        // Revert optimistic update on error
+        setIsFavorited(!newIsFavorited)
+        setCount(prev => newIsFavorited ? prev - 1 : prev + 1)
+        console.error('Failed to toggle favorite:', error)
       }
     }, debounceMs)
-  }
+  }, [isFavorited, favoritesLoading, listingId, favoriteMutation, unfavoriteMutation, debounceMs])
 
-  // Cleanup
+  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
