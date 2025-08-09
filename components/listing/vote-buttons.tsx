@@ -4,6 +4,13 @@ import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Text, useTheme, View, XStack } from "tamagui";
 
+/**
+ * VoteButtons Component
+ * 
+ * Handles upvoting and downvoting for listings with dual state management:
+ * 1. Local state for instant UI feedback
+ * 2. Cache updates via mutations for persistence
+ */
 export function VoteButtons({
   totalVotes,
   isUpvoted,
@@ -17,12 +24,12 @@ export function VoteButtons({
   const voteListing = useVoteListing();
   const unvoteListing = useUnvoteListing();
 
-  // Local state for instant UI updates
+  // Local state for instant UI updates (prevents delay while server processes)
   const [currentVotes, setCurrentVotes] = useState(totalVotes);
   const [currentIsUpvoted, setCurrentIsUpvoted] = useState(isUpvoted);
   const [lastListingId, setLastListingId] = useState(listingId);
 
-  // Sync with props when listingId changes or when props update from server
+  // Sync local state with server props when listing changes or server updates
   useEffect(() => {
     if (listingId !== lastListingId) {
       setCurrentVotes(totalVotes);
@@ -31,10 +38,10 @@ export function VoteButtons({
     }
   }, [listingId, totalVotes, isUpvoted, lastListingId]);
 
-  // Debounce refs
+  // Debounce timeout for spam protection
   const debounceTimeoutRef = useRef<number | null>(null);
 
-  // Determine icon names and colors based on current vote state
+  // Dynamic icons based on current vote state
   const upvoteIcon =
     currentIsUpvoted === true ? "caret-up-circle" : "caret-up-circle-outline";
   const downvoteIcon =
@@ -42,14 +49,18 @@ export function VoteButtons({
       ? "caret-down-circle"
       : "caret-down-circle-outline";
 
+  /**
+   * Debounced server call to prevent spam
+   * Waits 500ms before sending request to server
+   */
   const debouncedVote = useCallback(
     (action: "upvote" | "downvote" | "unvote") => {
-      // Clear existing timeout
+      // Clear any pending vote to replace with new one
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
 
-      // Set new timeout
+      // Queue the server call after debounce period
       debounceTimeoutRef.current = setTimeout(() => {
         switch (action) {
           case "upvote":
@@ -62,41 +73,55 @@ export function VoteButtons({
             unvoteListing.mutate(listingId);
             break;
         }
-      }, 500); // 500ms debounce
+      }, 300);
     },
     [voteListing, unvoteListing, listingId]
   );
 
+  /**
+   * Handle upvote button press
+   * 
+   * Logic:
+   * - If already upvoted: Remove upvote (unvote)
+   * - If downvoted: Switch to upvote (+2 total change)
+   * - If no vote: Add upvote (+1 total change)
+   */
   const handleUpvote = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
 
-    // Instant UI update
     if (currentIsUpvoted === true) {
-      // Remove upvote
+      // Remove existing upvote
       setCurrentVotes((prev) => prev - 1);
       setCurrentIsUpvoted(null);
       debouncedVote("unvote");
     } else {
-      // Add upvote or change from downvote to upvote
-      const voteDiff = currentIsUpvoted === false ? 2 : 1;
+      // Add upvote (or switch from downvote)
+      const voteDiff = currentIsUpvoted === false ? 2 : 1; // +2 if switching, +1 if new
       setCurrentVotes((prev) => prev + voteDiff);
       setCurrentIsUpvoted(true);
       debouncedVote("upvote");
     }
   }, [currentIsUpvoted, debouncedVote]);
 
+  /**
+   * Handle downvote button press
+   * 
+   * Logic:
+   * - If already downvoted: Remove downvote (unvote)
+   * - If upvoted: Switch to downvote (-2 total change)
+   * - If no vote: Add downvote (-1 total change)
+   */
   const handleDownvote = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
 
-    // Instant UI update
     if (currentIsUpvoted === false) {
-      // Remove downvote
+      // Remove existing downvote
       setCurrentVotes((prev) => prev + 1);
       setCurrentIsUpvoted(null);
       debouncedVote("unvote");
     } else {
-      // Add downvote or change from upvote to downvote
-      const voteDiff = currentIsUpvoted === true ? -2 : -1;
+      // Add downvote (or switch from upvote)
+      const voteDiff = currentIsUpvoted === true ? -2 : -1; // -2 if switching, -1 if new
       setCurrentVotes((prev) => prev + voteDiff);
       setCurrentIsUpvoted(false);
       debouncedVote("downvote");
