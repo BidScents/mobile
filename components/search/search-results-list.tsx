@@ -17,6 +17,8 @@ interface SearchResultsListProps {
 const MemoizedListingCard = React.memo(ListingCard);
 const MemoizedListingCardSkeleton = React.memo(ListingCardSkeleton);
 
+const GAP_SIZE = 12; // Same as homepage $3 gap
+
 export const SearchResultsList = React.memo(function SearchResultsList({
   searchParams,
   onRefresh,
@@ -72,18 +74,39 @@ export const SearchResultsList = React.memo(function SearchResultsList({
   }, [refetch, onRefresh]);
 
   // Render listing item
-  const renderListingItem = useCallback(({ item }: { item: any }) => (
-    <View paddingHorizontal="$2" paddingBottom="$3">
-      <MemoizedListingCard listing={item} />
-    </View>
-  ), []);
+  const renderListingItem = useCallback(({ item, index }: { item: any, index: number }) => {
+    const isLeftColumn = index % 2 === 0;
+    
+    return (
+      <View 
+        style={{
+          paddingLeft: isLeftColumn ? 0 : GAP_SIZE / 2,
+          paddingRight: isLeftColumn ? GAP_SIZE / 2 : 0,
+          paddingBottom: GAP_SIZE,
+        }}
+      >
+        <MemoizedListingCard listing={item} />
+      </View>
+    );
+  }, []);
 
   // Render loading skeleton
-  const renderSkeletonItem = useCallback(({ index }: { index: number }) => (
-    <View paddingHorizontal="$2" paddingBottom="$3" key={`skeleton-${index}`}>
-      <MemoizedListingCardSkeleton />
-    </View>
-  ), []);
+  const renderSkeletonItem = useCallback(({ index }: { index: number }) => {
+    const isLeftColumn = index % 2 === 0;
+    
+    return (
+      <View 
+        key={`skeleton-${index}`}
+        style={{
+          paddingLeft: isLeftColumn ? 0 : GAP_SIZE / 2,
+          paddingRight: isLeftColumn ? GAP_SIZE / 2 : 0,
+          paddingBottom: GAP_SIZE,
+        }}
+      >
+        <MemoizedListingCardSkeleton />
+      </View>
+    );
+  }, []);
 
   // Key extractor
   const keyExtractor = useCallback((item: any) => item.id, []);
@@ -93,11 +116,11 @@ export const SearchResultsList = React.memo(function SearchResultsList({
     if (!isFetchingNextPage) return null;
     
     return (
-      <View paddingVertical="$4" flexDirection="row" justifyContent="space-around">
-        <View paddingHorizontal="$2" paddingBottom="$3">
+      <View paddingVertical="$4" flexDirection="row" style={{ gap: GAP_SIZE }}>
+        <View style={{ flex: 1 }}>
           <MemoizedListingCardSkeleton />
         </View>
-        <View paddingHorizontal="$2" paddingBottom="$3">
+        <View style={{ flex: 1 }}>
           <MemoizedListingCardSkeleton />
         </View>
       </View>

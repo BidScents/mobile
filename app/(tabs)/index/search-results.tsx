@@ -1,7 +1,7 @@
 import { SelectBottomSheet } from "@/components/forms/select-bottom-sheet";
 import { SearchFilterBottomSheet, SearchFilterBottomSheetMethods } from "@/components/search/search-filter-bottom-sheet";
-import { SearchResultsList } from "@/components/search/search-results-list";
 import { SearchResultsHeader } from "@/components/search/search-results-header";
+import { SearchResultsList } from "@/components/search/search-results-list";
 import { Container } from "@/components/ui/container";
 import { SEARCH_SORT_OPTIONS } from "@/constants/search.constants";
 import { useSearchResults } from "@/hooks/use-search-results";
@@ -59,7 +59,7 @@ export default function SearchResultsScreen() {
   }, []);
 
   return (
-    <Container variant="fullscreen" safeArea={["top"]} pb={tabbarHeight} backgroundColor="$background">
+    <Container variant="padded" safeArea={["top"]} pb={tabbarHeight} backgroundColor="$background">
       <SearchResultsHeader
         currentSearchQuery={currentSearchQuery}
         onSearchChange={handleSearchChange}
