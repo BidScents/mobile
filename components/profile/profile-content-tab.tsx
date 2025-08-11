@@ -1,6 +1,7 @@
 import { ListingCard } from '@/components/listing/listing-card';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { FlashList } from '@shopify/flash-list';
+import * as Haptics from 'expo-haptics';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image } from 'react-native';
 import { Text, View } from 'tamagui';
@@ -18,7 +19,6 @@ import { ProfileContentEmpty } from './profile-content-empty';
 import { ProfileContentFooter } from './profile-content-footer';
 import { ProfileContentHeader } from './profile-content-header';
 import { ProfileContentLoading } from './profile-content-loading';
-
 // Memoized components to prevent re-renders
 const MemoizedListingCard = React.memo(ListingCard);
 
@@ -65,6 +65,7 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
 
   // Handle sort bottom sheet
   const handleSortPress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     selectBottomSheetRef.current?.present();
   }, []);
 
