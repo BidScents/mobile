@@ -1,54 +1,39 @@
-import { useSearchBarAnimation } from '@/hooks/use-search-bar-animation';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRef, useState } from 'react';
+import { Pressable, TextInput } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { XStack } from 'tamagui';
-import { SearchInput } from './search-input';
+import { Input, Text, XStack, useTheme } from 'tamagui';
 
 interface SearchBarProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
-  onSearchSubmit?: (query: string) => void;
   onSearchPress?: () => void;
   autoFocus?: boolean;
   editable?: boolean;
-  navigateToResults?: boolean;
-  initialFilters?: any;
-  initialSort?: any;
-  initialValue?: string;
-  includeSafeArea?: boolean;
 }
-
-export const SEARCH_BAR_HEIGHT = 40;
-export const SEARCH_BAR_PADDING = 16;
-
-export const getSearchBarTotalHeight = (safeAreaTop: number, includeSafeArea: boolean = true) => {
-  return SEARCH_BAR_HEIGHT + (SEARCH_BAR_PADDING * 2) + (includeSafeArea ? safeAreaTop : 0);
-};
 
 export function SearchBar({
   placeholder = "Search listings",
   onSearch,
-  onSearchSubmit,
   onSearchPress,
   autoFocus = false,
   editable = true,
-  navigateToResults = false,
-  initialFilters,
-  initialSort,
-  initialValue = '',
-  includeSafeArea = true,
 }: SearchBarProps) {
-  const [searchQuery, setSearchQuery] = useState(initialValue);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const insets = useSafeAreaInsets();
-  
-  const { searchBarFlex, cancelButtonOpacity, animateToFocused, animateToBlurred } = useSearchBarAnimation();
+  const inputRef = useRef<TextInput>(null);
+  const theme = useTheme();
 
-  useEffect(() => {
-    setSearchQuery(initialValue);
-  }, [initialValue]);
+  // Animated values
+  const searchBarFlex = useSharedValue(1);
+  const cancelButtonOpacity = useSharedValue(0);
 
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
@@ -57,84 +42,121 @@ export function SearchBar({
 
   const handleFocus = () => {
     setIsFocused(true);
-    animateToFocused();
+    
+    // Animate search bar to be shorter and show cancel button
+    searchBarFlex.value = withSpring(0.99, { damping: 500 });
+    cancelButtonOpacity.value = withTiming(1, { duration: 300 });
   };
 
   const handleBlur = () => {
     setIsFocused(false);
-    animateToBlurred();
+    
+    // Animate search bar back to full width and hide cancel button
+    searchBarFlex.value = withSpring(1, { damping: 500 });
+    cancelButtonOpacity.value = withTiming(0, { duration: 200 });
   };
 
-  const handleSearchIconPress = () => {
-    if (editable && navigateToResults && searchQuery.trim()) {
-      handleSearchSubmit();
-    } else if (editable && onSearchSubmit && searchQuery.trim()) {
-      onSearchSubmit(searchQuery.trim());
+  const handleCancel = () => {
+
+    inputRef.current?.blur();
+    setSearchQuery('');
+    onSearch?.('');
+  };
+
+  const handleContainerPress = () => {
+    if (editable) {
+      inputRef.current?.focus();
     } else {
       onSearchPress?.();
     }
   };
 
-  const handleSearchSubmit = () => {
-    if (!searchQuery.trim() || !navigateToResults) return;
-    
-    const params = new URLSearchParams();
-    params.append('q', searchQuery.trim());
-    
-    if (initialFilters) {
-      params.append('filters', JSON.stringify(initialFilters));
+  const handleSearchIconPress = () => {
+    if (editable) {
+      inputRef.current?.focus();
+    } else {
+      onSearchPress?.();
     }
-    
-    if (initialSort) {
-      params.append('sort', JSON.stringify(initialSort));
-    }
-    
-    router.push(`/(tabs)/search-results?${params.toString()}` as any);
   };
 
-  const handleSubmitEditing = () => {
-    if (navigateToResults) {
-      handleSearchSubmit();
-    } else if (onSearchSubmit && searchQuery.trim()) {
-      onSearchSubmit(searchQuery.trim());
-    }
-    // Blur is handled by SearchInput component when needed
-  };
+  // Animated styles
+  const searchBarAnimatedStyle = useAnimatedStyle(() => ({
+    flex: searchBarFlex.value,
+  }));
 
-  const SearchInputContent = (
+  const cancelButtonAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: cancelButtonOpacity.value,
+  }));
+
+  const SearchInput = (
     <XStack
       alignItems="center"
       gap="$3"
-      marginTop={includeSafeArea ? insets.top : 0}
+      marginTop={insets.top}
+      marginHorizontal="$4"
       flex={1}
+      marginBottom="$2"
+      width="100%"
     >
-      <SearchInput
-        placeholder={placeholder}
-        value={searchQuery}
-        onChangeText={handleSearchChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onSubmitEditing={handleSubmitEditing}
-        onSearchIconPress={handleSearchIconPress}
-        onCancel={() => {}}
-        autoFocus={autoFocus}
-        editable={editable}
-        searchBarFlex={searchBarFlex}
-        cancelButtonOpacity={cancelButtonOpacity}
-        isFocused={isFocused}
-        backgroundColor="$muted"
-        height={SEARCH_BAR_HEIGHT}
-      />
+      <Animated.View style={searchBarAnimatedStyle}>
+        <XStack
+          alignItems="center"
+          backgroundColor="$muted"
+          borderRadius="$5"
+          paddingHorizontal="$3"
+          gap="$3"
+          onPress={handleContainerPress}
+          height={40}
+        >
+          <Pressable onPress={handleSearchIconPress}>
+            <Ionicons 
+              name="search" 
+              size={20} 
+              color={theme.foreground.val} 
+            />
+          </Pressable>
+          <Input
+            ref={inputRef}
+            flex={1}
+            placeholder={placeholder}
+            placeholderTextColor={"$foreground"}
+            value={searchQuery}
+            onChangeText={handleSearchChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            autoFocus={autoFocus}
+            editable={editable}
+            backgroundColor="transparent"
+            borderWidth={0}
+            paddingHorizontal={0}
+            fontSize="$5"
+            returnKeyType="search"
+            clearButtonMode="while-editing"
+            onSubmitEditing={() => {
+              inputRef.current?.blur();
+            }}
+          />
+        </XStack>
+      </Animated.View>
+
+      {/* Animated Cancel Button */}
+      <Animated.View style={[cancelButtonAnimatedStyle, { display: isFocused ? 'flex' : 'none' }]}>
+        <Pressable onPress={handleCancel}>
+          <Text color="$foreground" fontSize="$4">
+            Cancel
+          </Text>
+        </Pressable>
+      </Animated.View>
     </XStack>
   );
 
   if (!editable && onSearchPress) {
     return (
       <Pressable onPress={onSearchPress} style={{ flex: 1 }}>
-        {SearchInputContent}
+        {SearchInput}
       </Pressable>
     );
   }
 
-  return SearchInputContent;
+  return SearchInput;
 }

@@ -1,10 +1,8 @@
 import { ListingCard } from '@/components/listing/listing-card'
 import { ListingCardSkeleton } from '@/components/suspense/listing-card-skeleton'
 import { Container } from '@/components/ui/container'
-import { SearchBar } from '@/components/ui/search-bar'
 import { useHomepage } from '@/hooks/queries/use-homepage'
 import type { ListingCard as ListingCardType } from '@bid-scents/shared-sdk'
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs'
 import { FlashList } from '@shopify/flash-list'
 import React, { useMemo } from 'react'
 import { Dimensions } from 'react-native'
@@ -30,7 +28,6 @@ type FeedItem =
  */
 export default function Homepage() {
   const { data: homepage, isLoading, refetch, isFetching } = useHomepage()
-  const tabbarHeight = useBottomTabBarHeight();
 
   /**
    * Builds optimized feed data structure for FlashList
@@ -124,17 +121,9 @@ export default function Homepage() {
   return (
     <Container
       variant="padded"
-      safeArea={false}
-      pb={tabbarHeight}
+      safeArea={["bottom"]}
       backgroundColor="$background"
     >
-      <XStack pb="$2" width="100%" >
-        <SearchBar 
-          placeholder="Search listings..." 
-          navigateToResults={true}
-          editable={true}
-        />
-      </XStack>
       <FlashList
         data={feedData}
         renderItem={renderFeedItem}
@@ -144,7 +133,6 @@ export default function Homepage() {
         showsVerticalScrollIndicator={false}
         refreshing={isFetching && !isLoading}
         onRefresh={refetch}
-        keyboardDismissMode="on-drag"
       />
     </Container>
   )

@@ -1,47 +1,34 @@
-import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { useTheme } from "@tamagui/core";
-import * as Haptics from "expo-haptics";
-import React, { forwardRef, useImperativeHandle } from "react";
-import { Pressable } from "react-native";
-import { Text, XStack, YStack } from "tamagui";
-import { Button } from "../ui/button";
+import { BottomSheet } from '@/components/ui/bottom-sheet'
+import { Ionicons } from '@expo/vector-icons'
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
+import { useTheme } from '@tamagui/core'
+import * as Haptics from 'expo-haptics'
+import React, { forwardRef, useImperativeHandle } from 'react'
+import { Pressable } from 'react-native'
+import { Text, XStack, YStack } from 'tamagui'
+import { Button } from '../ui/button'
 
 export interface SelectOption {
-  label: string;
-  value: string;
+  label: string
+  value: string
 }
 
 interface SelectBottomSheetMethods extends BottomSheetModalMethods {
-  dismiss: () => void;
+  dismiss: () => void
 }
 
 interface SelectBottomSheetProps {
-  options?: SelectOption[];
-  onSelect: (value: string) => void;
-  title?: string;
-  subtitle?: string;
+  options?: SelectOption[]
+  onSelect: (value: string) => void
+  title?: string
+  subtitle?: string
 }
 
-export const SelectBottomSheet = forwardRef<
-  SelectBottomSheetMethods,
-  SelectBottomSheetProps
->(
-  (
-    {
-      options = [],
-      onSelect,
-      title = "Select Option",
-      subtitle = "Choose from the available options below",
-    },
-    ref
-  ) => {
-    const theme = useTheme();
-    const [selectedValue, setSelectedValue] = React.useState<string | null>(
-      null
-    );
-    const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
+export const SelectBottomSheet = forwardRef<SelectBottomSheetMethods, SelectBottomSheetProps>(
+  ({ options = [], onSelect, title = "Select Option", subtitle = "Choose from the available options below" }, ref) => {
+    const theme = useTheme()
+    const [selectedValue, setSelectedValue] = React.useState<string | null>(null)
+    const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null)
 
     useImperativeHandle(ref, () => ({
       present: () => bottomSheetRef.current?.present(),
@@ -49,38 +36,36 @@ export const SelectBottomSheet = forwardRef<
       close: () => bottomSheetRef.current?.close(),
       collapse: () => bottomSheetRef.current?.collapse(),
       expand: () => bottomSheetRef.current?.expand(),
-      snapToIndex: (index: number) =>
-        bottomSheetRef.current?.snapToIndex(index),
-      snapToPosition: (position: string | number) =>
-        bottomSheetRef.current?.snapToPosition(position),
+      snapToIndex: (index: number) => bottomSheetRef.current?.snapToIndex(index),
+      snapToPosition: (position: string | number) => bottomSheetRef.current?.snapToPosition(position),
       forceClose: () => bottomSheetRef.current?.forceClose(),
-    }));
+    }))
 
     const handleOptionSelect = (option: SelectOption) => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      setSelectedValue(option.value);
-    };
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+      setSelectedValue(option.value)
+    }
 
     return (
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={["50%", "80%"]}
-        backgroundStyle={{ backgroundColor: theme.background?.val || "white" }}
+        snapPoints={['50%', '80%']}
+        backgroundStyle={{ backgroundColor: theme.background?.val || 'white' }}
       >
-        <YStack gap="$2" padding="$4" flex={1}>
+        <YStack gap="$4" padding="$4" paddingBottom="$8" flex={1}>
           {/* Header */}
           <YStack gap="$2">
-            <Text
-              textAlign="left"
-              fontSize="$7"
+            <Text 
+              textAlign="left" 
+              fontSize="$7" 
               fontWeight="600"
               color="$foreground"
             >
               {title}
             </Text>
-            <Text
-              textAlign="left"
-              color="$mutedForeground"
+            <Text 
+              textAlign="left" 
+              color="$mutedForeground" 
               fontSize="$4"
               lineHeight="$5"
             >
@@ -91,7 +76,7 @@ export const SelectBottomSheet = forwardRef<
           {/* Options List */}
           <YStack gap="$2" flex={1}>
             {options.map((option, index) => (
-              <Pressable
+              <Pressable 
                 key={`${option.value}-${index}`}
                 onPress={() => handleOptionSelect(option)}
                 style={({ pressed }) => ({
@@ -104,46 +89,38 @@ export const SelectBottomSheet = forwardRef<
                   borderRadius="$6"
                   paddingVertical="$2"
                 >
-                  <Text
-                    fontSize="$5"
+                  <Text 
+                    fontSize="$5" 
                     fontWeight="400"
                     color="$foreground"
                     flex={1}
                   >
                     {option.label}
                   </Text>
-                  <Ionicons
-                    name={
-                      option.value === selectedValue
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={24}
-                    color={theme.foreground?.val}
-                  />
+                  <Ionicons name={option.value === selectedValue ? "radio-button-on" : "radio-button-off"} size={24} color={theme.foreground?.val} />
                 </XStack>
               </Pressable>
             ))}
-            <Button
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                bottomSheetRef.current?.dismiss();
-                onSelect(selectedValue || "");
-              }}
-              variant="primary"
-              size="lg"
-              fullWidth
-              disabled={!selectedValue}
-              borderRadius="$10"
-              mt="$4"
-            >
-              Apply
-            </Button>
+                <Button
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                    bottomSheetRef.current?.dismiss()
+                    onSelect(selectedValue || '')
+                  }}
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  disabled={!selectedValue}
+                  borderRadius="$10"
+                  mt="$4"
+                >
+                  Apply
+                </Button>
           </YStack>
         </YStack>
       </BottomSheet>
-    );
+    )
   }
-);
+)
 
-SelectBottomSheet.displayName = "SelectBottomSheet";
+SelectBottomSheet.displayName = 'SelectBottomSheet'

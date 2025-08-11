@@ -1,3 +1,4 @@
+import { SearchBar } from '@/components/ui/search-bar';
 import { darkBlur, lightBlur } from '@/tamagui.config';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -5,7 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { router, Tabs } from "expo-router";
 import React from 'react';
 import { StyleSheet, useColorScheme } from 'react-native';
-import { useTheme } from 'tamagui';
+import { useTheme, XStack } from 'tamagui';
 
 export default function TabsLayout() {
   const theme = useTheme();
@@ -54,7 +55,11 @@ export default function TabsLayout() {
         name="index" 
         options={{
           title: "Home",
-          headerShown: false,
+          headerShown: true,
+          header: () => 
+            <XStack backgroundColor="$background">
+                <SearchBar placeholder="Search" />
+            </XStack>,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "home" : "home-outline"} 
@@ -65,6 +70,24 @@ export default function TabsLayout() {
         }}
       />
       
+      <Tabs.Screen 
+        name="search" 
+        options={{
+          title: "Search",
+          headerShown: true,
+          header: () => 
+            <XStack backgroundColor="$background">
+              <SearchBar placeholder="Search" />
+            </XStack>,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons 
+              name={focused ? "search" : "search-outline"} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
       
       <Tabs.Screen 
         name="add" 
