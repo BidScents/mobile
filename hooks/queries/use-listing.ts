@@ -142,20 +142,11 @@ export function useSearchListings(searchParams: SearchRequest) {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-  });
-}
-
-/**
- * Basic search listings query (non-infinite) for simple searches
- * Useful for small result sets or when pagination isn't needed
- */
-export function useSimpleSearchListings(searchParams: SearchRequest) {
-  return useQuery({
-    queryKey: queryKeys.listings.search(searchParams),
-    queryFn: () =>
-      ListingService.searchListingsV1ListingSearchPost(searchParams),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    enabled: !!searchParams.q || !!searchParams.filters, // Only search when there's actual search criteria
+    // Enable query for:
+    // 1. Search with query text
+    // 2. Filter-only search (empty query but has filters)
+    // 3. Empty search to return all listings (no query and no filters)
+    enabled: true,
   });
 }
 
