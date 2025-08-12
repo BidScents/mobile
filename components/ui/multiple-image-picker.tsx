@@ -1,16 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@tamagui/core";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import React from "react";
 import {
   Alert,
   Dimensions,
-  Linking,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { Image, Text, XStack, YStack } from "tamagui";
+import { Image, Text, XStack, YStack, useTheme } from "tamagui";
 
 interface MultipleImagePickerProps {
   imageUris: string[];
@@ -60,36 +58,36 @@ export function MultipleImagePicker({
     }
   };
 
-  /**
-   * Request media library permissions
-   */
-  const requestPermissions = async (): Promise<boolean> => {
-    try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+  // /**
+  //  * Request media library permissions
+  //  */
+  // const requestPermissions = async (): Promise<boolean> => {
+  //   try {
+  //     const { status } =
+  //       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-      if (status === "granted") {
-        return true;
-      }
+  //     if (status === "granted") {
+  //       return true;
+  //     }
 
-      if (status === "denied") {
-        Alert.alert(
-          "Permission Required",
-          "This app needs access to your photo library to select images. Please enable it in Settings.",
-          [
-            { text: "Cancel", style: "cancel" },
-            { text: "Open Settings", onPress: () => Linking.openSettings() },
-          ]
-        );
-      }
+  //     if (status === "denied") {
+  //       Alert.alert(
+  //         "Permission Required",
+  //         "This app needs access to your photo library to select images. Please enable it in Settings.",
+  //         [
+  //           { text: "Cancel", style: "cancel" },
+  //           { text: "Open Settings", onPress: () => Linking.openSettings() },
+  //         ]
+  //       );
+  //     }
 
-      return false;
-    } catch (error) {
-      console.error("Permission request failed:", error);
-      Alert.alert("Error", "Failed to request permissions");
-      return false;
-    }
-  };
+  //     return false;
+  //   } catch (error) {
+  //     console.error("Permission request failed:", error);
+  //     Alert.alert("Error", "Failed to request permissions");
+  //     return false;
+  //   }
+  // };
 
   /**
    * Handle adding new images
@@ -97,12 +95,12 @@ export function MultipleImagePicker({
   const pickImages = async () => {
     if (disabled || imageUris.length >= maxImages) return;
 
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
+    // const hasPermission = await requestPermissions();
+    // if (!hasPermission) return;
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         allowsMultipleSelection: true,
         quality: 0.3,
         selectionLimit: Math.max(1, maxImages - imageUris.length),
@@ -179,7 +177,7 @@ export function MultipleImagePicker({
               backgroundColor="$background"
               opacity={disabled ? 0.5 : 1}
             >
-              <Ionicons name="add" size={32} color="#999" />
+              <Ionicons name="add" size={32} color={theme.$foreground?.get()} />
               <Text
                 color="$mutedForeground"
                 fontSize="$2"
@@ -245,7 +243,7 @@ export function MultipleImagePicker({
                       }}
                       onPress={() => removeImage(index)}
                     >
-                      <Ionicons name="close" size={16} color="$foreground" />
+                      <Ionicons name="close" size={16} color={theme.$foreground?.get()} />
                     </TouchableOpacity>
                   </YStack>
 
@@ -262,7 +260,7 @@ export function MultipleImagePicker({
                         borderRadius="$2"
                         padding="$1"
                       >
-                        <Ionicons name="chevron-back" size={16} color="#666" />
+                        <Ionicons name="chevron-back" size={20} color={theme.$foreground?.get()} />
                       </YStack>
                     </TouchableOpacity>
 
@@ -282,8 +280,8 @@ export function MultipleImagePicker({
                       >
                         <Ionicons
                           name="chevron-forward"
-                          size={16}
-                          color="#666"
+                          size={20}
+                          color={theme.$foreground?.get()}
                         />
                       </YStack>
                     </TouchableOpacity>

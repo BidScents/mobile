@@ -1,28 +1,16 @@
-/**
- * Profile Preview Picker Component with Permissions
- * 
- * Self-contained component that handles both UI display and image picking logic
- * for cover photo and profile avatar. Includes proper permission handling.
- * Features:
- * - Cover photo with bottom-edge positioned profile avatar
- * - Built-in image picking functionality with permission requests
- * - Loading states and error handling
- * - Clean separation from parent component
- */
-
-import { Button } from '@/components/ui/button'
-import { Ionicons } from '@expo/vector-icons'
-import * as ImagePicker from 'expo-image-picker'
-import React from 'react'
-import { Alert, Linking } from 'react-native'
-import { Image, Text, YStack } from 'tamagui'
+import { Button } from "@/components/ui/button";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import React from "react";
+import { Alert } from "react-native";
+import { Image, Text, YStack } from "tamagui";
 
 interface ProfilePreviewPickerProps {
-  profileImageUri?: string | null
-  coverImageUri?: string | null
-  onProfileImageChange: (uri: string | null) => void
-  onCoverImageChange: (uri: string | null) => void
-  disabled?: boolean
+  profileImageUri?: string | null;
+  coverImageUri?: string | null;
+  onProfileImageChange: (uri: string | null) => void;
+  onCoverImageChange: (uri: string | null) => void;
+  disabled?: boolean;
 }
 
 export function ProfilePreviewPicker({
@@ -30,114 +18,111 @@ export function ProfilePreviewPicker({
   coverImageUri,
   onProfileImageChange,
   onCoverImageChange,
-  disabled = false
+  disabled = false,
 }: ProfilePreviewPickerProps) {
 
-  /**
-   * Request media library permissions
-   */
-  const requestPermissions = async (): Promise<boolean> => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-      
-      if (status === 'granted') {
-        return true
-      }
-      
-      if (status === 'denied') {
-        Alert.alert(
-          'Permission Required',
-          'This app needs access to your photo library to select images. Please enable it in Settings.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() }
-          ]
-        )
-      }
-      
-      return false
-    } catch (error) {
-      console.error('Permission request failed:', error)
-      Alert.alert('Error', 'Failed to request permissions')
-      return false
-    }
-  }
+  // /**
+  //  * Request media library permissions
+  //  */
+  // const requestPermissions = async (): Promise<boolean> => {
+  //   try {
+  //     const { status } =
+  //       await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+  //     if (status === "granted") {
+  //       return true;
+  //     }
+
+  //     if (status === "denied") {
+  //       Alert.alert(
+  //         "Permission Required",
+  //         "This app needs access to your photo library to select images. Please enable it in Settings.",
+  //         [
+  //           { text: "Cancel", style: "cancel" },
+  //           { text: "Open Settings", onPress: () => Linking.openSettings() },
+  //         ]
+  //       );
+  //     }
+
+  //     return false;
+  //   } catch (error) {
+  //     console.error("Permission request failed:", error);
+  //     Alert.alert("Error", "Failed to request permissions");
+  //     return false;
+  //   }
+  // };
 
   /**
-   * Handle profile image selection with permission check
+   * Handle profile image selection - let ImagePicker handle permissions automatically
    */
   const pickProfileImage = async () => {
-    if (disabled) return
-    
-    // Check permissions first
-    const hasPermission = await requestPermissions()
-    if (!hasPermission) return
-    
+    if (disabled) return;
+
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Fixed deprecated warning
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.3,
-      })
+        quality: 0.5,
+        exif: false,
+      });
 
-      if (!result.canceled && result.assets[0]) {
-        onProfileImageChange(result.assets[0].uri)
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        onProfileImageChange(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Profile image selection failed:', error)
-      Alert.alert('Error', 'Failed to select profile image')
+      console.error("Profile image selection failed:", error);
+      Alert.alert(
+        "Error",
+        "Failed to select profile image. Please try again.",
+        [{ text: "OK" }]
+      );
     }
-  }
+  };
 
   /**
-   * Handle cover image selection with permission check
+   * Handle cover image selection - let ImagePicker handle permissions automatically
    */
   const pickCoverImage = async () => {
-    if (disabled) return
-    
-    // Check permissions first
-    const hasPermission = await requestPermissions()
-    if (!hasPermission) return
-    
+    if (disabled) return;
+
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Fixed deprecated warning
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [16, 9],
-        quality: 0.3,
-      })
+        quality: 0.5,
+        exif: false,
+      });
 
-      if (!result.canceled && result.assets[0]) {
-        onCoverImageChange(result.assets[0].uri)
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        onCoverImageChange(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Cover image selection failed:', error)
-      Alert.alert('Error', 'Failed to select cover image')
+      console.error("Cover image selection failed:", error);
+      Alert.alert("Error", "Failed to select cover image. Please try again.", [
+        { text: "OK" },
+      ]);
     }
-  }
+  };
 
-  const AVATAR_SIZE = 100 
-  const COVER_HEIGHT = 130 
-  const AVATAR_OVERLAP = AVATAR_SIZE * 0.5 
+  const AVATAR_SIZE = 100;
+  const COVER_HEIGHT = 130;
+  const AVATAR_OVERLAP = AVATAR_SIZE * 0.5;
 
   return (
     <YStack>
       {/* Cover Image Container with Avatar Positioned at Bottom */}
-      <YStack 
-        position="relative" 
-        height={COVER_HEIGHT} 
-        backgroundColor="$background" 
-        borderRadius="$6" 
+      <YStack
+        position="relative"
+        height={COVER_HEIGHT}
+        backgroundColor="$background"
+        borderRadius="$6"
         overflow="visible" // Allow avatar to extend beyond cover
         marginBottom={AVATAR_SIZE - AVATAR_OVERLAP} // Space for avatar extending below
       >
         {/* Cover Image Background */}
-        <YStack
-          height="100%"
-          borderRadius="$6"
-          overflow="hidden"
-        >
+        <YStack height="100%" borderRadius="$6" overflow="hidden">
           {coverImageUri ? (
             <Image
               source={{ uri: coverImageUri }}
@@ -146,10 +131,10 @@ export function ProfilePreviewPicker({
               accessibilityLabel="Cover Photo"
             />
           ) : (
-            <YStack 
-              flex={1} 
-              backgroundColor="$background" 
-              justifyContent="center" 
+            <YStack
+              flex={1}
+              backgroundColor="$background"
+              justifyContent="center"
               alignItems="center"
               borderWidth={2}
               borderStyle="dashed"
@@ -162,11 +147,11 @@ export function ProfilePreviewPicker({
             </YStack>
           )}
         </YStack>
-        
+
         {/* Cover Photo Camera Button */}
-        <YStack 
-          position="absolute" 
-          top="$3" 
+        <YStack
+          position="absolute"
+          top="$3"
           right="$3"
           backgroundColor="$background"
           borderRadius="$10"
@@ -183,19 +168,18 @@ export function ProfilePreviewPicker({
             onPress={pickCoverImage}
             disabled={disabled}
             leftIcon="camera"
-            accessibilityLabel="Pick Cover Photo"
           />
         </YStack>
-        
-        {/* Profile Avatar - Positioned at bottom edge of cover */}
-        <YStack 
-          position="absolute" 
+
+        {/* Profile Avatar*/}
+        <YStack
+          position="absolute"
           bottom={-AVATAR_OVERLAP} // Negative value pulls avatar up into cover
-          left="$4" 
-          width={AVATAR_SIZE} 
+          left="$4"
+          width={AVATAR_SIZE}
           height={AVATAR_SIZE}
         >
-          {/* Avatar Container with thick white border */}
+          {/* Avatar*/}
           <YStack
             width="100%"
             height="100%"
@@ -213,21 +197,25 @@ export function ProfilePreviewPicker({
                 borderRadius={(AVATAR_SIZE - 12) / 2} // Subtract border padding
               />
             ) : (
-              <YStack 
-                flex={1} 
-                backgroundColor="$gray6" 
+              <YStack
+                flex={1}
+                backgroundColor="$gray6"
                 borderRadius={(AVATAR_SIZE - 12) / 2}
-                justifyContent="center" 
+                justifyContent="center"
                 alignItems="center"
               >
-                <Ionicons name="person" size={AVATAR_SIZE * 0.4} color="white" />
+                <Ionicons
+                  name="person"
+                  size={AVATAR_SIZE * 0.4}
+                  color="white"
+                />
               </YStack>
             )}
           </YStack>
 
-          {/* Profile Camera Button - Bottom right of avatar */}
-          <YStack 
-            position="absolute" 
+          {/* Profile Camera Button */}
+          <YStack
+            position="absolute"
             bottom={0}
             right={0}
             backgroundColor="$background"
@@ -247,5 +235,5 @@ export function ProfilePreviewPicker({
         </YStack>
       </YStack>
     </YStack>
-  )
+  );
 }

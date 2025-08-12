@@ -8,7 +8,7 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Input, Text, XStack } from 'tamagui';
+import { Input, Text, XStack, useTheme } from 'tamagui';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -29,6 +29,7 @@ export function SearchBar({
   const [isFocused, setIsFocused] = useState(false);
   const insets = useSafeAreaInsets();
   const inputRef = useRef<TextInput>(null);
+  const theme = useTheme();
 
   // Animated values
   const searchBarFlex = useSharedValue(1);
@@ -111,7 +112,7 @@ export function SearchBar({
             <Ionicons 
               name="search" 
               size={20} 
-              color={"$foreground"} 
+              color={theme.foreground.val} 
             />
           </Pressable>
           <Input

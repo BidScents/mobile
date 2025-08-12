@@ -37,8 +37,14 @@ export function ControlledInput<T extends FieldValues>({
       render={({ field: { onChange, value }, fieldState: { error } }) => {
         const handleChange = (text: string) => {
           if (variant === 'numeric') {
-            const numValue = text === '' ? undefined : parseFloat(text)
-            onChange(numValue)
+            // Allow empty string to remain as empty string, don't convert to undefined
+            // This prevents React Hook Form from reverting to default values
+            if (text === '') {
+              onChange('')
+            } else {
+              const numValue = parseFloat(text)
+              onChange(isNaN(numValue) ? text : numValue)
+            }
           }
           else {
             onChange(text)
@@ -53,7 +59,11 @@ export function ControlledInput<T extends FieldValues>({
 
         const displayValue = () => {
           if (variant === 'numeric') {
-            return value?.toString() || ''
+            // Handle both number and string values
+            if (value === '' || value === undefined || value === null) {
+              return ''
+            }
+            return value.toString()
           }
           return (value as string) || ''
         }

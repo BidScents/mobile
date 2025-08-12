@@ -1,11 +1,15 @@
+import { currency } from "@/constants/constants";
 import {
   ListingCard as ListingCardType,
   ListingType,
 } from "@bid-scents/shared-sdk";
 import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { GestureResponderEvent } from "react-native";
 import { Card, Image, Text, XStack, YStack } from "tamagui";
+import { seedListingDetailCache } from "../../hooks/queries/use-listing";
+import { queryKeys } from "../../hooks/queries/query-keys";
 import { Button } from "../ui/button";
 import { CountdownTimer } from "./countdown-timer";
 import { FavoriteButton } from "./favorite-button";
@@ -13,8 +17,6 @@ import { FavoriteButton } from "./favorite-button";
 interface ListingCardProps {
   listing: ListingCardType;
   onPress?: () => void;
-  onFavorite?: (listingId: string) => Promise<void>;
-  onUnfavorite?: (listingId: string) => Promise<void>;
 }
 
 /**
@@ -24,13 +26,23 @@ interface ListingCardProps {
 export function ListingCard({
   listing,
   onPress,
-  onFavorite,
-  onUnfavorite,
 }: ListingCardProps) {
+  const queryClient = useQueryClient();
+
   const handleCardPress = () => {
     onPress?.();
+    
+    // Only seed cache if no data exists or existing data is also seeded
+    const existingData = queryClient.getQueryData(
+      queryKeys.listings.detail(listing.id)
+    ) as any;
+    
+    if (!existingData || existingData?.__seeded === true) {
+      // Seed cache with listing card data for instant loading
+      seedListingDetailCache(queryClient, listing);
+    }
+    
     router.push(`/listing/${listing.id}` as any);
-    console.log(listing);
   };
 
   const handleActionPress = (e: GestureResponderEvent) => {
@@ -52,20 +64,12 @@ export function ListingCard({
     }
   };
 
-  const handleFavorite = async (listingId: string) => {
-    await onFavorite?.(listingId);
-  };
-
-  const handleUnfavorite = async (listingId: string) => {
-    await onUnfavorite?.(listingId);
-  };
-
   const formatPrice = (price: number): string => {
-    return `RM ${price.toFixed(0)}`;
+    return `${currency} ${price.toFixed(0)}`;
   };
 
   const formatCurrentBid = (bid: number): string => {
-    return `RM ${bid.toFixed(0)}`;
+    return `${currency} ${bid.toFixed(0)}`;
   };
 
   const formatVolume = (volume: number, percentage: number): string => {
@@ -74,7 +78,7 @@ export function ListingCard({
 
   //   const formatNextBid = (currentBid: number): string => {
   //     {/* TODO: use listing bid increment */}
-  //     return `RM ${(currentBid + 0.5).toFixed(1)}`
+  //     return `${currency} ${(currentBid + 0.5).toFixed(1)}`
   //   }
 
   const truncateDescription = (
@@ -320,8 +324,6 @@ export function ListingCard({
             <FavoriteButton
               listingId={listing.id}
               initialCount={listing.favorites_count}
-              onFavorite={handleFavorite}
-              onUnfavorite={handleUnfavorite}
               size="small"
             />
           </XStack>

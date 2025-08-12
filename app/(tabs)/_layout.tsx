@@ -20,9 +20,14 @@ export default function TabsLayout() {
     <>
     <Tabs
       screenOptions={{
-        animation: 'shift',
         headerShown: false,
         headerShadowVisible: false,
+        headerStyle: {
+          backgroundColor: theme.background?.val,
+        },
+        headerTitleStyle: {
+          color: theme.foreground?.val,
+        },
         tabBarActiveTintColor: theme.foreground?.val,
         tabBarInactiveTintColor: theme.mutedForeground?.val,
         tabBarLabelStyle: {
@@ -32,6 +37,7 @@ export default function TabsLayout() {
         },
         tabBarStyle: {
           position: 'absolute',
+          borderTopWidth: 0,
         },
         tabBarBackground: () => (
           <BlurView tint={colorScheme === 'light' ? lightBlur : darkBlur} style={{ 
@@ -129,6 +135,22 @@ export default function TabsLayout() {
               color={color} 
             />
           ),
+        }}
+        listeners={{
+          tabPress: async (e) => {
+            if (router.canDismiss()) {
+              e.preventDefault();
+              try {
+                await router.dismissAll();
+                router.replace('/profile');
+              } catch (error) {
+                // Fallback if dismissAll fails
+                router.push('/profile');
+              }
+            }
+
+
+          },
         }}
       />
     </Tabs>

@@ -5,24 +5,30 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "com.bidscents.app",
+    "scheme": "com.bidscents.mobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bidscents.app",
+      "buildNumber": "1",
+      "bundleIdentifier": "com.bidscents.mobile",
       "infoPlist": {
         "CFBundleURLTypes": [
           {
             "CFBundleURLName": "bidscents-oauth",
-            "CFBundleURLSchemes": ["com.bidscents.app"]
+            "CFBundleURLSchemes": [
+              "com.bidscents.mobile"
+            ]
           },
           {
             "CFBundleURLName": "bidscents-auth",
-            "CFBundleURLSchemes": ["com.bidscents.app"]
+            "CFBundleURLSchemes": [
+              "com.bidscents.mobile"
+            ]
           }
         ]
-      }
+      },
+      "appleTeamId": "BRHM2L7C9T"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,21 +36,24 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.bidscents.app",
+      "package": "com.bidscents.mobile",
       "intentFilters": [
         {
           "action": "VIEW",
           "autoVerify": true,
           "data": [
             {
-              "scheme": "com.bidscents.app"
+              "scheme": "com.bidscents.mobile"
             },
             {
-              "scheme": "com.bidscents.app",
+              "scheme": "com.bidscents.mobile",
               "host": "auth"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -63,10 +72,18 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "575b76bf-846e-4bc8-95a7-033d66167237"
+      }
+    },
+    "owner": "bidscents"
   }
 }

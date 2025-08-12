@@ -24,31 +24,25 @@ export function useCreateListing(options?: UseCreateListingOptions) {
     },
     
     onSuccess: (data) => {
-      // 1. Homepage invalidations - new listings appear in homepage sections
-      queryClient.invalidateQueries({ queryKey: queryKeys.homepage })
-
-      // 2. General listings invalidations - affects listings page and search
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.search({}) })
-
-      // 3. Dashboard invalidations - affects seller's dashboard
+      // Homepage invalidations (not needed as it can lead to many requests)
+      // queryClient.invalidateQueries({ queryKey: queryKeys.homepage })
+    
+      // All listings invalidations (not needed as it can lead to many requests)
+      // queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
+    
+      // All dashboard invalidations (covers all dashboard sub-queries)
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.listings.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.listings.active })
       
-      // 4. Profile invalidations - affects seller's profile listings
+      // Profile invalidations: these are specific because we need the user ID
       if (user?.id) {
         queryClient.invalidateQueries({ 
           queryKey: queryKeys.profile.listings(user.id, ProfileTab.ACTIVE) 
         })
-        
-        // Also invalidate featured tab in case this is a featured listing
         queryClient.invalidateQueries({ 
           queryKey: queryKeys.profile.listings(user.id, ProfileTab.FEATURED) 
         })
       }
       
-      // Call custom success handler if provided
       options?.onSuccess?.(data)
     },
     

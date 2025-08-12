@@ -1,7 +1,6 @@
 import { ControlledInput } from "@/components/forms/controlled-input";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { MultipleImagePicker } from "@/components/ui/multiple-image-picker";
 import { useCreateListing } from "@/hooks/queries/use-create-listing";
 import {
@@ -24,7 +23,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, ScrollView } from "react-native";
+import { Alert } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { XStack, YStack } from "tamagui";
 
 /**
@@ -148,224 +148,222 @@ export default function AddListingScreen() {
 
   return (
     <Container backgroundColor="$background" safeArea={false} variant="padded">
-      <KeyboardAwareView backgroundColor="$background">
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ flexGrow: 1 }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <YStack flex={1} gap="$5" minHeight="100%">
-            {/* Images Section */}
-            <YStack gap="$3">
-              <MultipleImagePicker
-                imageUris={imageUris}
-                onImagesChange={setImageUris}
-                disabled={loading}
-                maxImages={10}
-                label="Photos"
-              />
-            </YStack>
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <YStack flex={1} gap="$5">
+          {/* Images Section */}
+          <YStack gap="$3">
+            <MultipleImagePicker
+              imageUris={imageUris}
+              onImagesChange={setImageUris}
+              disabled={loading}
+              maxImages={10}
+              label="Photos"
+            />
+          </YStack>
 
-            {/* Basic Information */}
-            <YStack gap="$3">
+          {/* Basic Information */}
+          <YStack gap="$3">
+            <ControlledInput
+              control={control}
+              name="type"
+              variant="select"
+              label="Listing Type"
+              placeholder="Select listing type"
+              disabled={loading}
+              options={listingTypeOptions}
+            />
+
+            <ControlledInput
+              control={control}
+              name="name"
+              variant="text"
+              label="Title"
+              placeholder="Enter listing title"
+              disabled={loading}
+            />
+
+            <ControlledInput
+              control={control}
+              name="description"
+              variant="multiline"
+              label="Description"
+              placeholder="Describe your fragrance..."
+              disabled={loading}
+              numberOfLines={4}
+            />
+
+            {!isAuction ? (
               <ControlledInput
                 control={control}
-                name="type"
-                variant="select"
-                label="Listing Type"
-                placeholder="Select listing type"
-                disabled={loading}
-                options={listingTypeOptions}
-              />
-
-              <ControlledInput
-                control={control}
-                name="name"
-                variant="text"
-                label="Title"
-                placeholder="Enter listing title"
+                name="price"
+                variant="numeric"
+                label="Price"
+                placeholder="0.00"
                 disabled={loading}
               />
-
-              <ControlledInput
-                control={control}
-                name="description"
-                variant="multiline"
-                label="Description"
-                placeholder="Describe your fragrance..."
-                disabled={loading}
-                numberOfLines={4}
-              />
-
-              {!isAuction ? (
+            ) : (
+              <YStack gap="$4">
                 <ControlledInput
                   control={control}
-                  name="price"
+                  name="starting_price"
                   variant="numeric"
-                  label="Price"
+                  label="Starting Price"
                   placeholder="0.00"
                   disabled={loading}
                 />
-              ) : (
-                <YStack gap="$4">
-                  <ControlledInput
-                    control={control}
-                    name="starting_price"
-                    variant="numeric"
-                    label="Starting Price"
-                    placeholder="0.00"
-                    disabled={loading}
-                  />
 
-                  <ControlledInput
-                    control={control}
-                    name="reserve_price"
-                    variant="numeric"
-                    label="Reserve Price (Optional)"
-                    placeholder="0.00"
-                    disabled={loading}
-                  />
+                <ControlledInput
+                  control={control}
+                  name="reserve_price"
+                  variant="numeric"
+                  label="Reserve Price (Optional)"
+                  placeholder="0.00"
+                  disabled={loading}
+                />
 
-                  <ControlledInput
-                    control={control}
-                    name="buy_now_price"
-                    variant="numeric"
-                    label="Buy Now Price (Optional)"
-                    placeholder="0.00"
-                    disabled={loading}
-                  />
+                <ControlledInput
+                  control={control}
+                  name="buy_now_price"
+                  variant="numeric"
+                  label="Buy Now Price (Optional)"
+                  placeholder="0.00"
+                  disabled={loading}
+                />
 
-                  <ControlledInput
-                    control={control}
-                    name="bid_increment"
-                    variant="numeric"
-                    label="Bid Increment"
-                    placeholder="5.00"
-                    disabled={loading}
-                  />
+                <ControlledInput
+                  control={control}
+                  name="bid_increment"
+                  variant="numeric"
+                  label="Bid Increment"
+                  placeholder="5.00"
+                  disabled={loading}
+                />
 
-                  <ControlledInput
-                    control={control}
-                    name="ends_at"
-                    variant="date"
-                    label="End Date & Time"
-                    placeholder="Select auction end time"
-                    disabled={loading}
-                  />
+                <ControlledInput
+                  control={control}
+                  name="ends_at"
+                  variant="date"
+                  label="End Date & Time"
+                  placeholder="Select auction end time"
+                  disabled={loading}
+                />
 
-                  <ControlledInput
-                    control={control}
-                    name="is_extendable"
-                    variant="switch"
-                    label="Extendable (Optional)"
-                    placeholder="Extendable"
-                    switchChecked={watch("is_extendable")}
-                    disabled={loading}
-                  />
-                </YStack>
-              )}
+                <ControlledInput
+                  control={control}
+                  name="is_extendable"
+                  variant="switch"
+                  label="Extendable (Optional)"
+                  placeholder="Extendable"
+                  switchChecked={watch("is_extendable")}
+                  disabled={loading}
+                />
+              </YStack>
+            )}
 
-              <ControlledInput
-                control={control}
-                name="brand"
-                variant="text"
-                label="Brand"
-                placeholder="Enter brand name"
-                disabled={loading}
-              />
+            <ControlledInput
+              control={control}
+              name="brand"
+              variant="text"
+              label="Brand"
+              placeholder="Enter brand name"
+              disabled={loading}
+            />
 
-              <ControlledInput
-                control={control}
-                variant="select"
-                name="category"
-                label="Category"
-                placeholder="Select category"
-                disabled={loading}
-                options={categoryOptions}
-              />
+            <ControlledInput
+              control={control}
+              variant="select"
+              name="category"
+              label="Category"
+              placeholder="Select category"
+              disabled={loading}
+              options={categoryOptions}
+            />
 
-              <XStack gap="$3">
-                <YStack flex={1}>
-                  <ControlledInput
-                    control={control}
-                    name="volume"
-                    variant="numeric"
-                    label="Volume (ml)"
-                    placeholder="100"
-                    disabled={loading}
-                  />
-                </YStack>
+            <XStack gap="$3">
+              <YStack flex={1}>
+                <ControlledInput
+                  control={control}
+                  name="volume"
+                  variant="numeric"
+                  label="Volume (ml)"
+                  placeholder="100"
+                  disabled={loading}
+                />
+              </YStack>
 
-                <YStack flex={1}>
-                  <ControlledInput
-                    control={control}
-                    name="remaining_percentage"
-                    variant="numeric"
-                    label="Remaining %"
-                    placeholder="100"
-                    disabled={loading}
-                  />
-                </YStack>
-              </XStack>
+              <YStack flex={1}>
+                <ControlledInput
+                  control={control}
+                  name="remaining_percentage"
+                  variant="numeric"
+                  label="Remaining %"
+                  placeholder="100"
+                  disabled={loading}
+                />
+              </YStack>
+            </XStack>
 
-              <ControlledInput
-                control={control}
-                name="box_condition"
-                variant="select"
-                label="Box Condition"
-                placeholder="Select condition"
-                disabled={loading}
-                options={boxConditionOptions}
-              />
+            <ControlledInput
+              control={control}
+              name="box_condition"
+              variant="select"
+              label="Box Condition"
+              placeholder="Select condition"
+              disabled={loading}
+              options={boxConditionOptions}
+            />
 
-              <XStack gap="$3">
-                <YStack flex={1}>
-                  <ControlledInput
-                    control={control}
-                    name="quantity"
-                    variant="numeric"
-                    label="Quantity"
-                    placeholder="1"
-                    disabled={loading}
-                  />
-                </YStack>
+            <XStack gap="$3">
+              <YStack flex={1}>
+                <ControlledInput
+                  control={control}
+                  name="quantity"
+                  variant="numeric"
+                  label="Quantity"
+                  placeholder="1"
+                  disabled={loading}
+                />
+              </YStack>
 
-                <YStack flex={1}>
-                  <ControlledInput
-                    control={control}
-                    name="purchase_year"
-                    variant="numeric"
-                    label="Purchase Year"
-                    placeholder={new Date().getFullYear().toString()}
-                    disabled={loading}
-                  />
-                </YStack>
-              </XStack>
+              <YStack flex={1}>
+                <ControlledInput
+                  control={control}
+                  name="purchase_year"
+                  variant="numeric"
+                  label="Purchase Year"
+                  placeholder={new Date().getFullYear().toString()}
+                  disabled={loading}
+                />
+              </YStack>
+            </XStack>
 
-              <ControlledInput
-                control={control}
-                name="batch_code"
-                variant="text"
-                label="Batch Code (Optional)"
-                placeholder="Enter batch code if available"
-                disabled={loading}
-              />
-            </YStack>
-
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              onPress={handleSubmit(onSubmit)}
-              disabled={loading || !isValid}
-              borderRadius="$10"
-            >
-              {loading ? "Creating Listing..." : "Create Listing"}
-            </Button>
+            <ControlledInput
+              control={control}
+              name="batch_code"
+              variant="text"
+              label="Batch Code (Optional)"
+              placeholder="Enter batch code if available"
+              disabled={loading}
+            />
           </YStack>
-        </ScrollView>
-      </KeyboardAwareView>
+
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onPress={handleSubmit(onSubmit)}
+            disabled={loading || !isValid}
+            borderRadius="$10"
+          >
+            {loading ? "Creating Listing..." : "Create Listing"}
+          </Button>
+        </YStack>
+      </KeyboardAwareScrollView>
     </Container>
   );
 }

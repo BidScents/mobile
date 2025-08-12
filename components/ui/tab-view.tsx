@@ -1,4 +1,5 @@
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import * as Haptics from 'expo-haptics';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, LayoutChangeEvent } from 'react-native';
 import { Text, View, XStack, useTheme } from 'tamagui';
@@ -48,6 +49,7 @@ export default function TabView({
 
   // Handle tab press
   const handleTabPress = useCallback((tabKey: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (tabKey !== activeTabKey) {
       setActiveTabKey(tabKey);
       setLoadedTabs(prev => new Set([...prev, tabKey])); // Mark tab as loaded
@@ -140,7 +142,6 @@ export default function TabView({
                 color={activeTabKey === tab.key ? '$foreground' : '$mutedForeground'}
                 onPress={() => handleTabPress(tab.key)}
                 paddingVertical="$2"
-                paddingHorizontal={paddingHorizontal}
                 textAlign="center"
                 lineHeight="$9"
               >

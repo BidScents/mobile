@@ -1,11 +1,16 @@
 import { darkBlur, lightBlur } from "@/tamagui.config";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { router } from "expo-router";
 import React from "react";
-import { Animated, ImageBackground, StyleSheet, useColorScheme } from "react-native";
+import {
+  Animated,
+  ImageBackground,
+  StyleSheet,
+  useColorScheme,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, useTheme } from "tamagui";
+import { BlurBackButton } from "./blur-back-button";
 
 const AnimatedImageBackground =
   Animated.createAnimatedComponent(ImageBackground);
@@ -33,45 +38,12 @@ export default function Header({
   rightIcon?: keyof typeof Ionicons.glyphMap;
   rightIconPress?: () => void;
 }) {
-  const colorScheme = useColorScheme()
-  const theme = useTheme()
+  const colorScheme = useColorScheme();
+  const theme = useTheme();
   return (
     <>
       {/* Back button */}
-      <View
-        style={{
-          zIndex: 2,
-          position: "absolute",
-          top: insets.top,
-          left: 20,
-          height: 30,
-          width: 30,
-          borderRadius: 15,
-          overflow: 'hidden',
-        }}
-        onPress={() => router.back()}
-        hitSlop={{
-          top: 10,
-          bottom: 10,
-          left: 10,
-          right: 10,
-        }}
-        pressStyle={{
-          opacity: 0.7,
-        }}
-      >
-        <BlurView
-          tint={colorScheme === 'light' ? lightBlur : darkBlur}
-          intensity={80}
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Ionicons name="chevron-back" color={theme.foreground.val} size={20} />
-        </BlurView>
-      </View>
+      <BlurBackButton size={30} topOffset={0} leftOffset={20} iconSize={20} />
 
       {/* Right icon */}
       {rightIcon && (
@@ -84,7 +56,7 @@ export default function Header({
             height: 30,
             width: 30,
             borderRadius: 15,
-            overflow: 'hidden',
+            overflow: "hidden",
           }}
           onPress={rightIconPress}
           hitSlop={{
@@ -98,7 +70,7 @@ export default function Header({
           }}
         >
           <BlurView
-            tint={colorScheme === 'light' ? lightBlur : darkBlur}
+            tint={colorScheme === "light" ? lightBlur : darkBlur}
             intensity={80}
             style={{
               flex: 1,
@@ -167,7 +139,7 @@ export default function Header({
         }}
       >
         <AnimatedBlurView
-          tint={colorScheme === 'light' ? lightBlur : darkBlur}
+          tint={colorScheme === "light" ? lightBlur : darkBlur}
           intensity={80}
           style={{
             ...StyleSheet.absoluteFillObject,

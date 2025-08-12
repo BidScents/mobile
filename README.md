@@ -1,53 +1,97 @@
-# BidScents Mobile App (Expo)
+# BidScents Mobile App
 
-## Quick Start
+## Quick Team Setup
 
 ### 1. Clone and Install
-
 ```bash
 git clone https://github.com/BidScents/mobile.git
 cd bidscents-mobile
 bun install 
 ```
 
-### 2. Start Development
+### 2. Get Development Build
 
+**iOS:** Download and install from here:
+https://expo.dev/accounts/bidscents/projects/bidscents/builds
+
+**Android:** Build yourself:
 ```bash
-bun expo start
+bun add -g eas-cli && eas login
+eas build --platform android --profile development
 ```
 
-Use the Expo Dev Tools to preview in iOS, Android, or Web.
+### 3. Connect to Local Backend
+
+#### Find Your IP Address:
 ```bash
-bun expo prebuild --clean
-bun expo run:ios
+# macOS/Linux
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Windows  
+ipconfig
 ```
 
-### 3. Install Shared SDK
-
+#### Update Environment (Without Rebuilding):
+Create `.env` file with your IP:
 ```bash
-bun add @bid-scents/shared-sdk
+EXPO_PUBLIC_API_BASE_URL=http://192.168.1.XXX:8000  # Your IP here
+EXPO_PUBLIC_SUPABASE_URL=your-supabase-url
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+EXPO_PUBLIC_TERMS_URL=https://bidscents.com/terms-of-service
+EXPO_PUBLIC_IMAGE_BASE_URL= base url for supabase storage imgs
+EXPO_PUBLIC_PROJECT_ID = get form expo project dashboard
 ```
+
+#### Start Backend:
+```bash
+# In backend directory - MUST use --host 0.0.0.0
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+#### Start Mobile Development:
+```bash
+bun expo start --dev-client --clear
+```
+
+**Scan QR code with your phone's camera → Opens in development build**
+
+### 4. Test Connection
+Open Safari on your phone: `http://YOUR_IP:8000/docs`
+If you see FastAPI docs, you're connected! ✅
 
 ---
 
-## Project Structure
+## Development vs Production
 
-```
-mobile/
-├── app/                    # Route-based screens (expo-router)
-│   ├── _layout.tsx         # Root layout with Tamagui + SafeArea
-│   └── index.tsx           # Home screen
-├── assets/
-│   ├── fonts/              # Roboto font variants
-│   └── images/             # Static images
-├── components/             # Reusable UI components
-├── hooks/                  # Custom React hooks
-├── lib/                    # Utility functions and shared logic
-├── tamagui.config.ts       # Tamagui theme + font config
-├── app.json                # Expo project config
-├── tsconfig.json
-└── README.md
-```
+| Method | Features | Setup Time |
+|--------|----------|------------|
+| **Development Build** | ✅ Push notifications, ✅ All features | 5 min (download) |
+| **Simulator/Local** | ❌ Limited features | 30 sec |
+
+**Use development builds for testing notifications and real app features.**
+
+---
+
+## Daily Workflow
+1. `git pull && bun install`
+2. Update `.env` with your IP if changed  
+3. Start backend: `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
+4. Start mobile: `bun expo start --dev-client --clear`
+5. Scan QR code with development build
+6. Code with hot reload 🔥
+
+---
+
+## Quick Fixes
+
+| Problem | Solution |
+|---------|----------|
+| Red boxes after `bun install` | `bun expo start --clear` |
+| "Network request failed" | Check IP in `.env` matches your computer |
+| Can't reach backend from phone | Backend must use `--host 0.0.0.0` |
+| Need to change IP | Update `.env` and restart: `bun expo start --dev-client --clear` |
+
+**💡 Environment changes (`.env`) don't require rebuilding - just restart the dev server!**
 
 ---
 
@@ -102,25 +146,6 @@ Use `$color`, `$background`, or semantic color tokens in components:
 
 ---
 
-## Fonts
-
-Roboto font files are located in:
-
-```
-assets/fonts/
-├── Roboto-Light.ttf
-├── Roboto-Regular.ttf
-├── Roboto-Medium.ttf
-├── Roboto-SemiBold.ttf
-├── Roboto-Bold.ttf
-├── Roboto-ExtraBold.ttf
-├── Roboto-Black.ttf
-```
-
-And loaded in `app/_layout.tsx` using Expo's `useFonts()` hook.
-
----
-
 ## Troubleshooting
 
 ### Build Issues - Quick Fixes
@@ -171,3 +196,6 @@ bun install && bun expo prebuild --clean && bun expo run:ios
 ```
 
 **💡 Rule: Always try Step 1 first after adding dependencies!**
+
+
+---
