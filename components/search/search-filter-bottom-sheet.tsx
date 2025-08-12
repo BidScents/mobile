@@ -1,13 +1,11 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { FilterParameter, ListingBoxCondition, ListingCategory, ListingType } from "@bid-scents/shared-sdk";
-import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { useTheme } from "@tamagui/core";
 import * as Haptics from "expo-haptics";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
-import { Pressable } from "react-native";
-import { Accordion, Square, Text, XStack, YStack } from "tamagui";
+import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 export interface SearchFilterBottomSheetMethods {
   present: () => void;
@@ -38,30 +36,18 @@ const MultiSelectChip = <T,>({
 }: MultiSelectChipProps<T>) => {
 
   return (
-    <Pressable
+    <Button
       onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
         onToggle(value);
       }}
+      variant={isSelected ? "primary" : "secondary"}
+      size="sm"
     >
-      <XStack
-        alignItems="center"
-        backgroundColor={isSelected ? "$primary" : "$muted"}
-        borderRadius="$6"
-        paddingHorizontal="$3"
-        paddingVertical="$2"
-        marginRight="$2"
-        marginBottom="$2"
-      >
-        <Text
-          fontSize="$4"
-          color={isSelected ? "$primaryForeground" : "$foreground"}
-          fontWeight={isSelected ? "600" : "400"}
-        >
-          {label}
-        </Text>
-      </XStack>
-    </Pressable>
+      <Text fontSize="$3" fontWeight="400" color={isSelected ? "$background" : "$foreground"}>
+        {label}
+      </Text>
+    </Button>
   );
 };
 
@@ -259,205 +245,118 @@ export const SearchFilterBottomSheet = forwardRef<
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      snapPoints={['90%', '60%']}
       backgroundStyle={{ backgroundColor: theme.background?.val }}
+      snapPoints={['80%']}
+      enableDynamicSizing
     >
-      <YStack gap="$4" padding="$4" paddingBottom="$8" flex={1}>
+      <YStack gap="$4" padding="$4" paddingBottom="$8">
         {/* Header */}
         <XStack alignItems="center" justifyContent="space-between">
           <Text fontSize="$7" fontWeight="600" color="$foreground">
             Filters
           </Text>
-          <Pressable onPress={handleClearFilters}>
-            <Text fontSize="$4" color="$primary" fontWeight="500">
-              Clear All
-            </Text>
-          </Pressable>
+          <Button onPress={handleClearFilters} variant="ghost" size="sm">
+            Clear All
+          </Button>
         </XStack>
 
         {/* Filters Content */}
-        <YStack flex={1}>
-          <Accordion overflow="hidden" width="100%" type="single">
+          <YStack gap="$5">
             {/* Listing Types */}
-            <Accordion.Item value="listingTypes">
-              <Accordion.Trigger 
-                flexDirection="row" 
-                justifyContent="space-between"
-                paddingVertical="$3"
-                onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              >
-                {({ open }: { open: boolean }) => (
-                  <>
-                    <Text fontSize="$5" fontWeight="600" color="$foreground">
-                      Listing Types
-                    </Text>
-                    <Square animation="quick" rotate={open ? '180deg' : '0deg'}>
-                      <Ionicons name="chevron-down" size={16} color={theme.mutedForeground.val} />
-                    </Square>
-                  </>
-                )}
-              </Accordion.Trigger>
-              <Accordion.HeightAnimator animation="medium">
-                <Accordion.Content animation="medium" exitStyle={{ opacity: 0 }} paddingBottom="$3">
-                  <XStack flexWrap="wrap">
-                    {Object.values(ListingType).map((type) => (
-                      <MultiSelectChip<ListingType>
-                        key={type}
-                        label={listingTypeLabels[type]}
-                        value={type}
-                        isSelected={localFilters.listing_types?.includes(type) || false}
-                        onToggle={toggleListingType}
-                      />
-                    ))}
-                  </XStack>
-                </Accordion.Content>
-              </Accordion.HeightAnimator>
-            </Accordion.Item>
+            <YStack gap="$3">
+              <Text fontSize="$5" fontWeight="600" color="$foreground">
+                Listing Types
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <XStack gap="$2" paddingRight="$4">
+                  {Object.values(ListingType).map((type) => (
+                    <MultiSelectChip<ListingType>
+                      key={type}
+                      label={listingTypeLabels[type]}
+                      value={type}
+                      isSelected={localFilters.listing_types?.includes(type) || false}
+                      onToggle={toggleListingType}
+                    />
+                  ))}
+                </XStack>
+              </ScrollView>
+            </YStack>
 
             {/* Categories */}
-            <Accordion.Item value="categories">
-              <Accordion.Trigger 
-                flexDirection="row" 
-                justifyContent="space-between"
-                paddingVertical="$3"
-                onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              >
-                {({ open }: { open: boolean }) => (
-                  <>
-                    <Text fontSize="$5" fontWeight="600" color="$foreground">
-                      Categories
-                    </Text>
-                    <Square animation="quick" rotate={open ? '180deg' : '0deg'}>
-                      <Ionicons name="chevron-down" size={16} color={theme.mutedForeground.val} />
-                    </Square>
-                  </>
-                )}
-              </Accordion.Trigger>
-              <Accordion.HeightAnimator animation="medium">
-                <Accordion.Content animation="medium" exitStyle={{ opacity: 0 }} paddingBottom="$3">
-                  <XStack flexWrap="wrap">
-                    {Object.values(ListingCategory).map((category) => (
-                      <MultiSelectChip<ListingCategory>
-                        key={category}
-                        label={categoryLabels[category]}
-                        value={category}
-                        isSelected={localFilters.categories?.includes(category) || false}
-                        onToggle={toggleCategory}
-                      />
-                    ))}
-                  </XStack>
-                </Accordion.Content>
-              </Accordion.HeightAnimator>
-            </Accordion.Item>
+            <YStack gap="$3">
+              <Text fontSize="$5" fontWeight="600" color="$foreground">
+                Categories
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <XStack gap="$2" paddingRight="$4">
+                  {Object.values(ListingCategory).map((category) => (
+                    <MultiSelectChip<ListingCategory>
+                      key={category}
+                      label={categoryLabels[category]}
+                      value={category}
+                      isSelected={localFilters.categories?.includes(category) || false}
+                      onToggle={toggleCategory}
+                    />
+                  ))}
+                </XStack>
+              </ScrollView>
+            </YStack>
 
             {/* Price Range */}
-            <Accordion.Item value="priceRange">
-              <Accordion.Trigger 
-                flexDirection="row" 
-                justifyContent="space-between"
-                paddingVertical="$3"
-                onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              >
-                {({ open }: { open: boolean }) => (
-                  <>
-                    <Text fontSize="$5" fontWeight="600" color="$foreground">
-                      Price Range
-                    </Text>
-                    <Square animation="quick" rotate={open ? '180deg' : '0deg'}>
-                      <Ionicons name="chevron-down" size={16} color={theme.mutedForeground.val} />
-                    </Square>
-                  </>
-                )}
-              </Accordion.Trigger>
-              <Accordion.HeightAnimator animation="medium">
-                <Accordion.Content animation="medium" exitStyle={{ opacity: 0 }} paddingBottom="$3">
-                  <PriceRangeInput
-                    minValue={localFilters.min_price ?? null}
-                    maxValue={localFilters.max_price ?? null}
-                    onMinChange={(value) =>
-                      setLocalFilters(prev => ({ ...prev, min_price: value }))
-                    }
-                    onMaxChange={(value) =>
-                      setLocalFilters(prev => ({ ...prev, max_price: value }))
-                    }
-                  />
-                </Accordion.Content>
-              </Accordion.HeightAnimator>
-            </Accordion.Item>
+            <YStack gap="$3">
+              <Text fontSize="$5" fontWeight="600" color="$foreground">
+                Price Range
+              </Text>
+              <PriceRangeInput
+                minValue={localFilters.min_price ?? null}
+                maxValue={localFilters.max_price ?? null}
+                onMinChange={(value) =>
+                  setLocalFilters(prev => ({ ...prev, min_price: value }))
+                }
+                onMaxChange={(value) =>
+                  setLocalFilters(prev => ({ ...prev, max_price: value }))
+                }
+              />
+            </YStack>
 
             {/* Purchase Year */}
-            <Accordion.Item value="purchaseYear">
-              <Accordion.Trigger 
-                flexDirection="row" 
-                justifyContent="space-between"
-                paddingVertical="$3"
-                onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              >
-                {({ open }: { open: boolean }) => (
-                  <>
-                    <Text fontSize="$5" fontWeight="600" color="$foreground">
-                      Purchase Year
-                    </Text>
-                    <Square animation="quick" rotate={open ? '180deg' : '0deg'}>
-                      <Ionicons name="chevron-down" size={16} color={theme.mutedForeground.val} />
-                    </Square>
-                  </>
-                )}
-              </Accordion.Trigger>
-              <Accordion.HeightAnimator animation="medium">
-                <Accordion.Content animation="medium" exitStyle={{ opacity: 0 }} paddingBottom="$3">
-                  <PriceRangeInput
-                    minValue={localFilters.min_purchase_year ?? null}
-                    maxValue={localFilters.max_purchase_year ?? null}
-                    onMinChange={(value) =>
-                      setLocalFilters(prev => ({ ...prev, min_purchase_year: value }))
-                    }
-                    onMaxChange={(value) =>
-                      setLocalFilters(prev => ({ ...prev, max_purchase_year: value }))
-                    }
-                    placeholder="Year"
-                  />
-                </Accordion.Content>
-              </Accordion.HeightAnimator>
-            </Accordion.Item>
+            <YStack gap="$3">
+              <Text fontSize="$5" fontWeight="600" color="$foreground">
+                Purchase Year
+              </Text>
+              <PriceRangeInput
+                minValue={localFilters.min_purchase_year ?? null}
+                maxValue={localFilters.max_purchase_year ?? null}
+                onMinChange={(value) =>
+                  setLocalFilters(prev => ({ ...prev, min_purchase_year: value }))
+                }
+                onMaxChange={(value) =>
+                  setLocalFilters(prev => ({ ...prev, max_purchase_year: value }))
+                }
+                placeholder="Year"
+              />
+            </YStack>
 
             {/* Box Conditions */}
-            <Accordion.Item value="boxConditions">
-              <Accordion.Trigger 
-                flexDirection="row" 
-                justifyContent="space-between"
-                paddingVertical="$3"
-                onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-              >
-                {({ open }: { open: boolean }) => (
-                  <>
-                    <Text fontSize="$5" fontWeight="600" color="$foreground">
-                      Box Condition
-                    </Text>
-                    <Square animation="quick" rotate={open ? '180deg' : '0deg'}>
-                      <Ionicons name="chevron-down" size={16} color={theme.mutedForeground.val} />
-                    </Square>
-                  </>
-                )}
-              </Accordion.Trigger>
-              <Accordion.HeightAnimator animation="medium">
-                <Accordion.Content animation="medium" exitStyle={{ opacity: 0 }} paddingBottom="$3">
-                  <XStack flexWrap="wrap">
-                    {Object.values(ListingBoxCondition).map((condition) => (
-                      <MultiSelectChip<ListingBoxCondition>
-                        key={condition}
-                        label={boxConditionLabels[condition]}
-                        value={condition}
-                        isSelected={localFilters.box_conditions?.includes(condition) || false}
-                        onToggle={toggleBoxCondition}
-                      />
-                    ))}
-                  </XStack>
-                </Accordion.Content>
-              </Accordion.HeightAnimator>
-            </Accordion.Item>
-          </Accordion>
-        </YStack>
+            <YStack gap="$3">
+              <Text fontSize="$5" fontWeight="600" color="$foreground">
+                Box Condition
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <XStack gap="$2" paddingRight="$4">
+                  {Object.values(ListingBoxCondition).map((condition) => (
+                    <MultiSelectChip<ListingBoxCondition>
+                      key={condition}
+                      label={boxConditionLabels[condition]}
+                      value={condition}
+                      isSelected={localFilters.box_conditions?.includes(condition) || false}
+                      onToggle={toggleBoxCondition}
+                    />
+                  ))}
+                </XStack>
+              </ScrollView>
+            </YStack>
+          </YStack>
 
         {/* Apply Button */}
         <Button
@@ -466,6 +365,7 @@ export const SearchFilterBottomSheet = forwardRef<
           size="lg"
           fullWidth
           borderRadius="$10"
+          mt="$4"
         >
           Apply Filters {getActiveFiltersCount() > 0 && `(${getActiveFiltersCount()})`}
         </Button>
