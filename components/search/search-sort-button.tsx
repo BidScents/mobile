@@ -34,6 +34,7 @@ export const SearchSortButton: React.FC<SearchSortButtonProps> = ({
       paddingVertical="$2"
       onPress={handlePress}
       pressStyle={{ backgroundColor: "$mutedPress" }}
+      hitSlop={20}
     >
       <Text fontSize="$4" fontWeight="500" color={theme.foreground.val}>
         {currentSortLabel}
