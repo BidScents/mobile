@@ -4,8 +4,8 @@ import { color } from '@tamagui/themes'
 import { Platform } from 'react-native'
 
 
-export const lightBlur = "systemThickMaterialLight"
-export const darkBlur = "systemThickMaterialDark"
+export const lightBlur = "prominent"
+export const darkBlur = "prominent"
 
 
 // Create platform-specific font configuration

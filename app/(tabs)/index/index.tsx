@@ -125,7 +125,6 @@ export default function Homepage() {
     <Container
       variant="padded"
       safeArea={false}
-      pb={tabbarHeight}
       backgroundColor="$background"
     >
       <XStack pb="$2" width="100%" >
@@ -145,6 +144,7 @@ export default function Homepage() {
         refreshing={isFetching && !isLoading}
         onRefresh={refetch}
         keyboardDismissMode="on-drag"
+        contentContainerStyle={{ paddingBottom: tabbarHeight }}
       />
     </Container>
   )

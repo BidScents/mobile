@@ -1,6 +1,7 @@
 import { ListingCard } from '@/components/listing/listing-card';
 import { ListingCardSkeleton } from '@/components/suspense/listing-card-skeleton';
 import { SearchRequest } from '@bid-scents/shared-sdk';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { FlashList } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useState } from 'react';
 import { RefreshControl } from 'react-native';
@@ -25,6 +26,7 @@ export const SearchResultsList = React.memo(function SearchResultsList({
   onDataChange
 }: SearchResultsListProps) {
   const [canLoadMore, setCanLoadMore] = useState(false);
+  const tabbarHeight = useBottomTabBarHeight();
   
   const {
     data,
@@ -139,8 +141,8 @@ export const SearchResultsList = React.memo(function SearchResultsList({
         numColumns={2}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item: any) => `skeleton-${item.id}`}
-        contentContainerStyle={{ paddingHorizontal: 0 }}
         keyboardDismissMode="on-drag"
+        contentContainerStyle={{ paddingBottom: tabbarHeight }}
       />
     );
   }
@@ -201,7 +203,6 @@ export const SearchResultsList = React.memo(function SearchResultsList({
         drawDistance={500}
         removeClippedSubviews={true}
         getItemType={() => 'listing'}
-        contentContainerStyle={{ paddingHorizontal: 0 }}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.3}
         refreshControl={
@@ -212,6 +213,7 @@ export const SearchResultsList = React.memo(function SearchResultsList({
         }
         ListFooterComponent={renderFooter}
         keyboardDismissMode="on-drag"
+        contentContainerStyle={{ paddingBottom: tabbarHeight }}
       />
     </View>
   );

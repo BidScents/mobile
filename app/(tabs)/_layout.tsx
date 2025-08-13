@@ -19,6 +19,7 @@ export default function TabsLayout() {
     <>
     <Tabs
       screenOptions={{
+        tabBarShowLabel: false,
         headerShown: false,
         headerShadowVisible: false,
         headerStyle: {
@@ -29,11 +30,6 @@ export default function TabsLayout() {
         },
         tabBarActiveTintColor: theme.foreground?.val,
         tabBarInactiveTintColor: theme.mutedForeground?.val,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          paddingTop: 3,
-          fontWeight: '500',
-        },
         tabBarStyle: {
           position: 'absolute',
           borderTopWidth: 0,
@@ -58,18 +54,32 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "home" : "home-outline"} 
-              size={24} 
+              size={28} 
               color={color} 
             />
           ),
         }}
       />
       
+      <Tabs.Screen 
+        name="chat" 
+        options={{
+          title: "Chat",
+          headerShown: true,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons 
+              name={focused ? "chatbubbles" : "chatbubbles-outline"} 
+              size={28} 
+              color={color} 
+            />
+          ),
+        }}
+      />
       
       <Tabs.Screen 
         name="add" 
         options={{
-          title: "Add",
+          title: "Add Listing",
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "add-circle" : "add-circle-outline"} 
@@ -87,14 +97,14 @@ export default function TabsLayout() {
       />
       
       <Tabs.Screen 
-        name="inbox" 
+        name="notifications" 
         options={{
-          title: "Inbox",
+          title: "Notifications",
           headerShown: true,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
-              name={focused ? "chatbubbles" : "chatbubbles-outline"} 
-              size={24} 
+              name={focused ? "notifications" : "notifications-outline"} 
+              size={28} 
               color={color} 
             />
           ),
@@ -108,7 +118,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "person" : "person-outline"} 
-              size={24} 
+              size={28} 
               color={color} 
             />
           ),

@@ -59,7 +59,7 @@ export default function SearchResultsScreen() {
   }, []);
 
   return (
-    <Container variant="padded" safeArea={["top"]} pb={tabbarHeight} backgroundColor="$background">
+    <Container variant="padded" safeArea={["top"]} backgroundColor="$background">
       <SearchResultsHeader
         currentSearchQuery={currentSearchQuery}
         onSearchChange={handleSearchChange}
