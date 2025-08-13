@@ -1,4 +1,3 @@
-import { SearchBar } from '@/components/ui/search-bar';
 import { darkBlur, lightBlur } from '@/tamagui.config';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -6,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { router, Tabs } from "expo-router";
 import React from 'react';
 import { StyleSheet, useColorScheme } from 'react-native';
-import { useTheme, XStack } from 'tamagui';
+import { useTheme } from 'tamagui';
 
 export default function TabsLayout() {
   const theme = useTheme();
@@ -20,6 +19,7 @@ export default function TabsLayout() {
     <>
     <Tabs
       screenOptions={{
+        tabBarShowLabel: false,
         headerShown: false,
         headerShadowVisible: false,
         headerStyle: {
@@ -30,11 +30,6 @@ export default function TabsLayout() {
         },
         tabBarActiveTintColor: theme.foreground?.val,
         tabBarInactiveTintColor: theme.mutedForeground?.val,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          paddingTop: 3,
-          fontWeight: '500',
-        },
         tabBarStyle: {
           position: 'absolute',
           borderTopWidth: 0,
@@ -55,15 +50,11 @@ export default function TabsLayout() {
         name="index" 
         options={{
           title: "Home",
-          headerShown: true,
-          header: () => 
-            <XStack backgroundColor="$background">
-                <SearchBar placeholder="Search" />
-            </XStack>,
+          headerShown: false,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "home" : "home-outline"} 
-              size={24} 
+              size={28} 
               color={color} 
             />
           ),
@@ -71,18 +62,14 @@ export default function TabsLayout() {
       />
       
       <Tabs.Screen 
-        name="search" 
+        name="chat" 
         options={{
-          title: "Search",
+          title: "Chat",
           headerShown: true,
-          header: () => 
-            <XStack backgroundColor="$background">
-              <SearchBar placeholder="Search" />
-            </XStack>,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
-              name={focused ? "search" : "search-outline"} 
-              size={24} 
+              name={focused ? "chatbubbles" : "chatbubbles-outline"} 
+              size={28} 
               color={color} 
             />
           ),
@@ -92,7 +79,7 @@ export default function TabsLayout() {
       <Tabs.Screen 
         name="add" 
         options={{
-          title: "Add",
+          title: "Add Listing",
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "add-circle" : "add-circle-outline"} 
@@ -110,14 +97,14 @@ export default function TabsLayout() {
       />
       
       <Tabs.Screen 
-        name="inbox" 
+        name="notifications" 
         options={{
-          title: "Inbox",
+          title: "Notifications",
           headerShown: true,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
-              name={focused ? "chatbubbles" : "chatbubbles-outline"} 
-              size={24} 
+              name={focused ? "notifications" : "notifications-outline"} 
+              size={28} 
               color={color} 
             />
           ),
@@ -131,7 +118,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "person" : "person-outline"} 
-              size={24} 
+              size={28} 
               color={color} 
             />
           ),

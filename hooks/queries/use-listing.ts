@@ -105,11 +105,16 @@ export function useListingDetail(listingId: string) {
  * User favorites query - gets all favorited listings for the current user
  */
 export function useUserFavorites() {
-  return useQuery({
+  const query = useQuery({
     queryKey: queryKeys.listings.favorites,
     queryFn: () => ListingService.getUserFavoritesV1ListingFavoritesGet(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  return {
+    ...query,
+    data: query.data || [], // Ensure data is always an array
+  };
 }
 
 // ========================================
@@ -142,20 +147,11 @@ export function useSearchListings(searchParams: SearchRequest) {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-  });
-}
-
-/**
- * Basic search listings query (non-infinite) for simple searches
- * Useful for small result sets or when pagination isn't needed
- */
-export function useSimpleSearchListings(searchParams: SearchRequest) {
-  return useQuery({
-    queryKey: queryKeys.listings.search(searchParams),
-    queryFn: () =>
-      ListingService.searchListingsV1ListingSearchPost(searchParams),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    enabled: !!searchParams.q || !!searchParams.filters, // Only search when there's actual search criteria
+    // Enable query for:
+    // 1. Search with query text
+    // 2. Filter-only search (empty query but has filters)
+    // 3. Empty search to return all listings (no query and no filters)
+    enabled: true,
   });
 }
 
@@ -172,7 +168,21 @@ function updateFavoriteCountInAllCaches(
   listingId: string,
   newCount: number
 ) {
-  // 1. Update listing detail cache
+
+  // 1. Update favorites cache
+  queryClient.setQueryData<any>(
+    queryKeys.listings.favorites,
+    (old: any) => {
+      if (!old) return old;
+      return (old || []).map((listing: any) =>
+        listing.id === listingId
+          ? { ...listing, favorites_count: newCount }
+          : listing
+      );
+    }
+  );
+
+  // 2. Update listing detail cache
   queryClient.setQueryData<ListingDetailsResponse>(
     queryKeys.listings.detail(listingId),
     (old) =>
@@ -184,34 +194,34 @@ function updateFavoriteCountInAllCaches(
         : old
   );
 
-  // 2. Update homepage cache - all listing arrays
+  // 3. Update homepage cache - all listing arrays
   queryClient.setQueryData<HomepageResponse>(
     queryKeys.homepage,
     (old) => {
       if (!old) return old;
       return {
         ...old,
-        featured: old.featured.map((listing) =>
+        featured: (old.featured || []).map((listing) =>
           listing.id === listingId
             ? { ...listing, favorites_count: newCount }
             : listing
         ),
-        recent_auctions: old.recent_auctions.map((listing) =>
+        recent_auctions: (old.recent_auctions || []).map((listing) =>
           listing.id === listingId
             ? { ...listing, favorites_count: newCount }
             : listing
         ),
-        recent_listings: old.recent_listings.map((listing) =>
+        recent_listings: (old.recent_listings || []).map((listing) =>
           listing.id === listingId
             ? { ...listing, favorites_count: newCount }
             : listing
         ),
-        sellers_you_follow: old.sellers_you_follow?.map((listing) =>
+        sellers_you_follow: (old.sellers_you_follow || []).map((listing) =>
           listing.id === listingId
             ? { ...listing, favorites_count: newCount }
             : listing
-        ) || null,
-        recent_swaps: old.recent_swaps.map((listing) =>
+        ),
+        recent_swaps: (old.recent_swaps || []).map((listing) =>
           listing.id === listingId
             ? { ...listing, favorites_count: newCount }
             : listing
@@ -220,14 +230,14 @@ function updateFavoriteCountInAllCaches(
     }
   );
 
-  // 3. Update all search result caches
+  // 4. Update all search result caches
   queryClient.setQueriesData<SearchResponse>(
     { queryKey: queryKeys.listings.search({}) },
     (old) => {
       if (!old) return old;
       return {
         ...old,
-        listings: old.listings.map((listing) =>
+        listings: (old.listings || []).map((listing) =>
           listing.id === listingId
             ? { ...listing, favorites_count: newCount }
             : listing
@@ -236,16 +246,16 @@ function updateFavoriteCountInAllCaches(
     }
   );
 
-  // 4. Update infinite search caches
+// 5. Update infinite search caches
   queryClient.setQueriesData<any>(
     { queryKey: queryKeys.listings.infiniteSearch({}) },
     (old: any) => {
       if (!old?.pages) return old;
       return {
         ...old,
-        pages: old.pages.map((page: SearchResponse) => ({
+        pages: (old.pages || []).map((page: SearchResponse) => ({
           ...page,
-          listings: page.listings.map((listing) =>
+          listings: (page.listings || []).map((listing) =>
             listing.id === listingId
               ? { ...listing, favorites_count: newCount }
               : listing
@@ -255,18 +265,6 @@ function updateFavoriteCountInAllCaches(
     }
   );
 
-  // 5. Update favorites cache
-  queryClient.setQueryData<any>(
-    queryKeys.listings.favorites,
-    (old: any) => {
-      if (!old) return old;
-      return old.map((listing: any) =>
-        listing.id === listingId
-          ? { ...listing, favorites_count: newCount }
-          : listing
-      );
-    }
-  );
 }
 
 // ========================================

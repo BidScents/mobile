@@ -81,7 +81,7 @@ export function ImageCarousel({
           onPress={onPressPagination}
         />
       )}
-      <View style={{ position: "absolute", bottom: 0, right: 20 }}>
+      <View style={{ position: "absolute", bottom: 20, right: 20 }}>
         <FavoriteButton
           listingId={listingId}
           initialCount={favoritesCount}

@@ -177,7 +177,7 @@ export function MultipleImagePicker({
               backgroundColor="$background"
               opacity={disabled ? 0.5 : 1}
             >
-              <Ionicons name="add" size={32} color={theme.$foreground?.get()} />
+              <Ionicons name="add" size={32} color={theme.$foreground?.val} />
               <Text
                 color="$mutedForeground"
                 fontSize="$2"

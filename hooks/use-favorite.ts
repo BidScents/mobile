@@ -5,12 +5,16 @@ import { useUserFavorites } from "./queries/use-listing";
  * Uses only the favorites list - no detailed listing calls
  */
 export function useIsFavorited(listingId: string) {
-  const { data: favorites, isLoading } = useUserFavorites();
+  const { data: favorites, isLoading, error } = useUserFavorites();
 
-  const isFavorited = favorites?.some((favorite) => favorite.id === listingId) ?? false;
+  // Ensure favorites is always an array and listingId is valid
+  const isFavorited = Array.isArray(favorites) && listingId 
+    ? favorites.some((favorite) => favorite?.id === listingId) 
+    : false;
 
   return {
     isFavorited,
     isLoading,
+    error,
   };
 }

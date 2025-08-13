@@ -42,7 +42,7 @@ export function ListingHeader({ name, brand, price, listingType }: ListingHeader
 
       {displayPrice && (
         <Text fontSize="$7" fontWeight="600" color="$foreground">
-          {currency}{displayPrice}
+          {currency} {displayPrice}
         </Text>
       )}
     </View>
