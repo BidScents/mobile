@@ -132,7 +132,7 @@ export const handleAuthSuccess = async (session: any) => {
       const loginResult = await AuthService.loginV1AuthLoginGet()
       
       if (loginResult.onboarded) {
-        router.replace('/(tabs)')
+        router.replace('/(tabs)/home')
       } else {
         router.replace('/(auth)/onboarding')
       }
@@ -243,7 +243,7 @@ export const handleOnboarding = async (data: OnboardingFormData & {
     Alert.alert(
       'Welcome!', 
       onboardingResult.message || 'Your profile has been created successfully!',
-      [{ text: 'Continue', onPress: () => router.replace('/(tabs)') }]
+      [{ text: 'Continue', onPress: () => router.replace('/(tabs)/home') }]
     )
 
   } catch (error: any) {
@@ -266,7 +266,7 @@ export const handleOnboardingError = (error: any) => {
     Alert.alert(
       'Profile Already Created', 
       'It looks like your profile is already set up. You can edit it in your profile settings.',
-      [{ text: 'Continue', onPress: () => router.replace('/(tabs)') }]
+      [{ text: 'Continue', onPress: () => router.replace('/(tabs)/home') }]
     )
   } else if (error.message?.includes('Username')) {
     Alert.alert('Username Error', 'There was an issue with your username. Please try a different one.')

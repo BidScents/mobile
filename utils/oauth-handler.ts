@@ -19,7 +19,7 @@ export class OAuthHandler {
       const loginResult = await AuthService.loginV1AuthLoginGet()
       
       if (loginResult.onboarded) {
-        router.replace('/(tabs)')
+        router.replace('/(tabs)/home')
       } else {
         router.replace('/(auth)/onboarding')
       }

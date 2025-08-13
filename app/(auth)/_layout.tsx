@@ -1,16 +1,6 @@
-import { useAuthStore } from '@bid-scents/shared-sdk'
-import { Stack, router } from 'expo-router'
-import { useEffect } from 'react'
+import { Stack } from 'expo-router'
 
 export default function AuthLayout() {
-  const { isAuthenticated, isOnboarded } = useAuthStore()
-
-  useEffect(() => {
-    // Redirect authenticated users away from auth screens
-    if (isAuthenticated && isOnboarded) {
-      router.replace('/(tabs)')
-    }
-  }, [isAuthenticated, isOnboarded])
 
   return (
     <Stack
