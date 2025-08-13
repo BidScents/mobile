@@ -22,13 +22,21 @@ export const PriceRangeInput: React.FC<PriceRangeInputProps> = ({
   const theme = useTheme();
   
   const handleMinChange = (text: string) => {
-    const value = text === "" ? null : parseFloat(text);
-    onMinChange(isNaN(value!) ? null : value);
+    if (text === "") {
+      onMinChange(null);
+      return;
+    }
+    const value = parseFloat(text);
+    onMinChange(isNaN(value) ? null : value);
   };
 
   const handleMaxChange = (text: string) => {
-    const value = text === "" ? null : parseFloat(text);
-    onMaxChange(isNaN(value!) ? null : value);
+    if (text === "") {
+      onMaxChange(null);
+      return;
+    }
+    const value = parseFloat(text);
+    onMaxChange(isNaN(value) ? null : value);
   };
 
   return (
