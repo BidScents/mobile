@@ -45,7 +45,7 @@ export default function RootIndex() {
     return (
       <>
         <StartupInitializer />
-        <Redirect href="/(tabs)" />
+        <Redirect href="/(tabs)/home" />
       </>
     );
   }

@@ -89,7 +89,7 @@ export function SearchBar({
       params.append('sort', JSON.stringify(initialSort));
     }
     
-    router.push(`/(tabs)/search-results?${params.toString()}` as any);
+    router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
   };
 
   const handleSubmitEditing = () => {
