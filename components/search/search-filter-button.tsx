@@ -34,7 +34,7 @@ export const SearchFilterButton: React.FC<SearchFilterButtonProps> = ({
       paddingVertical="$2"
       onPress={handlePress}
       pressStyle={{ backgroundColor: "$mutedPress" }}
-      hitSlop={20}
+      hitSlop={10}
     >
       <Ionicons name="filter" size={16} color={theme.foreground.val} />
       <Text fontSize="$4" fontWeight="500" color={theme.foreground.val}>
