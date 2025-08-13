@@ -23,11 +23,9 @@ export const handleExistingSession = async (
   setUser: (user: any) => void,
   setLoading: (loading: boolean) => void
 ) => {
-  // Sync session with SDK
   handleAuthStateChange('SIGNED_IN', session)
   setSession(session)
   
-  // Only fetch user data if we don't have it or user isn't onboarded
   const needsUserData = !existingUser || !existingUser.onboarded_at
   
   if (needsUserData) {
@@ -35,12 +33,31 @@ export const handleExistingSession = async (
       console.log('Fetching user data from API...')
       const loginResult = await AuthService.loginV1AuthLoginGet()
       setUser(loginResult.profile)
-    } catch (apiError) {
-      console.log('User needs onboarding or API error:', apiError)
+    } catch (apiError: any) {
+      console.log('API error occurred:', apiError)
+      
+      if (apiError.status === 500 || apiError.status === 502 || apiError.status === 503) {
+        console.log('Server error - maintaining existing auth state')
+        if (existingUser) {
+          setUser(existingUser)
+        } else {
+          console.log('No cached user data available, user will need to retry')
+        }
+      } else if (apiError.status === 401 || apiError.status === 403) {
+        console.log('Authentication error - clearing session')
+        handleAuthStateChange('SIGNED_OUT', null)
+        setUser(null)
+        setSession(null)
+      } else {
+        console.log('User likely needs onboarding')
+        setUser(null)
+      }
+      
       setLoading(false)
     }
   } else {
     console.log('Using cached user data')
+    setUser(existingUser)
     setLoading(false)
   }
 }
@@ -69,7 +86,6 @@ export const handleSignIn = async (
   handleAuthStateChange('SIGNED_IN', session)
   setSession(session)
   
-  // Check if we need fresh user data
   const currentUser = useAuthStore.getState().user
   const needsUserData = !currentUser || !currentUser.onboarded_at
   
@@ -77,8 +93,24 @@ export const handleSignIn = async (
     try {
       const loginResult = await AuthService.loginV1AuthLoginGet()
       setUser(loginResult.profile)
-    } catch (apiError) {
+    } catch (apiError: any) {
       console.log('API call failed during auth change:', apiError)
+      
+      if (apiError.status === 500 || apiError.status === 502 || apiError.status === 503) {
+        console.log('Server error during sign in - maintaining existing auth state')
+        if (currentUser) {
+          setUser(currentUser)
+        }
+      } else if (apiError.status === 401 || apiError.status === 403) {
+        console.log('Authentication error during sign in - clearing session')
+        handleAuthStateChange('SIGNED_OUT', null)
+        setUser(null)
+        setSession(null)
+      } else {
+        console.log('User likely needs onboarding')
+        setUser(null)
+      }
+      
       setLoading(false)
     }
   }

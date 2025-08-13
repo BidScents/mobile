@@ -42,7 +42,7 @@ export default function SearchResultsScreen() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/(tabs)/index');
+      router.replace('/(tabs)/home');
     }
   }, []);
 
