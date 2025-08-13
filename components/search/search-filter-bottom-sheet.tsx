@@ -10,7 +10,7 @@ import { BOX_CONDITION_LABELS, CATEGORY_LABELS, LISTING_TYPE_LABELS } from "./co
 import { MultiSelectChip } from "./multi-select-chip";
 import { PriceRangeInput } from "./price-range-input";
 import { useFilterState } from "./use-filter-state";
-import { createClearedFilters, getActiveFiltersCount } from "./utils";
+import { createEmptyFilters, getActiveFiltersCount } from "@/utils/search.utils";
 
 export interface SearchFilterBottomSheetMethods {
   present: () => void;
@@ -58,7 +58,7 @@ export const SearchFilterBottomSheet = forwardRef<
 
   const handleClearFilters = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const clearedFilters = createClearedFilters();
+    const clearedFilters = createEmptyFilters();
     resetFilters(clearedFilters);
     onFiltersChange(clearedFilters);
   };
