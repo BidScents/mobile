@@ -1,8 +1,8 @@
 import { ListingCard } from '@/components/listing/listing-card';
 import { ListingCardSkeleton } from '@/components/suspense/listing-card-skeleton';
 import { SearchRequest } from '@bid-scents/shared-sdk';
+import { LegendList } from '@legendapp/list';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { FlashList } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useState } from 'react';
 import { RefreshControl } from 'react-native';
 import { View } from 'tamagui';
@@ -134,11 +134,12 @@ export const SearchResultsList = React.memo(function SearchResultsList({
     const skeletonData = Array.from({ length: 6 }, (_, index) => ({ id: index }));
     
     return (
-      <FlashList
+      <LegendList
         data={skeletonData}
         renderItem={renderSkeletonItem}
         estimatedItemSize={260}
         numColumns={2}
+        recycleItems
         showsVerticalScrollIndicator={false}
         keyExtractor={(item: any) => `skeleton-${item.id}`}
         keyboardDismissMode="on-drag"
@@ -193,7 +194,7 @@ export const SearchResultsList = React.memo(function SearchResultsList({
   // Results list
   return (
     <View flex={1}>
-      <FlashList
+      <LegendList
         data={flatListings}
         renderItem={renderListingItem}
         estimatedItemSize={260}
@@ -201,8 +202,7 @@ export const SearchResultsList = React.memo(function SearchResultsList({
         showsVerticalScrollIndicator={false}
         keyExtractor={keyExtractor}
         drawDistance={500}
-        removeClippedSubviews={true}
-        getItemType={() => 'listing'}
+        recycleItems
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.3}
         refreshControl={

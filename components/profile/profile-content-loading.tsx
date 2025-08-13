@@ -1,5 +1,5 @@
 import { ListingCardSkeleton } from '@/components/suspense/listing-card-skeleton';
-import { FlashList } from '@shopify/flash-list';
+import { LegendList } from '@legendapp/list';
 import React, { useCallback, useMemo } from 'react';
 import { View } from 'tamagui';
 import type { ContentType } from '../../types/profile-content-tab.types';
@@ -42,12 +42,13 @@ export const ProfileContentLoading = React.memo(function ProfileContentLoading({
   if (isListingType) {
     return (
       <View flex={1}>
-        <FlashList
+        <LegendList
           data={skeletonData}
           renderItem={renderListingSkeleton}
           estimatedItemSize={estimatedSize}
           numColumns={2}
           showsVerticalScrollIndicator={false}
+          recycleItems
           keyExtractor={(_, index) => `skeleton-${index}`}
           contentContainerStyle={{ paddingHorizontal: 0 }}
         />
@@ -57,12 +58,13 @@ export const ProfileContentLoading = React.memo(function ProfileContentLoading({
 
   return (
     <View flex={1}>
-      <FlashList
+      <LegendList
         data={skeletonData}
         renderItem={renderReviewSkeleton}
         estimatedItemSize={estimatedSize}
         numColumns={1}
         showsVerticalScrollIndicator={false}
+        recycleItems
         keyExtractor={(_, index) => `skeleton-${index}`}
         contentContainerStyle={{ paddingTop: 16 }}
       />

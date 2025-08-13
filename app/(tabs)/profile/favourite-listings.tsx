@@ -2,7 +2,7 @@ import { ListingCard } from "@/components/listing/listing-card";
 import { Container } from "@/components/ui/container";
 import { useUserFavorites } from "@/hooks/queries/use-listing";
 import { useLoadingStore } from "@bid-scents/shared-sdk";
-import { FlashList } from "@shopify/flash-list";
+import { LegendList } from "@legendapp/list";
 import { useEffect } from "react";
 import { Text, View } from "tamagui";
 
@@ -49,13 +49,14 @@ export default function FavouriteListingsScreen() {
 
   return (
     <Container variant="padded" safeArea={false} backgroundColor="$background">
-      <FlashList
+      <LegendList
         data={listings || []}
         renderItem={({ item }) => <ListingCard listing={item} />}
         keyExtractor={(item) => item.id}
         estimatedItemSize={200}
         showsVerticalScrollIndicator={false}
         numColumns={2}
+        recycleItems
       />
     </Container>
   );

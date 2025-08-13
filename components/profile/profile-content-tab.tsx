@@ -1,6 +1,6 @@
 import { ListingCard } from '@/components/listing/listing-card';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { FlashList } from '@shopify/flash-list';
+import { LegendList } from '@legendapp/list';
 import * as Haptics from 'expo-haptics';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image } from 'react-native';
@@ -146,7 +146,7 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
           onSortPress={handleSortPress}
           showSort={!!onSortChange}
         />
-        <FlashList
+        <LegendList
           data={data}
           renderItem={renderListingItem}
           estimatedItemSize={260}
@@ -154,8 +154,7 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
           showsVerticalScrollIndicator={false}
           keyExtractor={listingKeyExtractor}
           drawDistance={500}
-          removeClippedSubviews={true}
-          getItemType={() => 'listing'}
+          recycleItems
           contentContainerStyle={{ paddingHorizontal: 0 }}
           ListFooterComponent={
             <ProfileContentFooter
@@ -192,7 +191,7 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
           onSortPress={handleSortPress}
           showSort={!!onSortChange}
         />
-        <FlashList
+        <LegendList
           data={data}
           renderItem={renderReviewItem}
           estimatedItemSize={120}
@@ -200,8 +199,7 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
           showsVerticalScrollIndicator={false}
           keyExtractor={reviewKeyExtractor}
           drawDistance={300}
-          removeClippedSubviews={true}
-          getItemType={() => 'review'}
+          recycleItems
           contentContainerStyle={{ paddingTop: 16 }}
           ListFooterComponent={
             <ProfileContentFooter

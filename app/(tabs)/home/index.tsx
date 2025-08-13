@@ -4,8 +4,8 @@ import { Container } from '@/components/ui/container'
 import { SearchBar } from '@/components/ui/search-bar'
 import { useHomepage } from '@/hooks/queries/use-homepage'
 import type { ListingCard as ListingCardType } from '@bid-scents/shared-sdk'
+import { LegendList } from "@legendapp/list"
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs'
-import { FlashList } from '@shopify/flash-list'
 import React, { useMemo } from 'react'
 import { Dimensions } from 'react-native'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
@@ -15,7 +15,7 @@ const cardWidth = (screenWidth - 32 - 12) / 2; // 32 for padding, 12 for gap
 const cardHeight = cardWidth * 1.4; // Maintain aspect ratio
 
 /**
- * Feed item types for FlashList optimization
+ * Feed item types for LegendList optimization
  * Each type has specific height calculations for better performance
  */
 type FeedItem = 
@@ -25,7 +25,7 @@ type FeedItem =
   | { type: 'spacer'; height: number }
 
 /**
- * Homepage component using FlashList for optimal scrolling performance
+ * Homepage component using LegendList for optimal scrolling performance
  * Displays featured listings, auctions, and other content sections
  */
 export default function Homepage() {
@@ -33,7 +33,7 @@ export default function Homepage() {
   const tabbarHeight = useBottomTabBarHeight();
 
   /**
-   * Builds optimized feed data structure for FlashList
+   * Builds optimized feed data structure for LegendList
    * Alternates between featured grids and horizontal sections
    */
   const feedData = useMemo((): FeedItem[] => {
@@ -134,16 +134,16 @@ export default function Homepage() {
           editable={true}
         />
       </XStack>
-      <FlashList
+      <LegendList
         data={feedData}
         renderItem={renderFeedItem}
         keyExtractor={(item, index) => `${item.type}-${index}`}
-        getItemType={(item) => item.type}
         estimatedItemSize={200}
         showsVerticalScrollIndicator={false}
         refreshing={isFetching && !isLoading}
         onRefresh={refetch}
         keyboardDismissMode="on-drag"
+        recycleItems
         contentContainerStyle={{ paddingBottom: tabbarHeight }}
       />
     </Container>
