@@ -24,6 +24,7 @@ export const getActiveFiltersCount = (filters: FilterParameter): number => {
   if (filters.min_price || filters.max_price) count++;
   if (filters.min_purchase_year || filters.max_purchase_year) count++;
   if (filters.box_conditions?.length) count++;
+  if (filters.seller_ids?.length) count++;
   return count;
 };
 
