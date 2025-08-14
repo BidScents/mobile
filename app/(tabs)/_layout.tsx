@@ -55,6 +55,10 @@ export default function TabsLayout() {
         tabBarStyle: {
           position: 'absolute',
           borderTopWidth: 0,
+          height: 75,
+        },
+        tabBarItemStyle: {
+          padding: 5,
         },
         tabBarBackground: () => (
           <BlurView tint={colorScheme === 'light' ? lightBlur : darkBlur} style={{ 
