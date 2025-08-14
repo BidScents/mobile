@@ -26,6 +26,9 @@
               "com.bidscents.mobile"
             ]
           }
+        ],
+        "UIBackgroundModes": [
+          "remote-notification"
         ]
       },
       "appleTeamId": "BRHM2L7C9T"

@@ -1,3 +1,5 @@
+import { useMarkNotificationsSeen, useNotificationsList } from '@/hooks/queries/use-notifications';
+import { useNotifications } from '@/hooks/use-notifications';
 import { darkBlur, lightBlur } from '@/tamagui.config';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -9,10 +11,30 @@ import { useTheme } from 'tamagui';
 
 export default function TabsLayout() {
   const theme = useTheme();
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme();
+  
+  // Get notification data and badge management
+  const { data: notificationData } = useNotificationsList();
+  const markAsSeen = useMarkNotificationsSeen();
+  const { clearBadge, clearNotifications } = useNotifications();
+  
+  const unseenCount = notificationData?.unseen_count || 0;
 
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+  
+  const handleNotificationsTap = async () => {
+    // Mark all notifications as seen
+    if (unseenCount > 0) {
+      try {
+        await markAsSeen.mutateAsync();
+        await clearBadge();
+        await clearNotifications();
+      } catch (error) {
+        console.error('Error marking notifications as seen:', error);
+      }
+    }
   };
 
   return (
@@ -101,6 +123,7 @@ export default function TabsLayout() {
         options={{
           title: "Notifications",
           headerShown: true,
+          tabBarBadge: unseenCount > 0 ? (unseenCount > 99 ? '99+' : unseenCount.toString()) : undefined,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons 
               name={focused ? "notifications" : "notifications-outline"} 
@@ -108,6 +131,9 @@ export default function TabsLayout() {
               color={color} 
             />
           ),
+        }}
+        listeners={{
+          tabPress: handleNotificationsTap,
         }}
       />
       
