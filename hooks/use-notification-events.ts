@@ -35,25 +35,15 @@ export function useNotificationEvents() {
         notificationListener = Notifications.addNotificationReceivedListener(async notification => {
           console.log('Notification received while app open:', notification);
           
-          // Increment badge count even for foreground notifications
-          // This ensures badge shows up when user backgrounds the app
-          try {
-            const currentBadge = await Notifications.getBadgeCountAsync();
-            await Notifications.setBadgeCountAsync(currentBadge + 1);
-            console.log('Badge count incremented to:', currentBadge + 1);
-          } catch (error) {
-            console.error('Error incrementing badge count:', error);
-          }
-          
           // Handle in-app notification display here
           // The system notification won't show when app is active
           // You can show a toast, update UI state, etc.
         });
 
         // Listen for user interactions with notifications
-        responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+        responseListener = Notifications.addNotificationResponseReceivedListener(async response => {
           console.log('Notification tapped:', response);
-          
+
           // Delegate navigation to service
           const notificationData = response.notification.request.content.data;
           handleNotificationNavigation(notificationData);
