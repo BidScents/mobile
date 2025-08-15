@@ -6,7 +6,7 @@
  */
 
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { handleNotificationNavigation } from "@/hooks/use-notifications";
+import { handleNotificationNavigation } from "@/services/notification-navigation";
 import { supabase } from "@/lib/supabase";
 import { initializeAuth, OpenAPI, useAuthStore } from "@bid-scents/shared-sdk";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
