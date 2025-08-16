@@ -27,7 +27,7 @@ export function useNotificationsList(cursor?: string, limit?: number ) {
     const [stableCursor] = useState(() => new Date().toISOString());
     const finalCursor = cursor || stableCursor;
     return useQuery({
-        queryKey: queryKeys.notifications.list(finalCursor, limit),
+        queryKey: queryKeys.notifications.list(),
         queryFn: () => NotificationsService.getNotificationsV1NotificationsGet(finalCursor, limit),
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
@@ -66,16 +66,31 @@ export function useEditNotificationPreferences() {
 /**
  * Mark all notifications as seen/read
  * Typically called when user opens notifications screen
- * Invalidates all notification queries to update UI state
+ * Optimistically updates cache without invalidating queries
  */
 export function useMarkNotificationsSeen() {
     const queryClient = useQueryClient();
     
     return useMutation({
         mutationFn: () => NotificationsService.markNotificationsSeenV1NotificationsMarkSeenPatch(),
-        onSuccess: () => {
-            // Invalidate all notification queries to update seen status
-            queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+        onMutate: async () => {
+            // Optimistically update the cache
+            queryClient.setQueryData(queryKeys.notifications.list(), (oldData: any) => {
+                if (!oldData) return oldData;
+                
+                return {
+                    ...oldData,
+                    unseen_count: 0,
+                    notifications: oldData.notifications?.map((notification: any) => ({
+                        ...notification,
+                        is_seen: true
+                    }))
+                };
+            });
+        },
+        onError: () => {
+            // Revert optimistic update on error
+            queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() });
         },
     });
 }
