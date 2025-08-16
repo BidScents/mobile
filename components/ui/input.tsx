@@ -275,7 +275,7 @@ export const Input: React.FC<InputProps> = ({
       gap="$2"
       opacity={disabled ? 0.8 : 1}
     >
-      {label && (
+      {label && !isSwitch && (
         <Paragraph fontWeight="400" color="$mutedForeground">
           {label}
         </Paragraph>
