@@ -1,6 +1,5 @@
 import { EditPreferencesRequest, NotificationsService } from "@bid-scents/shared-sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { queryKeys } from './query-keys';
 
 /**
@@ -24,8 +23,7 @@ export function useAddDeviceToken() {
  * @returns Query result with notifications list and pagination data
  */
 export function useNotificationsList(cursor?: string, limit?: number ) {
-    const [stableCursor] = useState(() => new Date().toISOString());
-    const finalCursor = cursor || stableCursor;
+    const finalCursor = cursor || new Date().toISOString();
     return useQuery({
         queryKey: queryKeys.notifications.list(),
         queryFn: () => NotificationsService.getNotificationsV1NotificationsGet(finalCursor, limit),
