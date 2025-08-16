@@ -41,7 +41,7 @@ export default function SignUpScreen() {
     formState: { isValid }
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
-    mode: 'onChange',
+    mode: 'onBlur',
     defaultValues: DEFAULT_VALUES
   })
 
@@ -164,7 +164,7 @@ export default function SignUpScreen() {
             size="lg"
             fullWidth
             onPress={handleSubmit(onSubmit)}
-            disabled={isLoading || !isValid}
+            disabled={isLoading}
             borderRadius="$10"
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}

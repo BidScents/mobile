@@ -41,7 +41,7 @@ export default function LoginScreen() {
     formState: { isValid }
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    mode: 'onChange',
+    mode: 'onBlur',
     defaultValues: DEFAULT_VALUES
   })
 
@@ -167,7 +167,7 @@ export default function LoginScreen() {
             size="lg"
             fullWidth
             onPress={handleSubmit(onSubmit)}
-            disabled={isLoading || !isValid}
+            disabled={isLoading}
             borderRadius="$10"
           >
             {isLoading ? 'Signing In...' : 'Sign In'}
