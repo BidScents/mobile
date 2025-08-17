@@ -6,8 +6,8 @@
  */
 
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { handleNotificationNavigation } from "@/services/notification-navigation";
 import { supabase } from "@/lib/supabase";
+import { handleNotificationNavigation } from "@/services/notification-navigation";
 import { initializeAuth, OpenAPI, useAuthStore } from "@bid-scents/shared-sdk";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { TamaguiProvider, Theme } from "@tamagui/core";
@@ -93,11 +93,11 @@ export default function RootLayout() {
             setLoading
           );
         } else {
-          await handleNoSession(logout);
+          await handleNoSession();
         }
 
         // Set up auth listener
-        setupAuthStateListener(setSession, setUser, setLoading, logout);
+        setupAuthStateListener(setSession, setUser, setLoading);
 
         setIsAppReady(true);
       } catch (error) {
