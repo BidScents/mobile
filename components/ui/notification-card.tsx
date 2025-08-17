@@ -125,15 +125,15 @@ export default function NotificationCard({
       <YStack flex={1} gap="$1.5" px="$1">
         <XStack alignItems="center" justifyContent="space-between">
           <Text
-            fontSize="$4"
-            fontWeight={notification.seen ? "400" : "500"}
+            fontSize="$5"
+            fontWeight={"500"}
             color="$foreground"
             numberOfLines={1}
           >
             {notification.title}
           </Text>
 
-          <Text fontSize="$2" color="$mutedForeground">
+          <Text fontSize="$3" color="$mutedForeground">
             {formatDate(notification.created_at)}
           </Text>
         </XStack>
@@ -143,6 +143,7 @@ export default function NotificationCard({
           color="$mutedForeground"
           numberOfLines={2}
           lineHeight="$1"
+          fontWeight="400"
         >
           {notification.body}
         </Text>

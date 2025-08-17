@@ -117,6 +117,7 @@ export default function ListingScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         bottomOffset={15}
+        keyboardDismissMode="on-drag"
       >
         {/* Image Carousel */}
         <ImageCarousel
