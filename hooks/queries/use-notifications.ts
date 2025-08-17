@@ -45,7 +45,7 @@ export function useNotificationPreferences() {
 
 /**
  * Update user's notification preferences
- * Invalidates preferences cache on success to ensure UI reflects changes
+ * Simple mutation without optimistic updates (handled in component)
  * 
  * @param preferences - Updated notification preference settings
  */
@@ -55,7 +55,8 @@ export function useEditNotificationPreferences() {
     return useMutation({
         mutationFn: (preferences: EditPreferencesRequest) => 
             NotificationsService.editNotificationPreferencesV1NotificationsNotificationPreferencesPatch(preferences),
-        onSuccess: () => {
+        onError: () => {
+            // On error, refetch to ensure UI shows correct server state
             queryClient.invalidateQueries({ queryKey: queryKeys.notifications.preferences });
         },
     });
