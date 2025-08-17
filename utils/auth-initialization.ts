@@ -68,9 +68,8 @@ export const handleExistingSession = async (
  * 
  * When no session exists, clear all auth state using the store's logout method
  */
-export const handleNoSession = async (logout: () => void) => {
+export const handleNoSession = async () => {
   handleAuthStateChange('SIGNED_OUT', null)
-  logout()
 }
 
 /**
