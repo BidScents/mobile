@@ -294,7 +294,7 @@ export const Input: React.FC<InputProps> = ({
           <Text
             fontSize="$5"
             fontWeight="400"
-            color="$mutedForeground"
+            color="$foreground"
             flex={1}
           >
             {label}
@@ -303,7 +303,7 @@ export const Input: React.FC<InputProps> = ({
             size="$4"
             disabled={disabled}
             native
-            defaultChecked={switchChecked}
+            checked={switchChecked}
             onCheckedChange={onSwitchChange}
           >
             <Switch.Thumb animation="bouncy" />
