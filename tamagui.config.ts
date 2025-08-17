@@ -165,6 +165,7 @@ const customThemes = {
     rating: '#feba17',
     ratingHover: '#fdb000',
     ratingPress: '#fca500',
+    blurTint: lightBlur,
   },
   
   dark: {
@@ -191,6 +192,7 @@ const customThemes = {
     rating: '#feba17',
     ratingHover: '#fdb000',
     ratingPress: '#fca500',
+    blurTint: darkBlur,
   }
 }
 
