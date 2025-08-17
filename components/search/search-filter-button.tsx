@@ -36,8 +36,8 @@ export const SearchFilterButton: React.FC<SearchFilterButtonProps> = ({
       pressStyle={{ backgroundColor: "$mutedPress" }}
       hitSlop={10}
     >
-      <Ionicons name="filter" size={16} color={theme.foreground.val} />
-      <Text fontSize="$4" fontWeight="500" color={theme.foreground.val}>
+      <Ionicons name="filter" size={16} color={theme.foreground.get()} />
+      <Text fontSize="$4" fontWeight="500" color={theme.foreground.get()}>
         Filter {activeFiltersCount > 0 && `(${activeFiltersCount})`}
       </Text>
     </XStack>

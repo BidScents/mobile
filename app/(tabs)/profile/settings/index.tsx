@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { Input } from "@/components/ui/input";
+import { useThemeSettings } from "@/hooks/use-theme-settings";
 import { handleSignOut } from "@/utils/auth-initialization";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -14,22 +16,22 @@ const SettingsSections = [
       {
         name: "Profile Details",
         icon: "person-outline",
-        src: "/profile/settings/edit-profile",
+        src: "/(tabs)/profile/edit-profile",
       },
       {
         name: "Account Details",
         icon: "card-outline",
-        src: "/profile/settings/account",
+        src: "/(tabs)/profile/settings/account",
       },
       {
         name: "Payments",
         icon: "wallet-outline",
-        src: "/profile/settings/payments",
+        src: "/(tabs)/profile/settings/payments",
       },
       {
         name: "Postage",
         icon: "mail-outline",
-        src: "/profile/settings/postage",
+        src: "/(tabs)/profile/settings/postage",
       },
     ],
   },
@@ -39,15 +41,16 @@ const SettingsSections = [
       {
         name: "Notifications",
         icon: "notifications-outline",
-        src: "/profile/settings/notification-preferences",
-      },
-      {
-        name: "Theme",
-        icon: "color-palette-outline",
-        src: "/profile/settings/theme",
+        src: "/(tabs)/profile/settings/notification-preferences",
       },
     ],
   },
+];
+
+const themeOptions = [
+  { label: "System", value: "system" },
+  { label: "Light", value: "light" },
+  { label: "Dark", value: "dark" },
 ];
 
 const handlePress = (link: string) => {
@@ -57,6 +60,13 @@ const handlePress = (link: string) => {
 
 export default function SettingsScreen() {
   const theme = useTheme();
+  const { themePreference, setTheme, isLoading } = useThemeSettings();
+
+  const handleThemeChange = (value: string) => {
+    if (value === "system" || value === "light" || value === "dark") {
+      setTheme(value);
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -106,7 +116,7 @@ export default function SettingsScreen() {
                       <Ionicons
                         name={item.icon as any}
                         size={20}
-                        color={theme.foreground?.val}
+                        color={theme.foreground?.get()}
                       />
                       <Text fontSize="$5" fontWeight="400">
                         {item.name}
@@ -115,13 +125,37 @@ export default function SettingsScreen() {
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color={theme.foreground?.val}
+                      color={theme.foreground?.get()}
                     />
                   </XStack>
                 ))}
+                
+                {/* Add Theme Selector for Preferences section */}
+                {section.title === "Preferences" && (
+                  <YStack px="$4" py="$2">
+                    <Input
+                      variant="select"
+                      label="Theme"
+                      placeholder="Select theme"
+                      value={themePreference}
+                      onChangeText={handleThemeChange}
+                      options={themeOptions}
+                      selectTitle="Choose Theme"
+                      selectSubtitle="Select your preferred app theme"
+                      disabled={isLoading}
+                    />
+                  </YStack>
+                )}
               </YStack>
             </YStack>
           ))}
+
+          <Text fontSize="$5" fontWeight="500" onPress={() => handleThemeChange("light")}>
+            Light
+          </Text>
+          <Text fontSize="$5" fontWeight="500" onPress={() => handleThemeChange("dark")}>
+            Dark
+          </Text>
 
           {/* Logout Section */}
           <YStack borderRadius="$6">

@@ -56,7 +56,7 @@ export function ListingDetailsSection({
             <Text fontSize="$5" fontWeight="400">
               {detail.value}
             </Text>
-            {/* <Ionicons name="chevron-forward" size={20} color={theme.foreground?.val} /> */}
+            {/* <Ionicons name="chevron-forward" size={20} color={theme.foreground?.get()} /> */}
           </XStack>
         </XStack>
       ))}

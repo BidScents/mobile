@@ -162,7 +162,7 @@ export const Button: React.FC<ButtonProps> = ({
         <Ionicons
           name={leftIcon}
           size={iconSizes[size]}
-          color={theme.foreground?.val}
+          color={theme.foreground.get()}
           pointerEvents="none"
         />
       )}
@@ -182,7 +182,7 @@ export const Button: React.FC<ButtonProps> = ({
         <Ionicons
           name={rightIcon}
           size={iconSizes[size]}
-          color={theme.foreground?.val}
+          color={theme.foreground.get()}
           pointerEvents="none"
         />
       )}

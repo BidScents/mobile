@@ -64,11 +64,11 @@ export function ImageCarousel({
           progress={progress}
           data={imageUrls || []}
           dotStyle={{
-            backgroundColor: theme.mutedForeground.val,
+            backgroundColor: theme.mutedForeground.get(),
             borderRadius: 5,
           }}
           activeDotStyle={{
-            backgroundColor: theme.background?.val,
+            backgroundColor: theme.background?.get(),
             overflow: "hidden",
             borderRadius: 5,
           }}

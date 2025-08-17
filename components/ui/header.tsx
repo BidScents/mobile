@@ -1,4 +1,3 @@
-import { darkBlur, lightBlur } from "@/tamagui.config";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import React from "react";
@@ -6,7 +5,6 @@ import {
   Animated,
   ImageBackground,
   StyleSheet,
-  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, useTheme } from "tamagui";
@@ -38,7 +36,6 @@ export default function Header({
   rightIcon?: keyof typeof Ionicons.glyphMap;
   rightIconPress?: () => void;
 }) {
-  const colorScheme = useColorScheme();
   const theme = useTheme();
   return (
     <>
@@ -70,7 +67,7 @@ export default function Header({
           }}
         >
           <BlurView
-            tint={colorScheme === "light" ? lightBlur : darkBlur}
+            tint={theme.blurTint.get() as any}
             intensity={80}
             style={{
               flex: 1,
@@ -78,7 +75,7 @@ export default function Header({
               justifyContent: "center",
             }}
           >
-            <Ionicons name={rightIcon} color={theme.foreground.val} size={20} />
+            <Ionicons name={rightIcon} color={theme.foreground.get()} size={20} />
           </BlurView>
         </View>
       )}
@@ -139,7 +136,7 @@ export default function Header({
         }}
       >
         <AnimatedBlurView
-          tint={colorScheme === "light" ? lightBlur : darkBlur}
+          tint={theme.blurTint.get() as any}
           intensity={80}
           style={{
             ...StyleSheet.absoluteFillObject,

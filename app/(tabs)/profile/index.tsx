@@ -100,7 +100,7 @@ export default function ProfileScreen() {
           <Ionicons
             name="chevron-forward"
             size={20}
-            color={theme.foreground?.val}
+            color={theme.foreground?.get()}
           />
         </XStack>
 
@@ -133,7 +133,7 @@ export default function ProfileScreen() {
                       <Ionicons
                         name={item.icon as any}
                         size={20}
-                        color={theme.foreground?.val}
+                        color={theme.foreground?.get()}
                       />
                       <Text fontSize="$5" fontWeight="400">
                         {item.name}
@@ -142,7 +142,7 @@ export default function ProfileScreen() {
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color={theme.foreground?.val}
+                      color={theme.foreground?.get()}
                     />
                   </XStack>
                 ))}

@@ -42,7 +42,7 @@ export function SellerCard({ seller }: { seller: UserPreview }) {
         bg="$muted"
         borderRadius="$5"
       >
-        <Ionicons name="bag-outline" size={20} color={theme.foreground?.val} />
+        <Ionicons name="bag-outline" size={20} color={theme.foreground?.get()} />
         <Text fontSize="$4" fontWeight="400">
           View Store
         </Text>

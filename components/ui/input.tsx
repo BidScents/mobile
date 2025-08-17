@@ -325,7 +325,7 @@ export const Input: React.FC<InputProps> = ({
           <Ionicons
             name={showPassword ? "eye-off" : "eye"}
             size={20}
-            color={theme.mutedForeground?.val || "#666"}
+            color={theme.mutedForeground?.get() || "#666"}
             onPress={togglePasswordVisibility}
             style={{ cursor: "pointer" }}
           />
@@ -363,7 +363,7 @@ export const Input: React.FC<InputProps> = ({
           <Ionicons
             name="chevron-down"
             size={20}
-            color={theme.mutedForeground?.val || "#666"}
+            color={theme.mutedForeground?.get() || "#666"}
             style={{
               cursor: disabled ? "not-allowed" : "pointer",
               opacity: disabled ? 0.6 : 1,

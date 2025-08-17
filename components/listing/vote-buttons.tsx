@@ -137,7 +137,7 @@ export function VoteButtons({
     <XStack alignItems="center" justifyContent="center" gap="$2">
       <XStack alignItems="center" gap="$2">
         <View onPress={() => handleUpvote()} hitSlop={10}>
-          <Ionicons name={upvoteIcon} size={30} color={theme.foreground?.val} />
+          <Ionicons name={upvoteIcon} size={30} color={theme.foreground?.get()} />
         </View>
         <Text fontSize="$5" fontWeight="500">
           {currentVotes}
@@ -150,7 +150,7 @@ export function VoteButtons({
           <Ionicons
             name={downvoteIcon}
             size={30}
-            color={theme.foreground?.val}
+            color={theme.foreground?.get()}
           />
         </View>
       </XStack>

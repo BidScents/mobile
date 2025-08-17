@@ -36,13 +36,13 @@ export const SearchSortButton: React.FC<SearchSortButtonProps> = ({
       pressStyle={{ backgroundColor: "$mutedPress" }}
       hitSlop={10}
     >
-      <Text fontSize="$4" fontWeight="500" color={theme.foreground.val}>
+      <Text fontSize="$4" fontWeight="500" color={theme.foreground.get()}>
         {currentSortLabel}
       </Text>
       <Ionicons
         name="chevron-down"
         size={16}
-        color={theme.foreground.val}
+        color={theme.foreground.get()}
       />
     </XStack>
   );

@@ -38,9 +38,9 @@ export function SearchEmptyState({
   const getIconColor = () => {
     switch (type) {
       case 'error':
-        return theme.red10?.val || '#ef4444';
+        return theme.red10?.get() || '#ef4444';
       default:
-        return theme.mutedForeground?.val || '#6b7280';
+        return theme.mutedForeground?.get() || '#6b7280';
     }
   };
 

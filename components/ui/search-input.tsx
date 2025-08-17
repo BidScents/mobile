@@ -84,7 +84,7 @@ export function SearchInput({
             <Ionicons 
               name="search" 
               size={20} 
-              color={theme.foreground.val} 
+              color={theme.foreground.get()} 
             />
           </Pressable>
           <Input

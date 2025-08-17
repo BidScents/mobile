@@ -49,13 +49,13 @@ export const PriceRangeInput: React.FC<PriceRangeInputProps> = ({
           style={[
             styles.textInput,
             {
-              backgroundColor: theme.muted?.val,
-              color: theme.foreground?.val,
-              borderColor: theme.border?.val,
+              backgroundColor: theme.muted?.get(),
+              color: theme.foreground?.get(),
+              borderColor: theme.border?.get(),
             },
           ]}
           placeholder="0"
-          placeholderTextColor={theme.mutedForeground?.val}
+          placeholderTextColor={theme.mutedForeground?.get()}
           value={minValue?.toString() || ""}
           onChangeText={handleMinChange}
           keyboardType="numeric"
@@ -70,13 +70,13 @@ export const PriceRangeInput: React.FC<PriceRangeInputProps> = ({
           style={[
             styles.textInput,
             {
-              backgroundColor: theme.muted?.val,
-              color: theme.foreground?.val,
-              borderColor: theme.border?.val,
+              backgroundColor: theme.muted?.get(),
+              color: theme.foreground?.get(),
+              borderColor: theme.border?.get(),
             },
           ]}
           placeholder="Any"
-          placeholderTextColor={theme.mutedForeground?.val}
+          placeholderTextColor={theme.mutedForeground?.get()}
           value={maxValue?.toString() || ""}
           onChangeText={handleMaxChange}
           keyboardType="numeric"

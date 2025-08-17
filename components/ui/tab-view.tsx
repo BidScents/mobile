@@ -121,7 +121,7 @@ export default function TabView({
               position: 'absolute',
               bottom: 0,
               height: 2,
-              backgroundColor: theme.foreground?.val,
+              backgroundColor: theme.foreground?.get(),
               borderRadius: 1,
               left: indicatorPosition,
               width: indicatorWidth,

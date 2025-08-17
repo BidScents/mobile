@@ -57,7 +57,7 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
           <Ionicons 
             name="chevron-back" 
             size={24} 
-            color={theme.foreground.val} 
+            color={theme.foreground.get()} 
           />
         </XStack>
         <SearchBar

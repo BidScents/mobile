@@ -49,8 +49,8 @@ export function AddCommentForm({ listingId }: AddCommentFormProps) {
           size={30}
           color={
             !newComment.trim()
-              ? theme.mutedForeground?.val
-              : theme.foreground?.val
+              ? theme.mutedForeground?.get()
+              : theme.foreground?.get()
           }
         />
       </View>

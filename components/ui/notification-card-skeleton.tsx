@@ -1,7 +1,6 @@
 import React from "react";
 import ContentLoader, { Rect } from "react-content-loader/native";
-import { useColorScheme } from "react-native";
-import { XStack } from "tamagui";
+import { XStack, useTheme } from "tamagui";
 
 interface NotificationCardSkeletonProps {
   width?: number;
@@ -12,10 +11,10 @@ export function NotificationCardSkeleton({
   width = 350,
   height = 80,
 }: NotificationCardSkeletonProps = {}) {
-  const colorScheme = useColorScheme();
+  const theme = useTheme();
 
-  const backgroundColor = colorScheme === "dark" ? "#1a1a1a" : "#f3f3f3";
-  const foregroundColor = colorScheme === "dark" ? "#2a2a2a" : "#e8e8e8";
+  const backgroundColor = theme.muted?.get() || "#f3f3f3";
+  const foregroundColor = theme.mutedHover?.get() || "#e8e8e8";
 
   return (
     <XStack gap="$3" alignItems="center" borderRadius="$5" padding="$2">

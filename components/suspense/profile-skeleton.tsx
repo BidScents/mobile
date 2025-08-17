@@ -1,8 +1,8 @@
 import { Container } from '@/components/ui/container'
 import React from 'react'
 import ContentLoader, { Circle, Rect } from 'react-content-loader/native'
-import { Dimensions, useColorScheme } from 'react-native'
-import { View, XStack, YStack } from 'tamagui'
+import { Dimensions } from 'react-native'
+import { View, XStack, YStack, useTheme } from 'tamagui'
 
 interface ProfileSkeletonProps {
   width?: number
@@ -13,12 +13,12 @@ interface ProfileSkeletonProps {
  * Includes cover image, profile avatar, user info, stats, tabs, and listings grid.
  */
 export function ProfileSkeleton({ width }: ProfileSkeletonProps) {
-  const colorScheme = useColorScheme()
+  const theme = useTheme()
   const screenWidth = width || Dimensions.get('window').width
   
-  // Darker greys for better visibility
-  const backgroundColor = colorScheme === 'dark' ? '#151515' : '#e8e8e8'
-  const foregroundColor = colorScheme === 'dark' ? '#252525' : '#d0d0d0'
+  // Use theme colors for skeleton loading
+  const backgroundColor = theme.muted?.get() || '#e8e8e8'
+  const foregroundColor = theme.mutedHover?.get() || '#d0d0d0'
 
   return (
     <YStack flex={1} backgroundColor="$background">
@@ -186,11 +186,11 @@ export function ProfileSkeleton({ width }: ProfileSkeletonProps) {
  * Includes auction timer, bid count, and proper spacing
  */
 function ListingCardSkeleton({ width, height }: { width: number; height: number }) {
-  const colorScheme = useColorScheme()
+  const theme = useTheme()
   
-  // Darker greys for better visibility
-  const backgroundColor = colorScheme === 'dark' ? '#151515' : '#e8e8e8'
-  const foregroundColor = colorScheme === 'dark' ? '#252525' : '#d0d0d0'
+  // Use theme colors for skeleton loading
+  const backgroundColor = theme.muted?.get() || '#e8e8e8'
+  const foregroundColor = theme.mutedHover?.get() || '#d0d0d0'
 
   return (
     <View

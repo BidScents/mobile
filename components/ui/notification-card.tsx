@@ -63,7 +63,7 @@ export default function NotificationCard({
             width: 60,
             height: 60,
             borderRadius: 6,
-            backgroundColor: theme.muted?.val,
+            backgroundColor: theme.muted?.get(),
           }}
           contentFit="cover"
         />
