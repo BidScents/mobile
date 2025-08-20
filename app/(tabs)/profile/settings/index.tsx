@@ -1,7 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { Input } from "@/components/ui/input";
-import { useThemeSettings } from "@/hooks/use-theme-settings";
 import { handleSignOut } from "@/utils/auth-initialization";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -43,14 +41,13 @@ const SettingsSections = [
         icon: "notifications-outline",
         src: "/(tabs)/profile/settings/notification-preferences",
       },
+      {
+        name: "Theme",
+        icon: "color-palette-outline",
+        src: "/(tabs)/profile/settings/theme",
+      },
     ],
   },
-];
-
-const themeOptions = [
-  { label: "System", value: "system" },
-  { label: "Light", value: "light" },
-  { label: "Dark", value: "dark" },
 ];
 
 const handlePress = (link: string) => {
@@ -60,13 +57,6 @@ const handlePress = (link: string) => {
 
 export default function SettingsScreen() {
   const theme = useTheme();
-  const { themePreference, setTheme, isLoading } = useThemeSettings();
-
-  const handleThemeChange = (value: string) => {
-    if (value === "system" || value === "light" || value === "dark") {
-      setTheme(value);
-    }
-  };
 
   const handleLogout = () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -129,33 +119,9 @@ export default function SettingsScreen() {
                     />
                   </XStack>
                 ))}
-                
-                {/* Add Theme Selector for Preferences section */}
-                {section.title === "Preferences" && (
-                  <YStack px="$4" py="$2">
-                    <Input
-                      variant="select"
-                      label="Theme"
-                      placeholder="Select theme"
-                      value={themePreference}
-                      onChangeText={handleThemeChange}
-                      options={themeOptions}
-                      selectTitle="Choose Theme"
-                      selectSubtitle="Select your preferred app theme"
-                      disabled={isLoading}
-                    />
-                  </YStack>
-                )}
               </YStack>
             </YStack>
           ))}
-
-          <Text fontSize="$5" fontWeight="500" onPress={() => handleThemeChange("light")}>
-            Light
-          </Text>
-          <Text fontSize="$5" fontWeight="500" onPress={() => handleThemeChange("dark")}>
-            Dark
-          </Text>
 
           {/* Logout Section */}
           <YStack borderRadius="$6">
