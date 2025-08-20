@@ -10,6 +10,7 @@ import { uploadProfileImage } from '@/utils/upload-profile-image'
 import {
   AuthService,
   handleAuthStateChange,
+  useAuthStore,
   type LoginFormData,
   type OnboardingFormData,
   type SignUpFormData
@@ -59,7 +60,8 @@ export const handleSignUp = async (data: SignUpFormData) => {
 
     // If user is immediately signed in (email confirmation disabled)
     if (authData.session) {
-      router.replace('/(auth)/onboarding')
+      // Stack.Protected will handle navigation based on auth state
+      handleAuthStateChange('SIGNED_IN', authData.session)
     }
   } catch (error: any) {
     console.log('Auth error:', error)
@@ -121,24 +123,24 @@ export const handleLogin = async (data: LoginFormData) => {
 /**
  * Handle successful authentication
  * 
- * Syncs session with SDK and determines user's onboarding status
- * to navigate to appropriate screen
+ * Syncs session with SDK and fetches user data
+ * Navigation is handled automatically by Stack.Protected guards
  */
 export const handleAuthSuccess = async (session: any) => {
   try {
+    const { setAuthState } = useAuthStore.getState()
+    
+    // Configure API token before making API calls
     handleAuthStateChange('SIGNED_IN', session)
     
     try {
+      // Fetch user data and set complete auth state atomically
       const loginResult = await AuthService.loginV1AuthLoginGet()
-      
-      if (loginResult.onboarded) {
-        router.replace('/(tabs)/home')
-      } else {
-        router.replace('/(auth)/onboarding')
-      }
+      setAuthState(session, loginResult)
     } catch (apiError) {
-      console.log('API call failed, assuming new user needs onboarding:', apiError)
-      router.replace('/(auth)/onboarding')
+      console.log('API call failed during login:', apiError)
+      // Set authenticated but not onboarded state for API failures
+      setAuthState(session, { onboarded: false, profile: null, favorites: [] })
     }
   } catch (error) {
     console.log('Auth success handling failed:', error)
@@ -240,10 +242,19 @@ export const handleOnboarding = async (data: OnboardingFormData & {
 
     console.log('Onboarding completed successfully')
 
+    // Update auth store with complete onboarding state atomically
+    const { setAuthState, session } = useAuthStore.getState()
+    const onboardingResponse = {
+      onboarded: true, // User just completed onboarding
+      profile: onboardingResult.profile,
+      favorites: []
+    }
+    setAuthState(session, onboardingResponse)
+
     Alert.alert(
       'Welcome!', 
       onboardingResult.message || 'Your profile has been created successfully!',
-      [{ text: 'Continue', onPress: () => router.replace('/(tabs)/home') }]
+      [{ text: 'Continue' }] // Stack.Protected will handle navigation after onboarding completion
     )
 
   } catch (error: any) {
@@ -266,7 +277,7 @@ export const handleOnboardingError = (error: any) => {
     Alert.alert(
       'Profile Already Created', 
       'It looks like your profile is already set up. You can edit it in your profile settings.',
-      [{ text: 'Continue', onPress: () => router.replace('/(tabs)/home') }]
+      [{ text: 'Continue' }] // Stack.Protected will handle navigation
     )
   } else if (error.message?.includes('Username')) {
     Alert.alert('Username Error', 'There was an issue with your username. Please try a different one.')

@@ -11,7 +11,6 @@ import {
   handleAuthStateChange,
   useAuthStore,
 } from "@bid-scents/shared-sdk";
-import { router } from "expo-router";
 
 /**
  * Handle existing session logic
@@ -24,20 +23,20 @@ import { router } from "expo-router";
 export const handleExistingSession = async (
   session: any,
   existingUser: any,
-  setSession: (session: any) => void,
-  setUser: (user: any) => void,
-  setLoading: (loading: boolean) => void
+  setAuthState: (session: any, loginResponse: any) => void,
+  setLoading: (loading: boolean) => void,
 ) => {
+  // Configure API token before making API calls
   handleAuthStateChange("SIGNED_IN", session);
-  setSession(session);
-
+  
   const needsUserData = !existingUser || !existingUser.onboarded_at;
 
   if (needsUserData) {
     try {
       console.log("Fetching user data from API...");
       const loginResult = await AuthService.loginV1AuthLoginGet();
-      setUser(loginResult.profile);
+      // Set complete auth state atomically
+      setAuthState(session, loginResult);
     } catch (apiError: any) {
       console.log("API error occurred:", apiError);
 
@@ -48,26 +47,34 @@ export const handleExistingSession = async (
       ) {
         console.log("Server error - maintaining existing auth state");
         if (existingUser) {
-          setUser(existingUser);
+          // Use existing user data but with current session
+          const fallbackResponse = {
+            onboarded: !!existingUser.onboarded_at,
+            profile: existingUser,
+            favorites: []
+          };
+          setAuthState(session, fallbackResponse);
         } else {
           console.log("No cached user data available, user will need to retry");
+          setLoading(false);
         }
       } else if (apiError.status === 401 || apiError.status === 403) {
         console.log("Authentication error - clearing session");
+        setAuthState(null, null);
         handleAuthStateChange("SIGNED_OUT", null);
-        setUser(null);
-        setSession(null);
       } else {
         console.log("User likely needs onboarding");
-        setUser(null);
+        setAuthState(session, { onboarded: false, profile: null, favorites: [] });
       }
-
-      setLoading(false);
     }
   } else {
     console.log("Using cached user data");
-    setUser(existingUser);
-    setLoading(false);
+    const cachedResponse = {
+      onboarded: !!existingUser.onboarded_at,
+      profile: existingUser,
+      favorites: []
+    };
+    setAuthState(session, cachedResponse);
   }
 };
 
@@ -87,20 +94,20 @@ export const handleNoSession = async () => {
  */
 export const handleSignIn = async (
   session: any,
-  setSession: (session: any) => void,
-  setUser: (user: any) => void,
+  setAuthState: (session: any, loginResponse: any) => void,
   setLoading: (loading: boolean) => void
 ) => {
+  // Configure API token before making API calls
   handleAuthStateChange("SIGNED_IN", session);
-  setSession(session);
-
-  const currentUser = useAuthStore.getState().user;
+  
+  const { user: currentUser } = useAuthStore.getState();
   const needsUserData = !currentUser || !currentUser.onboarded_at;
 
   if (needsUserData) {
     try {
       const loginResult = await AuthService.loginV1AuthLoginGet();
-      setUser(loginResult.profile);
+      // Set complete auth state atomically
+      setAuthState(session, loginResult);
     } catch (apiError: any) {
       console.log("API call failed during auth change:", apiError);
 
@@ -113,20 +120,32 @@ export const handleSignIn = async (
           "Server error during sign in - maintaining existing auth state"
         );
         if (currentUser) {
-          setUser(currentUser);
+          const fallbackResponse = {
+            onboarded: !!currentUser.onboarded_at,
+            profile: currentUser,
+            favorites: []
+          };
+          setAuthState(session, fallbackResponse);
+        } else {
+          setLoading(false);
         }
       } else if (apiError.status === 401 || apiError.status === 403) {
         console.log("Authentication error during sign in - clearing session");
+        setAuthState(null, null);
         handleAuthStateChange("SIGNED_OUT", null);
-        setUser(null);
-        setSession(null);
       } else {
         console.log("User likely needs onboarding");
-        setUser(null);
+        setAuthState(session, { onboarded: false, profile: null, favorites: [] });
       }
-
-      setLoading(false);
     }
+  } else {
+    // Use existing user data
+    const cachedResponse = {
+      onboarded: !!currentUser.onboarded_at,
+      profile: currentUser,
+      favorites: []
+    };
+    setAuthState(session, cachedResponse);
   }
 };
 
@@ -142,10 +161,10 @@ export const handleSignOut = async () => {
     if (error) {
       console.error("Supabase signout error:", error);
     }
+    // Stack.Protected will handle navigation based on auth state change
   } catch (error) {
     console.error("Error during sign out:", error);
-    // Even if there's an error, still navigate to login for safety
-    router.replace("/(auth)");
+    // Stack.Protected will handle navigation when auth state becomes false
   }
 };
 
@@ -155,9 +174,8 @@ export const handleSignOut = async () => {
  * Listens for auth events (sign in/out) and updates app state accordingly
  */
 export const setupAuthStateListener = (
-  setSession: (session: any) => void,
-  setUser: (user: any) => void,
-  setLoading: (loading: boolean) => void
+  setAuthState: (session: any, loginResponse: any) => void,
+  setLoading: (loading: boolean) => void,
 ) => {
   const {
     data: { subscription },
@@ -165,12 +183,11 @@ export const setupAuthStateListener = (
     console.log("Auth state changed:", event, !!session);
 
     if (event === "SIGNED_IN" && session) {
-      await handleSignIn(session, setSession, setUser, setLoading);
+      await handleSignIn(session, setAuthState, setLoading);
     } else if (event === "SIGNED_OUT") {
       // When Supabase triggers SIGNED_OUT, clear local state and navigate
       console.log("Supabase triggered SIGNED_OUT");
       handleAuthStateChange("SIGNED_OUT", null);
-      router.replace("/(auth)");
     } else if (event === "TOKEN_REFRESHED") {
       console.log("Token refreshed");
       handleAuthStateChange("TOKEN_REFRESHED", session);

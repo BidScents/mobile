@@ -11,18 +11,19 @@ import { Alert } from 'react-native'
 
 export class OAuthHandler {
   /**
-   * Handles successful authentication and navigation
+   * Handles successful authentication and user data fetching
+   * Navigation is handled automatically by Stack.Protected guards
    */
   private static async handleAuthSuccess(session: any): Promise<void> {
     try {
-      handleAuthStateChange('SIGNED_IN', session)
-      const loginResult = await AuthService.loginV1AuthLoginGet()
+      const { setAuthState } = (await import('@bid-scents/shared-sdk')).useAuthStore.getState()
       
-      if (loginResult.onboarded) {
-        router.replace('/(tabs)/home')
-      } else {
-        router.replace('/(auth)/onboarding')
-      }
+      // Configure API token before making API calls
+      handleAuthStateChange('SIGNED_IN', session)
+      
+      // Fetch user data and set complete auth state atomically
+      const loginResult = await AuthService.loginV1AuthLoginGet()
+      setAuthState(session, loginResult)
     } catch (error) {
       console.log('Auth success handling failed:', error)
       Alert.alert('Error', 'Something went wrong. Please try again.')
