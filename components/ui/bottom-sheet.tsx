@@ -1,6 +1,6 @@
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
-import { useTheme } from '@tamagui/core'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 import React, { forwardRef, useCallback, useMemo } from 'react'
 
 interface BottomSheetProps {
@@ -31,7 +31,7 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
     keyboardBlurBehavior = 'restore',
     enableDynamicSizing = true
   }, ref) => {
-    const theme = useTheme()
+    const colors = useThemeColors()
     const snapPointsMemo = useMemo(() => snapPoints, [snapPoints])
 
     const renderBackdrop = useCallback(
@@ -55,7 +55,7 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
         backdropComponent={renderBackdrop}
         backgroundStyle={[
           {
-            backgroundColor: theme.background.get(),
+            backgroundColor: colors.background,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
           },
@@ -63,14 +63,14 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
         ]}
         handleStyle={[
           {
-            backgroundColor: theme.background.get(),
+            backgroundColor: colors.background,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
           },
           handleStyle,
         ]}
         handleIndicatorStyle={{
-          backgroundColor: theme.mutedForeground.get(),
+          backgroundColor: colors.mutedForeground,
           width: 40,
           height: 4,
         }}

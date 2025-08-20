@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { handleSignOut } from "@/utils/auth-initialization";
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { Alert } from "react-native";
-import { ScrollView, Text, XStack, YStack, useTheme } from "tamagui";
+import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const SettingsSections = [
   {
@@ -56,7 +56,6 @@ const handlePress = (link: string) => {
 };
 
 export default function SettingsScreen() {
-  const theme = useTheme();
 
   const handleLogout = () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -103,19 +102,17 @@ export default function SettingsScreen() {
                       justifyContent="center"
                       gap="$2"
                     >
-                      <Ionicons
+                      <ThemedIonicons
                         name={item.icon as any}
                         size={20}
-                        color={theme.foreground?.get()}
                       />
                       <Text fontSize="$5" fontWeight="400">
                         {item.name}
                       </Text>
                     </XStack>
-                    <Ionicons
+                    <ThemedIonicons
                       name="chevron-forward"
                       size={20}
-                      color={theme.foreground?.get()}
                     />
                   </XStack>
                 ))}

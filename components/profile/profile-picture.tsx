@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image } from 'react-native';
-import { useTheme } from 'tamagui';
+import { useThemeColors } from '../../hooks/use-theme-colors';
 
 interface ProfilePictureProps {
   profilePicture?: string | null;
@@ -9,7 +9,7 @@ interface ProfilePictureProps {
 export const ProfilePicture: React.FC<ProfilePictureProps> = ({
   profilePicture,
 }) => {
-  const theme = useTheme();
+  const colors = useThemeColors();
 
   return (
     <Image
@@ -21,7 +21,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
         height: 120,
         borderRadius: 60,
         borderWidth: 4,
-        borderColor: theme.foreground?.get(),
+        borderColor: colors.foreground,
       }}
     />
   );

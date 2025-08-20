@@ -8,7 +8,8 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { Text, XStack, YStack, useTheme } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
+import { useThemeColors } from '../../../../hooks/use-theme-colors';
 
 const options = [
   { label: "System", value: "system" },
@@ -18,7 +19,7 @@ const options = [
 
 export default function ThemeScreen() {
   const { themePreference, setTheme } = useThemeSettings();
-  const theme = useTheme();
+  const colors = useThemeColors();
   const selectedIndex = useSharedValue(
     options.findIndex((opt) => opt.value === themePreference)
   );
@@ -96,7 +97,7 @@ export default function ThemeScreen() {
                 top: 4,
                 left: 4,
                 bottom: 4,
-                backgroundColor: theme.foreground.get(),
+                backgroundColor: colors.foreground,
                 borderRadius: 24,
                 width: segmentWidth,
               },

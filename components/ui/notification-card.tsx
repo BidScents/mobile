@@ -14,7 +14,8 @@ import {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Text, XStack, YStack, useTheme } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
+import { useThemeColors } from '../../hooks/use-theme-colors';
 
 const LISTING_RELATED_NOTIFICATION_TYPES = [
   NotificationType.LISTING_FAVORITED,
@@ -32,7 +33,7 @@ export default function NotificationCard({
 }: {
   notification: NotificationData;
 }) {
-  const theme = useTheme();
+  const colors = useThemeColors();
 
   const getImageContent = () => {
     const isListingRelated = LISTING_RELATED_NOTIFICATION_TYPES.includes(
@@ -63,7 +64,7 @@ export default function NotificationCard({
             width: 60,
             height: 60,
             borderRadius: 6,
-            backgroundColor: theme.muted?.get(),
+            backgroundColor: colors.muted,
           }}
           contentFit="cover"
         />

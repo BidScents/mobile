@@ -1,19 +1,19 @@
 import { BackButton } from "@/components/ui/back-button";
 import { Stack } from "expo-router";
-import { useTheme } from "tamagui";
+import { useThemeColors } from "../../../../hooks/use-theme-colors";
 
 export default function SettingsLayout() {
-  const theme = useTheme();
+  const colors = useThemeColors();
   return (
     <Stack
     screenOptions={{
       headerShown: true,
       headerShadowVisible: false,
       headerStyle: {
-        backgroundColor: theme.background.get(),
+        backgroundColor: colors.background,
       },
       headerTitleStyle: {
-        color: theme.foreground.get(),
+        color: colors.foreground,
       },
       headerLeft: () => <BackButton />,
     }}

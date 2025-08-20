@@ -1,6 +1,7 @@
 import React from 'react'
 import ContentLoader, { Circle, Rect } from 'react-content-loader/native'
-import { Card, useTheme } from 'tamagui'
+import { Card } from 'tamagui'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 
 interface ListingCardSkeletonProps {
   width?: number
@@ -15,10 +16,10 @@ export function ListingCardSkeleton({
   width = 170, 
   height = 240
 }: ListingCardSkeletonProps) {
-  const theme = useTheme()
+  const colors = useThemeColors()
   
-  const backgroundColor = theme.muted?.get() || '#f3f3f3'
-  const foregroundColor = theme.mutedHover?.get() || '#e8e8e8'
+  const backgroundColor = colors.muted || '#f3f3f3'
+  const foregroundColor = '#e8e8e8'
 
   return (
     <Card

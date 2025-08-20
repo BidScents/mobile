@@ -1,8 +1,8 @@
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import type { ButtonProps as TamaguiButtonProps } from "tamagui";
-import { Button as TamaguiButton, Text, useTheme } from "tamagui";
+import { Button as TamaguiButton, Text } from "tamagui";
+import { ThemedIonicons } from "./themed-icons";
 
 /**
  * Button variants for the BidScents marketplace
@@ -59,7 +59,6 @@ export const Button: React.FC<ButtonProps> = ({
   haptic = true,
   ...rest
 }) => {
-  const theme = useTheme();
   const handlePress = React.useCallback(async () => {
     if (!onPress || disabled) return;
     if (haptic) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -159,10 +158,9 @@ export const Button: React.FC<ButtonProps> = ({
       {...rest}
     >
       {leftIcon && (
-        <Ionicons
+        <ThemedIonicons
           name={leftIcon}
           size={iconSizes[size]}
-          color={theme.foreground.get()}
           pointerEvents="none"
         />
       )}
@@ -179,10 +177,9 @@ export const Button: React.FC<ButtonProps> = ({
       )}
 
       {rightIcon && (
-        <Ionicons
+        <ThemedIonicons
           name={rightIcon}
           size={iconSizes[size]}
-          color={theme.foreground.get()}
           pointerEvents="none"
         />
       )}

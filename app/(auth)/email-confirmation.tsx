@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
-import { Ionicons } from '@expo/vector-icons'
+import { ThemedIonicons } from '@/components/ui/themed-icons'
 import { router, useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { Text, YStack } from 'tamagui'
@@ -15,7 +15,7 @@ export default function EmailConfirmationScreen() {
   return (
     <Container backgroundColor="$background" safeArea={['top']} variant='padded'>
       <YStack flex={1} justifyContent="center" gap="$6" alignItems="center">
-          <Ionicons name="mail" size={64} color="$foreground" />
+          <ThemedIonicons name="mail" size={64} />
           
           <YStack gap="$2" alignItems="center">
             <Text color="$foreground" fontSize="$8" fontWeight="600" textAlign="center">

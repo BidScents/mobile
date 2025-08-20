@@ -2,11 +2,11 @@ import { queryKeys } from "@/hooks/queries/query-keys";
 import { useUnvoteListing, useVoteListing } from "@/hooks/queries/use-listing";
 import { useOptimisticMutation } from "@/hooks/use-optimistic-mutation";
 import type { ListingDetailsResponse } from "@bid-scents/shared-sdk";
-import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useState } from "react";
-import { Text, useTheme, View, XStack } from "tamagui";
+import { Text, View, XStack } from "tamagui";
+import { ThemedIonicons } from "../ui/themed-icons";
 
 /**
  * VoteButtons Component
@@ -22,7 +22,6 @@ export function VoteButtons({
   isUpvoted?: boolean | null;
   listingId: string;
 }) {
-  const theme = useTheme();
   const queryClient = useQueryClient();
   const voteListing = useVoteListing();
   const unvoteListing = useUnvoteListing();
@@ -137,7 +136,7 @@ export function VoteButtons({
     <XStack alignItems="center" justifyContent="center" gap="$2">
       <XStack alignItems="center" gap="$2">
         <View onPress={() => handleUpvote()} hitSlop={10}>
-          <Ionicons name={upvoteIcon} size={30} color={theme.foreground?.get()} />
+          <ThemedIonicons name={upvoteIcon} size={30} />
         </View>
         <Text fontSize="$5" fontWeight="500">
           {currentVotes}
@@ -147,10 +146,9 @@ export function VoteButtons({
           hitSlop={10}
           pressStyle={{ opacity: 0.6, scale: 0.95 }}
         >
-          <Ionicons
+          <ThemedIonicons
             name={downvoteIcon}
             size={30}
-            color={theme.foreground?.get()}
           />
         </View>
       </XStack>

@@ -1,10 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import { Keyboard } from "react-native";
-import { View, XStack, useTheme } from "tamagui";
+import { View, XStack } from "tamagui";
 import { useAddComment } from "../../hooks/queries/use-listing";
 import { Input } from "../ui/input";
+import { ThemedIonicons } from "../ui/themed-icons";
 
 interface AddCommentFormProps {
   listingId: string;
@@ -16,7 +16,6 @@ interface AddCommentFormProps {
  */
 export function AddCommentForm({ listingId }: AddCommentFormProps) {
   const [newComment, setNewComment] = useState("");
-  const theme = useTheme();
   const addComment = useAddComment();
 
   const handlePostComment = () => {
@@ -44,14 +43,10 @@ export function AddCommentForm({ listingId }: AddCommentFormProps) {
         pressStyle={{ opacity: 0.6, scale: 0.93 }}
         onPress={handlePostComment}
       >
-        <Ionicons
+        <ThemedIonicons
           name="send"
           size={30}
-          color={
-            !newComment.trim()
-              ? theme.mutedForeground?.get()
-              : theme.foreground?.get()
-          }
+          themeColor={!newComment.trim() ? "muted" : "foreground"}
         />
       </View>
     </XStack>

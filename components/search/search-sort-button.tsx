@@ -1,8 +1,8 @@
-import { Ionicons } from "@expo/vector-icons";
+import { ThemedIonicons } from "../ui/themed-icons";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import { Keyboard } from "react-native";
-import { Text, XStack, useTheme } from "tamagui";
+import { Text, XStack } from "tamagui";
 
 interface SearchSortButtonProps {
   currentSortLabel: string;
@@ -16,7 +16,6 @@ export const SearchSortButton: React.FC<SearchSortButtonProps> = ({
   currentSortLabel,
   onPress,
 }) => {
-  const theme = useTheme();
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -36,14 +35,13 @@ export const SearchSortButton: React.FC<SearchSortButtonProps> = ({
       pressStyle={{ backgroundColor: "$mutedPress" }}
       hitSlop={10}
     >
-      <Text fontSize="$4" fontWeight="500" color={theme.foreground.get()}>
+      <Text fontSize="$4" fontWeight="500" color="$foreground">
         {currentSortLabel}
       </Text>
-      <Ionicons
+      <ThemedIonicons
         name="chevron-down"
         size={16}
-        color={theme.foreground.get()}
-      />
+              />
     </XStack>
   );
 };

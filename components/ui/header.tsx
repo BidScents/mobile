@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import React from "react";
 import {
@@ -7,8 +6,10 @@ import {
   StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, View, useTheme } from "tamagui";
+import { Text, View } from "tamagui";
+import { useThemeColors } from "../../hooks/use-theme-colors";
 import { BlurBackButton } from "./blur-back-button";
+import { ThemedIonicons } from "./themed-icons";
 
 const AnimatedImageBackground =
   Animated.createAnimatedComponent(ImageBackground);
@@ -36,7 +37,7 @@ export default function Header({
   rightIcon?: keyof typeof Ionicons.glyphMap;
   rightIconPress?: () => void;
 }) {
-  const theme = useTheme();
+  const colors = useThemeColors();
   return (
     <>
       {/* Back button */}
@@ -67,7 +68,7 @@ export default function Header({
           }}
         >
           <BlurView
-            tint={theme.blurTint.get() as any}
+            tint={colors.blurTint as any}
             intensity={80}
             style={{
               flex: 1,
@@ -75,7 +76,7 @@ export default function Header({
               justifyContent: "center",
             }}
           >
-            <Ionicons name={rightIcon} color={theme.foreground.get()} size={20} />
+            <ThemedIonicons name={rightIcon}  size={20} />
           </BlurView>
         </View>
       )}
@@ -136,7 +137,7 @@ export default function Header({
         }}
       >
         <AnimatedBlurView
-          tint={theme.blurTint.get() as any}
+          tint={colors.blurTint as any}
           intensity={80}
           style={{
             ...StyleSheet.absoluteFillObject,

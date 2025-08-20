@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Ionicons } from "@expo/vector-icons";
+import { ThemedIonicons } from "./themed-icons";
 import * as ImagePicker from "expo-image-picker";
 import React from "react";
 import { Alert } from "react-native";
@@ -204,7 +204,7 @@ export function ProfilePreviewPicker({
                 justifyContent="center"
                 alignItems="center"
               >
-                <Ionicons
+                <ThemedIonicons
                   name="person"
                   size={AVATAR_SIZE * 0.4}
                   color="white"

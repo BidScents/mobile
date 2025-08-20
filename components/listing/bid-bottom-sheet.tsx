@@ -2,15 +2,15 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { currency } from "@/constants/constants";
 import { AuctionDetails, useAuthStore } from "@bid-scents/shared-sdk";
-import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { useTheme } from "@tamagui/core";
 import * as Haptics from "expo-haptics";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { Alert, StyleSheet } from "react-native";
 import { Text, View, XStack, YStack } from "tamagui";
 import { usePlaceBid } from "../../hooks/queries/use-listing";
+import { useThemeColors } from "../../hooks/use-theme-colors";
+import { ThemedIonicons } from "../ui/themed-icons";
 
 export interface BidBottomSheetMethods {
   present: () => void;
@@ -32,8 +32,9 @@ export const BidBottomSheet = forwardRef<
   BidBottomSheetMethods,
   BidBottomSheetProps
 >(({ listingId, auctionDetails, isCurrentUserHighestBidder = false, onBidPlaced }, ref) => {
-  const theme = useTheme();
+  const colors = useThemeColors();
   const [bidAmount, setBidAmount] = useState("");
+  
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
   const placeBidMutation = usePlaceBid();
   const { user, session } = useAuthStore();
@@ -51,6 +52,18 @@ export const BidBottomSheet = forwardRef<
   const minimumBid = currentBid + bidIncrement;
   const numericBidAmount = parseFloat(bidAmount) || 0;
   const isValidBid = bidAmount.trim().length > 0 && numericBidAmount >= minimumBid && !isCurrentUserHighestBidder;
+  
+  const bidInputStyles = [
+    styles.bidInput,
+    {
+      backgroundColor: colors.muted,
+      color: colors.foreground,
+      borderColor:
+        bidAmount && !isValidBid
+          ? colors.error
+          : "transparent",
+    },
+  ];
   const isLoading = placeBidMutation.isPending;
 
   useImperativeHandle(ref, () => ({
@@ -162,25 +175,14 @@ export const BidBottomSheet = forwardRef<
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Ionicons
+                  <ThemedIonicons
                     name="remove-outline"
                     size={24}
-                    color={theme.foreground.get()}
                   />
                 </View>
 
                 <BottomSheetTextInput
-                  style={[
-                    styles.bidInput,
-                    {
-                      backgroundColor: theme.muted?.get(),
-                      color: theme.foreground?.get(),
-                      borderColor:
-                        bidAmount && !isValidBid
-                          ? theme.error?.get()
-                          : "transparent",
-                    },
-                  ]}
+                  style={bidInputStyles}
                   placeholder={`${currency} 0`}
                   value={bidAmount ? `${currency} ${bidAmount}` : ""}
                   onChangeText={(text) => setBidAmount(text.replace(currency, "").trim())}
@@ -198,10 +200,9 @@ export const BidBottomSheet = forwardRef<
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Ionicons
+                  <ThemedIonicons
                     name="add-outline"
                     size={24}
-                    color={theme.foreground.get()}
                   />
                 </View>
               </XStack>

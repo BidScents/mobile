@@ -2,7 +2,8 @@ import { Container } from '@/components/ui/container'
 import React from 'react'
 import ContentLoader, { Circle, Rect } from 'react-content-loader/native'
 import { Dimensions } from 'react-native'
-import { View, YStack, useTheme } from 'tamagui'
+import { View, YStack } from 'tamagui'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 
 interface ListingDetailSkeletonProps {
   width?: number
@@ -14,12 +15,12 @@ interface ListingDetailSkeletonProps {
  * seller info, listing details, description, and action buttons
  */
 export function ListingDetailSkeleton({ width = Dimensions.get('window').width }: ListingDetailSkeletonProps) {
-  const theme = useTheme()
+  const colors = useThemeColors()
   const height = Dimensions.get('window').height * 0.55
   
   // Use theme colors for skeleton loading
-  const backgroundColor = theme.muted?.get() || '#e8e8e8'
-  const foregroundColor = theme.mutedHover?.get() || '#d0d0d0'
+  const backgroundColor = colors.muted || '#e8e8e8'
+  const foregroundColor = '#d0d0d0'
 
   return (
     <Container

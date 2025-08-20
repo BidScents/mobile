@@ -1,5 +1,5 @@
 import { ListingDetails } from "@bid-scents/shared-sdk";
-import { Text, XStack, YStack, useTheme } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 import { formatAllCapsText } from "../../utils/utility-functions";
 
 export function ListingDetailsSection({
@@ -7,7 +7,6 @@ export function ListingDetailsSection({
 }: {
   listing: ListingDetails;
 }) {
-  const theme = useTheme();
   const listingDetails = [
     {
       title: "Category",
@@ -56,7 +55,7 @@ export function ListingDetailsSection({
             <Text fontSize="$5" fontWeight="400">
               {detail.value}
             </Text>
-            {/* <Ionicons name="chevron-forward" size={20} color={theme.foreground?.get()} /> */}
+            {/* <Ionicons name="chevron-forward" size={20} color={theme.foreground?.val} /> */}
           </XStack>
         </XStack>
       ))}

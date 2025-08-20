@@ -1,8 +1,9 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
+import { createEmptyFilters, getActiveFiltersCount } from "@/utils/search.utils";
 import { FilterParameter, ListingBoxCondition, ListingCategory, ListingType } from "@bid-scents/shared-sdk";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { useTheme } from "@tamagui/core";
+import { useThemeColors } from '../../hooks/use-theme-colors';
 import * as Haptics from "expo-haptics";
 import React, { forwardRef, useImperativeHandle } from "react";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
@@ -10,7 +11,6 @@ import { BOX_CONDITION_LABELS, CATEGORY_LABELS, LISTING_TYPE_LABELS } from "./co
 import { MultiSelectChip } from "./multi-select-chip";
 import { PriceRangeInput } from "./price-range-input";
 import { useFilterState } from "./use-filter-state";
-import { createEmptyFilters, getActiveFiltersCount } from "@/utils/search.utils";
 
 export interface SearchFilterBottomSheetMethods {
   present: () => void;
@@ -28,7 +28,7 @@ export const SearchFilterBottomSheet = forwardRef<
   SearchFilterBottomSheetMethods,
   SearchFilterBottomSheetProps
 >(({ filters, onFiltersChange }, ref) => {
-  const theme = useTheme();
+  const colors = useThemeColors();
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
   
   const {
@@ -68,7 +68,7 @@ export const SearchFilterBottomSheet = forwardRef<
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      backgroundStyle={{ backgroundColor: theme.background?.get() }}
+      backgroundStyle={{ backgroundColor: colors.background }}
       snapPoints={['83%']}
       enableDynamicSizing
     >

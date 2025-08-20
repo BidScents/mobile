@@ -7,7 +7,8 @@ import Carousel, {
   Pagination,
 } from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme, View } from "tamagui";
+import { View } from "tamagui";
+import { useThemeColors } from '../../hooks/use-theme-colors';
 
 export function ImageCarousel({
   imageUrls,
@@ -24,7 +25,7 @@ export function ImageCarousel({
   favoritesCount: number;
   hidePagination?: boolean;
 }) {
-  const theme = useTheme();
+  const colors = useThemeColors();
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
   const insets = useSafeAreaInsets();
@@ -64,11 +65,11 @@ export function ImageCarousel({
           progress={progress}
           data={imageUrls || []}
           dotStyle={{
-            backgroundColor: theme.mutedForeground.get(),
+            backgroundColor: colors.mutedForeground,
             borderRadius: 5,
           }}
           activeDotStyle={{
-            backgroundColor: theme.background?.get(),
+            backgroundColor: colors.background,
             overflow: "hidden",
             borderRadius: 5,
           }}

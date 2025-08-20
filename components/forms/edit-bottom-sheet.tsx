@@ -1,8 +1,6 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { useTheme } from "@tamagui/core";
 import * as Haptics from "expo-haptics";
 import React, {
   forwardRef,
@@ -12,7 +10,9 @@ import React, {
 } from "react";
 import { Keyboard, Pressable, StyleSheet } from "react-native";
 import { Text, View, XStack, YStack } from "tamagui";
+import { useThemeColors } from "../../hooks/use-theme-colors";
 import { Button } from "../ui/button";
+import { ThemedIonicons } from "../ui/themed-icons";
 
 export interface EditBottomSheetMethods {
   present: () => void;
@@ -58,8 +58,17 @@ export const EditBottomSheet = forwardRef<
     },
     ref
   ) => {
-    const theme = useTheme();
+    const colors = useThemeColors();
     const [isEditing, setIsEditing] = useState(false);
+    
+    const textInputStyles = [
+      styles.textInput,
+      {
+        backgroundColor: colors.muted,
+        color: colors.foreground,
+        borderColor: colors.border,
+      },
+    ];
     const [editText, setEditText] = useState(initialText);
     const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
 
@@ -131,10 +140,9 @@ export const EditBottomSheet = forwardRef<
                 </Text>
                 {isEditing && (
                   <Pressable onPress={handleBackToOptions}>
-                    <Ionicons
+                    <ThemedIonicons
                       name="close"
                       size={24}
-                      color={theme.foreground?.get()}
                     />
                   </Pressable>
                 )}
@@ -154,16 +162,9 @@ export const EditBottomSheet = forwardRef<
               <YStack gap="$4" flex={1}>
                 <View flex={1}>
                   <BottomSheetTextInput
-                    style={[
-                      styles.textInput,
-                      {
-                        backgroundColor: theme.muted?.get(),
-                        color: theme.foreground?.get(),
-                        borderColor: theme.border?.get(),
-                      },
-                    ]}
+                    style={textInputStyles}
                     placeholder={placeholder}
-                    placeholderTextColor={theme.mutedForeground?.get()}
+                    placeholderTextColor={colors.placeholder}
                     value={editText}
                     onChangeText={setEditText}
                     multiline={true}
@@ -196,10 +197,11 @@ export const EditBottomSheet = forwardRef<
                       <Text color="$background" fontWeight="600">
                         Send
                       </Text>
-                      <Ionicons
+                      <ThemedIonicons
                         name="send"
                         size={16}
-                        color={theme.background?.get()}
+                        themeColor="foreground"
+                        style={{ color: colors.background }}
                       />
                     </XStack>
                   </Button>
@@ -228,10 +230,11 @@ export const EditBottomSheet = forwardRef<
                       borderRadius="$12"
                       padding="$2"
                     >
-                      <Ionicons
+                      <ThemedIonicons
                         name="pencil"
                         size={20}
-                        color={theme.background?.get()}
+                        themeColor="foreground"
+                        style={{ color: colors.background }}
                       />
                     </View>
                     <YStack flex={1}>
@@ -242,10 +245,10 @@ export const EditBottomSheet = forwardRef<
                         Make changes to your comment
                       </Text>
                     </YStack>
-                    <Ionicons
+                    <ThemedIonicons
                       name="chevron-forward"
                       size={20}
-                      color={theme.mutedForeground?.get()}
+                      themeColor="muted"
                     />
                   </XStack>
                 </Pressable>
@@ -271,10 +274,11 @@ export const EditBottomSheet = forwardRef<
                         borderRadius="$12"
                         padding="$2"
                       >
-                        <Ionicons
+                        <ThemedIonicons
                           name="trash"
                           size={20}
-                          color={theme.background?.get()}
+                          themeColor="foreground"
+                          style={{ color: colors.background }}
                         />
                       </View>
                       <YStack flex={1}>
@@ -289,10 +293,10 @@ export const EditBottomSheet = forwardRef<
                           Remove this comment permanently
                         </Text>
                       </YStack>
-                      <Ionicons
+                      <ThemedIonicons
                         name="chevron-forward"
                         size={20}
-                        color={theme.mutedForeground?.get()}
+                        themeColor="muted"
                       />
                     </XStack>
                   </Pressable>

@@ -1,10 +1,9 @@
-import { Ionicons } from '@expo/vector-icons'
-import { useTheme } from '@tamagui/core'
 import * as Haptics from 'expo-haptics'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Text, XStack } from 'tamagui'
 import { useFavoriteListing, useUnfavoriteListing } from '../../hooks/queries/use-listing'
 import { useIsFavorited } from '../../hooks/use-favorite'
+import { ThemedIonicons } from '../ui/themed-icons'
 
 interface FavoriteButtonProps {
   listingId: string
@@ -23,8 +22,6 @@ export function FavoriteButton({
   size = 'medium',
   debounceMs = 500
 }: FavoriteButtonProps) {
-  const theme = useTheme()
-  
   // Only check if favorited - no detailed data needed
   const { isFavorited: serverIsFavorited, isLoading: favoritesLoading } = useIsFavorited(listingId)
   
@@ -105,7 +102,6 @@ export function FavoriteButton({
     large: '$4'
   }[size]
 
-  const heartColor = isFavorited ? 'red' : (theme.foreground?.get() || '#000')
   const isDisabled = favoritesLoading
 
   // Show just icon if count is 0
@@ -121,10 +117,10 @@ export function FavoriteButton({
         paddingHorizontal="$2"
         paddingVertical="$1"
       >
-        <Ionicons 
+        <ThemedIonicons 
           name={isFavorited ? "heart" : "heart-outline"}
           size={iconSize} 
-          color={heartColor}
+          themeColor={isFavorited ? "red" : "foreground"}
         />
       </Button>
     )
@@ -144,10 +140,10 @@ export function FavoriteButton({
       alignItems="center"
     >
       <XStack alignItems="center" gap="$1">
-        <Ionicons 
+        <ThemedIonicons 
           name={isFavorited ? "heart" : "heart-outline"}
           size={iconSize} 
-          color={heartColor}
+          themeColor={isFavorited ? "red" : "foreground"}
         />
         <Text 
           fontSize={textSize} 

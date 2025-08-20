@@ -1,11 +1,12 @@
 import { useLoadingStore } from '@bid-scents/shared-sdk'
 import React from 'react'
 import { Modal } from 'react-native'
-import { Spinner, View, useTheme } from 'tamagui'
+import { Spinner, View } from 'tamagui'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 
 export const LoadingOverlay: React.FC = () => {
   const { isLoading } = useLoadingStore()
-  const theme = useTheme()
+  const colors = useThemeColors()
 
   return (
     <Modal visible={isLoading} transparent animationType="fade">
@@ -24,7 +25,7 @@ export const LoadingOverlay: React.FC = () => {
         >
           <Spinner 
             size="large" 
-            color={theme.foreground.get()} 
+            color={colors.foreground} 
           />
         </View>
       </View>

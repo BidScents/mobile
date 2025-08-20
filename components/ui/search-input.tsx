@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRef } from 'react';
 import { Pressable, TextInput } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
-import { Input, Text, XStack, useTheme } from 'tamagui';
+import { Input, Text, XStack } from 'tamagui';
+import { ThemedIonicons } from './themed-icons';
 
 interface SearchInputProps {
   placeholder: string;
@@ -41,7 +41,6 @@ export function SearchInput({
   height,
 }: SearchInputProps) {
   const inputRef = useRef<TextInput>(null);
-  const theme = useTheme();
 
   const searchBarAnimatedStyle = useAnimatedStyle(() => ({
     flex: searchBarFlex.value,
@@ -81,10 +80,9 @@ export function SearchInput({
           height={height}
         >
           <Pressable onPress={onSearchIconPress}>
-            <Ionicons 
+            <ThemedIonicons 
               name="search" 
               size={20} 
-              color={theme.foreground.get()} 
             />
           </Pressable>
           <Input

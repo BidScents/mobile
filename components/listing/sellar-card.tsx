@@ -1,12 +1,11 @@
 import { UserPreview } from "@bid-scents/shared-sdk";
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { Text, XStack, YStack, useTheme } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 import { AvatarIcon } from "../ui/avatar-icon";
+import { ThemedIonicons } from "../ui/themed-icons";
 
 export function SellerCard({ seller }: { seller: UserPreview }) {
-  const theme = useTheme();
 
   const handlePress = (link: string) => {
     router.push(link as any);
@@ -42,7 +41,7 @@ export function SellerCard({ seller }: { seller: UserPreview }) {
         bg="$muted"
         borderRadius="$5"
       >
-        <Ionicons name="bag-outline" size={20} color={theme.foreground?.get()} />
+        <ThemedIonicons name="bag-outline" size={20} />
         <Text fontSize="$4" fontWeight="400">
           View Store
         </Text>

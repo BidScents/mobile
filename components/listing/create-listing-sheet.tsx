@@ -1,7 +1,7 @@
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
-import { useTheme } from '@tamagui/core'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 import React, { forwardRef, useImperativeHandle } from 'react'
 import { Text, YStack } from 'tamagui'
 
@@ -12,7 +12,7 @@ interface CreateListingSheetMethods extends BottomSheetModalMethods {
 
 export const CreateListingSheet = forwardRef<CreateListingSheetMethods>((props, ref) => {
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null)
-  const theme = useTheme()
+  const colors = useThemeColors()
 
   useImperativeHandle(ref, () => ({
     present: () => bottomSheetRef.current?.present(),
@@ -29,7 +29,7 @@ export const CreateListingSheet = forwardRef<CreateListingSheetMethods>((props, 
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={['90%', '50%']}
-      backgroundStyle={{ backgroundColor: theme.background?.get() }}
+      backgroundStyle={{ backgroundColor: colors.background }}
     >
       <YStack gap="$5" padding="$4" paddingBottom="$8">
         {/* Header */}

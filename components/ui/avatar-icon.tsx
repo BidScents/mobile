@@ -1,5 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Avatar, useTheme } from "tamagui";
+import { ThemedIonicons } from "./themed-icons";
+import { Avatar } from "tamagui";
+import { useThemeColors } from '../../hooks/use-theme-colors';
 
 export function AvatarIcon({
   url,
@@ -10,7 +11,7 @@ export function AvatarIcon({
   size: string;
   onClick?: () => void;
 }) {
-  const theme = useTheme();
+  const colors = useThemeColors();
   return (
     <Avatar circular size={size} onPress={onClick}>
       {url && url.trim() !== "" ? (
@@ -26,7 +27,7 @@ export function AvatarIcon({
         justifyContent="center"
         alignItems="center"
       >
-        <Ionicons name="person" size={22} color={theme.background?.get()} />
+        <ThemedIonicons name="person" size={22} color={colors.background} />
       </Avatar.Fallback>
     </Avatar>
   );

@@ -1,7 +1,7 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { Ionicons } from "@expo/vector-icons";
+import { ThemedIonicons } from "../ui/themed-icons";
+import { useThemeColors } from '../../hooks/use-theme-colors';
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { useTheme } from "@tamagui/core";
 import * as Haptics from "expo-haptics";
 import React, { forwardRef, useImperativeHandle } from "react";
 import { Pressable } from "react-native";
@@ -37,7 +37,7 @@ export const SelectBottomSheet = forwardRef<
     },
     ref
   ) => {
-    const theme = useTheme();
+    const colors = useThemeColors();
     const [selectedValue, setSelectedValue] = React.useState<string | null>(
       null
     );
@@ -65,7 +65,7 @@ export const SelectBottomSheet = forwardRef<
       <BottomSheet
         ref={bottomSheetRef}
         snapPoints={["50%", "80%"]}
-        backgroundStyle={{ backgroundColor: theme.background.get() || "white" }}
+        backgroundStyle={{ backgroundColor: colors.background || "white" }}
       >
         <YStack gap="$2" padding="$4" flex={1}>
           {/* Header */}
@@ -112,15 +112,14 @@ export const SelectBottomSheet = forwardRef<
                   >
                     {option.label}
                   </Text>
-                  <Ionicons
+                  <ThemedIonicons
                     name={
                       option.value === selectedValue
                         ? "radio-button-on"
                         : "radio-button-off"
                     }
                     size={24}
-                    color={theme.foreground.get()}
-                  />
+                                      />
                 </XStack>
               </Pressable>
             ))}

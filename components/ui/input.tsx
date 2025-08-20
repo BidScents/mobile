@@ -1,6 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { useTheme } from "@tamagui/core";
 import React, { useCallback, useRef, useState } from "react";
 import type { KeyboardTypeOptions } from "react-native";
 import { Keyboard } from "react-native";
@@ -15,6 +13,7 @@ import {
 } from "tamagui";
 import { DateTimeBottomSheet } from "../forms/date-time-bottom-sheet";
 import { SelectBottomSheet } from "../forms/select-bottom-sheet";
+import { ThemedIonicons } from "./themed-icons";
 
 /**
  * Input variant types
@@ -94,7 +93,6 @@ export const Input: React.FC<InputProps> = ({
   switchChecked,
   onSwitchChange,
 }) => {
-  const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
 
   const selectBottomSheetRef = useRef<BottomSheetModalMethods>(null);
@@ -322,10 +320,10 @@ export const Input: React.FC<InputProps> = ({
             backgroundColor="transparent"
             borderRadius="$6"
           />
-          <Ionicons
+          <ThemedIonicons
             name={showPassword ? "eye-off" : "eye"}
             size={20}
-            color={theme.mutedForeground?.get() || "#666"}
+            themeColor="muted"
             onPress={togglePasswordVisibility}
             style={{ cursor: "pointer" }}
           />
@@ -360,10 +358,10 @@ export const Input: React.FC<InputProps> = ({
           >
             {isDate ? getDateTimeDisplayText() : getDisplayText()}
           </Text>
-          <Ionicons
+          <ThemedIonicons
             name="chevron-down"
             size={20}
-            color={theme.mutedForeground?.get() || "#666"}
+            themeColor="muted"
             style={{
               cursor: disabled ? "not-allowed" : "pointer",
               opacity: disabled ? 0.6 : 1,

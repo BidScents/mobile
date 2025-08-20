@@ -1,6 +1,6 @@
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
-import { useTheme } from '@tamagui/core'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 import * as Haptics from 'expo-haptics'
 import React, { forwardRef, useImperativeHandle } from 'react'
 import { Text, XStack, YStack } from 'tamagui'
@@ -21,7 +21,7 @@ interface QuickActionBottomSheetProps {
 
 export const QuickActionBottomSheet = forwardRef<QuickActionBottomSheetMethods, QuickActionBottomSheetProps>(
   ({ primaryOption = "", secondaryOption = "", onSelectPrimary, onSelectSecondary, title = "Select Option", subtitle = "Choose from the available options below" }, ref) => {
-    const theme = useTheme()
+    const colors = useThemeColors()
     const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null)
 
     useImperativeHandle(ref, () => ({
@@ -45,7 +45,7 @@ export const QuickActionBottomSheet = forwardRef<QuickActionBottomSheetMethods, 
       <BottomSheet
         ref={bottomSheetRef}
         snapPoints={['50%']}
-        backgroundStyle={{ backgroundColor: theme.background?.get() || 'white' }}
+        backgroundStyle={{ backgroundColor: colors.background || 'white' }}
       >
         <YStack gap="$4" padding="$4" paddingBottom="$8" flex={1}>
           {/* Header */}

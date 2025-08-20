@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { Ionicons } from '@expo/vector-icons';
+import { ThemedIonicons } from '../ui/themed-icons';
 import React from 'react';
-import { Text, View, useTheme } from 'tamagui';
+import { Text, View } from 'tamagui';
+import { useThemeColors } from '../../hooks/use-theme-colors';
 
 const SEARCH_SUGGESTIONS = ['Tom Ford', 'Creed', 'Aventus', 'Oud Wood'];
 
@@ -20,7 +21,7 @@ export function SearchEmptyState({
   onRetry,
   onClearFilters
 }: SearchEmptyStateProps) {
-  const theme = useTheme();
+  const colors = useThemeColors();
 
   const getIcon = () => {
     switch (type) {
@@ -38,9 +39,9 @@ export function SearchEmptyState({
   const getIconColor = () => {
     switch (type) {
       case 'error':
-        return theme.red10?.get() || '#ef4444';
+        return '#ef4444';
       default:
-        return theme.mutedForeground?.get() || '#6b7280';
+        return colors.mutedForeground || '#6b7280';
     }
   };
 
@@ -61,7 +62,7 @@ export function SearchEmptyState({
         borderRadius={40}
         backgroundColor="$muted"
       >
-        <Ionicons 
+        <ThemedIonicons 
           name={getIcon()} 
           size={40} 
           color={getIconColor()} 

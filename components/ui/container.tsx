@@ -1,6 +1,7 @@
 import React from 'react'
 import { Edge, SafeAreaView } from 'react-native-safe-area-context'
-import { View, ViewProps, useTheme } from 'tamagui'
+import { View, ViewProps } from 'tamagui'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 
 interface ContainerProps extends ViewProps {
   children: React.ReactNode
@@ -23,7 +24,7 @@ export const Container: React.FC<ContainerProps> = ({
   backgroundColor = '$background',
   ...props
 }) => {
-  const theme = useTheme()
+  const colors = useThemeColors()
 
   // Convert safeArea prop to edges array
   const getEdges = (): Edge[] => {
@@ -63,7 +64,7 @@ export const Container: React.FC<ContainerProps> = ({
 
   return (
     <SafeAreaView 
-      style={{ flex: 1, backgroundColor: theme.background.get() }} 
+      style={{ flex: 1, backgroundColor: colors.background }} 
       edges={getEdges()}
     >
       <View

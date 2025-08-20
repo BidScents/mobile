@@ -1,10 +1,10 @@
 import { AvatarIcon } from "@/components/ui/avatar-icon";
 import { Container } from "@/components/ui/container";
+import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useAuthStore } from "@bid-scents/shared-sdk";
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { ScrollView, Text, XStack, YStack, useTheme } from "tamagui";
+import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const SettingsSections = [
   {
@@ -66,7 +66,6 @@ const handlePress = (link: string) => {
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
-  const theme = useTheme();
   return (
     <Container variant="padded" safeArea={false} backgroundColor="$background">
       <ScrollView
@@ -97,10 +96,9 @@ export default function ProfileScreen() {
               </Text>
             </YStack>
           </XStack>
-          <Ionicons
+          <ThemedIonicons
             name="chevron-forward"
             size={20}
-            color={theme.foreground?.get()}
           />
         </XStack>
 
@@ -130,19 +128,17 @@ export default function ProfileScreen() {
                       justifyContent="center"
                       gap="$2"
                     >
-                      <Ionicons
+                      <ThemedIonicons
                         name={item.icon as any}
                         size={20}
-                        color={theme.foreground?.get()}
                       />
                       <Text fontSize="$5" fontWeight="400">
                         {item.name}
                       </Text>
                     </XStack>
-                    <Ionicons
+                    <ThemedIonicons
                       name="chevron-forward"
                       size={20}
-                      color={theme.foreground?.get()}
                     />
                   </XStack>
                 ))}

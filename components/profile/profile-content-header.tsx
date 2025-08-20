@@ -1,6 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
+import { ThemedIonicons } from '../ui/themed-icons';
 import React from 'react';
-import { Text, XStack, useTheme } from 'tamagui';
+import { Text, XStack } from 'tamagui';
+import { useThemeColors } from '../../hooks/use-theme-colors';
 import type { ContentType } from '../../types/profile-content-tab.types';
 
 interface ProfileContentHeaderProps {
@@ -18,7 +19,7 @@ export const ProfileContentHeader = React.memo(function ProfileContentHeader({
   onSortPress,
   showSort
 }: ProfileContentHeaderProps) {
-  const theme = useTheme();
+  const colors = useThemeColors();
   
   const getHeaderText = () => {
     if (contentType === 'reviews') {
@@ -50,7 +51,7 @@ export const ProfileContentHeader = React.memo(function ProfileContentHeader({
           <Text fontSize="$4" fontWeight="500" color="$mutedForeground">
             {currentSortLabel}
           </Text>
-          <Ionicons name="chevron-down" size={16} color={theme.mutedForeground?.get()} />
+          <ThemedIonicons name="chevron-down" size={16} color={colors.mutedForeground} />
         </XStack>
       )}
     </XStack>

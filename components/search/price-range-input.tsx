@@ -1,8 +1,8 @@
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { useTheme } from "@tamagui/core";
 import React from "react";
 import { StyleSheet } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
+import { useThemeColors } from "../../hooks/use-theme-colors";
 
 export interface PriceRangeInputProps {
   minValue: number | null;
@@ -19,7 +19,16 @@ export const PriceRangeInput: React.FC<PriceRangeInputProps> = ({
   onMaxChange,
   placeholder = "Price",
 }) => {
-  const theme = useTheme();
+  const colors = useThemeColors();
+  
+  const inputStyles = [
+    styles.textInput,
+    {
+      backgroundColor: colors.muted,
+      color: colors.foreground,
+      borderColor: colors.border,
+    },
+  ];
   
   const handleMinChange = (text: string) => {
     if (text === "") {
@@ -46,16 +55,9 @@ export const PriceRangeInput: React.FC<PriceRangeInputProps> = ({
           Min {placeholder}
         </Text>
         <BottomSheetTextInput
-          style={[
-            styles.textInput,
-            {
-              backgroundColor: theme.muted?.get(),
-              color: theme.foreground?.get(),
-              borderColor: theme.border?.get(),
-            },
-          ]}
+          style={inputStyles}
           placeholder="0"
-          placeholderTextColor={theme.mutedForeground?.get()}
+          placeholderTextColor={colors.placeholder}
           value={minValue?.toString() || ""}
           onChangeText={handleMinChange}
           keyboardType="numeric"
@@ -67,16 +69,9 @@ export const PriceRangeInput: React.FC<PriceRangeInputProps> = ({
           Max {placeholder}
         </Text>
         <BottomSheetTextInput
-          style={[
-            styles.textInput,
-            {
-              backgroundColor: theme.muted?.get(),
-              color: theme.foreground?.get(),
-              borderColor: theme.border?.get(),
-            },
-          ]}
+          style={inputStyles}
           placeholder="Any"
-          placeholderTextColor={theme.mutedForeground?.get()}
+          placeholderTextColor={colors.placeholder}
           value={maxValue?.toString() || ""}
           onChangeText={handleMaxChange}
           keyboardType="numeric"

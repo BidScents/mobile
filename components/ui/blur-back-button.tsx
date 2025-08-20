@@ -1,10 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
+import { ThemedIonicons } from "./themed-icons";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme, View } from "tamagui";
+import { View } from "tamagui";
+import { useThemeColors } from '../../hooks/use-theme-colors';
 
 interface BlurBackButtonProps {
   /** Size of the button (diameter) */
@@ -30,7 +31,7 @@ export function BlurBackButton({
   zIndex = 2,
 }: BlurBackButtonProps = {}) {
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
+  const colors = useThemeColors();
   
   // Calculate icon size based on button size if not provided
   const calculatedIconSize = iconSize ?? Math.round(size * 0.68);
@@ -68,7 +69,7 @@ export function BlurBackButton({
       }}
     >
       <BlurView
-        tint={theme.blurTint.get() as any}
+        tint={colors.blurTint as any}
         intensity={80}
         style={{
           flex: 1,
@@ -76,10 +77,9 @@ export function BlurBackButton({
           justifyContent: "center",
         }}
       >
-        <Ionicons
+        <ThemedIonicons
           name="chevron-back"
-          color={theme.foreground.get()}
-          size={calculatedIconSize}
+                    size={calculatedIconSize}
         />
       </BlurView>
     </View>

@@ -1,8 +1,8 @@
-import { Ionicons } from "@expo/vector-icons";
+import { ThemedIonicons } from "../ui/themed-icons";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import { Keyboard } from "react-native";
-import { Text, XStack, useTheme } from "tamagui";
+import { Text, XStack } from "tamagui";
 
 interface SearchFilterButtonProps {
   activeFiltersCount: number;
@@ -16,7 +16,6 @@ export const SearchFilterButton: React.FC<SearchFilterButtonProps> = ({
   activeFiltersCount,
   onPress,
 }) => {
-  const theme = useTheme();
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -36,8 +35,8 @@ export const SearchFilterButton: React.FC<SearchFilterButtonProps> = ({
       pressStyle={{ backgroundColor: "$mutedPress" }}
       hitSlop={10}
     >
-      <Ionicons name="filter" size={16} color={theme.foreground.get()} />
-      <Text fontSize="$4" fontWeight="500" color={theme.foreground.get()}>
+      <ThemedIonicons name="filter" size={16}  />
+      <Text fontSize="$4" fontWeight="500" >
         Filter {activeFiltersCount > 0 && `(${activeFiltersCount})`}
       </Text>
     </XStack>

@@ -1,7 +1,7 @@
 import { SearchBar } from "@/components/ui/search-bar";
-import { Ionicons } from "@expo/vector-icons";
+import { ThemedIonicons } from "../ui/themed-icons";
 import React from "react";
-import { XStack, YStack, useTheme } from "tamagui";
+import { XStack, YStack } from "tamagui";
 import { SearchFilterButton } from "./search-filter-button";
 import { SearchResultsCount } from "./search-results-count";
 import { SearchSortButton } from "./search-sort-button";
@@ -47,17 +47,16 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
   currentSortLabel,
   onSortPress,
 }) => {
-  const theme = useTheme();
 
   return (
     <YStack gap="$3" paddingBottom="$2">
       {/* Header with Back Button and SearchBar */}
       <XStack alignItems="center" gap="$2">
         <XStack onPress={onBackPress} hitSlop={20}>
-          <Ionicons 
+          <ThemedIonicons 
             name="chevron-back" 
             size={24} 
-            color={theme.foreground.get()} 
+             
           />
         </XStack>
         <SearchBar

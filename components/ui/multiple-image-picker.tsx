@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { ThemedIonicons } from "./themed-icons";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import React from "react";
@@ -8,7 +8,8 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { Image, Text, XStack, YStack, useTheme } from "tamagui";
+import { Image, Text, XStack, YStack } from "tamagui";
+import { useThemeColors } from '../../hooks/use-theme-colors';
 
 interface MultipleImagePickerProps {
   imageUris: string[];
@@ -25,7 +26,7 @@ export function MultipleImagePicker({
   maxImages = 10,
   label = "Photos",
 }: MultipleImagePickerProps) {
-  const theme = useTheme();
+  const colors = useThemeColors();
   const screenWidth = Dimensions.get("window").width;
   const padding = 32;
   const gap = 12;
@@ -177,7 +178,7 @@ export function MultipleImagePicker({
               backgroundColor="$background"
               opacity={disabled ? 0.5 : 1}
             >
-              <Ionicons name="add" size={32} color={theme.$foreground?.get()} />
+              <ThemedIonicons name="add" size={32} color={colors.foreground} />
               <Text
                 color="$mutedForeground"
                 fontSize="$2"
@@ -234,7 +235,7 @@ export function MultipleImagePicker({
                         position: "absolute",
                         top: 8,
                         right: 8,
-                        backgroundColor: theme.background.get(),
+                        backgroundColor: colors.background,
                         borderRadius: 12,
                         width: 24,
                         height: 24,
@@ -243,7 +244,7 @@ export function MultipleImagePicker({
                       }}
                       onPress={() => removeImage(index)}
                     >
-                      <Ionicons name="close" size={16} color={theme.$foreground?.get()} />
+                      <ThemedIonicons name="close" size={16} color={colors.foreground} />
                     </TouchableOpacity>
                   </YStack>
 
@@ -260,7 +261,7 @@ export function MultipleImagePicker({
                         borderRadius="$2"
                         padding="$1"
                       >
-                        <Ionicons name="chevron-back" size={20} color={theme.$foreground?.get()} />
+                        <ThemedIonicons name="chevron-back" size={20} color={colors.foreground} />
                       </YStack>
                     </TouchableOpacity>
 
@@ -278,10 +279,10 @@ export function MultipleImagePicker({
                         borderRadius="$2"
                         padding="$1"
                       >
-                        <Ionicons
+                        <ThemedIonicons
                           name="chevron-forward"
                           size={20}
-                          color={theme.$foreground?.get()}
+                          color={colors.foreground}
                         />
                       </YStack>
                     </TouchableOpacity>
@@ -306,7 +307,7 @@ export function MultipleImagePicker({
                   opacity={disabled ? 0.5 : 1}
                   gap="$1"
                 >
-                  <Ionicons name="add" size={32} color="#999" />
+                  <ThemedIonicons name="add" size={32} color="#999" />
                   <Text
                     color="$mutedForeground"
                     fontSize="$2"
