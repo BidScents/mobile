@@ -41,7 +41,8 @@ const ANDROID_FONTS = {
 export default function RootLayout() {
   const [isAppReady, setIsAppReady] = useState(false);
   const colorScheme = useColorScheme();
-  
+  const { isAuthenticated, isOnboarded } = useAuthStore();
+
   // Initialize theme settings on app startup to load saved preferences
   useThemeSettings();
 
@@ -64,7 +65,7 @@ export default function RootLayout() {
       if (!fontsLoaded) return;
 
       try {
-        const { setLoading, setError, setUser, setSession, user } =
+        const { setLoading, setError, setAuthState, user } =
           useAuthStore.getState();
 
         // Configure SDK
@@ -89,19 +90,13 @@ export default function RootLayout() {
 
         // Handle session state
         if (session) {
-          await handleExistingSession(
-            session,
-            user,
-            setSession,
-            setUser,
-            setLoading
-          );
+          await handleExistingSession(session, user, setAuthState, setLoading);
         } else {
           await handleNoSession();
         }
 
         // Set up auth listener
-        setupAuthStateListener(setSession, setUser, setLoading);
+        setupAuthStateListener(setAuthState, setLoading);
 
         setIsAppReady(true);
       } catch (error) {
@@ -155,6 +150,29 @@ export default function RootLayout() {
     return null;
   }
 
+  const routes = () => {
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* Unauthenticated routes */}
+        <Stack.Protected guard={!isAuthenticated}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+
+        {/* Authenticated and onboarded (main app) */}
+        <Stack.Protected guard={isAuthenticated && isOnboarded}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(screens)" />
+          <Stack.Screen name="listing" />
+        </Stack.Protected>
+
+        {/* Authenticated but not onboarded */}
+        <Stack.Protected guard={isAuthenticated && !isOnboarded}>
+          <Stack.Screen name="(onboarding)" />
+        </Stack.Protected>
+      </Stack>
+    );
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
@@ -163,9 +181,7 @@ export default function RootLayout() {
             <Theme name={colorScheme === "dark" ? "dark" : "light"}>
               <SafeAreaProvider>
                 <BottomSheetModalProvider>
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                  </Stack>
+                  {routes()}
                   <LoadingOverlay />
                 </BottomSheetModalProvider>
               </SafeAreaProvider>
@@ -176,4 +192,3 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
-
