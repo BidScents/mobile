@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
-import { handleSignOut } from "@/utils/auth-initialization";
+import { handleSignOutUI } from "@/utils/auth-ui-handlers";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { Alert } from "react-native";
@@ -65,7 +65,7 @@ export default function SettingsScreen() {
         style: "destructive",
         onPress: () => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          handleSignOut();
+          handleSignOutUI();
         },
       },
     ]);

@@ -14,7 +14,7 @@ import { ControlledInput } from '@/components/forms/controlled-input'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { KeyboardAwareView } from '@/components/ui/keyboard-aware-view'
-import { handleSignUp } from '@/utils/auth-actions'
+import { handleSignUpUI } from '@/utils/auth-ui-handlers'
 import { signUpSchema, type SignUpFormData } from '@bid-scents/shared-sdk'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { router } from 'expo-router'
@@ -55,7 +55,7 @@ export default function SignUpScreen() {
     setIsLoading(true)
     
     try {
-      await handleSignUp(data)
+      await handleSignUpUI(data)
     } catch (error) {
       // Error handling is done in the utility function
       // Loading state is cleared here regardless of outcome

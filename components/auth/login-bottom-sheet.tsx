@@ -1,6 +1,6 @@
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
-import { OAuthHandler } from '@/utils/oauth-handler'
+import { handleOAuthUI } from '@/utils/auth-ui-handlers'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { router } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
@@ -40,11 +40,11 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
     setLoadingProvider(provider)
     
     try {
-      await OAuthHandler.signInWithOAuth(provider)
-      // Success handling and navigation is done in OAuthHandler
+      await handleOAuthUI(provider)
+      // Success handling and navigation is done in handleOAuthUI
       bottomSheetRef.current?.dismiss()
     } catch (error) {
-      // Error handling is done in OAuthHandler
+      // Error handling is done in handleOAuthUI
     } finally {
       setIsLoading(false)
       setLoadingProvider(null)

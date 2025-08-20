@@ -14,7 +14,7 @@
 
 import { Container } from '@/components/ui/container'
 import { supabase } from '@/lib/supabase'
-import { handleAuthSuccess } from '@/utils/auth-actions'
+import { handleSignInEvent } from '@/utils/auth-events'
 import { useLoadingStore } from '@bid-scents/shared-sdk'
 import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useRef } from 'react'
@@ -45,7 +45,7 @@ export default function EmailConfirmationHandler() {
         
         if (session) {
           // User is authenticated - proceed with app flow
-          await handleAuthSuccess(session)
+          await handleSignInEvent(session)
         } else {
           // No session but no error - email confirmed successfully
           showConfirmationSuccess()

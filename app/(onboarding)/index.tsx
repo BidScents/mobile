@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { KeyboardAwareView } from '@/components/ui/keyboard-aware-view'
 import { ProfilePreviewPicker } from '@/components/ui/profile-preview-picker'
-import { handleOnboarding } from '@/utils/auth-actions'
+import { handleOnboardingUI } from '@/utils/auth-ui-handlers'
 import { onboardingSchema, type OnboardingFormData } from '@bid-scents/shared-sdk'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useState } from 'react'
@@ -76,7 +76,7 @@ export default function OnboardingScreen() {
         coverImageUri: coverImageUri || undefined
       }
 
-      await handleOnboarding(extendedData)
+      await handleOnboardingUI(extendedData)
     } catch (error) {
       // Error handling is done in the utility function
       // Loading state is cleared here regardless of outcome

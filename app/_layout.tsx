@@ -26,7 +26,7 @@ import {
   handleExistingSession,
   handleNoSession,
   setupAuthStateListener,
-} from "../utils/auth-initialization";
+} from "../utils/auth-events";
 
 const ANDROID_FONTS = {
   "Roboto-Light": require("../assets/fonts/Roboto-Light.ttf"),
@@ -65,7 +65,7 @@ export default function RootLayout() {
       if (!fontsLoaded) return;
 
       try {
-        const { setLoading, setError, setAuthState, user } =
+        const { setLoading, setError, user } =
           useAuthStore.getState();
 
         // Configure SDK
@@ -90,13 +90,13 @@ export default function RootLayout() {
 
         // Handle session state
         if (session) {
-          await handleExistingSession(session, user, setAuthState, setLoading);
+          await handleExistingSession(session, user);
         } else {
           await handleNoSession();
         }
 
         // Set up auth listener
-        setupAuthStateListener(setAuthState, setLoading);
+        setupAuthStateListener();
 
         setIsAppReady(true);
       } catch (error) {

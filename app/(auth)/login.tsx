@@ -15,7 +15,7 @@ import { ControlledInput } from '@/components/forms/controlled-input'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { KeyboardAwareView } from '@/components/ui/keyboard-aware-view'
-import { handleForgotPassword, handleLogin } from '@/utils/auth-actions'
+import { handleLoginUI, handleForgotPasswordUI } from '@/utils/auth-ui-handlers'
 import { loginSchema, type LoginFormData } from '@bid-scents/shared-sdk'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { router } from 'expo-router'
@@ -55,7 +55,7 @@ export default function LoginScreen() {
     setIsLoading(true)
     
     try {
-      await handleLogin(data)
+      await handleLoginUI(data)
     } catch (error) {
       // Error handling is done in the utility function
       // Loading state is cleared here regardless of outcome
@@ -134,7 +134,7 @@ export default function LoginScreen() {
                 <Text 
                   color="$foreground" 
                   fontSize="$3"
-                  onPress={handleForgotPassword}
+                  onPress={handleForgotPasswordUI}
                   disabled={isLoading}
                 >
                   Forgot Password?
