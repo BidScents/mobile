@@ -14,22 +14,22 @@ const SettingsSections = [
       {
         name: "Profile Details",
         icon: "person-outline",
-        src: "/profile/settings/edit-profile",
+        src: "/(tabs)/profile/edit-profile",
       },
       {
         name: "Account Details",
         icon: "card-outline",
-        src: "/profile/settings/account",
+        src: "/(tabs)/profile/settings/account",
       },
       {
         name: "Payments",
         icon: "wallet-outline",
-        src: "/profile/settings/payments",
+        src: "/(tabs)/profile/settings/payments",
       },
       {
         name: "Postage",
         icon: "mail-outline",
-        src: "/profile/settings/postage",
+        src: "/(tabs)/profile/settings/postage",
       },
     ],
   },
@@ -39,12 +39,12 @@ const SettingsSections = [
       {
         name: "Notifications",
         icon: "notifications-outline",
-        src: "/profile/settings/notification-preferences",
+        src: "/(tabs)/profile/settings/notification-preferences",
       },
       {
         name: "Theme",
         icon: "color-palette-outline",
-        src: "/profile/settings/theme",
+        src: "/(tabs)/profile/settings/theme",
       },
     ],
   },
@@ -106,7 +106,7 @@ export default function SettingsScreen() {
                       <Ionicons
                         name={item.icon as any}
                         size={20}
-                        color={theme.foreground?.val}
+                        color={theme.foreground?.get()}
                       />
                       <Text fontSize="$5" fontWeight="400">
                         {item.name}
@@ -115,7 +115,7 @@ export default function SettingsScreen() {
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color={theme.foreground?.val}
+                      color={theme.foreground?.get()}
                     />
                   </XStack>
                 ))}

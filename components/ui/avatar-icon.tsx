@@ -26,7 +26,7 @@ export function AvatarIcon({
         justifyContent="center"
         alignItems="center"
       >
-        <Ionicons name="person" size={22} color={theme.background?.val} />
+        <Ionicons name="person" size={22} color={theme.background?.get()} />
       </Avatar.Fallback>
     </Avatar>
   );

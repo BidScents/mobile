@@ -20,6 +20,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import config from "tamagui.config";
+import { useThemeSettings } from "../hooks/use-theme-settings";
 import { QueryProvider } from "../providers/query-provider";
 import {
   handleExistingSession,
@@ -38,8 +39,11 @@ const ANDROID_FONTS = {
 } as const;
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [isAppReady, setIsAppReady] = useState(false);
+  const colorScheme = useColorScheme();
+  
+  // Initialize theme settings on app startup to load saved preferences
+  useThemeSettings();
 
   const [fontsLoaded] = useFonts(
     Platform.OS === "android" ? ANDROID_FONTS : {}
@@ -60,7 +64,7 @@ export default function RootLayout() {
       if (!fontsLoaded) return;
 
       try {
-        const { setLoading, setError, setUser, setSession, user, logout } =
+        const { setLoading, setError, setUser, setSession, user } =
           useAuthStore.getState();
 
         // Configure SDK
@@ -172,3 +176,4 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+

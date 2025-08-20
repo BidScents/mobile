@@ -7,7 +7,7 @@ export const CloseButton = () => {
     const theme = useTheme()
     return (
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 0 }} hitSlop={20} >
-            <Ionicons name="close" size={24}  style={{ backgroundColor: theme.background.val, color: theme.foreground?.val, }} />
+            <Ionicons name="close" size={24}  style={{ backgroundColor: theme.background.get(), color: theme.foreground?.get(), }} />
         </TouchableOpacity>
     )
 }

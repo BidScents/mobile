@@ -1,17 +1,21 @@
 /**
  * Authentication initialization utilities
- * 
+ *
  * Helper functions for managing app startup authentication logic.
  * Handles session management, user data fetching, and auth state listeners.
  */
 
-import { supabase } from '@/lib/supabase'
-import { AuthService, handleAuthStateChange, useAuthStore } from '@bid-scents/shared-sdk'
-import { router } from 'expo-router'
+import { supabase } from "@/lib/supabase";
+import {
+  AuthService,
+  handleAuthStateChange,
+  useAuthStore,
+} from "@bid-scents/shared-sdk";
+import { router } from "expo-router";
 
 /**
  * Handle existing session logic
- * 
+ *
  * When a valid session exists, this function:
  * - Syncs session with SDK
  * - Checks if user data needs refreshing
@@ -24,57 +28,61 @@ export const handleExistingSession = async (
   setUser: (user: any) => void,
   setLoading: (loading: boolean) => void
 ) => {
-  handleAuthStateChange('SIGNED_IN', session)
-  setSession(session)
-  
-  const needsUserData = !existingUser || !existingUser.onboarded_at
-  
+  handleAuthStateChange("SIGNED_IN", session);
+  setSession(session);
+
+  const needsUserData = !existingUser || !existingUser.onboarded_at;
+
   if (needsUserData) {
     try {
-      console.log('Fetching user data from API...')
-      const loginResult = await AuthService.loginV1AuthLoginGet()
-      setUser(loginResult.profile)
+      console.log("Fetching user data from API...");
+      const loginResult = await AuthService.loginV1AuthLoginGet();
+      setUser(loginResult.profile);
     } catch (apiError: any) {
-      console.log('API error occurred:', apiError)
-      
-      if (apiError.status === 500 || apiError.status === 502 || apiError.status === 503) {
-        console.log('Server error - maintaining existing auth state')
+      console.log("API error occurred:", apiError);
+
+      if (
+        apiError.status === 500 ||
+        apiError.status === 502 ||
+        apiError.status === 503
+      ) {
+        console.log("Server error - maintaining existing auth state");
         if (existingUser) {
-          setUser(existingUser)
+          setUser(existingUser);
         } else {
-          console.log('No cached user data available, user will need to retry')
+          console.log("No cached user data available, user will need to retry");
         }
       } else if (apiError.status === 401 || apiError.status === 403) {
-        console.log('Authentication error - clearing session')
-        handleAuthStateChange('SIGNED_OUT', null)
-        setUser(null)
-        setSession(null)
+        console.log("Authentication error - clearing session");
+        handleAuthStateChange("SIGNED_OUT", null);
+        setUser(null);
+        setSession(null);
       } else {
-        console.log('User likely needs onboarding')
-        setUser(null)
+        console.log("User likely needs onboarding");
+        setUser(null);
       }
-      
-      setLoading(false)
+
+      setLoading(false);
     }
   } else {
-    console.log('Using cached user data')
-    setUser(existingUser)
-    setLoading(false)
+    console.log("Using cached user data");
+    setUser(existingUser);
+    setLoading(false);
   }
-}
+};
 
 /**
  * Handle no session logic
- * 
+ *
  * When no session exists, clear all auth state using the store's logout method
  */
 export const handleNoSession = async () => {
-  handleAuthStateChange('SIGNED_OUT', null)
-}
+  handleAuthStateChange("SIGNED_OUT", null);
+};
 
 /**
  * Handle sign in event
- * 
+ *
  * Called when user signs in - syncs session and fetches user data if needed
  */
 export const handleSignIn = async (
@@ -83,98 +91,92 @@ export const handleSignIn = async (
   setUser: (user: any) => void,
   setLoading: (loading: boolean) => void
 ) => {
-  handleAuthStateChange('SIGNED_IN', session)
-  setSession(session)
-  
-  const currentUser = useAuthStore.getState().user
-  const needsUserData = !currentUser || !currentUser.onboarded_at
-  
+  handleAuthStateChange("SIGNED_IN", session);
+  setSession(session);
+
+  const currentUser = useAuthStore.getState().user;
+  const needsUserData = !currentUser || !currentUser.onboarded_at;
+
   if (needsUserData) {
     try {
-      const loginResult = await AuthService.loginV1AuthLoginGet()
-      setUser(loginResult.profile)
+      const loginResult = await AuthService.loginV1AuthLoginGet();
+      setUser(loginResult.profile);
     } catch (apiError: any) {
-      console.log('API call failed during auth change:', apiError)
-      
-      if (apiError.status === 500 || apiError.status === 502 || apiError.status === 503) {
-        console.log('Server error during sign in - maintaining existing auth state')
+      console.log("API call failed during auth change:", apiError);
+
+      if (
+        apiError.status === 500 ||
+        apiError.status === 502 ||
+        apiError.status === 503
+      ) {
+        console.log(
+          "Server error during sign in - maintaining existing auth state"
+        );
         if (currentUser) {
-          setUser(currentUser)
+          setUser(currentUser);
         }
       } else if (apiError.status === 401 || apiError.status === 403) {
-        console.log('Authentication error during sign in - clearing session')
-        handleAuthStateChange('SIGNED_OUT', null)
-        setUser(null)
-        setSession(null)
+        console.log("Authentication error during sign in - clearing session");
+        handleAuthStateChange("SIGNED_OUT", null);
+        setUser(null);
+        setSession(null);
       } else {
-        console.log('User likely needs onboarding')
-        setUser(null)
+        console.log("User likely needs onboarding");
+        setUser(null);
       }
-      
-      setLoading(false)
+
+      setLoading(false);
     }
   }
-}
+};
 
 /**
  * Handle sign out event
- * 
+ *
  * Called when user signs out - clears Supabase session and all local state
  */
 export const handleSignOut = async () => {
   try {
     // Sign out from Supabase first (clears server session)
-    const { error } = await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut();
     if (error) {
-      console.error('Supabase signout error:', error)
-      // Continue with local cleanup even if Supabase signout fails
+      console.error("Supabase signout error:", error);
     }
-    
-    // Clear local auth state
-    handleAuthStateChange('SIGNED_OUT', null)
-    
-    // Clear auth store state (this will trigger through the auth state listener)
-    const { logout } = useAuthStore.getState()
-    logout()
-    
-    // Navigate to login
-    router.replace('/(auth)/login')
   } catch (error) {
-    console.error('Error during sign out:', error)
+    console.error("Error during sign out:", error);
     // Even if there's an error, still navigate to login for safety
-    router.replace('/(auth)/login')
+    router.replace("/(auth)");
   }
-}
+};
 
 /**
  * Set up Supabase auth state change listener
- * 
+ *
  * Listens for auth events (sign in/out) and updates app state accordingly
  */
 export const setupAuthStateListener = (
   setSession: (session: any) => void,
   setUser: (user: any) => void,
-  setLoading: (loading: boolean) => void,
+  setLoading: (loading: boolean) => void
 ) => {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    async (event, session) => {
-      console.log('Auth state changed:', event, !!session)
-      
-      if (event === 'SIGNED_IN' && session) {
-        await handleSignIn(session, setSession, setUser, setLoading)
-      } else if (event === 'SIGNED_OUT') {
-        // When Supabase triggers SIGNED_OUT, clear local state and navigate
-        handleAuthStateChange('SIGNED_OUT', null)
-        const { logout } = useAuthStore.getState()
-        logout()
-        router.replace('/(auth)/login')
-      } else if (event === 'TOKEN_REFRESHED') {
-        console.log('Token refreshed')
-        handleAuthStateChange('TOKEN_REFRESHED', session)
-      }
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log("Auth state changed:", event, !!session);
+
+    if (event === "SIGNED_IN" && session) {
+      await handleSignIn(session, setSession, setUser, setLoading);
+    } else if (event === "SIGNED_OUT") {
+      // When Supabase triggers SIGNED_OUT, clear local state and navigate
+      console.log("Supabase triggered SIGNED_OUT");
+      handleAuthStateChange("SIGNED_OUT", null);
+      router.replace("/(auth)");
+    } else if (event === "TOKEN_REFRESHED") {
+      console.log("Token refreshed");
+      handleAuthStateChange("TOKEN_REFRESHED", session);
     }
-  )
+  });
 
   // Return cleanup function
-  return () => subscription.unsubscribe()
-}
+  return () => subscription.unsubscribe();
+};

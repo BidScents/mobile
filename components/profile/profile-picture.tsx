@@ -21,7 +21,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
         height: 120,
         borderRadius: 60,
         borderWidth: 4,
-        borderColor: theme.foreground?.val,
+        borderColor: theme.foreground?.get(),
       }}
     />
   );

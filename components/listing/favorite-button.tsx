@@ -105,7 +105,7 @@ export function FavoriteButton({
     large: '$4'
   }[size]
 
-  const heartColor = isFavorited ? 'red' : (theme.foreground?.val || '#000')
+  const heartColor = isFavorited ? 'red' : (theme.foreground?.get() || '#000')
   const isDisabled = favoritesLoading
 
   // Show just icon if count is 0

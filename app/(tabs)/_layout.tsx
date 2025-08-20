@@ -1,17 +1,15 @@
 import { useMarkNotificationsSeen, useNotificationsList } from '@/hooks/queries/use-notifications';
 import { useNotifications } from '@/hooks/use-notifications';
-import { darkBlur, lightBlur } from '@/tamagui.config';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { router, Tabs } from "expo-router";
 import React from 'react';
-import { StyleSheet, useColorScheme } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useTheme } from 'tamagui';
 
 export default function TabsLayout() {
   const theme = useTheme();
-  const colorScheme = useColorScheme();
   
   // Get notification data and badge management
   const { data: notificationData } = useNotificationsList();
@@ -45,13 +43,13 @@ export default function TabsLayout() {
         headerShown: false,
         headerShadowVisible: false,
         headerStyle: {
-          backgroundColor: theme.background?.val,
+          backgroundColor: theme.background.get(),
         },
         headerTitleStyle: {
-          color: theme.foreground?.val,
+          color: theme.foreground.get(),
         },
-        tabBarActiveTintColor: theme.foreground?.val,
-        tabBarInactiveTintColor: theme.mutedForeground?.val,
+        tabBarActiveTintColor: theme.foreground.get(),
+        tabBarInactiveTintColor: theme.mutedForeground.get(),
         tabBarStyle: {
           position: 'absolute',
           borderTopWidth: 0,
@@ -61,7 +59,7 @@ export default function TabsLayout() {
           padding: 5,
         },
         tabBarBackground: () => (
-          <BlurView tint={colorScheme === 'light' ? lightBlur : darkBlur} style={{ 
+          <BlurView tint={theme.blurTint.get() as any} style={{ 
             ...StyleSheet.absoluteFillObject,
             overflow: 'hidden',
             backgroundColor: 'transparent',

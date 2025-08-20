@@ -65,7 +65,7 @@ export const SelectBottomSheet = forwardRef<
       <BottomSheet
         ref={bottomSheetRef}
         snapPoints={["50%", "80%"]}
-        backgroundStyle={{ backgroundColor: theme.background?.val || "white" }}
+        backgroundStyle={{ backgroundColor: theme.background.get() || "white" }}
       >
         <YStack gap="$2" padding="$4" flex={1}>
           {/* Header */}
@@ -119,7 +119,7 @@ export const SelectBottomSheet = forwardRef<
                         : "radio-button-off"
                     }
                     size={24}
-                    color={theme.foreground?.val}
+                    color={theme.foreground.get()}
                   />
                 </XStack>
               </Pressable>
@@ -127,8 +127,8 @@ export const SelectBottomSheet = forwardRef<
             <Button
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                bottomSheetRef.current?.dismiss();
                 onSelect(selectedValue || "");
+                bottomSheetRef.current?.dismiss();
               }}
               variant="primary"
               size="lg"

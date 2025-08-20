@@ -29,7 +29,7 @@ export const CreateListingSheet = forwardRef<CreateListingSheetMethods>((props, 
     <BottomSheet
       ref={bottomSheetRef}
       snapPoints={['90%', '50%']}
-      backgroundStyle={{ backgroundColor: theme.background?.val }}
+      backgroundStyle={{ backgroundColor: theme.background?.get() }}
     >
       <YStack gap="$5" padding="$4" paddingBottom="$8">
         {/* Header */}

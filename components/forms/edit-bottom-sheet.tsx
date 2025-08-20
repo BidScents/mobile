@@ -134,7 +134,7 @@ export const EditBottomSheet = forwardRef<
                     <Ionicons
                       name="close"
                       size={24}
-                      color={theme.foreground?.val}
+                      color={theme.foreground?.get()}
                     />
                   </Pressable>
                 )}
@@ -157,13 +157,13 @@ export const EditBottomSheet = forwardRef<
                     style={[
                       styles.textInput,
                       {
-                        backgroundColor: theme.muted?.val,
-                        color: theme.foreground?.val,
-                        borderColor: theme.border?.val,
+                        backgroundColor: theme.muted?.get(),
+                        color: theme.foreground?.get(),
+                        borderColor: theme.border?.get(),
                       },
                     ]}
                     placeholder={placeholder}
-                    placeholderTextColor={theme.mutedForeground?.val}
+                    placeholderTextColor={theme.mutedForeground?.get()}
                     value={editText}
                     onChangeText={setEditText}
                     multiline={true}
@@ -199,7 +199,7 @@ export const EditBottomSheet = forwardRef<
                       <Ionicons
                         name="send"
                         size={16}
-                        color={theme.background?.val}
+                        color={theme.background?.get()}
                       />
                     </XStack>
                   </Button>
@@ -231,7 +231,7 @@ export const EditBottomSheet = forwardRef<
                       <Ionicons
                         name="pencil"
                         size={20}
-                        color={theme.background?.val}
+                        color={theme.background?.get()}
                       />
                     </View>
                     <YStack flex={1}>
@@ -245,7 +245,7 @@ export const EditBottomSheet = forwardRef<
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color={theme.mutedForeground?.val}
+                      color={theme.mutedForeground?.get()}
                     />
                   </XStack>
                 </Pressable>
@@ -274,7 +274,7 @@ export const EditBottomSheet = forwardRef<
                         <Ionicons
                           name="trash"
                           size={20}
-                          color={theme.background?.val}
+                          color={theme.background?.get()}
                         />
                       </View>
                       <YStack flex={1}>
@@ -292,7 +292,7 @@ export const EditBottomSheet = forwardRef<
                       <Ionicons
                         name="chevron-forward"
                         size={20}
-                        color={theme.mutedForeground?.val}
+                        color={theme.mutedForeground?.get()}
                       />
                     </XStack>
                   </Pressable>

@@ -55,7 +55,7 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
         backdropComponent={renderBackdrop}
         backgroundStyle={[
           {
-            backgroundColor: theme.background.val,
+            backgroundColor: theme.background.get(),
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
           },
@@ -63,14 +63,14 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
         ]}
         handleStyle={[
           {
-            backgroundColor: theme.background.val,
+            backgroundColor: theme.background.get(),
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
           },
           handleStyle,
         ]}
         handleIndicatorStyle={{
-          backgroundColor: theme.mutedForeground.val,
+          backgroundColor: theme.mutedForeground.get(),
           width: 40,
           height: 4,
         }}

@@ -165,7 +165,7 @@ export const BidBottomSheet = forwardRef<
                   <Ionicons
                     name="remove-outline"
                     size={24}
-                    color={theme.foreground.val}
+                    color={theme.foreground.get()}
                   />
                 </View>
 
@@ -173,11 +173,11 @@ export const BidBottomSheet = forwardRef<
                   style={[
                     styles.bidInput,
                     {
-                      backgroundColor: theme.muted?.val,
-                      color: theme.foreground?.val,
+                      backgroundColor: theme.muted?.get(),
+                      color: theme.foreground?.get(),
                       borderColor:
                         bidAmount && !isValidBid
-                          ? theme.error?.val
+                          ? theme.error?.get()
                           : "transparent",
                     },
                   ]}
@@ -201,7 +201,7 @@ export const BidBottomSheet = forwardRef<
                   <Ionicons
                     name="add-outline"
                     size={24}
-                    color={theme.foreground.val}
+                    color={theme.foreground.get()}
                   />
                 </View>
               </XStack>

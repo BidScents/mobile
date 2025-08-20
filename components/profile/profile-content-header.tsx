@@ -50,7 +50,7 @@ export const ProfileContentHeader = React.memo(function ProfileContentHeader({
           <Text fontSize="$4" fontWeight="500" color="$mutedForeground">
             {currentSortLabel}
           </Text>
-          <Ionicons name="chevron-down" size={16} color={theme.mutedForeground?.val} />
+          <Ionicons name="chevron-down" size={16} color={theme.mutedForeground?.get()} />
         </XStack>
       )}
     </XStack>

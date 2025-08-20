@@ -68,7 +68,7 @@ export const SearchFilterBottomSheet = forwardRef<
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      backgroundStyle={{ backgroundColor: theme.background?.val }}
+      backgroundStyle={{ backgroundColor: theme.background?.get() }}
       snapPoints={['83%']}
       enableDynamicSizing
     >

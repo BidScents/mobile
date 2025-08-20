@@ -57,7 +57,7 @@ export const DateTimeBottomSheet = forwardRef<DateTimeBottomSheetMethods, DateTi
       <BottomSheet
         ref={bottomSheetRef}
         snapPoints={['70%', '90%']}
-        backgroundStyle={{ backgroundColor: theme.background?.val || 'white' }}
+        backgroundStyle={{ backgroundColor: theme.background?.get() || 'white' }}
       >
         <YStack gap="$4" padding="$4" paddingBottom="$8" flex={1}>
           {/* Header */}

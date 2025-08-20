@@ -1,10 +1,8 @@
-import { darkBlur, lightBlur } from "@/tamagui.config";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
-import { useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme, View } from "tamagui";
 
@@ -32,7 +30,6 @@ export function BlurBackButton({
   zIndex = 2,
 }: BlurBackButtonProps = {}) {
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
   const theme = useTheme();
   
   // Calculate icon size based on button size if not provided
@@ -71,7 +68,7 @@ export function BlurBackButton({
       }}
     >
       <BlurView
-        tint={colorScheme === "light" ? lightBlur : darkBlur}
+        tint={theme.blurTint.get() as any}
         intensity={80}
         style={{
           flex: 1,
@@ -81,7 +78,7 @@ export function BlurBackButton({
       >
         <Ionicons
           name="chevron-back"
-          color={theme.foreground.val}
+          color={theme.foreground.get()}
           size={calculatedIconSize}
         />
       </BlurView>
