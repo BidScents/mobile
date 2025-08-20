@@ -384,78 +384,24 @@ export function useUnfavoriteListing() {
 // ========================================
 
 /**
- * Vote listing mutation - updates both local state and detailed listing cache
+ * Vote listing mutation - simple API call only
+ * Cache updates are handled by components using useOptimisticMutation
  */
 export function useVoteListing() {
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: ({
-      listingId,
-      isUpvote,
-    }: {
-      listingId: string;
-      isUpvote: boolean;
-    }) =>
+    mutationFn: ({ listingId, isUpvote }: { listingId: string; isUpvote: boolean }) =>
       ListingService.voteListingV1ListingListingIdVotePost(listingId, isUpvote),
-    onSuccess: (_, { listingId, isUpvote }) => {
-      // Update the detailed listing cache with server response
-      queryClient.setQueryData<ListingDetailsResponse>(
-        queryKeys.listings.detail(listingId),
-        (old) => {
-          if (!old) return old;
-          
-          // Calculate vote change based on current state
-          let voteChange = 0;
-          if (old.is_upvoted === null) {
-            // No previous vote
-            voteChange = isUpvote ? 1 : -1;
-          } else if (old.is_upvoted === true) {
-            // Had upvote, changing to downvote
-            voteChange = isUpvote ? 0 : -2; // Remove upvote + add downvote
-          } else {
-            // Had downvote, changing to upvote  
-            voteChange = isUpvote ? 2 : 0; // Remove downvote + add upvote
-          }
-          
-          return {
-            ...old,
-            total_votes: old.total_votes + voteChange,
-            is_upvoted: isUpvote,
-          };
-        }
-      );
-    },
   });
 }
 
 /**
- * Remove vote mutation - updates both local state and detailed listing cache
+ * Remove vote mutation - simple API call only
+ * Cache updates are handled by components using useOptimisticMutation
  */
 export function useUnvoteListing() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (listingId: string) =>
       ListingService.unvoteListingV1ListingListingIdUnvoteDelete(listingId),
-    onSuccess: (_, listingId) => {
-      // Update the detailed listing cache with server response
-      queryClient.setQueryData<ListingDetailsResponse>(
-        queryKeys.listings.detail(listingId),
-        (old) => {
-          if (!old) return old;
-          
-          // Calculate vote change - remove current vote
-          const voteChange = old.is_upvoted === true ? -1 : old.is_upvoted === false ? 1 : 0;
-          
-          return {
-            ...old,
-            total_votes: old.total_votes + voteChange,
-            is_upvoted: null,
-          };
-        }
-      );
-    },
   });
 }
 

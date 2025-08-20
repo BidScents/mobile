@@ -151,7 +151,6 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       opacity={disabled ? 0.6 : 1}
       cursor={disabled ? "not-allowed" : "pointer"}
-      gap={iconOnly ? 0 : "$1"}
       alignItems="center"
       justifyContent="center"
       onPress={handlePress}

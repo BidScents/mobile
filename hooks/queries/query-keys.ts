@@ -47,5 +47,11 @@ export const queryKeys = {
       sold: ['dashboard', 'listings', 'sold'] as const,
       draft: ['dashboard', 'listings', 'draft'] as const,
     }
+  },
+  
+  notifications: {
+    all: ['notifications'] as const,
+    list: () => ['notifications', 'list'] as const,
+    preferences: ['notifications', 'preferences'] as const,
   }
 } as const

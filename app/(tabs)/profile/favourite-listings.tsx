@@ -1,12 +1,14 @@
 import { ListingCard } from "@/components/listing/listing-card";
 import { Container } from "@/components/ui/container";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useUserFavorites } from "@/hooks/queries/use-listing";
 import { useLoadingStore } from "@bid-scents/shared-sdk";
 import { LegendList } from "@legendapp/list";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useEffect } from "react";
-import { Text, View } from "tamagui";
 
 export default function FavouriteListingsScreen() {
+  const tabBarHeight = useBottomTabBarHeight();
   const { data: listings, isLoading } = useUserFavorites();
   const { showLoading, hideLoading } = useLoadingStore();
 
@@ -20,30 +22,10 @@ export default function FavouriteListingsScreen() {
 
   if (listings?.length === 0) {
     return (
-      <View
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-        paddingHorizontal="$4"
-        backgroundColor="$background"
-      >
-        <Text
-          fontSize="$6"
-          fontWeight="600"
-          color="$mutedForeground"
-          textAlign="center"
-        >
-          No Favourites
-        </Text>
-        <Text
-          fontSize="$4"
-          color="$mutedForeground"
-          textAlign="center"
-          marginTop="$2"
-        >
-          You have no favourite listings yet.
-        </Text>
-      </View>
+      <EmptyState
+        title="No Favourites"
+        description="You have no favourite listings yet."
+      />
     );
   }
 
@@ -57,6 +39,13 @@ export default function FavouriteListingsScreen() {
         showsVerticalScrollIndicator={false}
         numColumns={2}
         recycleItems
+        contentContainerStyle={{
+          paddingBottom: tabBarHeight,
+          gap: 6
+        }}
+        columnWrapperStyle={{
+          gap: 6
+        }}
       />
     </Container>
   );

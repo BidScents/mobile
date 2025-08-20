@@ -11,10 +11,11 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@bid-scents/shared-sdk": "^1.1.0",
+    "@bid-scents/shared-sdk": "^1.1.1",
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5.1.6",
     "@hookform/resolvers": "^5.1.1",
+    "@legendapp/list": "^1.1.4",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "react-native-community/datetimepicker",
     "@react-navigation/bottom-tabs": "^7.3.10",
@@ -51,6 +52,7 @@
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.5",
     "expo-system-ui": "~5.0.8",
+    "expo-task-manager": "^13.1.6",
     "expo-web-browser": "^14.2.0",
     "react": "19.0.0",
     "react-content-loader": "^7.0.2",

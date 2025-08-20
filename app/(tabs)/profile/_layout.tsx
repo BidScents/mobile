@@ -23,7 +23,7 @@ export default function ProfileLayout() {
       <Stack.Screen name="favourite-listings" options={{ title: "Favourite Listings" }} />
       <Stack.Screen name="orders" options={{ title: "Orders" }} />
       <Stack.Screen name="seller-dashboard" options={{ title: "Seller Dashboard" }} />
-      <Stack.Screen name="settings" options={{ title: "Settings" }} />
+      <Stack.Screen name="settings" options={{ title: "Settings", headerShown: false }} />
       <Stack.Screen name="help" options={{ title: "Help" }} />
       <Stack.Screen name="about-us" options={{ title: "About Us" }} />
       <Stack.Screen name="legal" options={{ title: "Legal" }} />

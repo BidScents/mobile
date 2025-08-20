@@ -7,6 +7,7 @@
 
 import { supabase } from '@/lib/supabase'
 import { AuthService, handleAuthStateChange, useAuthStore } from '@bid-scents/shared-sdk'
+import { router } from 'expo-router'
 
 /**
  * Handle existing session logic
@@ -67,9 +68,8 @@ export const handleExistingSession = async (
  * 
  * When no session exists, clear all auth state using the store's logout method
  */
-export const handleNoSession = async (logout: () => void) => {
+export const handleNoSession = async () => {
   handleAuthStateChange('SIGNED_OUT', null)
-  logout()
 }
 
 /**
@@ -119,11 +119,31 @@ export const handleSignIn = async (
 /**
  * Handle sign out event
  * 
- * Called when user signs out - uses store's logout method to clear all state
+ * Called when user signs out - clears Supabase session and all local state
  */
-export const handleSignOut = async (logout: () => void) => {
-  handleAuthStateChange('SIGNED_OUT', null)
-  logout()
+export const handleSignOut = async () => {
+  try {
+    // Sign out from Supabase first (clears server session)
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      console.error('Supabase signout error:', error)
+      // Continue with local cleanup even if Supabase signout fails
+    }
+    
+    // Clear local auth state
+    handleAuthStateChange('SIGNED_OUT', null)
+    
+    // Clear auth store state (this will trigger through the auth state listener)
+    const { logout } = useAuthStore.getState()
+    logout()
+    
+    // Navigate to login
+    router.replace('/(auth)/login')
+  } catch (error) {
+    console.error('Error during sign out:', error)
+    // Even if there's an error, still navigate to login for safety
+    router.replace('/(auth)/login')
+  }
 }
 
 /**
@@ -135,7 +155,6 @@ export const setupAuthStateListener = (
   setSession: (session: any) => void,
   setUser: (user: any) => void,
   setLoading: (loading: boolean) => void,
-  logout: () => void
 ) => {
   const { data: { subscription } } = supabase.auth.onAuthStateChange(
     async (event, session) => {
@@ -144,7 +163,11 @@ export const setupAuthStateListener = (
       if (event === 'SIGNED_IN' && session) {
         await handleSignIn(session, setSession, setUser, setLoading)
       } else if (event === 'SIGNED_OUT') {
-        await handleSignOut(logout)
+        // When Supabase triggers SIGNED_OUT, clear local state and navigate
+        handleAuthStateChange('SIGNED_OUT', null)
+        const { logout } = useAuthStore.getState()
+        logout()
+        router.replace('/(auth)/login')
       } else if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed')
         handleAuthStateChange('TOKEN_REFRESHED', session)

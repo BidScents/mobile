@@ -1,15 +1,17 @@
+import { queryKeys } from "@/hooks/queries/query-keys";
 import { useUnvoteListing, useVoteListing } from "@/hooks/queries/use-listing";
+import { useOptimisticMutation } from "@/hooks/use-optimistic-mutation";
+import type { ListingDetailsResponse } from "@bid-scents/shared-sdk";
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Text, useTheme, View, XStack } from "tamagui";
 
 /**
  * VoteButtons Component
  * 
- * Handles upvoting and downvoting for listings with dual state management:
- * 1. Local state for instant UI feedback
- * 2. Cache updates via mutations for persistence
+ * Uses optimistic mutation hook for clean debounced voting with instant UI feedback
  */
 export function VoteButtons({
   totalVotes,
@@ -21,15 +23,16 @@ export function VoteButtons({
   listingId: string;
 }) {
   const theme = useTheme();
+  const queryClient = useQueryClient();
   const voteListing = useVoteListing();
   const unvoteListing = useUnvoteListing();
 
-  // Local state for instant UI updates (prevents delay while server processes)
+  // Local state for instant UI updates
   const [currentVotes, setCurrentVotes] = useState(totalVotes);
   const [currentIsUpvoted, setCurrentIsUpvoted] = useState(isUpvoted);
   const [lastListingId, setLastListingId] = useState(listingId);
 
-  // Sync local state with server props when listing changes or server updates
+  // Sync local state with server props when listing changes
   useEffect(() => {
     if (listingId !== lastListingId) {
       setCurrentVotes(totalVotes);
@@ -38,95 +41,97 @@ export function VoteButtons({
     }
   }, [listingId, totalVotes, isUpvoted, lastListingId]);
 
-  // Debounce timeout for spam protection
-  const debounceTimeoutRef = useRef<number | null>(null);
+  type VoteAction = { action: "upvote" | "downvote" | "unvote" };
 
-  // Dynamic icons based on current vote state
-  const upvoteIcon =
-    currentIsUpvoted === true ? "caret-up-circle" : "caret-up-circle-outline";
-  const downvoteIcon =
-    currentIsUpvoted === false
-      ? "caret-down-circle"
-      : "caret-down-circle-outline";
-
-  /**
-   * Debounced server call to prevent spam
-   * Waits 500ms before sending request to server
-   */
-  const debouncedVote = useCallback(
-    (action: "upvote" | "downvote" | "unvote") => {
-      // Clear any pending vote to replace with new one
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
+  const optimisticVote = useOptimisticMutation<any, VoteAction>({
+    mutationFn: async ({ action }: VoteAction) => {
+      switch (action) {
+        case "upvote":
+          return voteListing.mutateAsync({ listingId, isUpvote: true });
+        case "downvote":
+          return voteListing.mutateAsync({ listingId, isUpvote: false });
+        case "unvote":
+          return unvoteListing.mutateAsync(listingId);
+      }
+    },
+    onOptimisticUpdate: ({ action }: VoteAction) => {
+      // Update local state immediately
+      if (action === "upvote") {
+        const voteDiff = currentIsUpvoted === false ? 2 : 1;
+        setCurrentVotes((prev) => prev + voteDiff);
+        setCurrentIsUpvoted(true);
+      } else if (action === "downvote") {
+        const voteDiff = currentIsUpvoted === true ? -2 : -1;
+        setCurrentVotes((prev) => prev + voteDiff);
+        setCurrentIsUpvoted(false);
+      } else if (action === "unvote") {
+        const voteDiff = currentIsUpvoted === true ? -1 : currentIsUpvoted === false ? 1 : 0;
+        setCurrentVotes((prev) => prev + voteDiff);
+        setCurrentIsUpvoted(null);
       }
 
-      // Queue the server call after debounce period
-      debounceTimeoutRef.current = setTimeout(() => {
-        switch (action) {
-          case "upvote":
-            voteListing.mutate({ listingId, isUpvote: true });
-            break;
-          case "downvote":
-            voteListing.mutate({ listingId, isUpvote: false });
-            break;
-          case "unvote":
-            unvoteListing.mutate(listingId);
-            break;
+      // Update cache immediately for consistency
+      queryClient.setQueryData<ListingDetailsResponse>(
+        queryKeys.listings.detail(listingId),
+        (old) => {
+          if (!old) return old;
+          
+          let newVotes = old.total_votes;
+          let newIsUpvoted = old.is_upvoted;
+          
+          if (action === "upvote") {
+            const voteDiff = old.is_upvoted === false ? 2 : 1;
+            newVotes = old.total_votes + voteDiff;
+            newIsUpvoted = true;
+          } else if (action === "downvote") {
+            const voteDiff = old.is_upvoted === true ? -2 : -1;
+            newVotes = old.total_votes + voteDiff;
+            newIsUpvoted = false;
+          } else if (action === "unvote") {
+            const voteDiff = old.is_upvoted === true ? -1 : old.is_upvoted === false ? 1 : 0;
+            newVotes = old.total_votes + voteDiff;
+            newIsUpvoted = null;
+          }
+          
+          return {
+            ...old,
+            total_votes: newVotes,
+            is_upvoted: newIsUpvoted,
+          };
         }
-      }, 300);
+      );
     },
-    [voteListing, unvoteListing, listingId]
-  );
+    onRevert: () => {
+      // Revert to server state on error
+      setCurrentVotes(totalVotes);
+      setCurrentIsUpvoted(isUpvoted);
+    },
+    debounceMs: 300,
+  });
 
-  /**
-   * Handle upvote button press
-   * 
-   * Logic:
-   * - If already upvoted: Remove upvote (unvote)
-   * - If downvoted: Switch to upvote (+2 total change)
-   * - If no vote: Add upvote (+1 total change)
-   */
+  // Dynamic icons based on current vote state
+  const upvoteIcon = currentIsUpvoted === true ? "caret-up-circle" : "caret-up-circle-outline";
+  const downvoteIcon = currentIsUpvoted === false ? "caret-down-circle" : "caret-down-circle-outline";
+
   const handleUpvote = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
 
     if (currentIsUpvoted === true) {
-      // Remove existing upvote
-      setCurrentVotes((prev) => prev - 1);
-      setCurrentIsUpvoted(null);
-      debouncedVote("unvote");
+      optimisticVote.mutate({ action: "unvote" });
     } else {
-      // Add upvote (or switch from downvote)
-      const voteDiff = currentIsUpvoted === false ? 2 : 1; // +2 if switching, +1 if new
-      setCurrentVotes((prev) => prev + voteDiff);
-      setCurrentIsUpvoted(true);
-      debouncedVote("upvote");
+      optimisticVote.mutate({ action: "upvote" });
     }
-  }, [currentIsUpvoted, debouncedVote]);
+  }, [currentIsUpvoted, optimisticVote]);
 
-  /**
-   * Handle downvote button press
-   * 
-   * Logic:
-   * - If already downvoted: Remove downvote (unvote)
-   * - If upvoted: Switch to downvote (-2 total change)
-   * - If no vote: Add downvote (-1 total change)
-   */
   const handleDownvote = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
 
     if (currentIsUpvoted === false) {
-      // Remove existing downvote
-      setCurrentVotes((prev) => prev + 1);
-      setCurrentIsUpvoted(null);
-      debouncedVote("unvote");
+      optimisticVote.mutate({ action: "unvote" });
     } else {
-      // Add downvote (or switch from upvote)
-      const voteDiff = currentIsUpvoted === true ? -2 : -1; // -2 if switching, -1 if new
-      setCurrentVotes((prev) => prev + voteDiff);
-      setCurrentIsUpvoted(false);
-      debouncedVote("downvote");
+      optimisticVote.mutate({ action: "downvote" });
     }
-  }, [currentIsUpvoted, debouncedVote]);
+  }, [currentIsUpvoted, optimisticVote]);
 
   return (
     <XStack alignItems="center" justifyContent="center" gap="$2">
