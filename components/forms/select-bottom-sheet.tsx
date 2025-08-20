@@ -128,7 +128,7 @@ export const SelectBottomSheet = forwardRef<
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 onSelect(selectedValue || "");
-                // bottomSheetRef.current?.dismiss();
+                bottomSheetRef.current?.dismiss();
               }}
               variant="primary"
               size="lg"
