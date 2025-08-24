@@ -80,7 +80,6 @@ export default function TabsLayout() {
           name="home"
           options={{
             title: "Home",
-            headerShown: false,
             tabBarIcon: ({ focused, color }) => (
               <ThemedIonicons
                 name={focused ? "home" : "home-outline"}
