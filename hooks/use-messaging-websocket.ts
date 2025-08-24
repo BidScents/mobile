@@ -1,11 +1,11 @@
-import { 
-  useAuthStore, 
-  WSMessageResponse, 
-  WSType, 
-  MessageResData, 
-  TypingResData, 
-  UpdateLastReadData, 
-  ErrorResData
+import {
+  ErrorResData,
+  MessageResData,
+  TypingResData,
+  UpdateLastReadData,
+  useAuthStore,
+  WSMessageResponse,
+  WSType
 } from '@bid-scents/shared-sdk'
 import { useEffect, useRef } from 'react'
 
@@ -97,29 +97,18 @@ export function useMessagingWebSocket({
     }
 
     // Create WebSocket connection
-    const wsUrl = `${WS_BASE_URL}/v1/message/ws?token=${session.access_token}`
+    const wsUrl = `${WS_BASE_URL}/v1/message?token=${session.access_token}`
     const ws = new WebSocket(wsUrl)
     wsRef.current = ws
 
     ws.onopen = () => {
       console.log('Connected to messaging WebSocket')
       onConnect?.()
-      
-      // Send initial ping to maintain connection
-      ws.send(JSON.stringify({ type: 'ping' }))
-      
-      // Set up periodic pings every 30 seconds
-      const pingInterval = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'ping' }))
-        }
-      }, 30000)
+    }
 
-      ws.onclose = () => {
-        console.log('Disconnected from messaging WebSocket')
-        clearInterval(pingInterval)
-        onDisconnect?.()
-      }
+    ws.onclose = () => {
+      console.log('Disconnected from messaging WebSocket')
+      onDisconnect?.()
     }
 
     ws.onmessage = (event) => {

@@ -1,4 +1,4 @@
-import { BidResData, useAuthStore, WSBidResponse, WSJoinResponse, WSExtensionResponse, WSType } from '@bid-scents/shared-sdk'
+import { BidResData, useAuthStore, WSBidResponse, WSExtensionResponse, WSJoinResponse, WSType } from '@bid-scents/shared-sdk'
 import { useEffect, useRef } from 'react'
 
 const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:8000'
@@ -91,19 +91,8 @@ export function useAuctionWebSocket({
       console.log(`Connected to auction WebSocket for listing ${listingIdRef.current}`)
       onConnect?.()
       
-      // Send initial ping to maintain connection
-      ws.send(JSON.stringify({ type: 'ping' }))
-      
-      // Set up periodic pings every 30 seconds
-      const pingInterval = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'ping' }))
-        }
-      }, 30000)
-
       ws.onclose = () => {
         console.log(`Disconnected from auction WebSocket for listing ${listingIdRef.current}`)
-        clearInterval(pingInterval)
         onDisconnect?.()
       }
     }
