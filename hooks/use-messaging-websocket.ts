@@ -85,14 +85,30 @@ export function useMessagingWebSocket({
   onError
 }: UseMessagingWebSocketOptions): UseMessagingWebSocketReturn {
   const wsRef = useRef<WebSocket | null>(null)
-  const enabledRef = useRef(enabled)
   const { session } = useAuthStore()
 
-  // Update refs without causing re-renders
-  enabledRef.current = enabled
+  // Store callbacks in refs to avoid useEffect dependencies
+  const callbacksRef = useRef({
+    onConnect,
+    onDisconnect,
+    onMessage,
+    onTyping,
+    onUpdateLastRead,
+    onError
+  })
+  
+  // Update callback refs
+  callbacksRef.current = {
+    onConnect,
+    onDisconnect,
+    onMessage,
+    onTyping,
+    onUpdateLastRead,
+    onError
+  }
 
   useEffect(() => {
-    if (!enabledRef.current || !session?.access_token) {
+    if (!enabled || !session?.access_token) {
       return
     }
 
@@ -103,12 +119,12 @@ export function useMessagingWebSocket({
 
     ws.onopen = () => {
       console.log('Connected to messaging WebSocket')
-      onConnect?.()
+      callbacksRef.current.onConnect?.()
     }
 
     ws.onclose = () => {
       console.log('Disconnected from messaging WebSocket')
-      onDisconnect?.()
+      callbacksRef.current.onDisconnect?.()
     }
 
     ws.onmessage = (event) => {
@@ -119,28 +135,28 @@ export function useMessagingWebSocket({
           case WSType.MESSAGE: {
             const messageData = message.data as MessageResData
             console.log('New message received:', messageData)
-            onMessage?.(messageData)
+            callbacksRef.current.onMessage?.(messageData)
             break
           }
           
           case WSType.TYPING: {
             const typingData = message.data as TypingResData
             console.log('Typing indicator received:', typingData)
-            onTyping?.(typingData)
+            callbacksRef.current.onTyping?.(typingData)
             break
           }
           
           case WSType.UPDATE_LAST_READ: {
             const updateData = message.data as UpdateLastReadData
             console.log('Last read update received:', updateData)
-            onUpdateLastRead?.(updateData)
+            callbacksRef.current.onUpdateLastRead?.(updateData)
             break
           }
           
           case WSType.ERROR: {
             const errorData = message.data as ErrorResData
             console.error('WebSocket error received:', errorData)
-            onError?.(errorData)
+            callbacksRef.current.onError?.(errorData)
             break
           }
           
@@ -167,7 +183,7 @@ export function useMessagingWebSocket({
     return () => {
       ws.close()
     }
-  }, [session?.access_token]) // Only depend on session, nothing else
+  }, [enabled, session?.access_token]) // Depend on enabled state and session
 
   /**
    * Sends typing status for a specific conversation
