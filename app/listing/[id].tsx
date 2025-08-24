@@ -6,8 +6,8 @@ import { BlurBackButton } from "@/components/ui/blur-back-button";
 import { Container } from "@/components/ui/container";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { useLocalSearchParams } from "expo-router";
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { Dimensions } from "react-native";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AppState, AppStateStatus, Dimensions } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text } from "tamagui";
 import { useListingDetail } from "../../hooks/queries/use-listing";
@@ -31,13 +31,26 @@ export default function ListingScreen() {
   const currentViewersRef = useRef<number | undefined>(undefined);
   const [, forceUpdate] = useState({});
   const forceUpdateUI = useCallback(() => forceUpdate({}), []);
+  
+  // Track app state for WebSocket connection management
+  const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState);
+
+  // Set up AppState listener for WebSocket lifecycle management
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      setAppState(nextAppState);
+    });
+
+    return () => subscription.remove();
+  }, []);
 
   // Determine if WebSocket should connect for auction listings
   const shouldConnectToAuction = useMemo(() => {
     const isAuctionListing = listing?.listing?.listing_type === "AUCTION";
     const hasAuctionDetails = !!listing?.auction_details;
-    return isAuctionListing && hasAuctionDetails && !!id;
-  }, [listing?.listing?.listing_type, listing?.auction_details, id]);
+    const isAppActive = appState === "active";
+    return isAuctionListing && hasAuctionDetails && !!id && isAppActive;
+  }, [listing?.listing?.listing_type, listing?.auction_details, id, appState]);
 
   // Check if current user is highest bidder (calculated once here to avoid duplication)
   const isCurrentUserHighestBidder = useMemo(() => {
