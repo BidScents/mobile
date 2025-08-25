@@ -1,4 +1,5 @@
 import { ThemedIonicons } from "@/components/ui/themed-icons";
+import { useConversationSummary } from "@/hooks/queries/use-messages";
 import {
   useMarkNotificationsSeen,
   useNotificationsList,
@@ -19,7 +20,11 @@ export default function TabsLayout() {
   const markAsSeen = useMarkNotificationsSeen();
   const { clearBadge, clearNotifications } = useNotifications();
 
+  // Get conversation data for chat badge
+  const { data: conversationData } = useConversationSummary();
+
   const unseenCount = notificationData?.unseen_count || 0;
+  const unreadMessagesCount = conversationData?.total_unread || 0;
 
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -93,8 +98,14 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="chat"
           options={{
-            title: "Chat",
+            title: "Messages",
             headerShown: true,
+            tabBarBadge:
+              unreadMessagesCount > 0
+                ? unreadMessagesCount > 99
+                  ? "99+"
+                  : unreadMessagesCount.toString()
+                : undefined,
             tabBarIcon: ({ focused, color }) => (
               <ThemedIonicons
                 name={focused ? "chatbubbles" : "chatbubbles-outline"}
