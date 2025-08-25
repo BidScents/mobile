@@ -75,7 +75,7 @@ export function useMessages(conversationId: string) {
   return useInfiniteQuery({
     queryKey: queryKeys.messages.list(conversationId),
     queryFn: ({ pageParam }) => {
-      return MessageService.getMessagesV1MessageMessagesConversationIdGet(
+      return MessageService.getMessagesV1MessageConversationIdMessagesGet(
         conversationId,
         pageParam, // cursor
         20 // limit
