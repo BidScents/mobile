@@ -8,7 +8,6 @@ import React, {
   useState,
 } from "react";
 import { AppState, AppStateStatus } from "react-native";
-import { queryKeys } from "../hooks/queries/query-keys";
 import { useMessagingWebSocket } from "../hooks/use-messaging-websocket";
 import { useMessagingWebSocketHandlers } from "../hooks/use-messaging-websocket-handlers";
 import { useTyping } from "../hooks/use-typing";
@@ -144,14 +143,8 @@ export function MessagingProvider({ children }: MessagingProviderProps) {
       console.log("App state changed:", appState, "->", nextAppState);
       setAppState(nextAppState);
 
-      // When app comes back to foreground, invalidate message caches to sync any missed updates
       if (appState !== "active" && nextAppState === "active") {
         console.log("App returned to foreground - refreshing message data");
-
-        // Invalidate message-related queries to sync with any updates that happened while backgrounded
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.messages.summary,
-        });
 
         // Clear all typing indicators since they would be stale
         if (typingUsersRef.current) {
