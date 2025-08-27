@@ -38,7 +38,6 @@ export const queryKeys = {
     summary: ['messages', 'summary'] as const,
     conversation: (id: string) => ['messages', 'conversation', id] as const,
     list: (conversationId: string, cursor?: string) => ['messages', 'list', conversationId, cursor] as const,
-    contactSeller: (sellerId: string) => ['messages', 'contact-seller', sellerId] as const,
   },
   
   dashboard: {

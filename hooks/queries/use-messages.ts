@@ -10,7 +10,7 @@ import {
   useInfiniteQuery,
   useMutation,
   useQuery,
-  useQueryClient
+  useQueryClient,
 } from "@tanstack/react-query";
 import { queryKeys } from "./query-keys";
 
@@ -41,25 +41,13 @@ export function useConversation(conversationId: string) {
   return useQuery({
     queryKey: queryKeys.messages.conversation(conversationId),
     queryFn: () =>
-      MessageService.getConversationV1MessageConversationConversationIdGet(conversationId),
+      MessageService.getConversationV1MessageConversationConversationIdGet(
+        conversationId
+      ),
     staleTime: 1 * 60 * 1000, // 1 minute - conversation content changes frequently
     enabled: !!conversationId,
     // Enable background refetch for active conversations
     refetchOnWindowFocus: true,
-  });
-}
-
-/**
- * Contact seller - get or create conversation with a seller
- * Used when contacting a seller from a listing
- */
-export function useContactSeller(sellerId: string) {
-  return useQuery({
-    queryKey: queryKeys.messages.contactSeller(sellerId),
-    queryFn: () =>
-      MessageService.contactSellerV1MessageContactSellerSellerIdGet(sellerId),
-    staleTime: 5 * 60 * 1000, // 5 minutes - seller contact info is relatively stable
-    enabled: !!sellerId,
   });
 }
 
@@ -86,7 +74,7 @@ export function useMessages(conversationId: string) {
       if (!lastPage || lastPage.length < 20) {
         return undefined;
       }
-      
+
       // Use the created_at timestamp of the last message as cursor
       const lastMessage = lastPage[lastPage.length - 1];
       return lastMessage.created_at;
@@ -129,7 +117,7 @@ function updateConversationCachesWithNewMessage(
     queryKeys.messages.list(conversationId),
     (old: any) => {
       if (!old?.pages) return old;
-      
+
       // Add message to the first page (most recent messages)
       const updatedPages = [...old.pages];
       if (updatedPages.length > 0) {
@@ -150,7 +138,7 @@ function updateConversationCachesWithNewMessage(
     queryKeys.messages.summary,
     (old) => {
       if (!old) return old;
-      
+
       return {
         ...old,
         conversations: old.conversations.map((conv) =>
@@ -170,6 +158,32 @@ function updateConversationCachesWithNewMessage(
 // ========================================
 // MESSAGE MUTATIONS
 // ========================================
+
+/**
+ * Contact seller mutation - creates or gets existing conversation with a seller
+ * Used when contacting a seller from a listing
+ * Automatically caches the result using the conversation query key
+ */
+export function useContactSeller() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (sellerId: string) =>
+      MessageService.contactSellerV1MessageContactSellerSellerIdGet(sellerId),
+    onSuccess: (conversationResponse: ConversationResponse) => {
+      // Store the conversation data in the conversation cache
+      queryClient.setQueryData(
+        queryKeys.messages.conversation(conversationResponse.id),
+        conversationResponse
+      );
+
+      // Also invalidate the conversation summary cache
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.messages.summary,
+      });
+    },
+  });
+}
 
 /**
  * Send message mutation with optimistic updates
@@ -201,9 +215,10 @@ export function useSendMessage() {
       });
 
       // Get current conversation data for rollback
-      const previousConversationData = queryClient.getQueryData<ConversationResponse>(
-        queryKeys.messages.conversation(conversationId)
-      );
+      const previousConversationData =
+        queryClient.getQueryData<ConversationResponse>(
+          queryKeys.messages.conversation(conversationId)
+        );
       const previousMessagesData = queryClient.getQueryData(
         queryKeys.messages.list(conversationId)
       );
@@ -262,7 +277,7 @@ export function useSendMessage() {
           context.previousMessagesData
         );
       }
-      
+
       // Also invalidate to ensure we have correct state
       queryClient.invalidateQueries({
         queryKey: queryKeys.messages.conversation(conversationId),
@@ -290,11 +305,13 @@ export function useUpdateLastRead() {
         queryKeys.messages.summary,
         (old) => {
           if (!old) return old;
-          
+
           // Find the conversation to get its current unread count
-          const conversation = old.conversations.find(conv => conv.id === conversationId);
+          const conversation = old.conversations.find(
+            (conv) => conv.id === conversationId
+          );
           const currentUnreadCount = conversation?.unread_count || 0;
-          
+
           return {
             ...old,
             total_unread: Math.max(0, old.total_unread - currentUnreadCount), // Decrease by actual unread count
