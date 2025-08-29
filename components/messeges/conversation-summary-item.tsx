@@ -30,13 +30,13 @@ function formatMessageContent(messageType: MessageType, content: any): string {
       const actionType = content.action_type;
       switch (actionType) {
         case "INITIATE_TRANSACTION":
-          return "💰 Transaction initiated";
+          return "Initiate transaction";
         case "CONFIRM_RECEIPT":
-          return "✅ Receipt confirmed";
+          return "Confirm receipt";
         case "SUBMIT_REVIEW":
-          return "⭐ Review submitted";
+          return "Submit review";
         default:
-          return "⚡ Action message";
+          return "Action message";
       }
     case MessageType.SYSTEM:
       return content.text || "System message";
