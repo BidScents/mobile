@@ -5,12 +5,13 @@ import { ListingDetailSkeleton } from "@/components/suspense/listing-detail-skel
 import { BlurBackButton } from "@/components/ui/blur-back-button";
 import { Container } from "@/components/ui/container";
 import { useAuthStore } from "@bid-scents/shared-sdk";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, AppStateStatus, Dimensions } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text } from "tamagui";
 import { useListingDetail } from "../../hooks/queries/use-listing";
+import { useContactSeller } from "../../hooks/queries/use-messages";
 import { useAuctionWebSocket } from "../../hooks/use-auction-websocket";
 import { useAuctionWebSocketHandlers } from "../../hooks/use-auction-websocket-handlers";
 import { isCurrentUserHighestBidder as checkIsCurrentUserHighestBidder } from "../../utils/auction-helpers";
@@ -21,8 +22,10 @@ import { isCurrentUserHighestBidder as checkIsCurrentUserHighestBidder } from ".
  */
 export default function ListingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { data: listing, isLoading, error, isFetching } = useListingDetail(id!);
   const { user } = useAuthStore();
+  const contactSellerMutation = useContactSeller();
 
   const width = Dimensions.get("window").width;
   const height = Dimensions.get("window").height * 0.5;
@@ -86,9 +89,23 @@ export default function ListingScreen() {
     onExtension: handleExtension,
   });
 
-  const handleContactSeller = () => {
-    console.log("Contact seller");
-  };
+  const handleContactSeller = useCallback(() => {
+    if (!listing?.seller?.id) {
+      console.error("No seller ID available");
+      return;
+    }
+
+    contactSellerMutation.mutate(listing.seller.id, {
+      onSuccess: (conversationResponse) => {
+        // Navigate to the chat screen with the conversation ID
+        router.push(`/(screens)/(chat)/${conversationResponse.id}`);
+      },
+      onError: (error) => {
+        console.error("Error contacting seller:", error);
+        //show an error toast here
+      },
+    });
+  }, [listing?.seller?.id, contactSellerMutation, router]);
 
   // Show skeleton only if no data at all (no seeded cache)
   if (isLoading && !listing) {
@@ -165,7 +182,7 @@ export default function ListingScreen() {
           listingId={listing.listing.id}
           auctionDetails={listing.auction_details}
           isCurrentUserHighestBidder={isCurrentUserHighestBidder}
-          isLoading={isLoading || (listing as any)?.__seeded === true}
+          isLoading={isLoading || (listing as any)?.__seeded === true || contactSellerMutation.isPending}
           onAction={handleContactSeller}
         />
       )}
