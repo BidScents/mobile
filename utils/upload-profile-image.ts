@@ -13,6 +13,11 @@ export const uploadProfileImage = async (
   imageUri: string, 
   variant: 'profile' | 'cover', 
 ): Promise<string> => {
+  // Validate imageUri is not null/undefined
+  if (!imageUri || typeof imageUri !== 'string') {
+    throw new Error('Image URI is required and must be a valid string')
+  }
+
   const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' })
   const { contentType, ext } = getImgExtension(imageUri)
   const uuid = Crypto.randomUUID()
