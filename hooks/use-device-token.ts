@@ -3,7 +3,6 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import { registerBackgroundNotificationTask } from '../services/background-notification-task';
 import { useAddDeviceToken } from './queries/use-notifications';
 
 /**
@@ -190,7 +189,7 @@ export function useDeviceToken() {
     if (isAuthenticated && user) {
       checkAndRegisterToken();
       // Register background notification task for badge handling
-      registerBackgroundNotificationTask();
+      // registerBackgroundNotificationTask();
     }
   }, [isAuthenticated, user?.id]);
 
