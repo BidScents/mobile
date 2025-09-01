@@ -6,12 +6,14 @@ import type {
 } from "@bid-scents/shared-sdk";
 import { MessageService, useAuthStore } from "@bid-scents/shared-sdk";
 import {
+  InfiniteData,
   QueryClient,
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { queryKeys } from "./query-keys";
 
 // ========================================
@@ -56,35 +58,74 @@ export function useConversation(conversationId: string) {
 // ========================================
 
 /**
- * Infinite query for loading messages with cursor pagination
+ * Infinite query for loading messages with cursor pagination (WhatsApp pattern)
  * Used for loading message history in conversation screens
  */
-export function useMessages(conversationId: string) {
+export function useMessages(conversationId: string, initialMessages: MessageResData[] = []) {
   return useInfiniteQuery({
     queryKey: queryKeys.messages.list(conversationId),
     queryFn: ({ pageParam }) => {
+      // Only fetch if we have a cursor (meaning we need older messages)
+      if (!pageParam) return [];
+      
       return MessageService.getMessagesV1MessageConversationIdMessagesGet(
         conversationId,
-        pageParam, // cursor
-        20 // limit
+        pageParam, // cursor timestamp
+        50 // limit
       );
     },
     getNextPageParam: (lastPage: MessageResData[]) => {
-      // If we got less than the limit, there are no more messages
-      if (!lastPage || lastPage.length < 20) {
+      // No more pages if we got less than the limit
+      if (!lastPage || lastPage.length < 50) {
         return undefined;
       }
-
-      // Use the created_at timestamp of the last message as cursor
-      const lastMessage = lastPage[lastPage.length - 1];
-      return lastMessage.created_at;
+      
+      // Use the oldest message's timestamp as cursor for next page
+      const oldestMessage = lastPage[lastPage.length - 1];
+      return oldestMessage.created_at;
     },
-    initialPageParam: new Date().toISOString(), // Start from current time
-    staleTime: 30 * 1000, // 30 seconds - messages are real-time
+    initialPageParam: initialMessages.length > 0 
+      ? initialMessages[0]?.created_at  // Start pagination from oldest initial message
+      : undefined, // No initial cursor if no initial messages
+    staleTime: 5 * 60 * 1000, // Increased stale time - less refetching
     enabled: !!conversationId,
-    // Enable background refetch for active message threads
-    refetchOnWindowFocus: true,
+    // Don't automatically fetch on mount - we have initial messages
+    refetchOnMount: false,
   });
+}
+
+/**
+ * Message deduplication hook - merges initial messages with paginated messages
+ * Ensures no duplicate messages and maintains chronological order
+ */
+export function useDeduplicatedMessages(
+  initialMessages: MessageResData[],
+  infiniteData: InfiniteData<MessageResData[]> | undefined
+) {
+  return useMemo(() => {
+    // Start with initial messages (most recent from conversation)
+    const messageMap = new Map<string, MessageResData>();
+    
+    // Add initial messages first
+    initialMessages.forEach(message => {
+      messageMap.set(message.id, message);
+    });
+    
+    // Add paginated messages (older messages)
+    if (infiniteData?.pages) {
+      infiniteData.pages.forEach(page => {
+        page.forEach(message => {
+          // Only add if not already present (deduplication)
+          if (!messageMap.has(message.id)) {
+            messageMap.set(message.id, message);
+          }
+        });
+      });
+    }
+    
+    // Convert to array and sort chronologically (oldest first)
+    return Array.from(messageMap.values())
+  }, [initialMessages, infiniteData]);
 }
 
 // ========================================
@@ -92,15 +133,15 @@ export function useMessages(conversationId: string) {
 // ========================================
 
 /**
- * Updates conversation caches after sending a message
- * Ensures optimistic updates are reflected across all related queries
+ * Updates conversation caches after sending a message (WhatsApp pattern)
+ * Only updates conversation cache, lets deduplication hook handle merging
  */
 function updateConversationCachesWithNewMessage(
   queryClient: QueryClient,
   conversationId: string,
   newMessage: MessageResData
 ) {
-  // 1. Update conversation cache with new message
+  // 1. Update conversation cache - add to messages array
   queryClient.setQueryData<ConversationResponse>(
     queryKeys.messages.conversation(conversationId),
     (old) => {
@@ -112,26 +153,9 @@ function updateConversationCachesWithNewMessage(
     }
   );
 
-  // 2. Update infinite messages cache
-  queryClient.setQueryData<any>(
-    queryKeys.messages.list(conversationId),
-    (old: any) => {
-      if (!old?.pages) return old;
-
-      // Add message to the first page (most recent messages)
-      const updatedPages = [...old.pages];
-      if (updatedPages.length > 0) {
-        updatedPages[0] = [newMessage, ...updatedPages[0]];
-      } else {
-        updatedPages[0] = [newMessage];
-      }
-
-      return {
-        ...old,
-        pages: updatedPages,
-      };
-    }
-  );
+  // 2. DON'T update infinite messages cache directly
+  // Let the deduplication hook handle merging on next render
+  // This prevents cache inconsistencies
 
   // 3. Update conversation summary cache
   queryClient.setQueryData<MessagesSummary>(
@@ -145,8 +169,7 @@ function updateConversationCachesWithNewMessage(
           conv.id === conversationId
             ? {
                 ...conv,
-                last_message: newMessage, // Use the complete MessageResData object
-                unread_count: conv.unread_count + 1, // Increment unread count for new message
+                last_message: newMessage,
               }
             : conv
         ),
@@ -251,17 +274,21 @@ export function useSendMessage() {
       };
     },
     onSuccess: (response: MessageResData, { conversationId }) => {
-      // Invalidate and refetch to get the real message data from server
-      // This ensures we have the correct message ID, timestamps, and any server-side updates
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.conversation(conversationId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.list(conversationId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.summary,
-      });
+      // Replace optimistic message with real message
+      queryClient.setQueryData<ConversationResponse>(
+        queryKeys.messages.conversation(conversationId),
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            messages: old.messages.map(msg => 
+              msg.id.startsWith('temp-') && msg.created_at === response.created_at
+                ? response // Replace optimistic with real message
+                : msg
+            ),
+          };
+        }
+      );
     },
     onError: (err, { conversationId }, context) => {
       // Rollback optimistic updates on error
