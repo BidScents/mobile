@@ -5,22 +5,15 @@ import { ConversationSummary } from "@bid-scents/shared-sdk";
 import { LegendList } from "@legendapp/list";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import React, { useCallback } from "react";
-import { RefreshControl } from "react-native";
 import { Text, View, YStack } from "tamagui";
 
 const MemoizedConversationSummaryItem = React.memo(ConversationSummaryItem);
 
 export default function ChatScreen() {
-  const { data, isLoading, refetch, isRefetching, error } =
-    useConversationSummary();
+  const { data, isLoading, refetch, error } = useConversationSummary();
   const tabbarHeight = useBottomTabBarHeight();
 
   const conversations = data?.conversations || [];
-
-  // Handle refresh
-  const handleRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
 
   // Render conversation item
   const renderConversationItem = useCallback(
@@ -95,7 +88,7 @@ export default function ChatScreen() {
             fontSize="$4"
             color="$blue9"
             textDecorationLine="underline"
-            onPress={handleRefresh}
+            onPress={() => refetch()}
           >
             Retry
           </Text>
@@ -137,9 +130,7 @@ export default function ChatScreen() {
         estimatedItemSize={80}
         showsVerticalScrollIndicator={false}
         keyExtractor={keyExtractor}
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
-        }
+        onRefresh={refetch}
         keyboardDismissMode="on-drag"
         contentContainerStyle={{ paddingBottom: tabbarHeight }}
       />
