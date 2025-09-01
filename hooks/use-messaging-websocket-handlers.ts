@@ -1,16 +1,16 @@
-import { useCallback } from 'react'
+import {
+  ConversationResponse,
+  ErrorResData,
+  MessageResData,
+  MessagesSummary,
+  TypingResData,
+  UpdateLastReadData,
+  useAuthStore
+} from '@bid-scents/shared-sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
-import { 
-  MessageResData, 
-  TypingResData, 
-  UpdateLastReadData, 
-  ErrorResData,
-  ConversationResponse,
-  MessagesSummary,
-  useAuthStore
-} from '@bid-scents/shared-sdk'
+import { useCallback } from 'react'
 import { queryKeys } from './queries/query-keys'
 
 /**
@@ -138,6 +138,15 @@ export function useMessagingWebSocketHandlers({
         return {
           ...old,
           messages: [messageData, ...old.messages],
+          participants: old.participants.map((participant) => {
+            if (participant.user.id === messageData.sender.id) {
+              return {
+                ...participant,
+                last_read_at: messageData.created_at,
+              }
+            }
+            return participant
+          }),
         }
       }
     )
@@ -199,12 +208,22 @@ export function useMessagingWebSocketHandlers({
     }
 
     // 5. Show notification for new message (only if not from current user)
+    const getNotificationBody = () => {
+      if (!messageData.content) {
+        return 'Sent a message'
+      }
+      
+      if (typeof messageData.content === 'object' && 'text' in messageData.content) {
+        return (messageData.content as any).text || 'Sent a message'
+      }
+      
+      return 'Sent a message'
+    }
+
     await Notifications.scheduleNotificationAsync({
       content: {
         title: messageData.sender.username || 'New Message',
-        body: 'content' in messageData.content ? 
-          (messageData.content as any).text || 'Sent a message' : 
-          'Sent a message',
+        body: getNotificationBody(),
         sound: true,
       },
       trigger: null, // Show immediately
@@ -260,35 +279,30 @@ export function useMessagingWebSocketHandlers({
     console.log('Last read update received:', updateData)
 
     const conversationId = updateData.conversation_id
+    const userId = updateData.user_id
+    const lastReadAt = updateData.last_read_at
 
-    // Only update if it's not the current user (we handle our own reads locally)
-    if (updateData.user_id === currentUserId) {
-      return
-    }
-
-    // Update conversation summary to reflect that someone else read messages
-    queryClient.setQueryData<MessagesSummary>(
-      queryKeys.messages.summary,
+    // Update the conversation cache to update participant's last_read_at
+    queryClient.setQueryData<ConversationResponse>(
+      queryKeys.messages.conversation(conversationId),
       (old) => {
         if (!old) return old
         
         return {
           ...old,
-          conversations: old.conversations.map((conv) => {
-            if (conv.id === conversationId) {
-              // Update participants' last read status
-              // This is useful for showing read receipts in group conversations
+          participants: old.participants.map((participant) => {
+            if (participant.user.id === userId) {
               return {
-                ...conv,
-                // Could add read receipt data here if needed
+                ...participant,
+                last_read_at: lastReadAt
               }
             }
-            return conv
-          }),
+            return participant
+          })
         }
       }
     )
-  }, [currentUserId, queryClient])
+  }, [queryClient])
 
   /**
    * Handles WebSocket errors
