@@ -28,8 +28,16 @@ export function ListingCard({
   onPress,
 }: ListingCardProps) {
   const queryClient = useQueryClient();
+  const isPressed = React.useRef(false);
 
   const handleCardPress = () => {
+    if (isPressed.current) {
+      return;
+    }
+    isPressed.current = true;
+    setTimeout(() => {
+      isPressed.current = false;
+    }, 1000); // Prevent double-tap
     onPress?.();
     
     // Only seed cache if no data exists or existing data is also seeded
