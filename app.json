@@ -12,7 +12,7 @@
       "supportsTablet": true,
       "buildNumber": "1",
       "bundleIdentifier": "com.bidscents.mobile",
-      "icon":  {
+      "icon": {
         "dark": "./assets/icons/ios-dark.png",
         "light": "./assets/icons/ios-light.png",
         "tinted": "./assets/icons/ios-tinted.png"
@@ -20,6 +20,7 @@
       "infoPlist": {
         "NSCameraUsageDescription": "This app needs access to your camera to take photos for messages and listings.",
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select images for messages and listings.",
+        "NSMicrophoneUsageDescription": "This app needs access to your microphone to record audio for messages and listings.",
         "CFBundleURLTypes": [
           {
             "CFBundleURLName": "bidscents-oauth",
@@ -92,11 +93,19 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "cameraPermission": "This app needs access to your camera to take photos for messages and listings.",
+          "microphonePermission": "This app needs access to your microphone to record audio for messages and listings.",
           "recordAudioAndroid": false
         }
-      ]
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow bidscents to access your photos.",
+          "savePhotosPermission": "Allow bidscents to save photos."
+        }
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
