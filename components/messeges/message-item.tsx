@@ -98,6 +98,7 @@ const MessageItemComponent = ({
           <FileMessage
             content={message.content as any}
             isCurrentUser={isCurrentUserMessage}
+            messageId={message.id}
           />
         );
       case 'ACTION':

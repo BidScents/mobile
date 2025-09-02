@@ -5,19 +5,21 @@ import { Image, Text, View, XStack } from "tamagui";
 interface FileMessageProps {
   content: FileContent;
   isCurrentUser: boolean;
+  messageId: string;
 }
 
-export function FileMessage({ content, isCurrentUser }: FileMessageProps) {
+export function FileMessage({ content, isCurrentUser, messageId }: FileMessageProps) {
   const isImage = content.file_type.startsWith("image/");
 
   if (isImage) {
     return (
       <View>
         <Image
+          key={`${messageId}-${content.file_url}`}
           source={{ uri: content.file_url }}
           width={200}
           height={150}
-          borderRadius="$3"
+          borderRadius="$5"
           resizeMode="cover"
         />
         {content.caption && (
