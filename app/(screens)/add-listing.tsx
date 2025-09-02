@@ -8,7 +8,7 @@ import {
   categoryOptions,
   listingTypeOptions,
 } from "@/types/create-listing-types";
-import { uploadListingImages } from "@/utils/upload-listing-images";
+import { uploadMultipleImages, ImageUploadConfigs } from "@/utils/image-upload-service";
 import {
   CreateListingRequest,
   createListingSchema,
@@ -95,14 +95,17 @@ export default function AddListingScreen() {
 
       // Step 1: Upload images
       console.log("Uploading images...");
-      const uploadedImageUrls = await uploadListingImages(
+      const uploadResults = await uploadMultipleImages(
         imageUris,
-        user.id,
-        (uploaded, total) => {
-          console.log(`Uploaded ${uploaded}/${total} images`);
+        ImageUploadConfigs.listing(),
+        (progress) => {
+          console.log(`Uploaded ${progress.uploaded}/${progress.total} images`);
           // You could update loading text here if needed
         }
       );
+
+      // Extract URLs from upload results
+      const uploadedImageUrls = uploadResults.map(result => `listing-images/${result.path}`);
 
       // Step 2: Update form data with uploaded URLs
       const updatedData = {

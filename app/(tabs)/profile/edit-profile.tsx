@@ -5,7 +5,7 @@ import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { ProfilePreviewPicker } from "@/components/ui/profile-preview-picker";
 import { useEditProfile } from "@/hooks/queries/use-profile";
-import { uploadProfileImage } from "@/utils/upload-profile-image";
+import { uploadSingleImage, ImageUploadConfigs } from "@/utils/image-upload-service";
 import {
   AuthService,
   onboardingSchema,
@@ -113,8 +113,8 @@ export default function EditProfileScreen() {
       if (isProfileImageChanged) {
         if (profileImageUri) {
           // Upload new image
-          const uploadedPath = await uploadProfileImage(profileImageUri, "profile");
-          profileImage = `profile-images/${uploadedPath}`;
+          const result = await uploadSingleImage(profileImageUri, ImageUploadConfigs.profile("profile"));
+          profileImage = `profile-images/${result.path}`;
         } else {
           // Image was removed
           profileImage = null;
@@ -125,8 +125,8 @@ export default function EditProfileScreen() {
       if (isCoverImageChanged) {
         if (coverImageUri) {
           // Upload new image
-          const uploadedPath = await uploadProfileImage(coverImageUri, "cover");
-          coverImage = `profile-images/${uploadedPath}`;
+          const result = await uploadSingleImage(coverImageUri, ImageUploadConfigs.profile("cover"));
+          coverImage = `profile-images/${result.path}`;
         } else {
           // Image was removed
           coverImage = null;

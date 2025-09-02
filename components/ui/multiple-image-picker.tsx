@@ -1,9 +1,7 @@
 import { ThemedIonicons } from "./themed-icons";
-import * as FileSystem from "expo-file-system";
-import * as ImagePicker from "expo-image-picker";
+import { useImagePicker } from "@/hooks/use-image-picker";
 import React from "react";
 import {
-  Alert,
   Dimensions,
   ScrollView,
   TouchableOpacity,
@@ -33,98 +31,31 @@ export function MultipleImagePicker({
   const itemsPerRow = 3;
   const itemSize =
     (screenWidth - padding - gap * (itemsPerRow - 1)) / itemsPerRow;
+  
+  const { pickFromGallery } = useImagePicker({
+    allowMultiple: true,
+    maxImages,
+    allowsEditing: false,
+    quality: 0.3
+  });
+
+
 
   /**
-   * Check if image file size is acceptable
-   */
-  const checkImageSize = async (uri: string): Promise<boolean> => {
-    try {
-      const fileInfo = await FileSystem.getInfoAsync(uri);
-      if (fileInfo.exists && fileInfo.size) {
-        const sizeInMB = fileInfo.size / (1024 * 1024);
-        if (sizeInMB > 10) {
-          Alert.alert(
-            "Image Too Large",
-            `This image is ${sizeInMB.toFixed(
-              1
-            )}MB. Please choose an image smaller than 10MB.`
-          );
-          return false;
-        }
-      }
-      return true;
-    } catch (error) {
-      console.error("Error checking file size:", error);
-      return true; // Allow if we can't check
-    }
-  };
-
-  // /**
-  //  * Request media library permissions
-  //  */
-  // const requestPermissions = async (): Promise<boolean> => {
-  //   try {
-  //     const { status } =
-  //       await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-  //     if (status === "granted") {
-  //       return true;
-  //     }
-
-  //     if (status === "denied") {
-  //       Alert.alert(
-  //         "Permission Required",
-  //         "This app needs access to your photo library to select images. Please enable it in Settings.",
-  //         [
-  //           { text: "Cancel", style: "cancel" },
-  //           { text: "Open Settings", onPress: () => Linking.openSettings() },
-  //         ]
-  //       );
-  //     }
-
-  //     return false;
-  //   } catch (error) {
-  //     console.error("Permission request failed:", error);
-  //     Alert.alert("Error", "Failed to request permissions");
-  //     return false;
-  //   }
-  // };
-
-  /**
-   * Handle adding new images
+   * Handle adding new images using universal hook
    */
   const pickImages = async () => {
     if (disabled || imageUris.length >= maxImages) return;
 
-    // const hasPermission = await requestPermissions();
-    // if (!hasPermission) return;
-
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsMultipleSelection: true,
-        quality: 0.3,
-        selectionLimit: Math.max(1, maxImages - imageUris.length),
-      });
-
-      if (!result.canceled && result.assets) {
-        // Check size for each selected image
-        const validUris: string[] = [];
-
-        for (const asset of result.assets) {
-          const isValidSize = await checkImageSize(asset.uri);
-          if (isValidSize) {
-            validUris.push(asset.uri);
-          }
-        }
-
-        if (validUris.length > 0) {
-          onImagesChange([...imageUris, ...validUris]);
-        }
-      }
-    } catch (error) {
-      console.error("Image selection failed:", error);
-      Alert.alert("Error", "Failed to select images");
+    const selectedImages = await pickFromGallery();
+    
+    if (selectedImages.length > 0) {
+      // Limit to remaining slots
+      const remainingSlots = maxImages - imageUris.length;
+      const imagesToAdd = selectedImages.slice(0, remainingSlots);
+      const newUris = imagesToAdd.map(img => img.uri);
+      
+      onImagesChange([...imageUris, ...newUris]);
     }
   };
 

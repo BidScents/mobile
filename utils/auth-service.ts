@@ -6,7 +6,7 @@
  */
 
 import { supabase } from '@/lib/supabase'
-import { uploadProfileImage } from '@/utils/upload-profile-image'
+import { uploadSingleImage, ImageUploadConfigs } from '@/utils/image-upload-service'
 import {
   AuthService as ApiAuthService,
   handleAuthStateChange,
@@ -198,9 +198,10 @@ export class AuthService {
       // Upload profile image
       if (data.profileImageUri) {
         try {
-          profileImagePath = await uploadProfileImage(data.profileImageUri, 'profile')
+          const result = await uploadSingleImage(data.profileImageUri, ImageUploadConfigs.profile('profile'))
+          profileImagePath = result.path
         } catch (error: any) {
-          if (error.message !== 'USER_SKIPPED') {
+          if (error.message !== 'USER_CANCELLED') {
             throw error
           }
         }
@@ -209,9 +210,10 @@ export class AuthService {
       // Upload cover image
       if (data.coverImageUri) {
         try {
-          coverImagePath = await uploadProfileImage(data.coverImageUri, 'cover')
+          const result = await uploadSingleImage(data.coverImageUri, ImageUploadConfigs.profile('cover'))
+          coverImagePath = result.path
         } catch (error: any) {
-          if (error.message !== 'USER_SKIPPED') {
+          if (error.message !== 'USER_CANCELLED') {
             throw error
           }
         }
