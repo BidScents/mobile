@@ -4,7 +4,7 @@ import type {
   MessageResData,
   MessagesSummary,
 } from "@bid-scents/shared-sdk";
-import { MessageService, useAuthStore } from "@bid-scents/shared-sdk";
+import { MessageService, MessageType, useAuthStore } from "@bid-scents/shared-sdk";
 import {
   InfiniteData,
   QueryClient,
@@ -229,7 +229,16 @@ export function useSendMessage() {
         messageRequest
       ),
     onMutate: async ({ conversationId, messageRequest }) => {
-      // Cancel outgoing queries for this conversation
+      // Skip optimistic updates for image messages - wait for success
+      if (messageRequest.content_type === MessageType.FILE) {
+        return {
+          previousConversationData: null,
+          previousMessagesData: null,
+          optimisticMessage: null,
+        };
+      }
+
+      // Cancel outgoing queries for this conversation (text messages only)
       await queryClient.cancelQueries({
         queryKey: queryKeys.messages.conversation(conversationId),
       });
@@ -246,7 +255,7 @@ export function useSendMessage() {
         queryKeys.messages.list(conversationId)
       );
 
-      // Create optimistic message with current user data
+      // Create optimistic message with current user data (text messages only)
       const optimisticMessage: MessageResData = {
         id: `temp-${Date.now()}`, // Temporary ID
         conversation_id: conversationId,
@@ -260,7 +269,7 @@ export function useSendMessage() {
         created_at: new Date().toISOString(),
       };
 
-      // Apply optimistic updates
+      // Apply optimistic updates (text messages only)
       updateConversationCachesWithNewMessage(
         queryClient,
         conversationId,
@@ -273,39 +282,52 @@ export function useSendMessage() {
         optimisticMessage,
       };
     },
-    onSuccess: (response: MessageResData, { conversationId }) => {
-      // Replace optimistic message with real message
-      queryClient.setQueryData<ConversationResponse>(
-        queryKeys.messages.conversation(conversationId),
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            messages: old.messages.map(msg => 
-              msg.id.startsWith('temp-') && msg.created_at === response.created_at
-                ? response // Replace optimistic with real message
-                : msg
-            ),
-          };
-        }
-      );
+    onSuccess: (response: MessageResData, { conversationId, messageRequest }) => {
+      console.log("Message sent successfully:", response);
+      
+      // For text messages: replace optimistic message with real message
+      if (messageRequest.content_type === MessageType.TEXT) {
+        queryClient.setQueryData<ConversationResponse>(
+          queryKeys.messages.conversation(conversationId),
+          (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              messages: old.messages.map(msg => 
+                msg.id.startsWith('temp-')
+                  ? response // Replace optimistic with real message
+                  : msg
+              ),
+            };
+          }
+        );
+      } else {
+        // For image messages: add the new message to cache (no optimistic update to replace)
+        updateConversationCachesWithNewMessage(
+          queryClient,
+          conversationId,
+          response
+        );
+      }
     },
-    onError: (err, { conversationId }, context) => {
-      // Rollback optimistic updates on error
-      if (context?.previousConversationData) {
+    onError: (err, { conversationId, messageRequest }, context) => {
+      console.error("Message send failed:", err);
+      
+      // Only rollback if we had optimistic updates (text messages)
+      if (messageRequest.content_type === MessageType.TEXT && context?.previousConversationData) {
         queryClient.setQueryData(
           queryKeys.messages.conversation(conversationId),
           context.previousConversationData
         );
       }
-      if (context?.previousMessagesData) {
+      if (messageRequest.content_type === MessageType.TEXT && context?.previousMessagesData) {
         queryClient.setQueryData(
           queryKeys.messages.list(conversationId),
           context.previousMessagesData
         );
       }
 
-      // Also invalidate to ensure we have correct state
+      // Always invalidate to ensure we have correct state
       queryClient.invalidateQueries({
         queryKey: queryKeys.messages.conversation(conversationId),
       });

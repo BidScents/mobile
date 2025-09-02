@@ -151,32 +151,6 @@ export function useMessagingWebSocketHandlers({
       }
     )
 
-    // 2. Update infinite messages cache
-    queryClient.setQueryData<any>(
-      queryKeys.messages.list(conversationId),
-      (old: any) => {
-        if (!old?.pages) return old
-        
-        // Check if message already exists in first page
-        const firstPage = old.pages[0] || []
-        const messageExists = firstPage.some((msg: MessageResData) => msg.id === messageData.id)
-        if (messageExists) return old
-
-        // Add message to the first page (most recent messages)
-        const updatedPages = [...old.pages]
-        if (updatedPages.length > 0) {
-          updatedPages[0] = [messageData, ...firstPage]
-        } else {
-          updatedPages[0] = [messageData]
-        }
-
-        return {
-          ...old,
-          pages: updatedPages,
-        }
-      }
-    )
-
     // 3. Update conversation summary cache
     queryClient.setQueryData<MessagesSummary>(
       queryKeys.messages.summary,
