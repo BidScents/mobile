@@ -1,4 +1,4 @@
-package com.bidscents.app
+package com.bidscents.mobile
 
 import android.app.Application
 import android.content.res.Configuration
