@@ -43,24 +43,6 @@ export default function SpecificChatScreen() {
     }, [id])
   );
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <Container
-        variant="fullscreen"
-        safeArea={["top"]}
-        backgroundColor="$background"
-      >
-        <YStack flex={1} justifyContent="center" alignItems="center">
-          <ActivityIndicator size="large" />
-          <Text fontSize="$4" color="$color11" marginTop="$3">
-            Loading conversation...
-          </Text>
-        </YStack>
-      </Container>
-    );
-  }
-
   // Error state
   if (error || !conversation) {
     return (
@@ -96,7 +78,16 @@ export default function SpecificChatScreen() {
       backgroundColor="$background"
     >
       <KeyboardAwareView>
-        <MessagesList conversation={conversation} />
+        {isLoading ? (
+          <YStack flex={1} justifyContent="center" alignItems="center">
+            <ActivityIndicator size="large" />
+            <Text fontSize="$4" color="$color11" marginTop="$3">
+              Loading conversation...
+            </Text>
+          </YStack>
+        ) : (
+            <MessagesList conversation={conversation} />
+        )}
         <ChatInputBar id={id as string} />
       </KeyboardAwareView>
     </Container>

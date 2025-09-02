@@ -23,44 +23,52 @@ export function FileMessage({ content, isCurrentUser, messageId }: FileMessagePr
           resizeMode="cover"
         />
         {content.caption && (
+          <View
+            paddingVertical="$1"
+            paddingHorizontal="$2"
+          >
           <Text
-            fontSize="$3"
-            color={isCurrentUser ? "$white" : "$color"}
+            fontSize="$4"
+            color="$foreground"
             marginTop="$2"
           >
             {content.caption}
           </Text>
+          </View>
         )}
       </View>
     );
   }
 
   return (
-    <View>
+    <View
+      paddingVertical="$1"
+      paddingHorizontal="$2"
+    >
       <XStack
         alignItems="center"
         gap="$2"
         padding="$3"
-        backgroundColor={isCurrentUser ? "rgba(255,255,255,0.1)" : "$backgroundPress"}
+        backgroundColor="$backgroundPress"
         borderRadius="$3"
       >
         <ThemedIonicons
           name="document-outline"
           size={24}
-          color={isCurrentUser ? "$white" : "$color"}
+          color="$foreground"
         />
         <View flex={1}>
           <Text
             fontSize="$4"
             fontWeight="500"
-            color={isCurrentUser ? "$white" : "$color"}
+            color="$foreground"
             numberOfLines={1}
           >
             {content.file_name}
           </Text>
           <Text
             fontSize="$2"
-            color={isCurrentUser ? "rgba(255,255,255,0.8)" : "$color11"}
+            color="$foreground"
           >
             {content.file_type}
           </Text>
@@ -69,7 +77,7 @@ export function FileMessage({ content, isCurrentUser, messageId }: FileMessagePr
       {content.caption && (
         <Text
           fontSize="$3"
-          color={isCurrentUser ? "$white" : "$color"}
+          color="$foreground"
           marginTop="$2"
         >
           {content.caption}

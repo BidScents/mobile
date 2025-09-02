@@ -122,6 +122,10 @@ const MessageItemComponent = ({
           );
         } else {
           return (
+            <View
+              paddingVertical="$1"
+              paddingHorizontal="$2"
+            >
             <Text
               fontSize="$3"
               color="$mutedForeground"
@@ -130,6 +134,7 @@ const MessageItemComponent = ({
             >
               {content?.text || "System message"}
             </Text>
+            </View>
           );
         }
       default:
@@ -201,10 +206,9 @@ const MessageItemComponent = ({
           alignItems={align === 'right' ? "flex-end" : "flex-start"}
         >
           <View
-            backgroundColor={align === 'right' ? "$primary" : "$muted"}
-            paddingVertical="$2.5"
-            paddingHorizontal="$3"
+            backgroundColor={align === 'right' ? "$muted" : "$muted"}
             borderRadius="$5"
+            padding="$2"
             borderBottomLeftRadius={align === 'left' ? "$1" : "$5"}
             borderBottomRightRadius={align === 'right' ? "$1" : "$5"}
           >
