@@ -68,11 +68,6 @@ export function useSetupPaymentMethod() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.payments.paymentMethod,
       });
-      
-      // Invalidate user profile to update payment method status
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.user.own,
-      });
     },
   });
 }
@@ -95,11 +90,6 @@ export function useCreateSubscription() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.payments.subscription,
       });
-      
-      // Invalidate user profile to update subscription status
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.user.own,
-      });
     },
   });
 }
@@ -116,11 +106,6 @@ export function useCancelSubscription() {
       // Invalidate subscription status
       queryClient.invalidateQueries({
         queryKey: queryKeys.payments.subscription,
-      });
-      
-      // Invalidate user profile to update subscription status
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.user.own,
       });
     },
   });
@@ -144,11 +129,6 @@ export function useOnboardConnectAccount() {
       // Invalidate connect account status
       queryClient.invalidateQueries({
         queryKey: queryKeys.payments.connectAccount,
-      });
-      
-      // Invalidate user profile to update seller status
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.user.own,
       });
     },
   });

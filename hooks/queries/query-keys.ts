@@ -28,11 +28,6 @@ export const queryKeys = {
       ['profile', 'reviews', userId, filters] as const,
   },
   
-  user: {
-    profile: (username: string) => ['user', 'profile', username] as const,
-    own: ['user', 'own'] as const,
-  },
-  
   messages: {
     all: ['messages'] as const,
     summary: ['messages', 'summary'] as const,
@@ -63,5 +58,5 @@ export const queryKeys = {
     subscription: ['payments', 'subscription'] as const,
     transaction: (messageId: string) => ['payments', 'transaction', messageId] as const,
     connectAccount: ['payments', 'connect-account'] as const,
-  }
+  },
 } as const
