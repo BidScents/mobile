@@ -33,18 +33,26 @@ export function FavoriteButton({
   const [isFavorited, setIsFavorited] = useState(serverIsFavorited)
   const [count, setCount] = useState(initialCount)
   
+  // Track if we have a pending user action to prevent server state overwrites
+  const hasPendingAction = useRef(false)
+  
   // Simple debounce timeout ref
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   
-  // Sync with server state
+  // Only sync with server state when we don't have pending user actions
   useEffect(() => {
-    setIsFavorited(serverIsFavorited)
+    if (!hasPendingAction.current) {
+      setIsFavorited(serverIsFavorited)
+    }
   }, [serverIsFavorited])
 
   const handleToggle = useCallback(async () => {
     if (favoritesLoading) return
 
     const newIsFavorited = !isFavorited
+    
+    // Mark that we have a pending action to prevent server state overwrites
+    hasPendingAction.current = true
     
     // Immediate optimistic update
     setIsFavorited(newIsFavorited)
@@ -66,21 +74,26 @@ export function FavoriteButton({
         } else {
           await unfavoriteMutation.mutateAsync(listingId)
         }
+        // Clear pending action flag after successful mutation
+        hasPendingAction.current = false
       } catch (error) {
         // Revert optimistic update on error
         setIsFavorited(!newIsFavorited)
         setCount(prev => newIsFavorited ? prev - 1 : prev + 1)
+        // Clear pending action flag after error
+        hasPendingAction.current = false
         console.error('Failed to toggle favorite:', error)
       }
     }, debounceMs)
   }, [isFavorited, favoritesLoading, listingId, favoriteMutation, unfavoriteMutation, debounceMs])
 
-  // Cleanup timeout on unmount
+  // Cleanup timeout on unmount and clear pending action flag
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
       }
+      hasPendingAction.current = false
     }
   }, [])
 

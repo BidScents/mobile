@@ -160,15 +160,14 @@ export function useSearchListings(searchParams: SearchRequest) {
 // ========================================
 
 /**
- * Helper function to update favorite count across all cache types
- * Ensures consistent favorite count synchronization everywhere
+ * Helper function to update favorite count in essential caches only
+ * Avoids updating homepage cache to prevent unnecessary rerenders
  */
-function updateFavoriteCountInAllCaches(
+function updateFavoriteCountInEssentialCaches(
   queryClient: QueryClient,
   listingId: string,
   newCount: number
 ) {
-
   // 1. Update favorites cache
   queryClient.setQueryData<any>(
     queryKeys.listings.favorites,
@@ -194,7 +193,55 @@ function updateFavoriteCountInAllCaches(
         : old
   );
 
-  // 3. Update homepage cache - all listing arrays
+  // 3. Update search result caches only if they exist (don't create new ones)
+  const existingSearchQueries = queryClient.getQueriesData<SearchResponse>({
+    queryKey: queryKeys.listings.search({})
+  });
+  
+  existingSearchQueries.forEach(([queryKey, data]) => {
+    if (data) {
+      queryClient.setQueryData(queryKey, {
+        ...data,
+        listings: (data.listings || []).map((listing) =>
+          listing.id === listingId
+            ? { ...listing, favorites_count: newCount }
+            : listing
+        ),
+      });
+    }
+  });
+
+  // 4. Update infinite search caches only if they exist
+  const existingInfiniteQueries = queryClient.getQueriesData<any>({
+    queryKey: queryKeys.listings.infiniteSearch({})
+  });
+  
+  existingInfiniteQueries.forEach(([queryKey, data]) => {
+    if (data?.pages) {
+      queryClient.setQueryData(queryKey, {
+        ...data,
+        pages: (data.pages || []).map((page: SearchResponse) => ({
+          ...page,
+          listings: (page.listings || []).map((listing) =>
+            listing.id === listingId
+              ? { ...listing, favorites_count: newCount }
+              : listing
+          ),
+        })),
+      });
+    }
+  });
+}
+
+/**
+ * Helper function to update homepage cache specifically when needed
+ * Use this only when actually viewing the homepage
+ */
+export function updateHomepageFavoriteCount(
+  queryClient: QueryClient,
+  listingId: string,
+  newCount: number
+) {
   queryClient.setQueryData<HomepageResponse>(
     queryKeys.homepage,
     (old) => {
@@ -229,42 +276,6 @@ function updateFavoriteCountInAllCaches(
       };
     }
   );
-
-  // 4. Update all search result caches
-  queryClient.setQueriesData<SearchResponse>(
-    { queryKey: queryKeys.listings.search({}) },
-    (old) => {
-      if (!old) return old;
-      return {
-        ...old,
-        listings: (old.listings || []).map((listing) =>
-          listing.id === listingId
-            ? { ...listing, favorites_count: newCount }
-            : listing
-        ),
-      };
-    }
-  );
-
-// 5. Update infinite search caches
-  queryClient.setQueriesData<any>(
-    { queryKey: queryKeys.listings.infiniteSearch({}) },
-    (old: any) => {
-      if (!old?.pages) return old;
-      return {
-        ...old,
-        pages: (old.pages || []).map((page: SearchResponse) => ({
-          ...page,
-          listings: (page.listings || []).map((listing) =>
-            listing.id === listingId
-              ? { ...listing, favorites_count: newCount }
-              : listing
-          ),
-        })),
-      };
-    }
-  );
-
 }
 
 // ========================================
@@ -273,7 +284,7 @@ function updateFavoriteCountInAllCaches(
 
 /**
  * Favorite listing mutation with optimistic updates
- * Updates favorite count across ALL cache types for consistency
+ * Updates favorite count in essential caches (excludes homepage to prevent rerenders)
  */
 export function useFavoriteListing() {
   const queryClient = useQueryClient();
@@ -295,22 +306,22 @@ export function useFavoriteListing() {
       // Get current count for optimistic update
       const currentCount = previousData?.favorites_count ?? 0;
       
-      // Optimistically increment count across ALL caches
-      updateFavoriteCountInAllCaches(queryClient, listingId, currentCount + 1);
+      // Optimistically increment count in essential caches only
+      updateFavoriteCountInEssentialCaches(queryClient, listingId, currentCount + 1);
 
       return { previousData, previousCount: currentCount };
     },
     onSuccess: (response: FavoriteResponse, listingId) => {
-      // Use server response to sync count across ALL caches
-      updateFavoriteCountInAllCaches(queryClient, listingId, response.favorites_count);
+      // Use server response to sync count in essential caches
+      updateFavoriteCountInEssentialCaches(queryClient, listingId, response.favorites_count);
       
       // Invalidate favorites list only to add/remove the listing itself
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.favorites });
     },
     onError: (err, listingId, context) => {
-      // Rollback optimistic count update across ALL caches
+      // Rollback optimistic count update in essential caches
       if (context?.previousCount !== undefined) {
-        updateFavoriteCountInAllCaches(queryClient, listingId, context.previousCount);
+        updateFavoriteCountInEssentialCaches(queryClient, listingId, context.previousCount);
       }
       
       // Rollback detail cache specifically
@@ -326,7 +337,7 @@ export function useFavoriteListing() {
 
 /**
  * Unfavorite listing mutation with optimistic updates
- * Updates favorite count across ALL cache types for consistency
+ * Updates favorite count in essential caches (excludes homepage to prevent rerenders)
  */
 export function useUnfavoriteListing() {
   const queryClient = useQueryClient();
@@ -350,22 +361,22 @@ export function useUnfavoriteListing() {
       // Get current count for optimistic update
       const currentCount = previousData?.favorites_count ?? 0;
       
-      // Optimistically decrement count across ALL caches
-      updateFavoriteCountInAllCaches(queryClient, listingId, Math.max(0, currentCount - 1));
+      // Optimistically decrement count in essential caches only
+      updateFavoriteCountInEssentialCaches(queryClient, listingId, Math.max(0, currentCount - 1));
 
       return { previousData, previousCount: currentCount };
     },
     onSuccess: (response: FavoriteResponse, listingId) => {
-      // Use server response to sync count across ALL caches
-      updateFavoriteCountInAllCaches(queryClient, listingId, response.favorites_count);
+      // Use server response to sync count in essential caches
+      updateFavoriteCountInEssentialCaches(queryClient, listingId, response.favorites_count);
       
       // Invalidate favorites list only to add/remove the listing itself
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.favorites });
     },
     onError: (err, listingId, context) => {
-      // Rollback optimistic count update across ALL caches
+      // Rollback optimistic count update in essential caches
       if (context?.previousCount !== undefined) {
-        updateFavoriteCountInAllCaches(queryClient, listingId, context.previousCount);
+        updateFavoriteCountInEssentialCaches(queryClient, listingId, context.previousCount);
       }
       
       // Rollback detail cache specifically
