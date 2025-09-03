@@ -41,7 +41,7 @@ export const ImagePickerBottomSheet = forwardRef<
     const { pickFromGallery, takePhoto } = useImagePicker({
       allowMultiple,
       maxImages,
-      quality: 0.8,
+      quality: 0.2,
       maxSizeInMB: 10,
     });
 

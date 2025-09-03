@@ -44,7 +44,7 @@ export default function SpecificChatScreen() {
   );
 
   // Error state
-  if (error || !conversation) {
+  if (error) {
     return (
       <Container
         variant="padded"
@@ -86,7 +86,7 @@ export default function SpecificChatScreen() {
             </Text>
           </YStack>
         ) : (
-            <MessagesList conversation={conversation} />
+            <MessagesList conversation={conversation!} />
         )}
         <ChatInputBar id={id as string} />
       </KeyboardAwareView>
