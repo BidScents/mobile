@@ -5,13 +5,12 @@
  * Includes alerts, navigation, and user-friendly error messages.
  */
 
-import { AuthService, type AuthResult, type OnboardingResult } from './auth-service'
+import { AuthService } from './auth-service'
 import { AuthStateManager } from './auth-state-manager'
 import {
   type LoginFormData,
   type OnboardingFormData,
-  type SignUpFormData,
-  useAuthStore
+  type SignUpFormData
 } from '@bid-scents/shared-sdk'
 import { router } from 'expo-router'
 import { Alert } from 'react-native'
@@ -30,13 +29,9 @@ export const handleSignUpUI = async (data: SignUpFormData): Promise<void> => {
           pathname: '/(auth)/email-confirmation',
           params: { email: result.email! }
         })
-      } else if (result.session && result.user) {
-        // Immediate sign in - set auth state
-        AuthStateManager.setAuthenticatedState(result.session, {
-          onboarded: !!result.user.onboarded_at,
-          profile: result.user,
-          favorites: []
-        })
+      } else if (result.session && result.loginResponse) {
+        // Immediate sign in - set auth state with complete server data
+        AuthStateManager.setAuthenticatedState(result.session, result.loginResponse)
       }
     } else {
       handleSignUpError(result.error!)
@@ -55,13 +50,9 @@ export const handleLoginUI = async (data: LoginFormData): Promise<void> => {
   try {
     const result = await AuthService.signInWithPassword(data)
 
-    if (result.success && result.session) {
-      // Set authenticated state
-      AuthStateManager.setAuthenticatedState(result.session, {
-        onboarded: !!result.user?.onboarded_at,
-        profile: result.user,
-        favorites: []
-      })
+    if (result.success && result.session && result.loginResponse) {
+      // Set authenticated state with complete server data
+      AuthStateManager.setAuthenticatedState(result.session, result.loginResponse)
     } else {
       handleLoginError(result.error!)
     }
@@ -79,13 +70,9 @@ export const handleOAuthUI = async (provider: 'google' | 'facebook'): Promise<vo
   try {
     const result = await AuthService.signInWithOAuth(provider)
 
-    if (result.success && result.session) {
-      // Set authenticated state
-      AuthStateManager.setAuthenticatedState(result.session, {
-        onboarded: !!result.user?.onboarded_at,
-        profile: result.user,
-        favorites: []
-      })
+    if (result.success && result.session && result.loginResponse) {
+      // Set authenticated state with complete server data
+      AuthStateManager.setAuthenticatedState(result.session, result.loginResponse)
     } else if (result.error && result.error !== 'User cancelled') {
       // Only show error if user didn't cancel
       Alert.alert(
@@ -114,9 +101,8 @@ export const handleOnboardingUI = async (data: OnboardingFormData & {
     const result = await AuthService.completeOnboarding(data)
 
     if (result.success && result.profile) {
-      // Update auth store with onboarding completion
-      const { session } = useAuthStore.getState()
-      AuthStateManager.setOnboardingCompletedState(session, result.profile)
+      // Refresh complete auth state from server to get all up-to-date data
+      await AuthService.refreshCurrentUser()
 
       Alert.alert(
         'Welcome!', 
@@ -144,6 +130,50 @@ export const handleSignOutUI = async (): Promise<void> => {
     console.error('Sign out UI error:', error)
     Alert.alert('Sign Out Failed', 'Unable to sign out. Please try again.')
   }
+}
+
+/**
+ * Handle account deletion with confirmation
+ */
+export const handleDeleteAccountUI = async (): Promise<void> => {
+  return new Promise((resolve) => {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This action cannot be undone and will permanently remove all your data.',
+      [
+        { text: 'Cancel', style: 'cancel', onPress: () => resolve() },
+        { 
+          text: 'Delete', 
+          style: 'destructive', 
+          onPress: async () => {
+            try {
+              const result = await AuthService.deleteAccount()
+              if (result.success) {
+                // Auth state will be cleared by the auth state listener
+                Alert.alert(
+                  'Account Deleted', 
+                  'Your account has been successfully deleted.',
+                  [{ text: 'OK' }]
+                )
+              } else {
+                Alert.alert(
+                  'Deletion Failed', 
+                  result.error || 'Unable to delete your account. Please try again.'
+                )
+              }
+            } catch (error: any) {
+              console.error('Delete account UI error:', error)
+              Alert.alert(
+                'Deletion Failed', 
+                'Unable to delete your account. Please try again.'
+              )
+            }
+            resolve()
+          }
+        }
+      ]
+    )
+  })
 }
 
 /**

@@ -3,17 +3,28 @@
  * 
  * Handles all authentication operations without UI logic.
  * Pure business logic for auth flows - no alerts, no navigation.
+ * 
+ * IMPORTANT: This service handles auth operations for both React and non-React contexts.
+ * 
+ * **For non-React contexts (auth event handlers, initialization):**
+ * - Use AuthService methods directly
+ * 
+ * **For React components:**
+ * - Use AuthService methods directly
+ * - Use auth store (useAuthStore) for accessing auth state
+ * - Call AuthService.refreshCurrentUser() after operations that change server state
  */
 
 import { supabase } from '@/lib/supabase'
-import { uploadSingleImage, ImageUploadConfigs } from '@/utils/image-upload-service'
+import { ImageUploadConfigs, uploadSingleImage } from '@/utils/image-upload-service'
 import {
   AuthService as ApiAuthService,
   handleAuthStateChange,
+  useAuthStore,
   type LoginFormData,
+  type LoginResponse,
   type OnboardingFormData,
-  type SignUpFormData,
-  type LoginResponse
+  type SignUpFormData
 } from '@bid-scents/shared-sdk'
 import { makeRedirectUri } from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
@@ -21,7 +32,7 @@ import * as WebBrowser from 'expo-web-browser'
 export interface AuthResult {
   success: boolean
   session?: any
-  user?: any
+  loginResponse?: LoginResponse
   error?: string
   requiresEmailConfirmation?: boolean
   email?: string
@@ -33,9 +44,15 @@ export interface OnboardingResult {
   error?: string
 }
 
+export interface DeleteAccountResult {
+  success: boolean
+  error?: string
+}
+
 export class AuthService {
   /**
    * Authenticate with existing session and fetch user data
+   * This method directly calls the API and should be used by auth event handlers
    */
   static async authenticateWithSession(session: any): Promise<LoginResponse> {
     // Configure API token before making calls
@@ -82,7 +99,7 @@ export class AuthService {
         return {
           success: true,
           session: authData.session,
-          user: loginResult.profile
+          loginResponse: loginResult
         }
       }
 
@@ -112,7 +129,7 @@ export class AuthService {
         return {
           success: true,
           session: authData.session,
-          user: loginResult.profile
+          loginResponse: loginResult
         }
       }
 
@@ -159,7 +176,7 @@ export class AuthService {
         return {
           success: true,
           session: sessionData.session,
-          user: loginResult.profile
+          loginResponse: loginResult
         }
         
       } else if (result.type === 'cancel') {
@@ -174,6 +191,7 @@ export class AuthService {
 
   /**
    * Complete user onboarding
+   * This method directly calls the API and handles file uploads
    */
   static async completeOnboarding(data: OnboardingFormData & {
     profileImageUri?: string
@@ -240,12 +258,61 @@ export class AuthService {
   }
 
   /**
+   * Delete user account
+   * This method directly calls the API and handles Supabase signout
+   * For React components, use the useDeleteAccount hook instead
+   */
+  static async deleteAccount(): Promise<DeleteAccountResult> {
+    try {
+      // Call API to delete account
+      await ApiAuthService.deleteAccountV1AuthDeleteAccountDelete()
+      
+      // Sign out from Supabase to clear local session
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Error signing out after account deletion:', error)
+        // Don't throw - account is still deleted on server
+      }
+      
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
+  }
+
+  /**
    * Sign out user
    */
   static async signOut(): Promise<void> {
     const { error } = await supabase.auth.signOut()
     if (error) {
       throw new Error(error.message)
+    }
+  }
+
+  /**
+   * Refresh current user's authentication state from server
+   * Useful after payments, transactions, or other operations that change server-side state
+   */
+  static async refreshCurrentUser(): Promise<void> {
+    const { session } = useAuthStore.getState()
+    if (!session) {
+      throw new Error('No active session to refresh')
+    }
+
+    try {
+      useAuthStore.getState().setLoading(true)
+      
+      // Fetch fresh user data
+      const loginResponse = await this.authenticateWithSession(session)
+      
+      // Update auth store with fresh data
+      useAuthStore.getState().setAuthState(session, loginResponse)
+    } catch (error: any) {
+      useAuthStore.getState().setError(error.message || 'Failed to refresh user data')
+      throw error
+    } finally {
+      useAuthStore.getState().setLoading(false)
     }
   }
 
