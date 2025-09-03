@@ -11,27 +11,42 @@ import type {
 import { PaymentsService } from "@bid-scents/shared-sdk";
 import {
   useMutation,
-  useQuery,
   useQueryClient
 } from "@tanstack/react-query";
 import { queryKeys } from "./query-keys";
 
 // ========================================
-// PRODUCT & PRICING QUERIES
+// LISTING BOOST MUTATIONS
 // ========================================
 
 /**
- * Get available products and pricing information
- * Used for subscription plans and boost pricing
+ * Create payment intent for boosting a listing
+ * Returns payment intent client secret for processing
  */
-export function useProducts() {
-  return useQuery({
-    queryKey: queryKeys.payments.products,
-    queryFn: () => PaymentsService.listProductsV1PaymentsProductsGet(),
-    staleTime: 10 * 60 * 1000, // 10 minutes - pricing doesn't change frequently
-    // Enable background refetch for pricing updates
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+export function useBoostListing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (boostRequest: BoostRequest) =>
+      PaymentsService.boostListingV1PaymentsBoostPost(boostRequest),
+    onSuccess: (response: PaymentResponse, boostRequest: BoostRequest) => {
+      // Invalidate listing details for all boosted listings
+      Object.values(boostRequest.boosts).flat().forEach((listingId) => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.listings.detail(listingId),
+        });
+      });
+      
+      // Invalidate dashboard listings to reflect boost status
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.dashboard.listings.all,
+      });
+      
+      // Invalidate homepage to show boosted listing in featured section
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.homepage,
+      });
+    },
   });
 }
 
@@ -106,41 +121,6 @@ export function useCancelSubscription() {
       // Invalidate user profile to update subscription status
       queryClient.invalidateQueries({
         queryKey: queryKeys.user.own,
-      });
-    },
-  });
-}
-
-// ========================================
-// LISTING BOOST MUTATIONS
-// ========================================
-
-/**
- * Create payment intent for boosting a listing
- * Returns payment intent client secret for processing
- */
-export function useBoostListing() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (boostRequest: BoostRequest) =>
-      PaymentsService.boostListingV1PaymentsBoostPost(boostRequest),
-    onSuccess: (response: PaymentResponse, boostRequest: BoostRequest) => {
-      // Invalidate listing details for all boosted listings
-      Object.values(boostRequest.boosts).flat().forEach((listingId) => {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.listings.detail(listingId),
-        });
-      });
-      
-      // Invalidate dashboard listings to reflect boost status
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.dashboard.listings.all,
-      });
-      
-      // Invalidate homepage to show boosted listing in featured section
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.homepage,
       });
     },
   });
@@ -347,28 +327,6 @@ export function useSubmitReview() {
       // Invalidate profile queries to reflect new reviews
       queryClient.invalidateQueries({
         queryKey: queryKeys.profile.all,
-      });
-    },
-  });
-}
-
-// ========================================
-// ADMIN/UTILITY MUTATIONS
-// ========================================
-
-/**
- * Reset pricing information (admin function)
- * Resets the products dict to reflect changes in Stripe
- */
-export function useResetPricing() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => PaymentsService.resetPricingV1PaymentsResetPost(),
-    onSuccess: () => {
-      // Invalidate products to fetch updated pricing
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payments.products,
       });
     },
   });

@@ -59,7 +59,6 @@ export const queryKeys = {
   
   payments: {
     all: ['payments'] as const,
-    products: ['payments', 'products'] as const,
     paymentMethod: ['payments', 'payment-method'] as const,
     subscription: ['payments', 'subscription'] as const,
     transaction: (messageId: string) => ['payments', 'transaction', messageId] as const,
