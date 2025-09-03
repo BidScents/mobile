@@ -20,8 +20,7 @@ export function FileMessage({
     return (
       <View>
         <FastImage
-          key={`${messageId}-${content.file_url}`}
-          source={{ uri: content.file_url, priority: FastImage.priority.high }}
+          source={{ uri: content.file_url }}
           style={{ width: 200, height: 150, borderRadius: 16 }}
         />
         {content.caption && (
