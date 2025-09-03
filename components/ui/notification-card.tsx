@@ -11,8 +11,8 @@ import {
   NotificationType,
   OutbidContent,
 } from "@bid-scents/shared-sdk";
+import FastImage from "@d11/react-native-fast-image";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Text, XStack, YStack } from "tamagui";
 import { useThemeColors } from '../../hooks/use-theme-colors';
@@ -54,7 +54,7 @@ export default function NotificationCard({
       }
 
       return (
-        <Image
+        <FastImage
           source={{
             uri: imageUrl
               ? `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${imageUrl}`
@@ -66,7 +66,6 @@ export default function NotificationCard({
             borderRadius: 6,
             backgroundColor: colors.muted,
           }}
-          contentFit="cover"
         />
       );
     }

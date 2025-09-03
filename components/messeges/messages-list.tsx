@@ -143,6 +143,7 @@ export function MessagesList({ conversation }: MessagesListProps) {
           paddingVertical: 8,
         }}
         removeClippedSubviews={true}
+        drawDistance={1000}
         getItemType={getItemType}
         ListHeaderComponent={renderTypingIndicator}
       />
