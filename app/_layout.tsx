@@ -22,6 +22,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import config from "tamagui.config";
 import { useThemeSettings } from "../hooks/use-theme-settings";
 import { QueryProvider } from "../providers/query-provider";
+import { MessagingProvider } from "../providers/messaging-provider";
 import {
   handleExistingSession,
   handleNoSession,
@@ -177,16 +178,18 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
         <QueryProvider>
-          <TamaguiProvider config={config}>
-            <Theme name={colorScheme === "dark" ? "dark" : "light"}>
-              <SafeAreaProvider>
-                <BottomSheetModalProvider>
-                  {routes()}
-                  <LoadingOverlay />
-                </BottomSheetModalProvider>
-              </SafeAreaProvider>
-            </Theme>
-          </TamaguiProvider>
+          <MessagingProvider>
+            <TamaguiProvider config={config}>
+              <Theme name={colorScheme === "dark" ? "dark" : "light"}>
+                <SafeAreaProvider>
+                  <BottomSheetModalProvider>
+                    {routes()}
+                    <LoadingOverlay />
+                  </BottomSheetModalProvider>
+                </SafeAreaProvider>
+              </Theme>
+            </TamaguiProvider>
+          </MessagingProvider>
         </QueryProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>

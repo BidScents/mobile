@@ -5,7 +5,7 @@ import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { ProfilePreviewPicker } from "@/components/ui/profile-preview-picker";
 import { useEditProfile } from "@/hooks/queries/use-profile";
-import { uploadProfileImage } from "@/utils/upload-profile-image";
+import { uploadSingleImage, ImageUploadConfigs } from "@/utils/image-upload-service";
 import {
   AuthService,
   onboardingSchema,
@@ -63,9 +63,9 @@ export default function EditProfileScreen() {
    * This prevents unnecessary API calls when no changes are made
    */
   const isCoverImageChanged =
-    formatImageUri(coverImageUri || "") !== user?.cover_image_url;
+    formatImageUri(coverImageUri || "") !== (user?.cover_image_url || "");
   const isProfileImageChanged =
-    formatImageUri(profileImageUri || "") !== user?.profile_image_url;
+    formatImageUri(profileImageUri || "") !== (user?.profile_image_url || "");
   const isUsernameChanged = watch("username") !== user?.username;
   const isBioChanged = watch("bio") !== user?.bio;
   const isFirstNameChanged = watch("first_name") !== user?.first_name;
@@ -108,17 +108,30 @@ export default function EditProfileScreen() {
         }
       }
 
-      // Handle image uploads only if images were changed
-      const profileImage = isProfileImageChanged
-        ? `profile-images/${await uploadProfileImage(
-            profileImageUri!,
-            "profile"
-          )}`
-        : user?.profile_image_url;
+      // Handle image uploads only if images were changed and exist
+      let profileImage = user?.profile_image_url;
+      if (isProfileImageChanged) {
+        if (profileImageUri) {
+          // Upload new image
+          const result = await uploadSingleImage(profileImageUri, ImageUploadConfigs.profile("profile"));
+          profileImage = `profile-images/${result.path}`;
+        } else {
+          // Image was removed
+          profileImage = null;
+        }
+      }
 
-      const coverImage = isCoverImageChanged
-        ? `profile-images/${await uploadProfileImage(coverImageUri!, "cover")}`
-        : user?.cover_image_url;
+      let coverImage = user?.cover_image_url;
+      if (isCoverImageChanged) {
+        if (coverImageUri) {
+          // Upload new image
+          const result = await uploadSingleImage(coverImageUri, ImageUploadConfigs.profile("cover"));
+          coverImage = `profile-images/${result.path}`;
+        } else {
+          // Image was removed
+          coverImage = null;
+        }
+      }
 
       // Submit updated profile data
       await editProfileMutation.mutateAsync({

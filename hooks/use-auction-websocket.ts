@@ -1,4 +1,4 @@
-import { BidResData, useAuthStore, WSBidResponse, WSJoinResponse, WSExtensionResponse, WSType } from '@bid-scents/shared-sdk'
+import { BidResData, useAuthStore, WSBidResponse, WSExtensionResponse, WSJoinResponse, WSType } from '@bid-scents/shared-sdk'
 import { useEffect, useRef } from 'react'
 
 const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:8000'
@@ -69,43 +69,44 @@ export function useAuctionWebSocket({
   onExtension
 }: UseAuctionWebSocketOptions): UseAuctionWebSocketReturn {
   const wsRef = useRef<WebSocket | null>(null)
-  const enabledRef = useRef(enabled)
-  const listingIdRef = useRef(listingId)
   const { session } = useAuthStore()
 
-  // Update refs without causing re-renders
-  enabledRef.current = enabled
-  listingIdRef.current = listingId
+  // Store callbacks in refs to avoid useEffect dependencies
+  const callbacksRef = useRef({
+    onConnect,
+    onDisconnect,
+    onViewerCount,
+    onBid,
+    onExtension
+  })
+  
+  // Update callback refs
+  callbacksRef.current = {
+    onConnect,
+    onDisconnect,
+    onViewerCount,
+    onBid,
+    onExtension
+  }
 
   useEffect(() => {
-    if (!enabledRef.current || !listingIdRef.current || !session?.access_token) {
+    if (!enabled || !listingId || !session?.access_token) {
       return
     }
 
     // Create WebSocket connection
-    const wsUrl = `${WS_BASE_URL}/v1/auctions/${listingIdRef.current}?token=${session.access_token}`
+    const wsUrl = `${WS_BASE_URL}/v1/auctions/${listingId}?token=${session.access_token}`
     const ws = new WebSocket(wsUrl)
     wsRef.current = ws
 
     ws.onopen = () => {
-      console.log(`Connected to auction WebSocket for listing ${listingIdRef.current}`)
-      onConnect?.()
-      
-      // Send initial ping to maintain connection
-      ws.send(JSON.stringify({ type: 'ping' }))
-      
-      // Set up periodic pings every 30 seconds
-      const pingInterval = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'ping' }))
-        }
-      }, 30000)
+      console.log(`Connected to auction WebSocket for listing ${listingId}`)
+      callbacksRef.current.onConnect?.()
+    }
 
-      ws.onclose = () => {
-        console.log(`Disconnected from auction WebSocket for listing ${listingIdRef.current}`)
-        clearInterval(pingInterval)
-        onDisconnect?.()
-      }
+    ws.onclose = () => {
+      console.log(`Disconnected from auction WebSocket for listing ${listingId}`)
+      callbacksRef.current.onDisconnect?.()
     }
 
     ws.onmessage = (event) => {
@@ -115,15 +116,15 @@ export function useAuctionWebSocket({
         if (message.type === WSType.JOIN) {
           const joinMessage = message as WSJoinResponse
           console.log('Viewer count updated:', joinMessage.current_viewers)
-          onViewerCount?.(joinMessage.current_viewers)
+          callbacksRef.current.onViewerCount?.(joinMessage.current_viewers)
         } else if (message.type === WSType.BID) {
           const bidMessage = message as WSBidResponse
           console.log('New bid received:', bidMessage.data)
-          onBid?.(bidMessage.data)
+          callbacksRef.current.onBid?.(bidMessage.data)
         } else if (message.type === WSType.AUCTION_EXTENDED) {
           const extensionMessage = message as WSExtensionResponse
           console.log('Auction extended, new end time:', extensionMessage.new_end_time)
-          onExtension?.(extensionMessage.new_end_time)
+          callbacksRef.current.onExtension?.(extensionMessage.new_end_time)
         }
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error)
@@ -138,7 +139,7 @@ export function useAuctionWebSocket({
     return () => {
       ws.close()
     }
-  }, [session?.access_token]) // Only depend on session, nothing else
+  }, [enabled, listingId, session?.access_token]) // Depend on enabled state, listing ID, and session
 
   return {
     isConnected: wsRef.current?.readyState === WebSocket.OPEN

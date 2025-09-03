@@ -35,7 +35,9 @@ export const queryKeys = {
   
   messages: {
     all: ['messages'] as const,
+    summary: ['messages', 'summary'] as const,
     conversation: (id: string) => ['messages', 'conversation', id] as const,
+    list: (conversationId: string, cursor?: string) => ['messages', 'list', conversationId, cursor] as const,
   },
   
   dashboard: {

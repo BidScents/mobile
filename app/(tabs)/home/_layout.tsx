@@ -1,17 +1,19 @@
 import { BackButton } from "@/components/ui/back-button";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Stack } from "expo-router";
 
 export default function IndexLayout() {
+  const colors = useThemeColors();
   return (
     <Stack
       screenOptions={{
         headerShown: true,
         headerShadowVisible: false,
         headerStyle: {
-          backgroundColor: "$background",
+          backgroundColor: colors.background,
         },
         headerTitleStyle: {
-          color: "$foreground",
+          color: colors.foreground,
         },
         headerLeft: () => <BackButton />,
       }}

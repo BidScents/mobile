@@ -140,7 +140,6 @@ export default function Homepage() {
         keyExtractor={(item, index) => `${item.type}-${index}`}
         estimatedItemSize={200}
         showsVerticalScrollIndicator={false}
-        refreshing={isFetching && !isLoading}
         onRefresh={refetch}
         keyboardDismissMode="on-drag"
         recycleItems

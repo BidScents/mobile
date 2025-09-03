@@ -8,7 +8,7 @@ import {
   categoryOptions,
   listingTypeOptions,
 } from "@/types/create-listing-types";
-import { uploadListingImages } from "@/utils/upload-listing-images";
+import { uploadMultipleImages, ImageUploadConfigs } from "@/utils/image-upload-service";
 import {
   CreateListingRequest,
   createListingSchema,
@@ -95,14 +95,17 @@ export default function AddListingScreen() {
 
       // Step 1: Upload images
       console.log("Uploading images...");
-      const uploadedImageUrls = await uploadListingImages(
+      const uploadResults = await uploadMultipleImages(
         imageUris,
-        user.id,
-        (uploaded, total) => {
-          console.log(`Uploaded ${uploaded}/${total} images`);
+        ImageUploadConfigs.listing(),
+        (progress) => {
+          console.log(`Uploaded ${progress.uploaded}/${progress.total} images`);
           // You could update loading text here if needed
         }
       );
+
+      // Extract URLs from upload results
+      const uploadedImageUrls = uploadResults.map(result => `listing-images/${result.path}`);
 
       // Step 2: Update form data with uploaded URLs
       const updatedData = {
@@ -121,7 +124,6 @@ export default function AddListingScreen() {
         // Provide defaults for optional backend fields
         batch_code: data.batch_code || undefined,
         starting_price: data.starting_price || undefined,
-        reserve_price: data.reserve_price || undefined,
         buy_now_price: data.buy_now_price || undefined,
         bid_increment: data.bid_increment || undefined,
         ends_at: data.ends_at || undefined,
@@ -154,7 +156,7 @@ export default function AddListingScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <YStack flex={1} gap="$5">
+        <YStack flex={1} gap="$5" pb="$4">
           {/* Images Section */}
           <YStack gap="$3">
             <MultipleImagePicker
@@ -197,6 +199,25 @@ export default function AddListingScreen() {
               numberOfLines={4}
             />
 
+            <ControlledInput
+              control={control}
+              name="brand"
+              variant="text"
+              label="Brand"
+              placeholder="Enter brand name"
+              disabled={loading}
+            />
+
+            <ControlledInput
+              control={control}
+              variant="select"
+              name="category"
+              label="Category"
+              placeholder="Select category"
+              disabled={loading}
+              options={categoryOptions}
+            />
+
             {!isAuction ? (
               <ControlledInput
                 control={control}
@@ -213,15 +234,6 @@ export default function AddListingScreen() {
                   name="starting_price"
                   variant="numeric"
                   label="Starting Price"
-                  placeholder="0.00"
-                  disabled={loading}
-                />
-
-                <ControlledInput
-                  control={control}
-                  name="reserve_price"
-                  variant="numeric"
-                  label="Reserve Price (Optional)"
                   placeholder="0.00"
                   disabled={loading}
                 />
@@ -264,25 +276,6 @@ export default function AddListingScreen() {
                 />
               </YStack>
             )}
-
-            <ControlledInput
-              control={control}
-              name="brand"
-              variant="text"
-              label="Brand"
-              placeholder="Enter brand name"
-              disabled={loading}
-            />
-
-            <ControlledInput
-              control={control}
-              variant="select"
-              name="category"
-              label="Category"
-              placeholder="Select category"
-              disabled={loading}
-              options={categoryOptions}
-            />
 
             <XStack gap="$3">
               <YStack flex={1}>

@@ -6,10 +6,12 @@ export function AvatarIcon({
   url,
   size,
   onClick,
+  isGroup = false,
 }: {
   url: string | null | undefined;
   size: string;
   onClick?: () => void;
+  isGroup?: boolean;
 }) {
   const colors = useThemeColors();
   return (
@@ -27,7 +29,11 @@ export function AvatarIcon({
         justifyContent="center"
         alignItems="center"
       >
-        <ThemedIonicons name="person" size={22} color={colors.background} />
+        <ThemedIonicons 
+          name={isGroup ? "people" : "person"} 
+          size={22} 
+          color={colors.background} 
+        />
       </Avatar.Fallback>
     </Avatar>
   );

@@ -3,11 +3,12 @@ import {
   ListingCard as ListingCardType,
   ListingType,
 } from "@bid-scents/shared-sdk";
+import FastImage from "@d11/react-native-fast-image";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React from "react";
 import { GestureResponderEvent } from "react-native";
-import { Card, Image, Text, XStack, YStack } from "tamagui";
+import { Card, Text, XStack, YStack } from "tamagui";
 import { queryKeys } from "../../hooks/queries/query-keys";
 import { seedListingDetailCache } from "../../hooks/queries/use-listing";
 import { Button } from "../ui/button";
@@ -28,8 +29,16 @@ export function ListingCard({
   onPress,
 }: ListingCardProps) {
   const queryClient = useQueryClient();
+  const isPressed = React.useRef(false);
 
   const handleCardPress = () => {
+    if (isPressed.current) {
+      return;
+    }
+    isPressed.current = true;
+    setTimeout(() => {
+      isPressed.current = false;
+    }, 1000); // Prevent double-tap
     onPress?.();
     
     // Only seed cache if no data exists or existing data is also seeded
@@ -297,14 +306,16 @@ export function ListingCard({
         {/* Product Image */}
         <YStack position="relative">
           {listing.image_url && process.env.EXPO_PUBLIC_IMAGE_BASE_URL ? (
-            <Image
+            <FastImage
               source={{
                 uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${listing.image_url}`,
               }}
-              width="100%"
-              aspectRatio={1}
-              borderRadius="$5"
-              backgroundColor="$gray2"
+              style={{
+                width: "100%",
+                aspectRatio: 1,
+                borderRadius: 10,
+                backgroundColor: "$gray2",
+              }}
             />
           ) : (
             <YStack
