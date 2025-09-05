@@ -89,6 +89,13 @@
           }
         }
       ],
+      [
+        "@stripe/stripe-react-native/app.plugin.js",
+        {
+          // "merchantIdentifier": "merchant.com.bidscents.app",
+          "enableGooglePay": true
+        }
+      ],
       "expo-notifications",
       [
         "expo-camera",

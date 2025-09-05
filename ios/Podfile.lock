@@ -2556,6 +2556,95 @@ PODS:
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
   - SocketRocket (0.7.1)
+  - Stripe (24.20.0):
+    - StripeApplePay (= 24.20.0)
+    - StripeCore (= 24.20.0)
+    - StripePayments (= 24.20.0)
+    - StripePaymentsUI (= 24.20.0)
+    - StripeUICore (= 24.20.0)
+  - stripe-react-native (0.51.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Stripe (~> 24.20.0)
+    - stripe-react-native/NewArch (= 0.51.0)
+    - StripeApplePay (~> 24.20.0)
+    - StripeFinancialConnections (~> 24.20.0)
+    - StripePayments (~> 24.20.0)
+    - StripePaymentSheet (~> 24.20.0)
+    - StripePaymentsUI (~> 24.20.0)
+    - Yoga
+  - stripe-react-native/NewArch (0.51.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Stripe (~> 24.20.0)
+    - StripeApplePay (~> 24.20.0)
+    - StripeFinancialConnections (~> 24.20.0)
+    - StripePayments (~> 24.20.0)
+    - StripePaymentSheet (~> 24.20.0)
+    - StripePaymentsUI (~> 24.20.0)
+    - Yoga
+  - StripeApplePay (24.20.0):
+    - StripeCore (= 24.20.0)
+  - StripeCore (24.20.0)
+  - StripeFinancialConnections (24.20.0):
+    - StripeCore (= 24.20.0)
+    - StripeUICore (= 24.20.0)
+  - StripePayments (24.20.0):
+    - StripeCore (= 24.20.0)
+    - StripePayments/Stripe3DS2 (= 24.20.0)
+  - StripePayments/Stripe3DS2 (24.20.0):
+    - StripeCore (= 24.20.0)
+  - StripePaymentSheet (24.20.0):
+    - StripeApplePay (= 24.20.0)
+    - StripeCore (= 24.20.0)
+    - StripePayments (= 24.20.0)
+    - StripePaymentsUI (= 24.20.0)
+  - StripePaymentsUI (24.20.0):
+    - StripeCore (= 24.20.0)
+    - StripePayments (= 24.20.0)
+    - StripeUICore (= 24.20.0)
+  - StripeUICore (24.20.0):
+    - StripeCore (= 24.20.0)
   - UMAppLoader (5.1.3)
   - Yoga (0.0.0)
   - ZXingObjC/Core (3.6.9)
@@ -2681,6 +2770,7 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
+  - "stripe-react-native (from `../node_modules/@stripe/stripe-react-native`)"
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2694,6 +2784,14 @@ SPEC REPOS:
     - SDWebImageSVGCoder
     - SDWebImageWebPCoder
     - SocketRocket
+    - Stripe
+    - StripeApplePay
+    - StripeCore
+    - StripeFinancialConnections
+    - StripePayments
+    - StripePaymentSheet
+    - StripePaymentsUI
+    - StripeUICore
     - ZXingObjC
 
 EXTERNAL SOURCES:
@@ -2926,6 +3024,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  stripe-react-native:
+    :path: "../node_modules/@stripe/stripe-react-native"
   UMAppLoader:
     :path: "../node_modules/unimodules-app-loader/ios"
   Yoga:
@@ -3054,6 +3154,15 @@ SPEC CHECKSUMS:
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
+  Stripe: 517f6e3e25f01641be2adab3aa3d1f45d4d443c6
+  stripe-react-native: c6c84ea556bb26da0729aaead6f497ca9157f02b
+  StripeApplePay: 78f0c4a2c2af7f03b298d2f9bc7a1a0044490923
+  StripeCore: 4430d270394b09c97dec8b2436228e76fcb3f84c
+  StripeFinancialConnections: efaf9a43bca22b6784da57eca99301598783e60f
+  StripePayments: db1f0a2e914a276028b23f5e1467e1e88f6a0238
+  StripePaymentSheet: 9c1c6d7c6498c8ba593e3b8690bf6fc79672ee91
+  StripePaymentsUI: d6b0285fdda8ac9cf8e83de423ca4efbf8b29439
+  StripeUICore: 31c439e9a03cd178415fa9dd65cc1ce71db260ec
   UMAppLoader: 55159b69750129faa7a51c493cb8ea55a7b64eb9
   Yoga: adb397651e1c00672c12e9495babca70777e411e
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
