@@ -82,6 +82,13 @@ export class AuthStateManager {
     setLoading(loading)
   }
 
+   /**
+   * Check if user needs onboarding data
+   */
+   static needsUserData(existingUser: any): boolean {
+    return !existingUser || !existingUser.onboarded_at
+  }
+
   /**
    * Get current auth state
    */

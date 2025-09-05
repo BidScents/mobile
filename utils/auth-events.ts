@@ -6,12 +6,12 @@
  */
 
 import { supabase } from "@/lib/supabase"
-import { AuthService } from './auth-service'
-import { AuthStateManager } from './auth-state-manager'
 import {
   handleAuthStateChange,
   useAuthStore,
 } from "@bid-scents/shared-sdk"
+import { AuthService } from './auth-service'
+import { AuthStateManager } from './auth-state-manager'
 
 /**
  * Handle existing session on app startup
@@ -23,35 +23,44 @@ export const handleExistingSession = async (
   try {
     AuthStateManager.setLoading(true)
 
-    // Always fetch fresh user data for up-to-date favorites, payments, messages, etc.
-    try {
-      const loginResult = await AuthService.authenticateWithSession(session)
-      AuthStateManager.setAuthenticatedState(session, loginResult)
-    } catch (apiError: any) {
-      console.log("API error occurred:", apiError)
+    if (AuthStateManager.needsUserData(existingUser)) {
+      // Need to fetch fresh user data
+      try {
+        const loginResult = await AuthService.authenticateWithSession(session)
+        AuthStateManager.setAuthenticatedState(session, loginResult)
+      } catch (apiError: any) {
+        console.log("API error occurred:", apiError)
 
-      if (
-        apiError.status === 500 ||
-        apiError.status === 502 ||
-        apiError.status === 503
-      ) {
-        // Server error - use cached data if available
-        console.log("Server error - maintaining existing auth state")
-        if (existingUser) {
-          AuthStateManager.setAuthenticatedStateWithFallback(session, existingUser)
+        if (
+          apiError.status === 500 ||
+          apiError.status === 502 ||
+          apiError.status === 503
+        ) {
+          // Server error - use cached data if available
+          console.log("Server error - maintaining existing auth state")
+          if (existingUser) {
+            AuthStateManager.setAuthenticatedStateWithFallback(session, existingUser)
+          } else {
+            console.log("No cached user data available, user will need to retry")
+            AuthStateManager.setLoading(false)
+          }
+        } else if (apiError.status === 401 || apiError.status === 403) {
+          // Auth error - clear session
+          console.log("Authentication error - clearing session")
+          AuthStateManager.clearAuthState()
         } else {
-          console.log("No cached user data available, user will need to retry")
-          AuthStateManager.setLoading(false)
+          // Other error - assume needs onboarding
+          console.log("User likely needs onboarding")
+          AuthStateManager.setAuthenticatedStateWithFallback(session)
         }
-      } else if (apiError.status === 401 || apiError.status === 403) {
-        // Auth error - clear session
-        console.log("Authentication error - clearing session")
-        AuthStateManager.clearAuthState()
-      } else {
-        // Other error - assume needs onboarding
-        console.log("User likely needs onboarding")
-        AuthStateManager.setAuthenticatedStateWithFallback(session)
       }
+    } else {
+      // Use cached user data for fast startup
+      console.log("Using cached user data for fast startup")
+      AuthStateManager.setAuthenticatedStateWithFallback(session, existingUser)
+      
+      // Fetch fresh data in background to keep store updated
+      refreshUserDataInBackground(session)
     }
   } catch (error) {
     console.error("Error handling existing session:", error)
@@ -76,34 +85,39 @@ export const handleSignInEvent = async (session: any): Promise<void> => {
     
     const { user: currentUser } = useAuthStore.getState()
     
-    // Always fetch fresh user data for up-to-date favorites, payments, messages, etc.
-    try {
-      const loginResult = await AuthService.authenticateWithSession(session)
-      AuthStateManager.setAuthenticatedState(session, loginResult)
-    } catch (apiError: any) {
-      console.log("API call failed during auth change:", apiError)
+    if (AuthStateManager.needsUserData(currentUser)) {
+      // Need to fetch fresh user data
+      try {
+        const loginResult = await AuthService.authenticateWithSession(session)
+        AuthStateManager.setAuthenticatedState(session, loginResult)
+      } catch (apiError: any) {
+        console.log("API call failed during auth change:", apiError)
 
-      if (
-        apiError.status === 500 ||
-        apiError.status === 502 ||
-        apiError.status === 503
-      ) {
-        // Server error - use existing data if available
-        console.log("Server error during sign in - maintaining existing auth state")
-        if (currentUser) {
-          AuthStateManager.setAuthenticatedStateWithFallback(session, currentUser)
+        if (
+          apiError.status === 500 ||
+          apiError.status === 502 ||
+          apiError.status === 503
+        ) {
+          // Server error - use existing data if available
+          console.log("Server error during sign in - maintaining existing auth state")
+          if (currentUser) {
+            AuthStateManager.setAuthenticatedStateWithFallback(session, currentUser)
+          } else {
+            AuthStateManager.setLoading(false)
+          }
+        } else if (apiError.status === 401 || apiError.status === 403) {
+          // Auth error - clear session
+          console.log("Authentication error during sign in - clearing session")
+          AuthStateManager.clearAuthState()
         } else {
-          AuthStateManager.setLoading(false)
+          // Other error - assume needs onboarding
+          console.log("User likely needs onboarding")
+          AuthStateManager.setAuthenticatedStateWithFallback(session)
         }
-      } else if (apiError.status === 401 || apiError.status === 403) {
-        // Auth error - clear session
-        console.log("Authentication error during sign in - clearing session")
-        AuthStateManager.clearAuthState()
-      } else {
-        // Other error - assume needs onboarding
-        console.log("User likely needs onboarding")
-        AuthStateManager.setAuthenticatedStateWithFallback(session)
       }
+    } else {
+      // Use existing user data
+      AuthStateManager.setAuthenticatedStateWithFallback(session, currentUser)
     }
   } catch (error) {
     console.error("Error handling sign in event:", error)
@@ -121,6 +135,24 @@ export const handleSignOut = async (): Promise<void> => {
     console.error("Error during sign out:", error)
     // Clear state even if signout fails
     AuthStateManager.clearAuthState()
+  }
+}
+
+/**
+ * Background refresh function to update user data without blocking UI
+ */
+const refreshUserDataInBackground = async (session: any): Promise<void> => {
+  try {
+    console.log("Refreshing user data in background")
+    const loginResult = await AuthService.authenticateWithSession(session)
+    
+    AuthStateManager.setAuthenticatedState(session, loginResult)
+
+    
+    console.log("Background refresh completed")
+  } catch (error) {
+    console.log("Background refresh failed, keeping cached data:", error)
+    // Silently fail - user keeps cached data
   }
 }
 
