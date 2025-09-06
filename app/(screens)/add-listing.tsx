@@ -1,4 +1,5 @@
 import { ControlledInput } from "@/components/forms/controlled-input";
+import { ConnectOnboardingBottomSheet, ConnectOnboardingBottomSheetMethods } from "@/components/payments/connect-onboarding-bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { MultipleImagePicker } from "@/components/ui/multiple-image-picker";
@@ -8,7 +9,7 @@ import {
   categoryOptions,
   listingTypeOptions,
 } from "@/types/create-listing-types";
-import { uploadMultipleImages, ImageUploadConfigs } from "@/utils/image-upload-service";
+import { ImageUploadConfigs, uploadMultipleImages } from "@/utils/image-upload-service";
 import {
   CreateListingRequest,
   createListingSchema,
@@ -21,7 +22,7 @@ import {
 } from "@bid-scents/shared-sdk";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
@@ -48,7 +49,8 @@ const DEFAULT_VALUES: CreateListingFormData = {
 export default function AddListingScreen() {
   const [imageUris, setImageUris] = useState<string[]>([]);
   const { showLoading, hideLoading } = useLoadingStore();
-  const { user } = useAuthStore();
+  const { user, paymentDetails } = useAuthStore();
+  const connectOnboardingBottomSheetRef = useRef<ConnectOnboardingBottomSheetMethods>(null);
 
   const {
     control,
@@ -147,6 +149,23 @@ export default function AddListingScreen() {
   };
 
   const loading = createListingMutation.isPending;
+
+  // Check if user needs to set up connect account
+  useEffect(() => {
+    if (user && paymentDetails && !paymentDetails.has_connect_account) {
+      setTimeout(() => {
+        connectOnboardingBottomSheetRef.current?.present();
+      }, 500);
+    }
+  }, [user, paymentDetails]);
+
+  const handleOnboardingComplete = () => {
+    console.log('Onboarding completed successfully!');
+  };
+
+  const handleOnboardingDoLater = () => {
+    console.log('User chose to set up payments later');
+  };
 
   return (
     <Container backgroundColor="$background" safeArea={false} variant="padded">
@@ -357,6 +376,12 @@ export default function AddListingScreen() {
           </Button>
         </YStack>
       </KeyboardAwareScrollView>
+      
+      <ConnectOnboardingBottomSheet
+        ref={connectOnboardingBottomSheetRef}
+        onComplete={handleOnboardingComplete}
+        onDoLater={handleOnboardingDoLater}
+      />
     </Container>
   );
 }
