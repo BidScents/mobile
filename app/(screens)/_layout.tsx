@@ -28,7 +28,6 @@ export default function ProfileLayout() {
         name="(chat)/[id]"
         options={{
           title: "Chat",
-          animation: "slide_from_bottom",
           headerLeft: () => <BackButton />,
         }}
       />

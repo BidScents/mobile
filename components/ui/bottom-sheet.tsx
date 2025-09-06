@@ -1,7 +1,7 @@
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
-import { useThemeColors } from '../../hooks/use-theme-colors'
 import React, { forwardRef, useCallback, useMemo } from 'react'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 
 interface BottomSheetProps {
   children: React.ReactNode
@@ -13,6 +13,7 @@ interface BottomSheetProps {
   keyboardBehavior?: 'extend' | 'fillParent' | 'interactive'
   keyboardBlurBehavior?: 'none' | 'restore'
   enableDynamicSizing?: boolean
+  pressBehavior?: 'close' | 'none'
 }
 
 /**
@@ -29,7 +30,8 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
     onDismiss,
     keyboardBehavior = 'interactive',
     keyboardBlurBehavior = 'restore',
-    enableDynamicSizing = true
+    enableDynamicSizing = true,
+    pressBehavior = 'close'
   }, ref) => {
     const colors = useThemeColors()
     const snapPointsMemo = useMemo(() => snapPoints, [snapPoints])
@@ -41,7 +43,7 @@ export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>
           disappearsOnIndex={-1}
           appearsOnIndex={0}
           opacity={0.5}
-          pressBehavior="close"
+          pressBehavior={pressBehavior}
         />
       ),
       []
