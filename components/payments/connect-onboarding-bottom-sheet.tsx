@@ -4,11 +4,7 @@ import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useOnboardConnectAccount } from "@/hooks/queries/use-payments";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useState,
-} from "react";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { Linking } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
@@ -61,8 +57,8 @@ export const ConnectOnboardingBottomSheet = forwardRef<
       setIsLoading(true);
       
       const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-      const returnUrl = `${apiBaseUrl}/mobile-redirect/seller/onboarding/complete`;
-      const refreshUrl = `${apiBaseUrl}/mobile-redirect/seller/onboarding/refresh`;
+      const returnUrl = `${apiBaseUrl}/api/v1/link/onboarding-complete?source=mobile`;
+      const refreshUrl = `${apiBaseUrl}/api/v1/link/onboarding-refresh?source=mobile`;
 
       const onboardingUrl = await onboardMutation.mutateAsync({
         returnUrl,
@@ -95,8 +91,8 @@ export const ConnectOnboardingBottomSheet = forwardRef<
       setIsLoading(true);
       
       const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-      const returnUrl = `${apiBaseUrl}/mobile-redirect/seller/onboarding/complete`;
-      const refreshUrl = `${apiBaseUrl}/mobile-redirect/seller/onboarding/refresh`;
+      const returnUrl = `${apiBaseUrl}/api/v1/link/onboarding-complete?source=mobile`;
+      const refreshUrl = `${apiBaseUrl}/api/v1/link/onboarding-refresh?source=mobile`;
 
       await onboardMutation.mutateAsync({
         returnUrl,
