@@ -5,7 +5,8 @@ import type {
   ListingCard,
   ListingDetailsResponse,
   SearchRequest,
-  SearchResponse
+  SearchResponse,
+  SellersYouFollowResponse
 } from "@bid-scents/shared-sdk";
 import { AuctionsService, ListingService, useAuthStore } from "@bid-scents/shared-sdk";
 import {
@@ -704,4 +705,28 @@ export function usePlaceBid() {
       });
     },
   });
+}
+
+// ========================================
+// SOCIAL LISTINGS QUERIES
+// ========================================
+
+/**
+ * Get listings from sellers you follow with cursor-based pagination
+ * Used for social feed of listings from followed sellers
+ */
+export function useSellersYouFollowListings(limit: number = 20) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.listings.sellersYouFollow(),
+    queryFn: ({ pageParam }) => 
+      ListingService.getSellersYouFollowListingsV1ListingSellersYouFollowGet(
+        pageParam as string | undefined,
+        limit
+      ),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage: SellersYouFollowResponse) => {
+      return lastPage.next_cursor || undefined
+    },
+    staleTime: 3 * 60 * 1000, // 3 minutes - social feeds change moderately
+  })
 }

@@ -14,6 +14,7 @@ export const queryKeys = {
     search: (params: SearchRequest) => ['listings', 'search', params] as const,
     infiniteSearch: (params: SearchRequest) => ['listings', 'infinite-search', params] as const,
     favorites: ['listings', 'favorites'] as const,
+    sellersYouFollow: () => ['listings', 'sellers-you-follow'] as const,
     comments: (listingId: string) => ['listings', 'comments', listingId] as const,
     votes: (listingId: string) => ['listings', 'votes', listingId] as const,
   },
@@ -26,6 +27,10 @@ export const queryKeys = {
       ['profile', 'listings', userId, tab, filters] as const,
     reviews: (userId: string, filters?: ReviewSearchRequest) => 
       ['profile', 'reviews', userId, filters] as const,
+    followers: (userId: string) => 
+      ['profile', 'followers', userId] as const,
+    following: (userId: string) => 
+      ['profile', 'following', userId] as const,
   },
   
   messages: {
