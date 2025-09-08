@@ -8,9 +8,11 @@ import type {
   SubscriptionRequest,
   TransactionRequest
 } from "@bid-scents/shared-sdk";
+import type { ProductsResponse } from "@/types/products";
 import { PaymentsService } from "@bid-scents/shared-sdk";
 import {
   useMutation,
+  useQuery,
   useQueryClient
 } from "@tanstack/react-query";
 import { queryKeys } from "./query-keys";
@@ -108,6 +110,21 @@ export function useCancelSubscription() {
         queryKey: queryKeys.payments.subscription,
       });
     },
+  });
+}
+
+// ========================================
+// PRODUCT QUERIES
+// ========================================
+
+/**
+ * List available products from Stripe
+ * Returns product and pricing information
+ */
+export function useListProducts() {
+  return useQuery<ProductsResponse>({
+    queryKey: queryKeys.payments.products,
+    queryFn: () => PaymentsService.listProductsV1PaymentsProductsGet(),
   });
 }
 
