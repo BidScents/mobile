@@ -1,5 +1,6 @@
 import type {
   EditProfileRequest,
+  FollowerFollowingResponse,
   ListingSearchRequest,
   ProfileTab,
   ReviewSearchRequest
@@ -238,4 +239,50 @@ return useMutation({
     queryClient.invalidateQueries({ queryKey: queryKeys.profile.all })
   }
 })
+}
+
+// ========================================
+// SOCIAL QUERIES (FOLLOWERS/FOLLOWING)
+// ========================================
+
+/**
+ * Get user followers with cursor-based pagination
+ */
+export function useUserFollowers(userId: string, limit: number = 20) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.profile.followers(userId),
+    queryFn: ({ pageParam }) => 
+      ProfileService.getUserFollowersV1ProfileUserIdFollowersGet(
+        userId,
+        pageParam as string | undefined,
+        limit
+      ),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage: FollowerFollowingResponse) => {
+      return lastPage.next_cursor || undefined
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+/**
+ * Get users that a user is following with cursor-based pagination
+ */
+export function useUserFollowing(userId: string, limit: number = 20) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.profile.following(userId),
+    queryFn: ({ pageParam }) => 
+      ProfileService.getUserFollowingV1ProfileUserIdFollowingGet(
+        userId,
+        pageParam as string | undefined,
+        limit
+      ),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage: FollowerFollowingResponse) => {
+      return lastPage.next_cursor || undefined
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
 }
