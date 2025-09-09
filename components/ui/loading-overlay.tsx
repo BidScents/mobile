@@ -10,12 +10,12 @@ export const LoadingOverlay: React.FC = () => {
     <Modal visible={isLoading} transparent animationType="fade">
       <View
         flex={1}
-        backgroundColor="$background"
+        backgroundColor="transparent"
         alignItems="center"
         justifyContent="center"
       >
         <View
-          backgroundColor="$background" 
+          backgroundColor="$muted" 
           borderRadius="$5"
           padding="$5"
           justifyContent='center'
