@@ -2,37 +2,8 @@
  * Product and pricing types from the payments API
  */
 
-export interface BoostCredits {
-  normal_boost: number;
-  premium_boost: number;
-}
-
-export interface BoostInfo {
-  duration: number;
-  normal_price: number;
-  bulk_price: number;
-  bulk_limit: number;
-}
-
-export interface PassInfo {
-  id: string;
-  price: number;
-  boost_credits: BoostCredits;
-  duration: number;
-  free_trial: number;
-}
-
-export interface ProductsResponse {
-  boosts: {
-    normal_boost: BoostInfo;
-    premium_boost: BoostInfo;
-  };
-  passes: {
-    weekly_swap: PassInfo;
-    monthly_swap: PassInfo;
-    yearly_swap: PassInfo;
-  };
-}
+// Re-export SDK types for use in the app
+export type { ProductResponse, Boost, Pass } from "@bid-scents/shared-sdk";
 
 /**
  * Subscription plan for UI display (transformed from API data)
