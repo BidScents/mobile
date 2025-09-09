@@ -1,4 +1,4 @@
-import type { PassInfo, ProductsResponse, SubscriptionPlan } from "@/types/products";
+import type { ProductResponse, Pass, Boost, SubscriptionPlan } from "@/types/products";
 import { PassType } from "@bid-scents/shared-sdk";
 import { currency } from "../constants/constants";
 /**
@@ -28,7 +28,7 @@ function getBillingPeriod(duration: number): string {
  * @param boostsInfo - Boost pricing info for context
  * @returns Array of feature strings
  */
-function generateFeatures(passInfo: PassInfo, boostsInfo: ProductsResponse["boosts"]): string[] {
+function generateFeatures(passInfo: Pass, boostsInfo: Record<string, Boost>): string[] {
   const features: string[] = [];
 
   // Add free trial if available
@@ -36,19 +36,22 @@ function generateFeatures(passInfo: PassInfo, boostsInfo: ProductsResponse["boos
     features.push(`${passInfo.free_trial} days free trial`);
   }
 
-  // Add boost credits
-  if (passInfo.boost_credits.normal_boost > 0) {
-    const duration = boostsInfo.normal_boost.duration;
-    features.push(`${passInfo.boost_credits.normal_boost} x ${duration}h boost credit${passInfo.boost_credits.normal_boost > 1 ? 's' : ''}`);
-  }
-
-  if (passInfo.boost_credits.premium_boost > 0) {
-    const duration = boostsInfo.premium_boost.duration;
-    features.push(`${passInfo.boost_credits.premium_boost} x ${duration}h boost credit${passInfo.boost_credits.premium_boost > 1 ? 's' : ''}`);
-  }
+  // Add boost credits for each boost type
+  let hasBoostCredits = false;
+  
+  Object.entries(passInfo.boost_credits).forEach(([boostType, credits]) => {
+    if (credits > 0) {
+      hasBoostCredits = true;
+      const boostInfo = boostsInfo[boostType];
+      if (boostInfo) {
+        const duration = boostInfo.duration;
+        features.push(`${credits} x ${duration}h ${boostType.replace('_', ' ')} credit${credits > 1 ? 's' : ''}`);
+      }
+    }
+  });
 
   // If no boost credits, just show swap access
-  if (passInfo.boost_credits.normal_boost === 0 && passInfo.boost_credits.premium_boost === 0) {
+  if (!hasBoostCredits) {
     features.push("Swap Access");
   }
 
@@ -60,55 +63,48 @@ function generateFeatures(passInfo: PassInfo, boostsInfo: ProductsResponse["boos
  * @param productsData - Products response from API
  * @returns Array of subscription plans for display
  */
-export function transformProductsToPlans(productsData: ProductsResponse): SubscriptionPlan[] {
+export function transformProductsToPlans(productsData: ProductResponse): SubscriptionPlan[] {
   const { passes, boosts } = productsData;
 
-  return [
-    // Weekly Plan
-    {
-      id: passes.weekly_swap.id,
-      type: 'weekly_swap' as const,
-      title: "Weekly Swap Pass",
-      subtitle: "Perfect for active swappers",
-      price: formatPrice(passes.weekly_swap.price),
-      billing: getBillingPeriod(passes.weekly_swap.duration),
-      features: generateFeatures(passes.weekly_swap, boosts),
-      popular: false,
-      rawPrice: passes.weekly_swap.price,
-      duration: passes.weekly_swap.duration,
-      freeTrialDays: passes.weekly_swap.free_trial,
-    },
+  // Convert passes object to array and sort by duration (weekly, monthly, yearly)
+  const passEntries = Object.entries(passes).sort(([, a], [, b]) => a.duration - b.duration);
 
-    // Monthly Plan
-    {
-      id: passes.monthly_swap.id,
-      type: 'monthly_swap' as const,
-      title: "Monthly Swap Pass",
-      subtitle: "Most popular choice",
-      price: formatPrice(passes.monthly_swap.price),
-      billing: getBillingPeriod(passes.monthly_swap.duration),
-      features: generateFeatures(passes.monthly_swap, boosts),
-      popular: true,
-      rawPrice: passes.monthly_swap.price,
-      duration: passes.monthly_swap.duration,
-      freeTrialDays: passes.monthly_swap.free_trial,
-    },
+  return passEntries.map(([passKey, passInfo], index) => {
+    // Determine plan type based on duration
+    let planType: 'weekly_swap' | 'monthly_swap' | 'yearly_swap';
+    let title: string;
+    let subtitle: string;
+    let popular = false;
 
-    // Yearly Plan
-    {
-      id: passes.yearly_swap.id,
-      type: 'yearly_swap' as const,
-      title: "Yearly Swap Pass",
-      subtitle: "Maximum savings",
-      price: formatPrice(passes.yearly_swap.price),
-      billing: getBillingPeriod(passes.yearly_swap.duration),
-      features: generateFeatures(passes.yearly_swap, boosts),
-      popular: false,
-      rawPrice: passes.yearly_swap.price,
-      duration: passes.yearly_swap.duration,
-      freeTrialDays: passes.yearly_swap.free_trial,
-    },
-  ];
+    if (passInfo.duration <= 7) {
+      planType = 'weekly_swap';
+      title = "Weekly Swap Pass";
+      subtitle = "Perfect for active swappers";
+    } else if (passInfo.duration <= 31) {
+      planType = 'monthly_swap';
+      title = "Monthly Swap Pass";
+      subtitle = "Most popular choice";
+      popular = true; // Monthly is typically the most popular
+    } else {
+      planType = 'yearly_swap';
+      title = "Yearly Swap Pass";
+      subtitle = "Maximum savings";
+    }
+
+    return {
+      id: passInfo.id,
+      type: planType,
+      title,
+      subtitle,
+      price: formatPrice(passInfo.price),
+      billing: getBillingPeriod(passInfo.duration),
+      features: generateFeatures(passInfo, boosts),
+      popular,
+      rawPrice: passInfo.price,
+      duration: passInfo.duration,
+      freeTrialDays: passInfo.free_trial,
+    };
+  });
 }
 
 /**
