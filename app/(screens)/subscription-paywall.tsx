@@ -1,8 +1,10 @@
+import {
+  SubscriptionBottomAction,
+  SubscriptionHeader,
+  SubscriptionLoadingState,
+  SubscriptionPlanCard,
+} from "@/components/payments/paywall";
 import { StripeSetupPaymentMethod } from "@/components/payments/stripe-setup-payment-method";
-import { SubscriptionBottomAction } from "@/components/payments/subscription-bottom-action";
-import { SubscriptionHeader } from "@/components/payments/subscription-header";
-import { SubscriptionLoadingState } from "@/components/payments/subscription-loading-state";
-import { SubscriptionPlanCard } from "@/components/payments/subscription-plan-card";
 import { Container } from "@/components/ui/container";
 import { useCreateSubscription, useListProducts } from "@/hooks/queries/use-payments";
 import { AuthService } from "@/utils/auth-service";

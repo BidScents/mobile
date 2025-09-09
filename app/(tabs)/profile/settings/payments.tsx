@@ -1,8 +1,10 @@
-import { PaymentMethodSection } from "@/components/payments/payment-method-section";
-import { PaymentsLoadingState } from "@/components/payments/payments-loading-state";
-import { SubscriptionBenefitsSection } from "@/components/payments/subscription-benefits-section";
-import { SubscriptionManagementSection } from "@/components/payments/subscription-management-section";
-import { SubscriptionStatusSection } from "@/components/payments/subscription-status-section";
+import {
+  PaymentMethodSection,
+  PaymentsLoadingState,
+  SubscriptionBenefitsSection,
+  SubscriptionManagementSection,
+  SubscriptionStatusSection,
+} from "@/components/payments/settings";
 import { Container } from "@/components/ui/container";
 import { useCancelSubscription } from "@/hooks/queries/use-payments";
 import { useAuthStore } from "@bid-scents/shared-sdk";
