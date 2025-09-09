@@ -1,11 +1,12 @@
 import { ThemedIonicons } from '@/components/ui/themed-icons';
 import { useSetupPaymentMethod } from '@/hooks/queries/use-payments';
+import { useLoadingStore } from '@bid-scents/shared-sdk';
 import {
   useStripe
 } from '@stripe/stripe-react-native';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
+import { Text, XStack } from 'tamagui';
 
 interface StripeSetupPaymentMethodProps {
   /** Customer email for the setup */
@@ -14,8 +15,8 @@ interface StripeSetupPaymentMethodProps {
   customerId?: string;
   /** Ephemeral key secret for customer */
   ephemeralKeySecret?: string;
-  /** Called when setup succeeds */
-  onSuccess: () => void;
+  /** Called when setup succeeds - now receives the payment method ID */
+  onSuccess: (paymentMethodId: string) => void;
   /** Called when setup fails */
   onError: (error: Error) => void;
   /** Called when component mounts to start setup process */
@@ -34,7 +35,8 @@ export const StripeSetupPaymentMethod = memo<StripeSetupPaymentMethodProps>(({
   onError,
   onMount
 }) => {
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { initPaymentSheet, presentPaymentSheet, retrieveSetupIntent } = useStripe();
+  const { showLoading, hideLoading } = useLoadingStore();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -54,7 +56,8 @@ export const StripeSetupPaymentMethod = memo<StripeSetupPaymentMethodProps>(({
     };
 
     initializeSetup();
-  }, [setupMutation, onError, onMount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   const initializePaymentSheet = useCallback(async () => {
     if (!clientSecret) return;
@@ -70,10 +73,25 @@ export const StripeSetupPaymentMethod = memo<StripeSetupPaymentMethodProps>(({
           customerEphemeralKeySecret: ephemeralKeySecret,
         }),
 
-        // Default billing details
+        // Default billing details with Malaysia as default country
         defaultBillingDetails: {
           email: customerEmail,
+          address: {
+            country: 'MY', // Default to Malaysia
+          },
         },
+
+        // Enable Google Pay for Malaysian users
+        googlePay: {
+          merchantCountryCode: 'MY',
+          currencyCode: 'MYR',
+          testEnv: __DEV__, // Use test environment in development
+        },
+
+        // Payment method configuration for Malaysia
+        // Note: FPX and GrabPay don't support Setup Intents (saving for subscriptions)
+        // Only card payments can be saved for recurring subscriptions
+        // paymentMethodOrder: ['card'], // Keeping only card for setup intents
 
         // Use system theme colors - Stripe will adapt to device theme automatically
 
@@ -98,17 +116,9 @@ export const StripeSetupPaymentMethod = memo<StripeSetupPaymentMethodProps>(({
     customerEmail,
     onError
   ]);
-  
-  // Initialize PaymentSheet when we have client secret
-  useEffect(() => {
-    if (clientSecret) {
-      initializePaymentSheet();
-    }
-  }, [clientSecret, initializePaymentSheet]);
-
 
   const handleSetup = useCallback(async () => {
-    if (!isReady) {
+    if (!isReady || !clientSecret) {
       Alert.alert('Setup not ready', 'Please wait for setup to initialize');
       return;
     }
@@ -120,32 +130,57 @@ export const StripeSetupPaymentMethod = memo<StripeSetupPaymentMethodProps>(({
 
       if (error) {
         if (error.code === 'Canceled') {
-          // User canceled, just return without calling onError
+          // User canceled, call onError to reset state
+          hideLoading();
+          onError(new Error('USER_CANCELLED'));
           return;
         }
         throw new Error(error.message);
       }
 
-      // Setup succeeded
-      onSuccess();
+      // Setup succeeded - now retrieve the setup intent to get payment method ID
+      const { setupIntent: retrievedSetupIntent, error: retrieveError } = await retrieveSetupIntent(clientSecret);
+      
+      if (retrieveError) {
+        throw new Error(`Failed to retrieve setup intent: ${retrieveError.message}`);
+      }
+      
+      if (!retrievedSetupIntent) {
+        throw new Error('Setup intent not found after completion');
+      }
+
+      // Extract payment method ID - prefer the newer paymentMethod.id over deprecated paymentMethodId
+      const paymentMethodId = retrievedSetupIntent.paymentMethod?.id;
+      
+      if (!paymentMethodId) {
+        throw new Error('Payment method ID not found after setup');
+      }
+
+      hideLoading();
+      onSuccess(paymentMethodId);
 
     } catch (error) {
+      hideLoading();
       onError(error instanceof Error ? error : new Error('Failed to save payment method'));
     } finally {
       setIsProcessing(false);
     }
-  }, [isReady, presentPaymentSheet, onSuccess, onError]);
+  }, [isReady, clientSecret, presentPaymentSheet, retrieveSetupIntent, onSuccess, onError, hideLoading]);
 
-  if (setupMutation.isPending || !clientSecret) {
-    return (
-      <YStack alignItems="center" justifyContent="center" padding="$4" gap="$3">
-        <Spinner size="large" color="$primary" />
-        <Text fontSize="$3" color="$mutedForeground">
-          Setting up payment method...
-        </Text>
-      </YStack>
-    );
-  }
+  // Auto-present payment sheet when ready
+  useEffect(() => {
+    if (isReady && !isProcessing) {
+      showLoading();
+      handleSetup();
+    }
+  }, [isReady, isProcessing, handleSetup, showLoading]);
+  
+  // Initialize PaymentSheet when we have client secret
+  useEffect(() => {
+    if (clientSecret) {
+      initializePaymentSheet();
+    }
+  }, [clientSecret, initializePaymentSheet]);
 
   if (setupMutation.isError) {
     return (
@@ -166,54 +201,8 @@ export const StripeSetupPaymentMethod = memo<StripeSetupPaymentMethodProps>(({
     );
   }
 
-  if (!isReady) {
-    return (
-      <YStack alignItems="center" justifyContent="center" padding="$4" gap="$3">
-        <Spinner size="large" color="$primary" />
-        <Text fontSize="$3" color="$mutedForeground">
-          Loading payment form...
-        </Text>
-      </YStack>
-    );
-  }
-
-  return (
-    <YStack gap="$4" padding="$4">
-      <YStack gap="$3">
-        <XStack alignItems="center" gap="$2">
-          <ThemedIonicons name="card-outline" size={20} themeColor="foreground" />
-          <Text fontSize="$4" fontWeight="600" color="$foreground">
-            Add Payment Method
-          </Text>
-        </XStack>
-        
-        <Text fontSize="$3" color="$mutedForeground">
-          Save a payment method for faster checkout and subscriptions
-        </Text>
-      </YStack>
-
-      <Button
-        size="$4"
-        disabled={isProcessing}
-        onPress={handleSetup}
-        backgroundColor="$primary"
-        color="$foreground"
-        pressStyle={{ backgroundColor: '$primary', opacity: 0.8 }}
-      >
-        <XStack alignItems="center" gap="$2">
-          {isProcessing && <Spinner size="small" color="$foreground" />}
-          <ThemedIonicons name="add-circle-outline" size={20} color="$foreground" />
-          <Text color="$foreground" fontWeight="600">
-            {isProcessing ? 'Saving...' : 'Add Payment Method'}
-          </Text>
-        </XStack>
-      </Button>
-
-      <Text fontSize="$2" color="$mutedForeground" textAlign="center">
-        Your payment information is securely processed by Stripe
-      </Text>
-    </YStack>
-  );
+  // All loading states handled by global loading overlay
+  return null;
 });
 
 StripeSetupPaymentMethod.displayName = 'StripeSetupPaymentMethod';
