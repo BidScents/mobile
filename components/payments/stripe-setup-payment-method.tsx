@@ -150,7 +150,7 @@ export const StripeSetupPaymentMethod = memo<StripeSetupPaymentMethodProps>(({
       }
 
       // Extract payment method ID - prefer the newer paymentMethod.id over deprecated paymentMethodId
-      const paymentMethodId = retrievedSetupIntent.paymentMethod?.id;
+      const paymentMethodId = retrievedSetupIntent.paymentMethodId;
       
       if (!paymentMethodId) {
         throw new Error('Payment method ID not found after setup');

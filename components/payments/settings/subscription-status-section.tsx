@@ -56,7 +56,6 @@ export function SubscriptionStatusSection({
 
         <ButtonUI
           variant="primary"
-          leftIcon="star"
           onPress={onUpgrade}
         >
           Choose Plan
