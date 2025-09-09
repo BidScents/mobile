@@ -31,6 +31,13 @@ export default function ProfileLayout() {
           headerLeft: () => <BackButton />,
         }}
       />
+      <Stack.Screen
+        name="subscription-paywall"
+        options={{
+          title: "Subscriptions",
+          headerLeft: () => <BackButton />,
+        }}
+      />
     </Stack>
   );
 }
