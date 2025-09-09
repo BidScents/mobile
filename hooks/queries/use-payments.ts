@@ -8,7 +8,7 @@ import type {
   SubscriptionRequest,
   TransactionRequest
 } from "@bid-scents/shared-sdk";
-import type { ProductsResponse } from "@/types/products";
+import type { ProductResponse } from "@/types/products";
 import { PaymentsService } from "@bid-scents/shared-sdk";
 import {
   useMutation,
@@ -57,6 +57,17 @@ export function useBoostListing() {
 // ========================================
 
 /**
+ * Get user's payment method details
+ * Returns payment method information
+ */
+export function useGetPaymentMethod() {
+  return useQuery({
+    queryKey: queryKeys.payments.paymentMethod,
+    queryFn: () => PaymentsService.getPaymentMethodV1PaymentsPaymentMethodGet(),
+  });
+}
+
+/**
  * Setup payment method for user
  * Returns a client secret for payment method setup
  */
@@ -67,6 +78,47 @@ export function useSetupPaymentMethod() {
     mutationFn: () => PaymentsService.setupPaymentMethodV1PaymentsPaymentMethodPost(),
     onSuccess: () => {
       // Invalidate payment method status to reflect new setup
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.payments.paymentMethod,
+      });
+    },
+  });
+}
+
+/**
+ * Delete user's payment method
+ */
+export function useDeletePaymentMethod() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => PaymentsService.deletePaymentMethodV1PaymentsPaymentMethodDelete(),
+    onSuccess: () => {
+      // Invalidate payment method status to reflect deletion
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.payments.paymentMethod,
+      });
+      
+      // Also invalidate subscription status as it may be affected
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.payments.subscription,
+      });
+    },
+  });
+}
+
+/**
+ * Update user's payment method
+ * @param paymentMethodId - New payment method ID to update to
+ */
+export function useUpdatePaymentMethod() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (paymentMethodId: string) => 
+      PaymentsService.updatePaymentMethodV1PaymentsPaymentMethodPatch(paymentMethodId),
+    onSuccess: () => {
+      // Invalidate payment method status to reflect update
       queryClient.invalidateQueries({
         queryKey: queryKeys.payments.paymentMethod,
       });
@@ -122,7 +174,7 @@ export function useCancelSubscription() {
  * Returns product and pricing information
  */
 export function useListProducts() {
-  return useQuery<ProductsResponse>({
+  return useQuery<ProductResponse>({
     queryKey: queryKeys.payments.products,
     queryFn: () => PaymentsService.listProductsV1PaymentsProductsGet(),
   });
