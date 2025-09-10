@@ -6,6 +6,14 @@
 export type { ProductResponse, Boost, Pass } from "@bid-scents/shared-sdk";
 
 /**
+ * Payment method details from the payments API
+ */
+export interface PaymentMethodResponse {
+  brand: string;
+  last4: string;
+}
+
+/**
  * Subscription plan for UI display (transformed from API data)
  */
 export interface SubscriptionPlan {
