@@ -1,5 +1,4 @@
 import type {
-  BidResponse,
   FavoriteResponse,
   HomepageResponse,
   ListingCard,
@@ -8,13 +7,13 @@ import type {
   SearchResponse,
   SellersYouFollowResponse
 } from "@bid-scents/shared-sdk";
-import { AuctionsService, ListingService, useAuthStore } from "@bid-scents/shared-sdk";
+import { AuctionsService, ListingService, ListingType, useAuthStore } from "@bid-scents/shared-sdk";
 import {
-  QueryClient,
   useInfiniteQuery,
   useMutation,
   useQuery,
-  useQueryClient
+  useQueryClient,
+  type QueryClient
 } from "@tanstack/react-query";
 import { queryKeys } from "./query-keys";
 
@@ -92,13 +91,22 @@ export function seedListingDetailCache(
  * Can be pre-seeded with ListingCard data for instant loading
  */
 export function useListingDetail(listingId: string) {
+  const queryClient = useQueryClient()
+  
+  // Get current cached data to determine listing type for refetch behavior
+  const cachedData = queryClient.getQueryData<ListingDetailsResponse>(
+    queryKeys.listings.detail(listingId)
+  )
+  
+  const isAuction = cachedData?.listing?.listing_type === ListingType.AUCTION
+  
   return useQuery({
     queryKey: queryKeys.listings.detail(listingId),
-    queryFn: () =>
-      ListingService.getListingDetailsV1ListingListingIdDetailsGet(listingId),
-    staleTime: 3 * 60 * 1000, // 3 minutes - listings can change frequently
+    queryFn: () => {
+      return ListingService.getListingDetailsV1ListingListingIdDetailsGet(listingId)
+    },
+    staleTime: isAuction ? 0 : 3 * 60 * 1000, // 30 seconds for auctions, 3 minutes for others
     enabled: !!listingId,
-    // Background refetch will happen due to invalidation in cache seeding
   });
 }
 
@@ -684,13 +692,13 @@ export function usePlaceBid() {
 
       return { previousData };
     },
-    onSuccess: (response: BidResponse, { listingId }) => {
-      // Invalidate and refetch to get the real bid data from server
-      // This ensures we have the correct bid ID, timestamps, and any server-side updates
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.listings.detail(listingId),
-      });
-    },
+    // onSuccess: (response: BidResponse, { listingId }) => {
+    //   // Invalidate and refetch to get the real bid data from server
+    //   // This ensures we have the correct bid ID, timestamps, and any server-side updates
+    //   queryClient.invalidateQueries({
+    //     queryKey: queryKeys.listings.detail(listingId),
+    //   });
+    // },
     onError: (err, { listingId }, context) => {
       // Rollback optimistic update on error
       if (context?.previousData) {
