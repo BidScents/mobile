@@ -1,3 +1,5 @@
+import type { PaymentMethodResponse, ProductResponse } from "@/types/products";
+import { AuthService } from "@/utils/auth-service";
 import type {
   BoostRequest,
   ConversationResponse,
@@ -8,7 +10,6 @@ import type {
   SubscriptionRequest,
   TransactionRequest
 } from "@bid-scents/shared-sdk";
-import type { ProductResponse } from "@/types/products";
 import { PaymentsService } from "@bid-scents/shared-sdk";
 import {
   useMutation,
@@ -61,7 +62,7 @@ export function useBoostListing() {
  * Returns payment method information
  */
 export function useGetPaymentMethod() {
-  return useQuery({
+  return useQuery<PaymentMethodResponse>({
     queryKey: queryKeys.payments.paymentMethod,
     queryFn: () => PaymentsService.getPaymentMethodV1PaymentsPaymentMethodGet(),
   });
@@ -93,16 +94,19 @@ export function useDeletePaymentMethod() {
 
   return useMutation({
     mutationFn: () => PaymentsService.deletePaymentMethodV1PaymentsPaymentMethodDelete(),
-    onSuccess: () => {
+    onSuccess: async () => {
       // Invalidate payment method status to reflect deletion
       queryClient.invalidateQueries({
         queryKey: queryKeys.payments.paymentMethod,
       });
       
-      // Also invalidate subscription status as it may be affected
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payments.subscription,
-      });
+
+      // Refresh auth state to update payment details
+      try {
+        await AuthService.refreshCurrentUser();
+      } catch (error) {
+        console.error('Failed to refresh user after payment method deletion:', error);
+      }
     },
   });
 }
@@ -117,11 +121,18 @@ export function useUpdatePaymentMethod() {
   return useMutation({
     mutationFn: (paymentMethodId: string) => 
       PaymentsService.updatePaymentMethodV1PaymentsPaymentMethodPatch(paymentMethodId),
-    onSuccess: () => {
+    onSuccess: async () => {
       // Invalidate payment method status to reflect update
       queryClient.invalidateQueries({
         queryKey: queryKeys.payments.paymentMethod,
       });
+
+      // Refresh auth state to update payment details
+      try {
+        await AuthService.refreshCurrentUser();
+      } catch (error) {
+        console.error('Failed to refresh user after payment method update:', error);
+      }
     },
   });
 }
@@ -134,16 +145,16 @@ export function useUpdatePaymentMethod() {
  * Create or update swap pass subscription
  */
 export function useCreateSubscription() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (subscriptionRequest: SubscriptionRequest) =>
       PaymentsService.createSubscriptionV1PaymentsSubscriptionPost(subscriptionRequest),
-    onSuccess: () => {
-      // Invalidate subscription status
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payments.subscription,
-      });
+    onSuccess: async () => {
+      // Refresh auth state to update payment details and subscription status
+      try {
+        await AuthService.refreshCurrentUser();
+      } catch (error) {
+        console.error('Failed to refresh user after subscription creation:', error);
+      }
     },
   });
 }
@@ -156,11 +167,13 @@ export function useCancelSubscription() {
 
   return useMutation({
     mutationFn: () => PaymentsService.cancelSubscriptionV1PaymentsSubscriptionDelete(),
-    onSuccess: () => {
-      // Invalidate subscription status
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payments.subscription,
-      });
+    onSuccess: async () => {
+      // Refresh auth state to update subscription status
+      try {
+        await AuthService.refreshCurrentUser();
+      } catch (error) {
+        console.error('Failed to refresh user after subscription cancellation:', error);
+      }
     },
   });
 }
