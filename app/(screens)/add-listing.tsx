@@ -39,6 +39,7 @@ const DEFAULT_VALUES: CreateListingFormData = {
   category: ListingCategory.DESIGNER,
   volume: 50,
   remaining_percentage: 100,
+  price: 10,
   quantity: 1,
   purchase_year: new Date().getFullYear(),
   box_condition: ListingBoxCondition.GOOD,
@@ -65,6 +66,8 @@ export default function AddListingScreen() {
 
   const listingType = watch("type");
   const isAuction = listingType === ListingType.AUCTION;
+  const isSwap = listingType === ListingType.SWAP;
+
 
   const createListingMutation = useCreateListing({
     onSuccess: (data) => {
@@ -122,6 +125,8 @@ export default function AddListingScreen() {
         price:
           data.type === ListingType.AUCTION
             ? data.starting_price!
+            : data.type === ListingType.SWAP
+            ? 10
             : data.price!,
         // Provide defaults for optional backend fields
         batch_code: data.batch_code || undefined,
@@ -237,7 +242,7 @@ export default function AddListingScreen() {
               options={categoryOptions}
             />
 
-            {!isAuction ? (
+            {!isSwap && !isAuction && (
               <ControlledInput
                 control={control}
                 name="price"
@@ -246,54 +251,56 @@ export default function AddListingScreen() {
                 placeholder="0.00"
                 disabled={loading}
               />
-            ) : (
+            )}
+
+            {isAuction && (
               <YStack gap="$4">
-                <ControlledInput
-                  control={control}
-                  name="starting_price"
-                  variant="numeric"
-                  label="Starting Price"
-                  placeholder="0.00"
-                  disabled={loading}
-                />
+              <ControlledInput
+                control={control}
+                name="starting_price"
+                variant="numeric"
+                label="Starting Price"
+                placeholder="0.00"
+                disabled={loading}
+              />
 
-                <ControlledInput
-                  control={control}
-                  name="buy_now_price"
-                  variant="numeric"
-                  label="Buy Now Price (Optional)"
-                  placeholder="0.00"
-                  disabled={loading}
-                />
+              <ControlledInput
+                control={control}
+                name="buy_now_price"
+                variant="numeric"
+                label="Buy Now Price (Optional)"
+                placeholder="0.00"
+                disabled={loading}
+              />
 
-                <ControlledInput
-                  control={control}
-                  name="bid_increment"
-                  variant="numeric"
-                  label="Bid Increment"
-                  placeholder="5.00"
-                  disabled={loading}
-                />
+              <ControlledInput
+                control={control}
+                name="bid_increment"
+                variant="numeric"
+                label="Bid Increment"
+                placeholder="5.00"
+                disabled={loading}
+              />
 
-                <ControlledInput
-                  control={control}
-                  name="ends_at"
-                  variant="date"
-                  label="End Date & Time"
-                  placeholder="Select auction end time"
-                  disabled={loading}
-                />
+              <ControlledInput
+                control={control}
+                name="ends_at"
+                variant="date"
+                label="End Date & Time"
+                placeholder="Select auction end time"
+                disabled={loading}
+              />
 
-                <ControlledInput
-                  control={control}
-                  name="is_extendable"
-                  variant="switch"
-                  label="Extendable (Optional)"
-                  placeholder="Extendable"
-                  switchChecked={watch("is_extendable")}
-                  disabled={loading}
-                />
-              </YStack>
+              <ControlledInput
+                control={control}
+                name="is_extendable"
+                variant="switch"
+                label="Extendable (Optional)"
+                placeholder="Extendable"
+                switchChecked={watch("is_extendable")}
+                disabled={loading}
+              />
+            </YStack>
             )}
 
             <XStack gap="$3">
