@@ -2,6 +2,7 @@ import { currency } from "@/constants/constants";
 import {
   ListingCard as ListingCardType,
   ListingType,
+  useAuthStore
 } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,6 +31,8 @@ export function ListingCard({
 }: ListingCardProps) {
   const queryClient = useQueryClient();
   const isPressed = React.useRef(false);
+  const { paymentDetails } = useAuthStore();
+  const isSwapActive = Boolean(paymentDetails?.eligible_for_swap_until && new Date(paymentDetails.eligible_for_swap_until) > new Date());
 
   const handleCardPress = () => {
     if (isPressed.current) {
@@ -39,6 +42,12 @@ export function ListingCard({
     setTimeout(() => {
       isPressed.current = false;
     }, 1000); // Prevent double-tap
+
+    if (listing.listing_type === ListingType.SWAP && !isSwapActive) {
+      router.push(`(screens)/subscription-paywall` as any);
+      return;
+    }
+      
     onPress?.();
     
     // Only seed cache if no data exists or existing data is also seeded
