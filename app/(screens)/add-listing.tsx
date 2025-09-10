@@ -215,7 +215,7 @@ export default function AddListingScreen() {
                 alignItems="center"
                 gap="$2"
               >
-                <ThemedIonicons name="information-circle-outline" size={24} color="$blue11" />
+                <ThemedIonicons name="information-circle-outline" size={20} color="$blue11" />
                 <Text
                   fontSize="$3"
                   color="$blue11"
