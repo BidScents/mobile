@@ -3,6 +3,7 @@ import { ConnectOnboardingBottomSheet, ConnectOnboardingBottomSheetMethods } fro
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { MultipleImagePicker } from "@/components/ui/multiple-image-picker";
+import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useCreateListing } from "@/hooks/queries/use-create-listing";
 import {
   boxConditionOptions,
@@ -26,7 +27,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
 /**
  * Default form values for creating a listing
@@ -67,6 +68,14 @@ export default function AddListingScreen() {
   const listingType = watch("type");
   const isAuction = listingType === ListingType.AUCTION;
   const isSwap = listingType === ListingType.SWAP;
+
+  // Check if user has swap access
+  const isSwapActive = Boolean(paymentDetails?.eligible_for_swap_until && new Date(paymentDetails.eligible_for_swap_until) > new Date());
+
+  // Filter listing type options based on swap access
+  const availableListingTypeOptions = isSwapActive 
+    ? listingTypeOptions 
+    : listingTypeOptions.filter(option => option.value !== ListingType.SWAP);
 
 
   const createListingMutation = useCreateListing({
@@ -194,6 +203,30 @@ export default function AddListingScreen() {
 
           {/* Basic Information */}
           <YStack gap="$3">
+            {/* Swap Access Disclaimer */}
+            {!isSwapActive && (
+              <XStack
+                backgroundColor="$blue2"
+                borderRadius="$6"
+                padding="$3"
+                borderWidth={1}
+                borderColor="$blue6"
+                onPress={() => router.push("/(screens)/subscription-paywall")}
+                alignItems="center"
+                gap="$2"
+              >
+                <ThemedIonicons name="information-circle-outline" size={24} color="$blue11" />
+                <Text
+                  fontSize="$3"
+                  color="$blue11"
+                  textAlign="center"
+                  fontWeight="500"
+                >
+                  Subscribe to get Swap access and boost credits
+                </Text>
+              </XStack>
+            )}
+            
             <ControlledInput
               control={control}
               name="type"
@@ -201,7 +234,7 @@ export default function AddListingScreen() {
               label="Listing Type"
               placeholder="Select listing type"
               disabled={loading}
-              options={listingTypeOptions}
+              options={availableListingTypeOptions}
             />
 
             <ControlledInput
