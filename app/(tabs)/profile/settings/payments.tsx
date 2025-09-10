@@ -2,19 +2,14 @@ import {
   PaymentMethodSection,
   PaymentsLoadingState,
   SubscriptionBenefitsSection,
-  SubscriptionManagementSection,
   SubscriptionStatusSection,
 } from "@/components/payments/settings";
 import { Container } from "@/components/ui/container";
-import { useCancelSubscription } from "@/hooks/queries/use-payments";
 import { useAuthStore } from "@bid-scents/shared-sdk";
-import { router } from "expo-router";
-import { useCallback, useMemo } from "react";
-import { Alert } from "react-native";
+import { useMemo } from "react";
 import { ScrollView, YStack } from "tamagui";
 
 export default function PaymentsSettingsScreen() {
-  const cancelSubscriptionMutation = useCancelSubscription();
   const { paymentDetails, loading } = useAuthStore();
 
   // Compute subscription status from payment details
@@ -34,10 +29,8 @@ export default function PaymentsSettingsScreen() {
     const swapAccessDate = paymentDetails.eligible_for_swap_until
       ? new Date(paymentDetails.eligible_for_swap_until)
       : null;
-    const isSwapActive = swapAccessDate && swapAccessDate > new Date();
-    const hasActiveSubscription = !!(
-      paymentDetails.subscription_id && isSwapActive
-    );
+    const isSwapActive = Boolean(swapAccessDate && swapAccessDate > new Date());
+    const isActive = paymentDetails.subscription_is_active || false;
 
     // Calculate total boost credits
     const boostCredits = paymentDetails.boost_credits || {};
@@ -48,7 +41,7 @@ export default function PaymentsSettingsScreen() {
 
     // Determine plan type based on swap access duration
     let planType = null;
-    if (hasActiveSubscription && swapAccessDate) {
+    if (paymentDetails.subscription_id && swapAccessDate) {
       const now = new Date();
       const daysDifference = Math.ceil(
         (swapAccessDate.getTime() - now.getTime()) / (1000 * 3600 * 24)
@@ -64,7 +57,7 @@ export default function PaymentsSettingsScreen() {
     }
 
     return {
-      isActive: hasActiveSubscription,
+      isActive,
       hasPaymentMethod: paymentDetails.has_payment_method,
       planType,
       swapAccessUntil: swapAccessDate,
@@ -76,38 +69,6 @@ export default function PaymentsSettingsScreen() {
     };
   }, [paymentDetails]);
 
-  const handleCancelSubscription = useCallback(() => {
-    Alert.alert(
-      "Cancel Subscription",
-      "Are you sure you want to cancel your subscription? You will lose access to swap listings and boost credits.",
-      [
-        { text: "Keep Subscription", style: "cancel" },
-        {
-          text: "Cancel Subscription",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await cancelSubscriptionMutation.mutateAsync();
-              Alert.alert(
-                "Subscription Cancelled",
-                "Your subscription has been cancelled. You will retain access until your next billing date."
-              );
-            } catch (error) {
-              Alert.alert(
-                "Cancellation Failed",
-                "Failed to cancel subscription. Please try again or contact support."
-              );
-            }
-          },
-        },
-      ]
-    );
-  }, [cancelSubscriptionMutation]);
-
-  const handleUpgradeSubscription = useCallback(() => {
-    router.push("/(screens)/subscription-paywall");
-  }, []);
-
   // Show loading state while fetching auth data
   if (loading) {
     return <PaymentsLoadingState />;
@@ -117,28 +78,23 @@ export default function PaymentsSettingsScreen() {
     <Container variant="padded" safeArea={false}>
       <ScrollView flex={1}>
         <YStack gap="$6" pt="$2">
-          <PaymentMethodSection
-            hasPaymentMethod={subscriptionStatus.hasPaymentMethod}
-          />
-
-          <SubscriptionStatusSection
-            isActive={subscriptionStatus.isActive}
-            planType={subscriptionStatus.planType}
-            swapAccessUntil={subscriptionStatus.swapAccessUntil}
-            onUpgrade={handleUpgradeSubscription}
-          />
-
-          {subscriptionStatus.isActive && (
-            <SubscriptionBenefitsSection
-              boostCredits={subscriptionStatus.boostCredits}
+          {subscriptionStatus.hasPaymentMethod && (
+            <PaymentMethodSection
+              hasPaymentMethod={subscriptionStatus.hasPaymentMethod}
+              isSubscriptionActive={subscriptionStatus.isActive}
             />
           )}
 
-          {subscriptionStatus.isActive && (
-            <SubscriptionManagementSection
-              onUpgrade={handleUpgradeSubscription}
-              onCancel={handleCancelSubscription}
-              isCancelling={cancelSubscriptionMutation.isPending}
+          <SubscriptionStatusSection
+            isActive={subscriptionStatus.isActive}
+            isSwapActive={subscriptionStatus.isSwapActive}
+            planType={subscriptionStatus.planType}
+            swapAccessUntil={subscriptionStatus.swapAccessUntil}
+          />
+
+          {subscriptionStatus.isSwapActive && (
+            <SubscriptionBenefitsSection
+              boostCredits={subscriptionStatus.boostCredits}
             />
           )}
         </YStack>
