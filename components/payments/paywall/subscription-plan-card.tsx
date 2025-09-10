@@ -31,14 +31,14 @@ export function SubscriptionPlanCard({
       }}
       position="relative"
       borderWidth={isSelected ? 2 : 0}
-      borderColor="$primary"
+      borderColor="$foreground"
     >
       {plan.popular && (
         <XStack
           position="absolute"
           top={-8}
           right={12}
-          backgroundColor="$primary"
+          backgroundColor="$foreground"
           paddingHorizontal="$2"
           paddingVertical="$1"
           borderRadius="$2"
@@ -63,7 +63,7 @@ export function SubscriptionPlanCard({
           </YStack>
 
           <XStack alignItems="baseline" gap="$1">
-            <Text fontSize="$7" fontWeight="700" color="$primary">
+            <Text fontSize="$7" fontWeight="700" color="$foreground">
               {plan.price}
             </Text>
             <Text fontSize="$4" color="$mutedForeground">
