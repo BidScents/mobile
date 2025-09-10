@@ -1,4 +1,4 @@
-import { useDeduplicatedMessages, useMessages } from "@/hooks/queries/use-messages";
+import { useMessages } from "@/hooks/queries/use-messages";
 import { ConversationResponse, ConversationType, MessageResData, MessageType } from "@bid-scents/shared-sdk";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useMessagingContext } from "providers/messaging-provider";
@@ -17,22 +17,20 @@ export function MessagesList({ conversation }: MessagesListProps) {
   const listRef = useRef<any>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const { getTypingUsers } = useMessagingContext();
-  // Get initial messages from conversation
-  const initialMessages = conversation.messages || [];
 
   const typingUsers = getTypingUsers(conversation.id);
   
-  // Get infinite query for older messages
+  // Get infinite query for messages - automatically seeded with conversation data
   const {
-    data: infiniteData,
+    data,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
     isFetching,
-  } = useMessages(conversation.id, initialMessages);
+  } = useMessages(conversation.id);
   
-  // Merge and deduplicate all messages
-  const allMessages = useDeduplicatedMessages(initialMessages, infiniteData);
+  // Flatten all pages into a single array
+  const allMessages = data?.pages.flat() || [];
 
   // Handle loading more messages (FlashList onEndReached)
   const handleEndReached = useCallback(() => {

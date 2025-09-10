@@ -6,14 +6,12 @@ import type {
 } from "@bid-scents/shared-sdk";
 import { MessageService, MessageType, useAuthStore } from "@bid-scents/shared-sdk";
 import {
-  InfiniteData,
   QueryClient,
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { queryKeys } from "./query-keys";
 
 // ========================================
@@ -58,10 +56,12 @@ export function useConversation(conversationId: string) {
 // ========================================
 
 /**
- * Infinite query for loading messages with cursor pagination (WhatsApp pattern)
- * Used for loading message history in conversation screens
+ * Infinite query for loading messages with cursor pagination
+ * Automatically seeds with conversation data when available
  */
-export function useMessages(conversationId: string, initialMessages: MessageResData[] = []) {
+export function useMessages(conversationId: string) {
+  const queryClient = useQueryClient()
+  
   return useInfiniteQuery({
     queryKey: queryKeys.messages.list(conversationId),
     queryFn: ({ pageParam }) => {
@@ -74,6 +74,7 @@ export function useMessages(conversationId: string, initialMessages: MessageResD
         50 // limit
       );
     },
+    initialPageParam: undefined,
     getNextPageParam: (lastPage: MessageResData[]) => {
       // No more pages if we got less than the limit
       if (!lastPage || lastPage.length < 50) {
@@ -84,49 +85,25 @@ export function useMessages(conversationId: string, initialMessages: MessageResD
       const oldestMessage = lastPage[lastPage.length - 1];
       return oldestMessage.created_at;
     },
-    initialPageParam: initialMessages.length > 0 
-      ? initialMessages[0]?.created_at  // Start pagination from oldest initial message
-      : undefined, // No initial cursor if no initial messages
-    staleTime: 5 * 60 * 1000, // Increased stale time - less refetching
+    // Seed with conversation messages if available
+    initialData: () => {
+      const conversation = queryClient.getQueryData<ConversationResponse>(
+        queryKeys.messages.conversation(conversationId)
+      )
+      if (conversation?.messages?.length) {
+        return {
+          pages: [conversation.messages],
+          pageParams: [undefined],
+        }
+      }
+      return undefined
+    },
+    staleTime: 5 * 60 * 1000,
     enabled: !!conversationId,
-    // Don't automatically fetch on mount - we have initial messages
     refetchOnMount: false,
   });
 }
 
-/**
- * Message deduplication hook - merges initial messages with paginated messages
- * Ensures no duplicate messages and maintains chronological order
- */
-export function useDeduplicatedMessages(
-  initialMessages: MessageResData[],
-  infiniteData: InfiniteData<MessageResData[]> | undefined
-) {
-  return useMemo(() => {
-    // Start with initial messages (most recent from conversation)
-    const messageMap = new Map<string, MessageResData>();
-    
-    // Add initial messages first
-    initialMessages.forEach(message => {
-      messageMap.set(message.id, message);
-    });
-    
-    // Add paginated messages (older messages)
-    if (infiniteData?.pages) {
-      infiniteData.pages.forEach(page => {
-        page.forEach(message => {
-          // Only add if not already present (deduplication)
-          if (!messageMap.has(message.id)) {
-            messageMap.set(message.id, message);
-          }
-        });
-      });
-    }
-    
-    // Convert to array and sort chronologically (oldest first)
-    return Array.from(messageMap.values())
-  }, [initialMessages, infiniteData]);
-}
 
 // ========================================
 // CACHE HELPERS
