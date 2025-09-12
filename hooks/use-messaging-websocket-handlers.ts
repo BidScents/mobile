@@ -128,13 +128,20 @@ export function useMessagingWebSocketHandlers({
       queryKeys.messages.conversation(conversationId)
     )
     
-    const messageExists = existingConversation?.messages.some(msg => msg.id === messageData.id)
-    if (messageExists) {
-      console.log('Message already exists in cache, skipping WebSocket update')
+    const existingMessage = existingConversation?.messages.find(msg => msg.id === messageData.id)
+    if (existingMessage) {
+      // Message exists - check if it's different (updated) or identical (duplicate)
+      const isDifferent = JSON.stringify(existingMessage) !== JSON.stringify(messageData)
+      if (isDifferent) {
+        console.log('Message updated via WebSocket, updating cache')
+        updateAllMessageCaches(queryClient, conversationId, messageData, true) // shouldUpdate = true
+      } else {
+        console.log('Message already exists in cache with same content, skipping WebSocket update')
+      }
       return
     }
 
-    // Update all message caches with the new message
+    // Message doesn't exist - add as new message
     updateAllMessageCaches(queryClient, conversationId, messageData)
 
     // Update participant read status and unread counts
