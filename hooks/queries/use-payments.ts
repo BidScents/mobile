@@ -254,13 +254,13 @@ export function useAcceptTransaction() {
     mutationFn: ({ messageId }: { messageId: string }) =>
       PaymentsService.acceptTransactionV1PaymentsMessageIdAcceptPost(messageId),
     onSuccess: (response: PaymentResponse, { messageId, updatedMessage }: { messageId: string; updatedMessage: MessageResData }) => {
-      // Update message caches with the accepted transaction message
-      updateAllMessageCaches(
-        queryClient,
-        updatedMessage.conversation_id,
-        updatedMessage,
-        true // shouldUpdate = true to update existing message
-      );
+      // // Update message caches with the accepted transaction message
+      // updateAllMessageCaches(
+      //   queryClient,
+      //   updatedMessage.conversation_id,
+      //   updatedMessage,
+      //   true // shouldUpdate = true to update existing message
+      // );
       
       // Invalidate transaction-specific queries
       queryClient.invalidateQueries({
