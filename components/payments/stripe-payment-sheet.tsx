@@ -1,10 +1,8 @@
-import { ThemedIonicons } from '@/components/ui/themed-icons';
 import {
   useStripe
 } from '@stripe/stripe-react-native';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 interface StripePaymentSheetProps {
   /** Client secret from PaymentIntent */
@@ -141,61 +139,15 @@ export const StripePaymentSheet = memo<StripePaymentSheetProps>(({
     }
   }, [isReady, presentPaymentSheet, onSuccess, onError, onCancel]);
 
-  const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-    }).format(amount / 100);
-  };
+  // Auto-present payment sheet when ready
+  useEffect(() => {
+    if (isReady && !isProcessing) {
+      handlePayment();
+    }
+  }, [isReady, isProcessing, handlePayment]);
 
-  if (!isReady) {
-    return (
-      <YStack alignItems="center" justifyContent="center" padding="$4" gap="$3">
-        <Spinner size="large" color="$primary" />
-        <Text fontSize="$3" color="$mutedForeground">
-          Setting up payment...
-        </Text>
-      </YStack>
-    );
-  }
-
-  return (
-    <YStack gap="$4" padding="$4">
-      <YStack gap="$3">
-        <Text fontSize="$4" fontWeight="600" color="$foreground">
-          Complete Payment
-        </Text>
-        
-        <XStack justifyContent="space-between" alignItems="center">
-          <Text fontSize="$3" color="$mutedForeground">Total:</Text>
-          <Text fontSize="$4" fontWeight="600" color="$foreground">
-            {formatAmount(amount, currency)}
-          </Text>
-        </XStack>
-      </YStack>
-
-      <Button
-        size="$4"
-        disabled={isProcessing}
-        onPress={handlePayment}
-        backgroundColor="$primary"
-        color="$foreground"
-        pressStyle={{ backgroundColor: '$primary', opacity: 0.8 }}
-      >
-        <XStack alignItems="center" gap="$2">
-          {isProcessing && <Spinner size="small" color="$foreground" />}
-          <ThemedIonicons name="card-outline" size={20} color="$foreground" />
-          <Text color="$foreground" fontWeight="600">
-            {isProcessing ? 'Processing...' : `Pay ${formatAmount(amount, currency)}`}
-          </Text>
-        </XStack>
-      </Button>
-
-      <Text fontSize="$2" color="$mutedForeground" textAlign="center">
-        Your payment is secured by Stripe
-      </Text>
-    </YStack>
-  );
+  // All loading states handled by global loading overlay or component state
+  return null;
 });
 
 StripePaymentSheet.displayName = 'StripePaymentSheet';
