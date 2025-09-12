@@ -2,11 +2,13 @@ import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { formatDate } from "@/utils/utility-functions";
 import {
   ConversationResponse,
+  FileContent,
   MessageResData,
   MessageType,
   RichConfirmReceiptActionContent,
   RichInitiateTransactionActionContent,
   RichSubmitReviewActionContent,
+  RichTextContent,
   useAuthStore
 } from "@bid-scents/shared-sdk";
 import React, { useCallback, useMemo } from "react";
@@ -89,23 +91,27 @@ const MessageItemComponent = ({
       case MessageType.TEXT:
         return (
           <TextMessage
-            content={message.content as any}
+            content={message.content as RichTextContent}
             isCurrentUser={isCurrentUserMessage}
           />
         );
       case MessageType.FILE:
         return (
           <FileMessage
-            content={message.content as any}
+            content={message.content as FileContent}
             isCurrentUser={isCurrentUserMessage}
             messageId={message.id}
           />
         );
       case 'ACTION':
+        const isBuyer = (message.content as RichInitiateTransactionActionContent).buyer_id === user?.id;
         return (
           <ActionMessage
             content={message.content as RichInitiateTransactionActionContent}
             isCurrentUser={isCurrentUserMessage}
+            messageId={message.id}
+            isBuyer={isBuyer}
+            message={message}
           />
         );
       case 'SYSTEM':
@@ -251,6 +257,16 @@ const areEqual = (
 ) => {
   // If message ID is different, it's a different message.
   if (prevProps.message.id !== nextProps.message.id) {
+    return false;
+  }
+
+  // Check if message content has changed (important for transaction status updates)
+  if (JSON.stringify(prevProps.message.content) !== JSON.stringify(nextProps.message.content)) {
+    return false;
+  }
+
+  // Check if message created_at has changed (rare but possible)
+  if (prevProps.message.created_at !== nextProps.message.created_at) {
     return false;
   }
 

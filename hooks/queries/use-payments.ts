@@ -162,8 +162,6 @@ export function useCreateSubscription() {
  * Cancel user's subscription
  */
 export function useCancelSubscription() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: () => PaymentsService.cancelSubscriptionV1PaymentsSubscriptionDelete(),
     onSuccess: async () => {
@@ -253,18 +251,20 @@ export function useAcceptTransaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (messageId: string) =>
+    mutationFn: ({ messageId }: { messageId: string }) =>
       PaymentsService.acceptTransactionV1PaymentsMessageIdAcceptPost(messageId),
-    onSuccess: (response: PaymentResponse, messageId: string) => {
+    onSuccess: (response: PaymentResponse, { messageId, updatedMessage }: { messageId: string; updatedMessage: MessageResData }) => {
+      // Update message caches with the accepted transaction message
+      updateAllMessageCaches(
+        queryClient,
+        updatedMessage.conversation_id,
+        updatedMessage,
+        true // shouldUpdate = true to update existing message
+      );
+      
       // Invalidate transaction-specific queries
       queryClient.invalidateQueries({
         queryKey: queryKeys.payments.transaction(messageId),
-      });
-      
-      // Find the conversation this transaction belongs to and invalidate
-      // Note: We'd need the conversation ID, which might need to be passed or derived
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.all,
       });
     },
   });
@@ -278,17 +278,21 @@ export function useCancelTransaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (messageId: string) =>
+    mutationFn: ({ messageId }: { messageId: string }) =>
       PaymentsService.cancelTransactionV1PaymentsMessageIdCancelDelete(messageId),
-    onSuccess: (_, messageId: string) => {
+    onSuccess: (_, { messageId, updatedMessage }: { messageId: string; updatedMessage: MessageResData }) => {
+            
+      // Update message caches with the cancelled transaction message
+      updateAllMessageCaches(
+        queryClient,
+        updatedMessage.conversation_id,
+        updatedMessage,
+        true // shouldUpdate = true to update existing message
+      );
+      
       // Invalidate transaction-specific queries
       queryClient.invalidateQueries({
         queryKey: queryKeys.payments.transaction(messageId),
-      });
-      
-      // Invalidate all message-related queries to reflect cancellation
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.all,
       });
     },
   });
