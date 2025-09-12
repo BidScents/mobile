@@ -12,6 +12,7 @@ import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
 import { useCallback } from 'react'
 import { queryKeys } from './queries/query-keys'
+import { updateAllMessageCaches } from './queries/use-messages'
 
 /**
  * Configuration options for messaging WebSocket handlers
@@ -113,31 +114,36 @@ export function useMessagingWebSocketHandlers({
    * Handles new message updates with optimistic cache updates
    */
   const handleMessage = useCallback(async (messageData: MessageResData) => {
-    console.log('New message received:', messageData)
+    console.log('New message received via WebSocket:', messageData)
 
-    // Skip processing if it's the current user's own message (already optimistically added)
-    if (messageData.sender?.id === currentUserId) {
-      return
+    // Only provide haptic feedback for messages from other users
+    if (messageData.sender?.id !== currentUserId) {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     }
-
-    // Provide subtle haptic feedback for new message
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 
     const conversationId = messageData.conversation_id
 
-    // 1. Update conversation cache with new message
+    // Check for duplicates in conversation cache before updating
+    const existingConversation = queryClient.getQueryData<ConversationResponse>(
+      queryKeys.messages.conversation(conversationId)
+    )
+    
+    const messageExists = existingConversation?.messages.some(msg => msg.id === messageData.id)
+    if (messageExists) {
+      console.log('Message already exists in cache, skipping WebSocket update')
+      return
+    }
+
+    // Update all message caches with the new message
+    updateAllMessageCaches(queryClient, conversationId, messageData)
+
+    // Update participant read status and unread counts
     queryClient.setQueryData<ConversationResponse>(
       queryKeys.messages.conversation(conversationId),
       (old) => {
         if (!old) return old
-        
-        // Check if message already exists (prevent duplicates)
-        const messageExists = old.messages.some(msg => msg.id === messageData.id)
-        if (messageExists) return old
-
         return {
           ...old,
-          messages: [messageData, ...old.messages],
           participants: old.participants.map((participant) => {
             if (participant.user.id === messageData.sender.id) {
               return {
@@ -151,7 +157,7 @@ export function useMessagingWebSocketHandlers({
       }
     )
 
-    // 3. Update conversation summary cache
+    // Update conversation summary unread counts
     queryClient.setQueryData<MessagesSummary>(
       queryKeys.messages.summary,
       (old) => {
@@ -164,7 +170,6 @@ export function useMessagingWebSocketHandlers({
             conv.id === conversationId
               ? {
                   ...conv,
-                  last_message: messageData,
                   unread_count: conv.unread_count + 1, // Increment conversation unread
                 }
               : conv
@@ -182,26 +187,28 @@ export function useMessagingWebSocketHandlers({
     }
 
     // 5. Show notification for new message (only if not from current user)
-    const getNotificationBody = () => {
-      if (!messageData.content) {
+    if (messageData.sender?.id !== currentUserId) {
+      const getNotificationBody = () => {
+        if (!messageData.content) {
+          return 'Sent a message'
+        }
+        
+        if (typeof messageData.content === 'object' && 'text' in messageData.content) {
+          return (messageData.content as any).text || 'Sent a message'
+        }
+        
         return 'Sent a message'
       }
-      
-      if (typeof messageData.content === 'object' && 'text' in messageData.content) {
-        return (messageData.content as any).text || 'Sent a message'
-      }
-      
-      return 'Sent a message'
-    }
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: messageData.sender.username || 'New Message',
-        body: getNotificationBody(),
-        sound: true,
-      },
-      trigger: null, // Show immediately
-    })
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: messageData.sender.username || 'New Message',
+          body: getNotificationBody(),
+          sound: true,
+        },
+        trigger: null, // Show immediately
+      })
+    }
   }, [currentUserId, queryClient, typingUsersRef, onUIUpdate])
 
   /**

@@ -110,10 +110,10 @@ export function useMessages(conversationId: string) {
 // ========================================
 
 /**
- * Updates conversation caches after sending a message (WhatsApp pattern)
- * Only updates conversation cache, lets deduplication hook handle merging
+ * Universal function to update all message-related caches
+ * Updates both conversation and infinite message caches for real-time consistency
  */
-function updateConversationCachesWithNewMessage(
+export function updateAllMessageCaches(
   queryClient: QueryClient,
   conversationId: string,
   newMessage: MessageResData
@@ -130,9 +130,22 @@ function updateConversationCachesWithNewMessage(
     }
   );
 
-  // 2. DON'T update infinite messages cache directly
-  // Let the deduplication hook handle merging on next render
-  // This prevents cache inconsistencies
+  // 2. Update infinite messages cache for immediate UI visibility
+  queryClient.setQueryData(
+    queryKeys.messages.list(conversationId),
+    (old: any) => {
+      if (!old?.pages) return old;
+      
+      // Add to the first page (most recent messages)
+      const firstPage = old.pages[0] || [];
+      const updatedFirstPage = [newMessage, ...firstPage];
+      
+      return {
+        ...old,
+        pages: [updatedFirstPage, ...old.pages.slice(1)],
+      };
+    }
+  );
 
   // 3. Update conversation summary cache
   queryClient.setQueryData<MessagesSummary>(
@@ -247,7 +260,7 @@ export function useSendMessage() {
       };
 
       // Apply optimistic updates (text messages only)
-      updateConversationCachesWithNewMessage(
+      updateAllMessageCaches(
         queryClient,
         conversationId,
         optimisticMessage
@@ -280,7 +293,7 @@ export function useSendMessage() {
         );
       } else {
         // For image messages: add the new message to cache (no optimistic update to replace)
-        updateConversationCachesWithNewMessage(
+        updateAllMessageCaches(
           queryClient,
           conversationId,
           response

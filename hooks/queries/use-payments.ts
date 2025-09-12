@@ -2,9 +2,7 @@ import type { PaymentMethodResponse, ProductResponse } from "@/types/products";
 import { AuthService } from "@/utils/auth-service";
 import type {
   BoostRequest,
-  ConversationResponse,
   MessageResData,
-  MessagesSummary,
   PaymentResponse,
   ReviewRequest,
   SubscriptionRequest,
@@ -17,6 +15,7 @@ import {
   useQueryClient
 } from "@tanstack/react-query";
 import { queryKeys } from "./query-keys";
+import { updateAllMessageCaches } from "./use-messages";
 
 // ========================================
 // LISTING BOOST MUTATIONS
@@ -217,52 +216,6 @@ export function useOnboardConnectAccount() {
 }
 
 // ========================================
-// CACHE HELPERS FOR TRANSACTIONS
-// ========================================
-
-/**
- * Updates message caches when a transaction is created or updated
- * Ensures transaction messages appear in conversations
- */
-function updateMessageCachesWithTransaction(
-  queryClient: ReturnType<typeof useQueryClient>,
-  conversationId: string,
-  message: MessageResData
-) {
-  // Update conversation cache with new transaction message
-  queryClient.setQueryData(
-    queryKeys.messages.conversation(conversationId),
-    (old: ConversationResponse | undefined) => {
-      if (!old) return old;
-      return {
-        ...old,
-        messages: [message, ...old.messages],
-      };
-    }
-  );
-
-  // Update conversation summary cache
-  queryClient.setQueryData(
-    queryKeys.messages.summary,
-    (old: MessagesSummary | undefined) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        conversations: old.conversations.map((conv) =>
-          conv.id === conversationId
-            ? {
-                ...conv,
-                last_message: message,
-              }
-            : conv
-        ),
-      };
-    }
-  );
-}
-
-// ========================================
 // TRANSACTION MUTATIONS
 // ========================================
 
@@ -278,16 +231,16 @@ export function useCreateTransaction() {
       PaymentsService.createTransactionV1PaymentsTransactionPost(transactionRequest),
     onSuccess: (message: MessageResData) => {
       // Update message caches with the new transaction message
-      updateMessageCachesWithTransaction(
+      updateAllMessageCaches(
         queryClient,
         message.conversation_id,
         message
       );
       
-      // Invalidate conversation to ensure fresh data
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.conversation(message.conversation_id),
-      });
+      // // Invalidate conversation to ensure fresh data
+      // queryClient.invalidateQueries({
+      //   queryKey: queryKeys.messages.conversation(message.conversation_id),
+      // });
     },
   });
 }
