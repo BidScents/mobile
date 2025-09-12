@@ -116,13 +116,29 @@ export function useMessages(conversationId: string) {
 export function updateAllMessageCaches(
   queryClient: QueryClient,
   conversationId: string,
-  newMessage: MessageResData
+  newMessage: MessageResData,
+  shouldUpdate: boolean = false
 ) {
-  // 1. Update conversation cache - add to messages array
+  // 1. Update conversation cache - update or add to messages array
   queryClient.setQueryData<ConversationResponse>(
     queryKeys.messages.conversation(conversationId),
     (old) => {
       if (!old) return old;
+      
+      if (shouldUpdate) {
+        // Find and replace existing message, or add if not found
+        const existingIndex = old.messages.findIndex(msg => msg.id === newMessage.id);
+        if (existingIndex !== -1) {
+          const updatedMessages = [...old.messages];
+          updatedMessages[existingIndex] = newMessage;
+          return {
+            ...old,
+            messages: updatedMessages,
+          };
+        }
+      }
+      
+      // Default behavior: add new message
       return {
         ...old,
         messages: [newMessage, ...old.messages],
@@ -136,7 +152,32 @@ export function updateAllMessageCaches(
     (old: any) => {
       if (!old?.pages) return old;
       
-      // Add to the first page (most recent messages)
+      if (shouldUpdate) {
+        // Find and replace existing message across all pages
+        const updatedPages = old.pages.map((page: MessageResData[]) => {
+          const existingIndex = page.findIndex(msg => msg.id === newMessage.id);
+          if (existingIndex !== -1) {
+            const updatedPage = [...page];
+            updatedPage[existingIndex] = newMessage;
+            return updatedPage;
+          }
+          return page;
+        });
+        
+        // Check if message was found and updated
+        const messageFound = updatedPages.some((page: MessageResData[], pageIndex: number) =>
+          page !== old.pages[pageIndex]
+        );
+        
+        if (messageFound) {
+          return {
+            ...old,
+            pages: updatedPages,
+          };
+        }
+      }
+      
+      // Default behavior: add to the first page (most recent messages)
       const firstPage = old.pages[0] || [];
       const updatedFirstPage = [newMessage, ...firstPage];
       
