@@ -166,7 +166,7 @@ export default function AddListingScreen() {
 
   // Check if user needs to set up connect account
   useEffect(() => {
-    if (user && paymentDetails && !paymentDetails.has_connect_account) {
+    if (!paymentDetails || !paymentDetails.has_connect_account) {
       setTimeout(() => {
         connectOnboardingBottomSheetRef.current?.present();
       }, 500);
