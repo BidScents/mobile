@@ -43,21 +43,8 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
   };
 
   const handleAccept = async () => {
-    // Create updated message with accepted status for optimistic update
-    const updatedMessage: MessageResData = {
-      ...message,
-      content: {
-        ...content,
-        is_active: false
-      }
-    };
     
-    const result = await acceptTransaction.mutateAsync({ 
-      messageId, 
-      updatedMessage 
-    });
-
-    console.log(result);
+    const result = await acceptTransaction.mutateAsync({ messageId });
     
     // Store payment data and show payment sheet
     setPaymentData(result);
@@ -118,7 +105,7 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
             onPress={handleCancel} 
             disabled={!content.is_active || cancelTransaction.isPending}
           >
-            {cancelTransaction.isPending ? "Canceling..." : content.is_active ? "Cancel" : "Cancelled"}
+            {cancelTransaction.isPending ? "Canceling..." : content.is_active ? "Cancel" : "Processed"}
           </Button>
         ) : (
           <Button 
