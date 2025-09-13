@@ -199,17 +199,9 @@ export function useListProducts() {
  * Returns onboarding URL for Stripe Connect flow
  */
 export function useOnboardConnectAccount() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ refreshUrl, returnUrl }: { refreshUrl: string; returnUrl: string }) =>
       PaymentsService.onboardConnectAccountV1PaymentsConnectOnboardPost(refreshUrl, returnUrl),
-    onSuccess: () => {
-      // Invalidate connect account status
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payments.connectAccount,
-      });
-    },
   });
 }
 
@@ -234,11 +226,24 @@ export function useCreateTransaction() {
         message.conversation_id,
         message
       );
+    },
+    onError: (error: any) => {
+      console.error('Failed to create transaction:', error);
       
-      // // Invalidate conversation to ensure fresh data
-      // queryClient.invalidateQueries({
-      //   queryKey: queryKeys.messages.conversation(message.conversation_id),
-      // });
+      // Parse error message for user display
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to create transaction';
+      
+      // You can emit a toast or error event here
+      // For now, just log the user-friendly error
+      console.warn('User-friendly error:', errorMessage);
+    },
+    retry: (failureCount, error: any) => {
+      // Don't retry on 4xx errors (client errors)
+      if (error?.response?.status >= 400 && error?.response?.status < 500) {
+        return false;
+      }
+      // Retry up to 2 times for 5xx errors or network errors
+      return failureCount < 2;
     },
   });
 }
@@ -248,24 +253,25 @@ export function useCreateTransaction() {
  * Returns payment intent for processing payment
  */
 export function useAcceptTransaction() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ messageId }: { messageId: string }) =>
       PaymentsService.acceptTransactionV1PaymentsMessageIdAcceptPost(messageId),
-    onSuccess: (response: PaymentResponse, { messageId, updatedMessage }: { messageId: string; updatedMessage: MessageResData }) => {
-      // // Update message caches with the accepted transaction message
-      // updateAllMessageCaches(
-      //   queryClient,
-      //   updatedMessage.conversation_id,
-      //   updatedMessage,
-      //   true // shouldUpdate = true to update existing message
-      // );
+    onError: (error: any) => {
+      console.error('Failed to accept transaction:', error);
       
-      // Invalidate transaction-specific queries
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payments.transaction(messageId),
-      });
+      // Parse error message for user display
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to accept transaction';
+      
+      // You can emit a toast or error event here
+      console.warn('User-friendly error:', errorMessage);
+    },
+    retry: (failureCount, error: any) => {
+      // Don't retry on 4xx errors (client errors)
+      if (error?.response?.status >= 400 && error?.response?.status < 500) {
+        return false;
+      }
+      // Retry up to 2 times for 5xx errors or network errors
+      return failureCount < 2;
     },
   });
 }
@@ -289,11 +295,6 @@ export function useCancelTransaction() {
         updatedMessage,
         true // shouldUpdate = true to update existing message
       );
-      
-      // Invalidate transaction-specific queries
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payments.transaction(messageId),
-      });
     },
   });
 }
@@ -306,18 +307,16 @@ export function useConfirmReceipt() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (messageId: string) =>
+    mutationFn: ({ messageId }: { messageId: string }) =>
       PaymentsService.confirmReceiptV1PaymentsMessageIdConfirmReceiptPost(messageId),
-    onSuccess: (_, messageId: string) => {
-      // Invalidate transaction-specific queries
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payments.transaction(messageId),
-      });
-      
-      // Invalidate all message-related queries to reflect confirmation
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.all,
-      });
+    onSuccess: (_, { messageId, updatedMessage }: { messageId: string; updatedMessage: MessageResData }) => {
+      // Update message caches with the confirmed receipt message
+      updateAllMessageCaches(
+        queryClient,
+        updatedMessage.conversation_id,
+        updatedMessage,
+        true // shouldUpdate = true to update existing message
+      );
     },
   });
 }
@@ -330,23 +329,16 @@ export function useSubmitReview() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ messageId, reviewRequest }: { messageId: string; reviewRequest: ReviewRequest }) =>
+    mutationFn: ({ messageId, reviewRequest, updatedMessage }: { messageId: string; reviewRequest: ReviewRequest; updatedMessage: MessageResData }) =>
       PaymentsService.submitReviewV1PaymentsMessageIdSubmitReviewPost(messageId, reviewRequest),
-    onSuccess: (_, { messageId }) => {
-      // Invalidate transaction-specific queries
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.payments.transaction(messageId),
-      });
-      
-      // Invalidate all message-related queries to reflect review submission
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.all,
-      });
-      
-      // Invalidate profile queries to reflect new reviews
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.profile.all,
-      });
+    onSuccess: (_, { messageId, updatedMessage }: { messageId: string; reviewRequest: ReviewRequest; updatedMessage: MessageResData }) => {
+      // Update message caches with the submitted review message
+      updateAllMessageCaches(
+        queryClient,
+        updatedMessage.conversation_id,
+        updatedMessage,
+        true // shouldUpdate = true to update existing message
+      );
     },
   });
 }
