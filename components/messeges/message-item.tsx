@@ -3,19 +3,21 @@ import { formatDate } from "@/utils/utility-functions";
 import {
   ConversationResponse,
   FileContent,
+  MessageActionType,
   MessageResData,
   MessageType,
   RichConfirmReceiptActionContent,
   RichInitiateTransactionActionContent,
   RichSubmitReviewActionContent,
   RichTextContent,
-  useAuthStore
+  useAuthStore,
 } from "@bid-scents/shared-sdk";
 import React, { useCallback, useMemo } from "react";
 import { Avatar, Text, View, XStack, YStack } from "tamagui";
 import { ActionMessage } from "./message-content/action-message";
 import { FileMessage } from "./message-content/file-message";
-import { SystemMessage } from "./message-content/system-message";
+import { SystemReceiptMessage } from "./message-content/system-receipt-message";
+import { SystemReviewMessage } from "./message-content/system-review-message";
 import { TextMessage } from "./message-content/text-message";
 
 interface MessageItemProps {
@@ -37,6 +39,11 @@ const MessageItemComponent = ({
   const isCurrentUser = useMemo(() => 
     message.sender.id === user?.id, 
     [message.sender.id, user?.id]
+  );
+
+  const isSystemMessage = useMemo(() => 
+    message.sender.id === "00000000-0000-0000-0000-000000000000", 
+    [message.sender.id]
   );
   
   // Memoize read status calculation
@@ -60,6 +67,11 @@ const MessageItemComponent = ({
 
   // Memoize message type and alignment calculation
   const { actualType, align } = useMemo(() => {
+    // Check if it's a system message first (simplest approach)
+    if (isSystemMessage) {
+      return { actualType: 'SYSTEM', align: 'center' };
+    }
+    
     if (message.content_type === MessageType.ACTION) {
       const content = message.content as any;
       
@@ -69,20 +81,13 @@ const MessageItemComponent = ({
       if (isTransaction) {
         return { actualType: 'ACTION', align: isCurrentUser ? 'right' : 'left' };
       } else {
-        // Receipt confirmations and review submissions are SYSTEM messages
-        // Show on right if current user is the seller (buyer_id !== current user)
-        const isSeller = content?.buyer_id !== user?.id;
-        const shouldAlignRight = isCurrentUser || (isSeller && isCurrentUser);
-        return { actualType: 'SYSTEM', align: shouldAlignRight ? 'right' : 'center' };
+        // This shouldn't happen now that we check isSystemMessage first, but keep as fallback
+        return { actualType: 'SYSTEM', align: 'center' };
       }
     }
     
-    if (message.content_type === MessageType.SYSTEM) {
-      return { actualType: 'SYSTEM', align: 'center' };
-    }
-    
     return { actualType: message.content_type, align: isCurrentUser ? 'right' : 'left' };
-  }, [message.content_type, message.content, isCurrentUser, user?.id]);
+  }, [message.content_type, message.content, isCurrentUser, user?.id, isSystemMessage]);
 
   const renderMessageContent = useCallback(() => {
     const isCurrentUserMessage = align === 'right';
@@ -104,43 +109,37 @@ const MessageItemComponent = ({
           />
         );
       case 'ACTION':
-        const isBuyer = (message.content as RichInitiateTransactionActionContent).buyer_id === user?.id;
+        const isBuyerAction = (message.content as RichInitiateTransactionActionContent).buyer_id === user?.id;
         return (
           <ActionMessage
             content={message.content as RichInitiateTransactionActionContent}
             isCurrentUser={isCurrentUserMessage}
             messageId={message.id}
-            isBuyer={isBuyer}
+            isBuyer={isBuyerAction}
             message={message}
           />
         );
       case 'SYSTEM':
-        // Check if it's a receipt/review system message or generic system message
-        const content = message.content as any;
-        const isReceiptOrReview = content && ('buyer_id' in content);
-        
-        if (isReceiptOrReview) {
+        const isBuyerSystem = (message.content as RichConfirmReceiptActionContent | RichSubmitReviewActionContent).buyer_id === user?.id;
+        const isConfirmReceipt = (message.content as RichConfirmReceiptActionContent).action_type === MessageActionType.CONFIRM_RECEIPT;
+
+        if (isConfirmReceipt) {
           return (
-            <SystemMessage
-              content={content as RichConfirmReceiptActionContent | RichSubmitReviewActionContent}
-              isCurrentUser={isCurrentUserMessage}
+            <SystemReceiptMessage
+              content={message.content as RichConfirmReceiptActionContent}
+              isBuyer={isBuyerSystem}
+              messageId={message.id}
+              message={message}
             />
           );
-        } else {
+        }else{
           return (
-            <View
-              paddingVertical="$1"
-              paddingHorizontal="$2"
-            >
-            <Text
-              fontSize="$3"
-              color="$mutedForeground"
-              textAlign="center"
-              fontStyle="italic"
-            >
-              {content?.text || "System message"}
-            </Text>
-            </View>
+            <SystemReviewMessage
+              content={message.content as RichSubmitReviewActionContent}
+              isBuyer={isBuyerSystem}
+              messageId={message.id}
+              message={message}
+            />
           );
         }
       default:
@@ -153,35 +152,12 @@ const MessageItemComponent = ({
           </Text>
         );
     }
-  }, [actualType, align, message.content]);
+  }, [actualType, align, message.content, message.id, user?.id]);
 
   // Handle different alignments
   if (align === 'center') {
     return (
-      <View marginVertical="$2" alignItems="center">
-        <View
-          backgroundColor="$muted"
-          paddingHorizontal="$3"
-          paddingVertical="$2"
-          borderRadius="$4"
-          maxWidth="80%"
-        >
-          {renderMessageContent()}
-        </View>
-      </View>
-    );
-  }
-
-  // Special handling for system messages that should be aligned right/left
-  if (actualType === 'SYSTEM' && align !== 'center') {
-    return (
-      <View marginVertical="$1">
-        <XStack
-          justifyContent={align === 'right' ? "flex-end" : "flex-start"}
-        >
-          {renderMessageContent()}
-        </XStack>
-      </View>
+      renderMessageContent()
     );
   }
 
