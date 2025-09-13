@@ -163,6 +163,7 @@ export const Button: React.FC<ButtonProps> = ({
           name={leftIcon}
           size={iconSizes[size]}
           pointerEvents="none"
+          color={variantProps[variant].color}
         />
       )}
 
@@ -182,6 +183,7 @@ export const Button: React.FC<ButtonProps> = ({
           name={rightIcon}
           size={iconSizes[size]}
           pointerEvents="none"
+          color={variantProps[variant].color}
         />
       )}
     </TamaguiButton>
