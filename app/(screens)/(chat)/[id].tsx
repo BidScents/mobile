@@ -3,7 +3,7 @@ import { MessagesList } from "@/components/messeges/messages-list";
 import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { useConversation, useConversationSummary, useUpdateLastRead } from "@/hooks/queries/use-messages";
-import { ConversationSummary } from "@bid-scents/shared-sdk";
+import { ConversationSummary, UserPreview, useAuthStore } from "@bid-scents/shared-sdk";
 import { useFocusEffect, useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
@@ -16,16 +16,24 @@ export default function SpecificChatScreen() {
   const navigation = useNavigation();
   const { data: conversationSummary } = useConversationSummary();
   const { data: conversation, isLoading, error, refetch } = useConversation(id as string);
+  const { user } = useAuthStore();
 
   // Update header title when conversation data is available
   useEffect(() => {
-    if (conversationSummary) {
-      const conversationTitle = conversationSummary.conversations.find(
+    if (conversationSummary && user?.id) {
+      const currentConversation = conversationSummary.conversations.find(
         (conv: ConversationSummary) => conv.id === id
-      )?.participants[0].username;
-      navigation.setOptions({ title: conversationTitle });
+      );
+      
+      if (currentConversation) {
+        const otherParticipant = currentConversation.participants.find(
+          (participant: UserPreview) => participant.id !== user.id
+        );
+        
+        navigation.setOptions({ title: otherParticipant?.username });
+      }
     }
-  }, [conversationSummary, id, navigation]);
+  }, [conversationSummary, id, navigation, user?.id]);
 
   // Update last read status when the screen is focused
   useFocusEffect(
