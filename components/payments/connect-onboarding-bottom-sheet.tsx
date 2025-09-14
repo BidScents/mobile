@@ -47,7 +47,8 @@ export const ConnectOnboardingBottomSheet = forwardRef<
       eligible_for_swap_until: paymentDetails?.eligible_for_swap_until || null,
       subscription_id: paymentDetails?.subscription_id || null,
       boost_credits: paymentDetails?.boost_credits || {},
-      redeemed_free_trial: paymentDetails?.redeemed_free_trial || false
+      redeemed_free_trial: paymentDetails?.redeemed_free_trial || false,
+      subscription_is_active: paymentDetails?.subscription_is_active || false
     });
   };
 
