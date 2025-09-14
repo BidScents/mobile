@@ -1,5 +1,5 @@
+import FastImage from '@d11/react-native-fast-image';
 import React from 'react';
-import { Image } from 'react-native';
 import { useThemeColors } from '../../hooks/use-theme-colors';
 
 interface ProfilePictureProps {
@@ -10,12 +10,14 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
   profilePicture,
 }) => {
   const colors = useThemeColors();
+  const hasValidUrl = profilePicture && profilePicture.trim() !== "";
+
 
   return (
-    <Image
-      source={{
-        uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${profilePicture}` || "https://avatar.iran.liara.run/public",
-      }}
+    <FastImage
+      source={hasValidUrl ? {
+        uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${profilePicture}`,
+      } : require('@/assets/images/image-placeholder.png')}
       style={{
         width: 120,
         height: 120,
@@ -23,6 +25,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
         borderWidth: 4,
         borderColor: colors.foreground,
       }}
+      resizeMode={FastImage.resizeMode.cover}
     />
   );
 };
