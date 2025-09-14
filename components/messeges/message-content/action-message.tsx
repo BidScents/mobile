@@ -105,7 +105,7 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
             onPress={handleCancel} 
             disabled={!content.is_active || cancelTransaction.isPending}
           >
-            {cancelTransaction.isPending ? "Canceling..." : content.is_active ? "Cancel" : "Processed"}
+            {cancelTransaction.isPending ? "Canceling..." : content.is_active ? "Cancel" : "Cancelled"}
           </Button>
         ) : (
           <Button 
@@ -114,7 +114,7 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
             onPress={handleAccept} 
             disabled={!content.is_active || acceptTransaction.isPending}
           >
-            {acceptTransaction.isPending ? "Processing..." : content.is_active ? "Buy" : "Transaction Completed"}
+            {acceptTransaction.isPending ? "Processing..." : content.is_active ? "Buy" : "Completed"}
           </Button>
         )}
       </View>

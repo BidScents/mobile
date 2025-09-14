@@ -90,21 +90,20 @@ const MessageItemComponent = ({
   }, [message.content_type, message.content, isCurrentUser, user?.id, isSystemMessage]);
 
   const renderMessageContent = useCallback(() => {
-    const isCurrentUserMessage = align === 'right';
     
     switch (actualType) {
       case MessageType.TEXT:
         return (
           <TextMessage
             content={message.content as RichTextContent}
-            isCurrentUser={isCurrentUserMessage}
+            isCurrentUser={isCurrentUser}
           />
         );
       case MessageType.FILE:
         return (
           <FileMessage
             content={message.content as FileContent}
-            isCurrentUser={isCurrentUserMessage}
+            isCurrentUser={isCurrentUser}
             messageId={message.id}
           />
         );
@@ -113,7 +112,7 @@ const MessageItemComponent = ({
         return (
           <ActionMessage
             content={message.content as RichInitiateTransactionActionContent}
-            isCurrentUser={isCurrentUserMessage}
+            isCurrentUser={isCurrentUser}
             messageId={message.id}
             isBuyer={isBuyerAction}
             message={message}
@@ -146,7 +145,7 @@ const MessageItemComponent = ({
         return (
           <Text
             fontSize="$4"
-            color={isCurrentUserMessage ? "$white" : "$foreground"}
+            color={isCurrentUser ? "$white" : "$foreground"}
           >
             Unsupported message type
           </Text>
