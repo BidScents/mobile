@@ -4,9 +4,12 @@ import { Container } from '@/components/ui/container'
 import { SearchBar } from '@/components/ui/search-bar'
 import { useHomepage } from '@/hooks/queries/use-homepage'
 import type { ListingCard as ListingCardType } from '@bid-scents/shared-sdk'
+import { ListingType } from '@bid-scents/shared-sdk'
 import { LegendList } from "@legendapp/list"
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs'
-import React, { useMemo } from 'react'
+import * as Haptics from 'expo-haptics'
+import { router } from 'expo-router'
+import React, { useCallback, useMemo } from 'react'
 import { Dimensions } from 'react-native'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
 
@@ -29,8 +32,57 @@ type FeedItem =
  * Displays featured listings, auctions, and other content sections
  */
 export default function Homepage() {
-  const { data: homepage, isLoading, refetch, isFetching } = useHomepage()
+  const { data: homepage, isLoading, refetch } = useHomepage()
   const tabbarHeight = useBottomTabBarHeight();
+
+  // Navigation functions for "View All" buttons
+  const handleActiveAuctionsViewAll = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const params = new URLSearchParams();
+    params.append('q', '*');
+    
+    const auctionFilter = {
+      listing_types: [ListingType.AUCTION],
+      categories: null,
+      min_price: null,
+      max_price: null,
+      min_purchase_year: null,
+      max_purchase_year: null,
+      box_conditions: null,
+      seller_ids: null,
+    };
+    
+    params.append('filters', JSON.stringify(auctionFilter));
+    router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
+  }, []);
+
+  const handleRecentListingsViewAll = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const params = new URLSearchParams();
+    params.append('q', '*');
+    
+    router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
+  }, []);
+
+  const handleRecentSwapsViewAll = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const params = new URLSearchParams();
+    params.append('q', '*');
+    
+    const swapFilter = {
+      listing_types: [ListingType.SWAP],
+      categories: null,
+      min_price: null,
+      max_price: null,
+      min_purchase_year: null,
+      max_purchase_year: null,
+      box_conditions: null,
+      seller_ids: null,
+    };
+    
+    params.append('filters', JSON.stringify(swapFilter));
+    router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
+  }, []);
 
   /**
    * Builds optimized feed data structure for LegendList
@@ -98,11 +150,32 @@ export default function Homepage() {
   const renderFeedItem = ({ item }: { item: FeedItem }) => {
     switch (item.type) {
       case 'header':
+        const getViewAllHandler = () => {
+          switch (item.title) {
+            case 'Active Auctions':
+              return handleActiveAuctionsViewAll;
+            case 'Recent Listings':
+              return handleRecentListingsViewAll;
+            case 'Recent Swaps':
+              return handleRecentSwapsViewAll;
+            default:
+              return undefined;
+          }
+        };
+
         return (
           <XStack paddingHorizontal="0" paddingVertical="$2" justifyContent="space-between" alignItems="center">
             <Text fontSize="$8" fontWeight="600" color="$foreground">{item.title}</Text>
             {item.showViewAll && (
-              <Text fontSize="$3" color="$mutedForeground">View all</Text>
+              <Text 
+                fontSize="$3" 
+                color="$mutedForeground"
+                onPress={getViewAllHandler()}
+                pressStyle={{ opacity: 0.6 }}
+                cursor="pointer"
+              >
+                View all
+              </Text>
             )}
           </XStack>
         )

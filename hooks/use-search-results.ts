@@ -86,18 +86,10 @@ export const useSearchResults = () => {
     setResultsData(data);
   }, []);
 
-  // Handle refresh (reset to original search params)
+  // Handle refresh (maintain current filters and sort)
   const handleRefresh = useCallback(() => {
-    setFilters(initialFilters);
-    setSort(initialSort);
-    setCurrentSortLabel(() => {
-      const sortOption = SEARCH_SORT_OPTIONS.find(option => 
-        option.sort === initialSort.field && 
-        option.descending === initialSort.descending
-      );
-      return sortOption?.label || 'Newest First';
-    });
-  }, [initialFilters, initialSort]);
+    // This function can be used for any refresh-specific logic if needed in the future
+  }, []);
 
   return {
     // Search parameters
