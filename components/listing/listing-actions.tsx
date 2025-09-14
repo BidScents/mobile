@@ -8,7 +8,7 @@ interface ListingActionsProps {
   auctionDetails?: AuctionDetails | null | undefined;
   isCurrentUserHighestBidder?: boolean;
   isLoading: boolean;
-  onAction: () => void;
+  onContactSeller: () => void;
 }
 
 /**
@@ -21,7 +21,7 @@ export function ListingActions({
   auctionDetails,
   isCurrentUserHighestBidder,
   isLoading, 
-  onAction 
+  onContactSeller 
 }: ListingActionsProps) {
   return listingType === ListingType.AUCTION ? (
     <AuctionButton 
@@ -29,9 +29,9 @@ export function ListingActions({
       auctionDetails={auctionDetails}
       isCurrentUserHighestBidder={isCurrentUserHighestBidder}
       isActive={!isLoading}
-      onBidPlaced={() => onAction()}
+      contactSeller={() => onContactSeller()}
     />
   ) : (
-    <BottomButton isLoading={isLoading} onPress={onAction} />
+    <BottomButton isLoading={isLoading} onPress={onContactSeller} />
   );
 }

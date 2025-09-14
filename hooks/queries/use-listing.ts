@@ -21,6 +21,7 @@ import { queryKeys } from "./query-keys";
 // CACHE SEEDING HELPERS
 // ========================================
 
+//TODO: Add as a placeholder https://tkdodo.eu/blog/placeholder-and-initial-data-in-react-query
 /**
  * Transforms ListingCard data into a partial ListingDetailsResponse
  * Used to pre-populate detail cache for instant loading

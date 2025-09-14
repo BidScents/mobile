@@ -1,7 +1,7 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { currency } from "@/constants/constants";
-import { AuctionDetails, useAuthStore } from "@bid-scents/shared-sdk";
+import { AuctionDetails } from "@bid-scents/shared-sdk";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import * as Haptics from "expo-haptics";
@@ -24,20 +24,17 @@ export interface BidBottomSheetProps {
   auctionDetails: AuctionDetails | null | undefined;
   /** Whether the current user is the highest bidder */
   isCurrentUserHighestBidder?: boolean;
-  /** Optional callback when bid is placed successfully */
-  onBidPlaced?: (amount: number) => void;
 }
 
 export const BidBottomSheet = forwardRef<
   BidBottomSheetMethods,
   BidBottomSheetProps
->(({ listingId, auctionDetails, isCurrentUserHighestBidder = false, onBidPlaced }, ref) => {
+>(({ listingId, auctionDetails, isCurrentUserHighestBidder = false }, ref) => {
   const colors = useThemeColors();
   const [bidAmount, setBidAmount] = useState("");
   
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
   const placeBidMutation = usePlaceBid();
-  const { user, session } = useAuthStore();
 
   // Extract auction data
   const startingPrice = auctionDetails?.starting_price || 0;
@@ -125,7 +122,6 @@ export const BidBottomSheet = forwardRef<
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       bottomSheetRef.current?.dismiss();
       setBidAmount("");
-      onBidPlaced?.(numericBidAmount);
     } catch (error: any) {
       console.log("❌ Failed to place bid:", error?.body?.detail || error?.message || error);
       

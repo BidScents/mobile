@@ -183,7 +183,7 @@ export default function ListingScreen() {
           auctionDetails={listing.auction_details}
           isCurrentUserHighestBidder={isCurrentUserHighestBidder}
           isLoading={isLoading || (listing as any)?.__seeded === true || contactSellerMutation.isPending}
-          onAction={handleContactSeller}
+          onContactSeller={handleContactSeller}
         />
       )}
     </Container>
