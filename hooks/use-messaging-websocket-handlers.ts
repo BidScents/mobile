@@ -12,7 +12,7 @@ import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
 import { useCallback } from 'react'
 import { queryKeys } from './queries/query-keys'
-import { updateAllMessageCaches } from './queries/use-messages'
+import { updateAllMessageCaches, } from './queries/use-messages'
 
 /**
  * Configuration options for messaging WebSocket handlers
@@ -134,15 +134,24 @@ export function useMessagingWebSocketHandlers({
       const isDifferent = JSON.stringify(existingMessage) !== JSON.stringify(messageData)
       if (isDifferent) {
         console.log('Message updated via WebSocket, updating cache')
-        updateAllMessageCaches(queryClient, conversationId, messageData, true) // shouldUpdate = true
+        updateAllMessageCaches(queryClient, conversationId, messageData, true)
       } else {
         console.log('Message already exists in cache with same content, skipping WebSocket update')
       }
       return
     }
 
-    // Message doesn't exist - add as new message
-    updateAllMessageCaches(queryClient, conversationId, messageData)
+    // Message doesn't exist - determine add vs update based on message type
+    // ACTION/SYSTEM messages should update existing if same ID, TEXT/FILE should add as new
+    const isActionOrSystem = messageData.content_type === 'ACTION' || messageData.content_type === 'SYSTEM'
+    
+    if (isActionOrSystem) {
+      // For ACTION/SYSTEM messages, always try to update first
+      updateAllMessageCaches(queryClient, conversationId, messageData)
+    } else {
+      // For TEXT/FILE messages, always add as new
+      updateAllMessageCaches(queryClient, conversationId, messageData)
+    }
 
     // Update participant read status and unread counts
     queryClient.setQueryData<ConversationResponse>(
