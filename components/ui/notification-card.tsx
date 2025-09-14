@@ -26,6 +26,7 @@ const LISTING_RELATED_NOTIFICATION_TYPES = [
   NotificationType.AUCTION_EXTENSION,
   NotificationType.FOLLOWED_SELLER_LISTING,
   NotificationType.LISTING_COMMENT,
+  NotificationType.PAYMENT_MADE,
 ];
 
 export default function NotificationCard({
@@ -63,7 +64,7 @@ export default function NotificationCard({
           style={{
             width: 60,
             height: 60,
-            borderRadius: 6,
+            borderRadius: 8,
             backgroundColor: colors.muted,
           }}
         />
