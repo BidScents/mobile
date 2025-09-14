@@ -84,6 +84,11 @@ export default function Homepage() {
     router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
   }, []);
 
+  const handleSellersYouFollowViewAll = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/(tabs)/home/sellers-you-follow' as any);
+  }, []);
+
   /**
    * Builds optimized feed data structure for LegendList
    * Alternates between featured grids and horizontal sections
@@ -158,6 +163,8 @@ export default function Homepage() {
               return handleRecentListingsViewAll;
             case 'Recent Swaps':
               return handleRecentSwapsViewAll;
+            case 'From Sellers You Follow':
+              return handleSellersYouFollowViewAll;
             default:
               return undefined;
           }

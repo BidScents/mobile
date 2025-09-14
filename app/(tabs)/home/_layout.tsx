@@ -26,6 +26,7 @@ export default function IndexLayout() {
           animation: "fade",
         }}
       />
+      <Stack.Screen name="sellers-you-follow" options={{ title: "From Sellers You Follow" }} />
     </Stack>
   );
 }
