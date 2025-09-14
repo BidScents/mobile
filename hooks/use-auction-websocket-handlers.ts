@@ -1,8 +1,8 @@
-import { useCallback } from 'react'
+import { BidResData, HomepageResponse, ListingDetailsResponse } from '@bid-scents/shared-sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
-import { ListingDetailsResponse, BidResData } from '@bid-scents/shared-sdk'
+import { useCallback } from 'react'
 import { queryKeys } from './queries/query-keys'
 
 /**
@@ -117,6 +117,37 @@ export function useAuctionWebSocketHandlers({
         }
       }
     )
+
+    // Update homepage cache
+    queryClient.setQueryData<HomepageResponse>(
+        queryKeys.homepage,
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            featured: (old.featured || []).map((listing) =>
+              listing.id === listingId
+                ? { ...listing, bid_count: bidData.bid_count, current_bid: bidData.amount }
+                : listing
+            ),
+            recent_auctions: (old.recent_auctions || []).map((listing) =>
+              listing.id === listingId
+                ? { ...listing, bid_count: bidData.bid_count, current_bid: bidData.amount }
+                : listing
+            ),
+            recent_listings: (old.recent_listings || []).map((listing) =>
+              listing.id === listingId
+                ? { ...listing, bid_count: bidData.bid_count, current_bid: bidData.amount }
+                : listing
+            ),
+            sellers_you_follow: (old.sellers_you_follow || []).map((listing) =>
+              listing.id === listingId
+                ? { ...listing, bid_count: bidData.bid_count, current_bid: bidData.amount }
+                : listing
+            ),
+          };
+        }
+      );
 
     // Show toast notification for new bid
     await Notifications.scheduleNotificationAsync({
