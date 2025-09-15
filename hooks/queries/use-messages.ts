@@ -26,10 +26,8 @@ export function useConversationSummary() {
   return useQuery({
     queryKey: queryKeys.messages.summary,
     queryFn: () => MessageService.getConversationSummaryV1MessageSummaryGet(),
-    staleTime: 2 * 60 * 1000, // 2 minutes - conversations change frequently with new messages
+    staleTime: 60 * 1000, // 2 minutes - conversations change frequently with new messages
     // Conversations are critical for messaging, enable background refetch
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 }
 
@@ -44,10 +42,8 @@ export function useConversation(conversationId: string) {
       MessageService.getConversationV1MessageConversationConversationIdGet(
         conversationId
       ),
-    staleTime: 1 * 60 * 1000, // 1 minute - conversation content changes frequently
+    staleTime: 2 * 60 * 1000, // 2 minutes - reduce excessive requests
     enabled: !!conversationId,
-    // Enable background refetch for active conversations
-    refetchOnWindowFocus: true,
   });
 }
 
@@ -57,22 +53,36 @@ export function useConversation(conversationId: string) {
 
 /**
  * Infinite query for loading messages with cursor pagination
- * Automatically seeds with conversation data when available
+ * Uses conversation endpoint for first page, then messages endpoint for subsequent pages
  */
-export function useMessages(conversationId: string) {
-  const queryClient = useQueryClient()
-  
+export function useMessages(conversationId: string) {  
   return useInfiniteQuery({
     queryKey: queryKeys.messages.list(conversationId),
-    queryFn: ({ pageParam }) => {
-      // Only fetch if we have a cursor (meaning we need older messages)
-      if (!pageParam) return [];
+    queryFn: async ({ pageParam }) => {
+      console.log('🔄 useMessages queryFn called:', { conversationId, pageParam });
       
-      return MessageService.getMessagesV1MessageConversationIdMessagesGet(
-        conversationId,
-        pageParam, // cursor timestamp
-        50 // limit
-      );
+      try {
+        // First page: use conversation endpoint to get initial messages
+        if (!pageParam) {
+          console.log('📡 Fetching first page from conversation endpoint');
+          const conversation = await MessageService.getConversationV1MessageConversationConversationIdGet(conversationId);
+          console.log('✅ First page loaded:', conversation.messages?.length || 0, 'messages');
+          return conversation.messages || [];
+        }
+        
+        // Subsequent pages: use messages endpoint with cursor
+        console.log('📡 Fetching next page with cursor:', pageParam);
+        const messages = await MessageService.getMessagesV1MessageConversationIdMessagesGet(
+          conversationId,
+          pageParam, // cursor timestamp
+          50 // limit
+        );
+        console.log('✅ Next page loaded:', messages?.length || 0, 'messages');
+        return messages || [];
+      } catch (error) {
+        console.error('❌ useMessages queryFn error:', { conversationId, pageParam, error });
+        throw error;
+      }
     },
     initialPageParam: undefined,
     getNextPageParam: (lastPage: MessageResData[]) => {
@@ -85,22 +95,11 @@ export function useMessages(conversationId: string) {
       const oldestMessage = lastPage[lastPage.length - 1];
       return oldestMessage.created_at;
     },
-    // Seed with conversation messages if available
-    initialData: () => {
-      const conversation = queryClient.getQueryData<ConversationResponse>(
-        queryKeys.messages.conversation(conversationId)
-      )
-      if (conversation?.messages?.length) {
-        return {
-          pages: [conversation.messages],
-          pageParams: [undefined],
-        }
-      }
-      return undefined
-    },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 seconds - reduce excessive refetching
     enabled: !!conversationId,
-    refetchOnMount: false,
+    refetchOnWindowFocus: "always",
+    refetchOnMount: "always",
+    gcTime: 2 * 60 * 1000, // 2 minutes - reduce excessive refetching
   });
 }
 
