@@ -12,19 +12,56 @@ import { Text, TextArea, XStack, YStack } from "tamagui";
 interface SystemReviewMessageProps {
   content: RichSubmitReviewActionContent;
   isBuyer: boolean;
+  isSeller: boolean;
   messageId: string;
   message: MessageResData;
 }
 
-export function SystemReviewMessage({ content, isBuyer, messageId, message }: SystemReviewMessageProps) {
+export function SystemReviewMessage({ content, isBuyer, isSeller, messageId, message }: SystemReviewMessageProps) {
   const submitReview = useSubmitReview();
   const [rating, setRating] = useState<number>(4);
   const [comment, setComment] = useState<string>("");
   const [isSubmitted, setIsSubmitted] = useState(!content.is_active);
 
   // Only show for buyers
-  if (!isBuyer) {
-    return null;
+  if (!isBuyer && isSeller) {
+    return (
+      <YStack
+        backgroundColor="$muted"
+        borderRadius="$6"
+        paddingBottom="$3"
+        paddingTop="$4"
+        paddingHorizontal="$4"
+        width="100%"
+        gap="$3"
+        marginVertical="$5"
+      >
+          <Text
+            fontSize="$4"
+            fontWeight="500"
+            color="$foreground"
+            flex={1}
+            minWidth="200"
+          >
+            {content.is_active ? "Waiting for buyer to submit review" : "Buyer has submitted review"}
+          </Text>
+  
+          <XStack
+            position="absolute"
+            top={-8}
+            left={8}
+            backgroundColor="$foreground"
+            paddingHorizontal="$2"
+            paddingVertical="$1"
+            borderRadius="$6"
+            zIndex={1}
+          >
+            <Text fontSize="$2" color="$background" fontWeight="600">
+              {content.is_active ? "Waiting for Review" : "Review Submitted"}
+            </Text>
+          </XStack>
+      </YStack>
+    );
   }
 
   const handleStarPress = (starIndex: number) => {
