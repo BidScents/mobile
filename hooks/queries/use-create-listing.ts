@@ -1,5 +1,5 @@
 import type { CreateListingRequest, ListingResponse } from '@bid-scents/shared-sdk'
-import { DashboardService, ProfileTab, useAuthStore } from '@bid-scents/shared-sdk'
+import { DashboardService, useAuthStore } from '@bid-scents/shared-sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../queries/query-keys'
 
@@ -33,15 +33,8 @@ export function useCreateListing(options?: UseCreateListingOptions) {
       // All dashboard invalidations (covers all dashboard sub-queries)
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
       
-      // Profile invalidations: these are specific because we need the user ID
-      if (user?.id) {
-        queryClient.invalidateQueries({ 
-          queryKey: queryKeys.profile.listings(user.id, ProfileTab.ACTIVE) 
-        })
-        queryClient.invalidateQueries({ 
-          queryKey: queryKeys.profile.listings(user.id, ProfileTab.FEATURED) 
-        })
-      }
+      // Messages invalidations
+      queryClient.invalidateQueries({ queryKey: ['profile', 'listings'] })
       
       options?.onSuccess?.(data)
     },
