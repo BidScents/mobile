@@ -26,8 +26,9 @@ export function useConversationSummary() {
   return useQuery({
     queryKey: queryKeys.messages.summary,
     queryFn: () => MessageService.getConversationSummaryV1MessageSummaryGet(),
-    staleTime: 60 * 1000, // 2 minutes - conversations change frequently with new messages
-    // Conversations are critical for messaging, enable background refetch
+    refetchOnWindowFocus: "always",
+    refetchOnMount: "always",
+    gcTime: 2 * 60 * 1000,
   });
 }
 

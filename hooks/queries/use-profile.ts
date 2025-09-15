@@ -263,6 +263,7 @@ export function useUserFollowers(userId: string, limit: number = 20) {
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: "always",
   })
 }
 
@@ -284,5 +285,6 @@ export function useUserFollowing(userId: string, limit: number = 20) {
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: "always",
   })
 }

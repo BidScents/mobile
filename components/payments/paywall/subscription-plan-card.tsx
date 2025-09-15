@@ -44,7 +44,7 @@ export function SubscriptionPlanCard({
           borderRadius="$2"
           zIndex={1}
         >
-          <Text fontSize="$1" color="white" fontWeight="600">
+          <Text fontSize="$1" color="$background" fontWeight="600">
             MOST POPULAR
           </Text>
         </XStack>
