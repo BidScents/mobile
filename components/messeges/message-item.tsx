@@ -37,20 +37,20 @@ const MessageItemComponent = ({
   
   // Memoize expensive calculations
   const isCurrentUser = useMemo(() => 
-    message.sender.id === user?.id, 
-    [message.sender.id, user?.id]
+    message.sender?.id === user?.id, 
+    [message.sender?.id, user?.id]
   );
 
   const isSystemMessage = useMemo(() => 
-    message.sender.id === "00000000-0000-0000-0000-000000000000", 
-    [message.sender.id]
+    message.sender?.id === "00000000-0000-0000-0000-000000000000", 
+    [message.sender?.id]
   );
   
   // Memoize read status calculation
   const isRead = useMemo(() => {
     // A message is read if every participant (except the sender) has read it.
     const otherParticipants = conversation.participants.filter(
-      (p) => p.user.id !== message.sender.id
+      (p) => p.user.id !== message.sender?.id
     );
 
     // If there are no other participants, the message is not considered 'read' by others.
@@ -63,7 +63,7 @@ const MessageItemComponent = ({
     return otherParticipants.every((p) => {
       return p.last_read_at && new Date(p.last_read_at) >= new Date(message.created_at);
     });
-  }, [conversation.participants, message.created_at, message.sender.id]);
+  }, [conversation.participants, message.created_at, message.sender?.id]);
 
   // Memoize message type and alignment calculation
   const { actualType, align } = useMemo(() => {
@@ -171,12 +171,12 @@ const MessageItemComponent = ({
           <Avatar circular size="$2" marginRight="$2">
             <Avatar.Image
               source={{
-                uri: message.sender.profile_image_url || undefined,
+                uri: message.sender?.profile_image_url || undefined,
               }}
             />
             <Avatar.Fallback backgroundColor="$muted">
               <Text fontSize="$2" fontWeight="600" color="$mutedForeground">
-                {message.sender.username?.charAt(0).toUpperCase() || "U"}
+                {message.sender?.username?.charAt(0).toUpperCase() || "?"}
               </Text>
             </Avatar.Fallback>
           </Avatar>

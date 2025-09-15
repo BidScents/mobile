@@ -161,7 +161,7 @@ export function useMessagingWebSocketHandlers({
         return {
           ...old,
           participants: old.participants.map((participant) => {
-            if (participant.user.id === messageData.sender.id) {
+            if (participant.user.id === messageData.sender?.id) {
               return {
                 ...participant,
                 last_read_at: messageData.created_at,
@@ -197,7 +197,7 @@ export function useMessagingWebSocketHandlers({
     // 4. Clear typing indicator for sender if they were typing
     if (typingUsersRef?.current[conversationId]) {
       typingUsersRef.current[conversationId] = typingUsersRef.current[conversationId].filter(
-        typing => typing.user.id !== messageData.sender.id
+        typing => typing.user.id !== messageData.sender?.id
       )
       onUIUpdate?.()
     }
@@ -218,7 +218,7 @@ export function useMessagingWebSocketHandlers({
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: messageData.sender.username || 'New Message',
+          title: messageData.sender?.username || 'New Message',
           body: getNotificationBody(),
           sound: true,
         },

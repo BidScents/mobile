@@ -91,9 +91,9 @@ export function ConversationSummaryItem({
     // For group conversations, prefix with sender name
     if (isGroup && conversation.last_message.sender) {
       const senderName =
-        conversation.last_message.sender.id === currentUserId
+        conversation.last_message.sender?.id === currentUserId
           ? "You"
-          : conversation.last_message.sender.username;
+          : conversation.last_message.sender?.username || "Unknown";
       return `${senderName}: ${messageContent}`;
     }
 

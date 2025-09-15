@@ -30,7 +30,7 @@ export default function SpecificChatScreen() {
           (participant: UserPreview) => participant.id !== user.id
         );
         
-        navigation.setOptions({ title: otherParticipant?.username });
+        navigation.setOptions({ title: otherParticipant?.username || "Chat" });
       }
     }
   }, [conversationSummary, id, navigation, user?.id]);

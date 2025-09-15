@@ -79,7 +79,7 @@ export default function NotificationCard({
 
     if (notification.type === NotificationType.MESSAGE) {
       const content = notification.content as MessageContent;
-      return <AvatarIcon url={content.sender.profile_image_url} size="$5" />;
+      return <AvatarIcon url={content.sender?.profile_image_url} size="$5" />;
     }
 
     // Default fallback

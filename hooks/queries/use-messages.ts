@@ -291,11 +291,11 @@ export function useSendMessage() {
         conversation_id: conversationId,
         content_type: messageRequest.content_type,
         content: messageRequest.content,
-        sender: {
-          id: user?.id || "current-user",
-          username: user?.username || "You",
-          profile_image_url: user?.profile_image_url || null,
-        },
+        sender: user ? {
+          id: user.id,
+          username: user.username || "You",
+          profile_image_url: user.profile_image_url || null,
+        } : null,
         created_at: new Date().toISOString(),
       };
 
