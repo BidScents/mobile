@@ -23,6 +23,8 @@ interface UseMessagingWebSocketOptions {
   onDisconnect?: () => void
   /** Callback fired when new message is received */
   onMessage?: (messageData: MessageResData) => void
+  /** Callback fired when message update is received */
+  onUpdateMessage?: (messageData: MessageResData) => void
   /** Callback fired when typing indicator is received */
   onTyping?: (typingData: TypingResData) => void
   /** Callback fired when last read update is received */
@@ -80,6 +82,7 @@ export function useMessagingWebSocket({
   onConnect,
   onDisconnect,
   onMessage,
+  onUpdateMessage,
   onTyping,
   onUpdateLastRead,
   onError
@@ -92,6 +95,7 @@ export function useMessagingWebSocket({
     onConnect,
     onDisconnect,
     onMessage,
+    onUpdateMessage,
     onTyping,
     onUpdateLastRead,
     onError
@@ -102,6 +106,7 @@ export function useMessagingWebSocket({
     onConnect,
     onDisconnect,
     onMessage,
+    onUpdateMessage,
     onTyping,
     onUpdateLastRead,
     onError
@@ -139,6 +144,13 @@ export function useMessagingWebSocket({
             const messageData = message.data as MessageResData
             console.log('New message received:', messageData)
             callbacksRef.current.onMessage?.(messageData)
+            break
+          }
+          
+          case WSType.UPDATE_MESSAGE: {
+            const messageData = message.data as MessageResData
+            console.log('Message update received:', messageData)
+            callbacksRef.current.onUpdateMessage?.(messageData)
             break
           }
           

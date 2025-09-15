@@ -36,6 +36,8 @@ interface UseMessagingWebSocketHandlersReturn {
   handleDisconnect: () => void
   /** Handler for new message updates */
   handleMessage: (messageData: MessageResData) => Promise<void>
+  /** Handler for message updates */
+  handleUpdateMessage: (messageData: MessageResData) => Promise<void>
   /** Handler for typing indicator updates */
   handleTyping: (typingData: TypingResData) => void
   /** Handler for last read updates */
@@ -111,47 +113,31 @@ export function useMessagingWebSocketHandlers({
   }, [typingUsersRef, onUIUpdate])
 
   /**
-   * Handles new message updates with optimistic cache updates
+   * Handles new messages (adds to cache)
    */
   const handleMessage = useCallback(async (messageData: MessageResData) => {
     console.log('New message received via WebSocket:', messageData)
+
+    const conversationId = messageData.conversation_id
+
+    // Check if message already exists in conversation cache
+    const existingConversation = queryClient.getQueryData<ConversationResponse>(
+      queryKeys.messages.conversation(conversationId)
+    )
+    const messageExists = existingConversation?.messages.some(msg => msg.id === messageData.id)
+
+    if (messageExists) {
+      console.log('Message already exists in cache, skipping duplicate')
+      return
+    }
 
     // Only provide haptic feedback for messages from other users
     if (messageData.sender?.id !== currentUserId) {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     }
 
-    const conversationId = messageData.conversation_id
-
-    // Check for duplicates in conversation cache before updating
-    const existingConversation = queryClient.getQueryData<ConversationResponse>(
-      queryKeys.messages.conversation(conversationId)
-    )
-    
-    const existingMessage = existingConversation?.messages.find(msg => msg.id === messageData.id)
-    if (existingMessage) {
-      // Message exists - check if it's different (updated) or identical (duplicate)
-      const isDifferent = JSON.stringify(existingMessage) !== JSON.stringify(messageData)
-      if (isDifferent) {
-        console.log('Message updated via WebSocket, updating cache')
-        updateAllMessageCaches(queryClient, conversationId, messageData, true)
-      } else {
-        console.log('Message already exists in cache with same content, skipping WebSocket update')
-      }
-      return
-    }
-
-    // Message doesn't exist - determine add vs update based on message type
-    // ACTION/SYSTEM messages should update existing if same ID, TEXT/FILE should add as new
-    const isActionOrSystem = messageData.content_type === 'ACTION' || messageData.content_type === 'SYSTEM'
-    
-    if (isActionOrSystem) {
-      // For ACTION/SYSTEM messages, always try to update first
-      updateAllMessageCaches(queryClient, conversationId, messageData)
-    } else {
-      // For TEXT/FILE messages, always add as new
-      updateAllMessageCaches(queryClient, conversationId, messageData)
-    }
+    // Add new message to caches
+    updateAllMessageCaches(queryClient, conversationId, messageData)
 
     // Update participant read status and unread counts
     queryClient.setQueryData<ConversationResponse>(
@@ -194,7 +180,7 @@ export function useMessagingWebSocketHandlers({
       }
     )
 
-    // 4. Clear typing indicator for sender if they were typing
+    // Clear typing indicator for sender if they were typing
     if (typingUsersRef?.current[conversationId]) {
       typingUsersRef.current[conversationId] = typingUsersRef.current[conversationId].filter(
         typing => typing.user.id !== messageData.sender?.id
@@ -202,7 +188,7 @@ export function useMessagingWebSocketHandlers({
       onUIUpdate?.()
     }
 
-    // 5. Show notification for new message (only if not from current user)
+    // Show notification for new message (only if not from current user)
     if (messageData.sender?.id !== currentUserId) {
       const getNotificationBody = () => {
         if (!messageData.content) {
@@ -226,6 +212,18 @@ export function useMessagingWebSocketHandlers({
       })
     }
   }, [currentUserId, queryClient, typingUsersRef, onUIUpdate])
+
+  /**
+   * Handles message updates (updates existing message in cache)
+   */
+  const handleUpdateMessage = useCallback(async (messageData: MessageResData) => {
+    console.log('Message update received via WebSocket:', messageData)
+
+    const conversationId = messageData.conversation_id
+
+    // Update existing message in caches
+    updateAllMessageCaches(queryClient, conversationId, messageData, true)
+  }, [queryClient])
 
   /**
    * Handles typing indicator updates
@@ -315,6 +313,7 @@ export function useMessagingWebSocketHandlers({
     handleConnect,
     handleDisconnect,
     handleMessage,
+    handleUpdateMessage,
     handleTyping,
     handleUpdateLastRead,
     handleError,

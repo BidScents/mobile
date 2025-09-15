@@ -124,6 +124,7 @@ export function MessagingProvider({ children }: MessagingProviderProps) {
     onConnect: handlers.handleConnect,
     onDisconnect: handlers.handleDisconnect,
     onMessage: handlers.handleMessage,
+    onUpdateMessage: handlers.handleUpdateMessage,
     onTyping: handlers.handleTyping,
     onUpdateLastRead: handlers.handleUpdateLastRead,
     onError: handlers.handleError,
