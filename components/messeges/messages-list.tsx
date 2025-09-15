@@ -3,7 +3,8 @@ import { ConversationResponse, ConversationType, MessageResData, MessageType } f
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useMessagingContext } from "providers/messaging-provider";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { Text, View } from "tamagui";
+import { ActivityIndicator } from "react-native";
+import { Text, View, YStack } from "tamagui";
 import { MessageItem } from "./message-item";
 import { ScrollLoadingIndicator } from "./scroll-loading-indicator";
 import { ScrollToBottomButton } from "./scroll-to-bottom-button";
@@ -27,6 +28,7 @@ export function MessagesList({ conversation }: MessagesListProps) {
     fetchNextPage,
     isFetchingNextPage,
     isFetching,
+    isLoading
   } = useMessages(conversation.id);
   
   // Flatten all pages into a single array
@@ -105,6 +107,17 @@ export function MessagesList({ conversation }: MessagesListProps) {
       />
     );
   }, [typingUsers, conversation.type, showAvatars]);
+
+  if (isLoading) {
+    return (
+      <YStack flex={1} justifyContent="center" alignItems="center">
+        <ActivityIndicator size="large" />
+        <Text fontSize="$4" color="$color11" marginTop="$3">
+          Loading conversation...
+        </Text>
+      </YStack>
+    )
+  }
 
   if (!allMessages.length) {
     return (
