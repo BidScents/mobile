@@ -104,7 +104,7 @@ export default function NotificationCard({
       router.push(`/chat/${content.conversation_id}`);
     } else if (notification.type === NotificationType.NEW_FOLLOWER) {
       const content = notification.content as FollowerContent;
-      router.push(`/profile/${content.follower.username}`);
+      router.push(`/profile/${content.follower.id}`);
     }
   };
 
