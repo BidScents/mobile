@@ -38,6 +38,24 @@ export default function ProfileLayout() {
           headerLeft: () => <BackButton />,
         }}
       />
+      <Stack.Screen
+        name="(followers)/[id]"
+        options={{
+          title: "Followers",
+          headerLeft: () => <BackButton />,
+          presentation: "modal",
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="(following)/[id]"
+        options={{
+          title: "Following",
+          headerLeft: () => <BackButton />,
+          presentation: "modal",
+          animation: "slide_from_bottom",
+        }}
+      />
     </Stack>
   );
 }
