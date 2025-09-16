@@ -251,12 +251,14 @@ return useMutation({
 export function useUserFollowers(userId: string, limit: number = 20) {
   return useInfiniteQuery({
     queryKey: queryKeys.profile.followers(userId),
-    queryFn: ({ pageParam }) => 
-      ProfileService.getUserFollowersV1ProfileUserIdFollowersGet(
+    queryFn: ({ pageParam }) => {
+      const cursorToUse = pageParam || new Date().toISOString();
+      return ProfileService.getUserFollowersV1ProfileUserIdFollowersGet(
         userId,
-        pageParam as string | undefined,
+        cursorToUse,
         limit
-      ),
+      );
+    },
     initialPageParam: undefined,
     getNextPageParam: (lastPage: FollowerFollowingResponse) => {
       return lastPage.next_cursor || undefined
@@ -273,12 +275,14 @@ export function useUserFollowers(userId: string, limit: number = 20) {
 export function useUserFollowing(userId: string, limit: number = 20) {
   return useInfiniteQuery({
     queryKey: queryKeys.profile.following(userId),
-    queryFn: ({ pageParam }) => 
-      ProfileService.getUserFollowingV1ProfileUserIdFollowingGet(
+    queryFn: ({ pageParam }) => {
+      const cursorToUse = pageParam || new Date().toISOString();
+      return ProfileService.getUserFollowingV1ProfileUserIdFollowingGet(
         userId,
-        pageParam as string | undefined,
+        cursorToUse,
         limit
-      ),
+      );
+    },
     initialPageParam: undefined,
     getNextPageParam: (lastPage: FollowerFollowingResponse) => {
       return lastPage.next_cursor || undefined
