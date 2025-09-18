@@ -83,10 +83,6 @@ return useInfiniteQuery({
   initialPageParam: 1,
   enabled: !!userId,
   staleTime: 3 * 60 * 1000, // 3 minutes
-  // Prevent any automatic fetching
-  refetchOnWindowFocus: false,
-  refetchOnMount: false, // Changed to false to prevent auto-refetch
-  refetchOnReconnect: false,
 })
 }
 
