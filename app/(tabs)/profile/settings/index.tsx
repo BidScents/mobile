@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
-import { handleSignOutUI } from "@/utils/auth-ui-handlers";
+import { handleDeleteAccountUI, handleSignOutUI } from "@/utils/auth-ui-handlers";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { Alert } from "react-native";
@@ -128,6 +128,15 @@ export default function SettingsScreen() {
               leftIcon="log-out-outline"
             >
               Log Out
+            </Button>
+          </YStack>
+          <YStack borderRadius="$6">
+            <Button
+              onPress={handleDeleteAccountUI}
+              variant="destructive"
+              leftIcon="trash-outline"
+            >
+              Delete Account
             </Button>
           </YStack>
         </YStack>

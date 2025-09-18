@@ -47,6 +47,7 @@ export interface OnboardingResult {
 export interface DeleteAccountResult {
   success: boolean
   error?: string
+  errorType?: 'active_transactions' | 'unreleased_payments' | 'generic'
 }
 
 export class AuthService {
@@ -260,23 +261,42 @@ export class AuthService {
   /**
    * Delete user account
    * This method directly calls the API and handles Supabase signout
-   * For React components, use the useDeleteAccount hook instead
    */
   static async deleteAccount(): Promise<DeleteAccountResult> {
     try {
       // Call API to delete account
       await ApiAuthService.deleteAccountV1AuthDeleteAccountDelete()
       
-      // Sign out from Supabase to clear local session
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        console.error('Error signing out after account deletion:', error)
-        // Don't throw - account is still deleted on server
-      }
+      AuthService.signOut()
       
       return { success: true }
     } catch (error: any) {
-      return { success: false, error: error.message }
+      // Parse specific error messages from backend
+      let errorType: 'active_transactions' | 'unreleased_payments' | 'generic' = 'generic'
+      let errorMessage = error.message || 'Unable to delete your account. Please try again.'
+
+      // Check if it's an HTTP error with specific message
+      if (error.body?.detail || error.response?.data?.detail) {
+        const detail = error.body?.detail || error.response?.data?.detail
+        
+        if (typeof detail === 'string') {
+          if (detail.includes('Cannot delete account with active transactions')) {
+            errorType = 'active_transactions'
+            errorMessage = detail
+          } else if (detail.includes('unreleased payments that are unable to be claimed')) {
+            errorType = 'unreleased_payments'
+            errorMessage = detail
+          } else {
+            errorMessage = detail
+          }
+        }
+      }
+
+      return { 
+        success: false, 
+        error: errorMessage,
+        errorType 
+      }
     }
   }
 

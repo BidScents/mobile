@@ -156,10 +156,7 @@ export const handleDeleteAccountUI = async (): Promise<void> => {
                   [{ text: 'OK' }]
                 )
               } else {
-                Alert.alert(
-                  'Deletion Failed', 
-                  result.error || 'Unable to delete your account. Please try again.'
-                )
+                handleDeleteAccountError(result.error!, result.errorType)
               }
             } catch (error: any) {
               console.error('Delete account UI error:', error)
@@ -239,5 +236,41 @@ const handleOnboardingError = (error: string): void => {
       'Profile Creation Failed', 
       error || 'Unable to create your profile. Please try again.'
     )
+  }
+}
+
+/**
+ * Handle delete account errors with appropriate user feedback
+ */
+const handleDeleteAccountError = (error: string, errorType?: 'active_transactions' | 'unreleased_payments' | 'generic'): void => {
+  switch (errorType) {
+    case 'active_transactions':
+      Alert.alert(
+        'Cannot Delete Account',
+        'You cannot delete your account while you have active transactions. Please wait for your current transactions to complete before trying again.',
+        [{ text: 'OK' }]
+      )
+      break
+    
+    case 'unreleased_payments':
+      Alert.alert(
+        'Payment Setup Required',
+        'You have pending payments that need to be released. Please complete your payment setup first before deleting your account.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Setup Payments', 
+            onPress: () => router.push('/(tabs)/profile/settings/payments' as any)
+          }
+        ]
+      )
+      break
+    
+    default:
+      Alert.alert(
+        'Deletion Failed',
+        error || 'Unable to delete your account. Please try again.'
+      )
+      break
   }
 }
