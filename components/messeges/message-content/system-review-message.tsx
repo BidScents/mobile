@@ -12,19 +12,17 @@ import { Text, TextArea, XStack, YStack } from "tamagui";
 interface SystemReviewMessageProps {
   content: RichSubmitReviewActionContent;
   isBuyer: boolean;
-  isSeller: boolean;
   messageId: string;
   message: MessageResData;
 }
 
-export function SystemReviewMessage({ content, isBuyer, isSeller, messageId, message }: SystemReviewMessageProps) {
+export function SystemReviewMessage({ content, isBuyer, messageId, message }: SystemReviewMessageProps) {
   const submitReview = useSubmitReview();
   const [rating, setRating] = useState<number>(4);
   const [comment, setComment] = useState<string>("");
   const [isSubmitted, setIsSubmitted] = useState(!content.is_active);
 
-  // Only show for buyers
-  if (!isBuyer && isSeller) {
+  if (!isBuyer) {
     return (
       <YStack
         backgroundColor="$muted"
