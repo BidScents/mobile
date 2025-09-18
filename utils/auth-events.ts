@@ -126,19 +126,6 @@ export const handleSignInEvent = async (session: any): Promise<void> => {
 }
 
 /**
- * Handle sign out event
- */
-export const handleSignOut = async (): Promise<void> => {
-  try {
-    await AuthService.signOut()
-  } catch (error) {
-    console.error("Error during sign out:", error)
-    // Clear state even if signout fails
-    AuthStateManager.clearAuthState()
-  }
-}
-
-/**
  * Background refresh function to update user data without blocking UI
  */
 const refreshUserDataInBackground = async (session: any): Promise<void> => {
