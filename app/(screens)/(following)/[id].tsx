@@ -7,7 +7,8 @@ import { useUserFollowing } from "@/hooks/queries/use-profile";
 import { UserPreview } from "@bid-scents/shared-sdk";
 import { LegendList } from "@legendapp/list";
 import { useLocalSearchParams } from "expo-router";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
+import { RefreshControl } from "react-native";
 import { Text, View, YStack } from "tamagui";
 
 
@@ -15,8 +16,12 @@ export default function FollowingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const followingQuery = useUserFollowing(id!);
 
-  // Flatten the paginated data
-  const flatUsers = followingQuery.data?.pages.flatMap(page => page.users) || [];
+  // Flatten the paginated data with memoization for stable reference
+  const flatUsers = useMemo(() => {
+    const users = followingQuery.data?.pages.flatMap(page => page.users) || [];
+    console.log('Following flatUsers updated:', users.length, users);
+    return users;
+  }, [followingQuery.data]);
 
   // Handle load more
   const handleLoadMore = useCallback(() => {
@@ -90,14 +95,22 @@ export default function FollowingScreen() {
         ) : (
           // Results list
           <LegendList
+            key={`following-${flatUsers.length}`}
             data={flatUsers}
             renderItem={renderUserItem}
             estimatedItemSize={70}
+            recycleItems
+            drawDistance={500}
             showsVerticalScrollIndicator={false}
             keyExtractor={keyExtractor}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.3}
-            onRefresh={followingQuery.refetch}
+            refreshControl={
+              <RefreshControl
+                refreshing={followingQuery.isRefetching || followingQuery.isFetching}
+                onRefresh={followingQuery.refetch}
+              />
+            }
             ListFooterComponent={renderFooter}
             keyboardDismissMode="on-drag"
           />
