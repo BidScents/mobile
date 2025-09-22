@@ -48,8 +48,7 @@ export const queryKeys = {
     listings: {
       all: ['dashboard', 'listings'] as const,
       active: ['dashboard', 'listings', 'active'] as const,
-      sold: ['dashboard', 'listings', 'sold'] as const,
-      draft: ['dashboard', 'listings', 'draft'] as const,
+      boosted: ['dashboard', 'listings', 'boosted'] as const,
     }
   },
   

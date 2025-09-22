@@ -1,6 +1,8 @@
 import type {
+  ActiveListingsResponse,
   CreateListingRequest,
   DashboardAuctionResponse,
+  FeaturedListingsResponse,
   ListingResponse,
   MessageResData,
   UpdateListingRequest
@@ -54,6 +56,42 @@ export function useSettlementDetails(listingId: string) {
     queryFn: () => DashboardService.getSettlementDetailsV1DashboardAuctionsListingIdGet(listingId),
     enabled: !!listingId,
     staleTime: 1 * 60 * 1000, // 1 minute (more frequent updates for active auctions)
+  })
+}
+
+/**
+ * Get user's active listings with infinite scroll pagination
+ */
+export function useActiveListings(perPage: number = 20) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.dashboard.listings.active,
+    queryFn: ({ pageParam = 1 }) => {
+      return DashboardService.getActiveListingsV1DashboardListingsActiveGet(perPage, pageParam)
+    },
+    getNextPageParam: (lastPage) => {
+      const { page, total_pages } = lastPage.pagination_data
+      return page < total_pages ? page + 1 : undefined
+    },
+    initialPageParam: 1,
+    staleTime: 3 * 60 * 1000, // 3 minutes
+  })
+}
+
+/**
+ * Get user's boosted listings with infinite scroll pagination
+ */
+export function useBoostedListings(perPage: number = 20) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.dashboard.listings.boosted,
+    queryFn: ({ pageParam = 1 }) => {
+      return DashboardService.getBoostedListingsV1DashboardListingsBoostedGet(perPage, pageParam)
+    },
+    getNextPageParam: (lastPage) => {
+      const { page, total_pages } = lastPage.pagination_data
+      return page < total_pages ? page + 1 : undefined
+    },
+    initialPageParam: 1,
+    staleTime: 3 * 60 * 1000, // 3 minutes
   })
 }
 
