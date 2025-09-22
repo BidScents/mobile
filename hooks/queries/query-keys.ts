@@ -43,6 +43,8 @@ export const queryKeys = {
   dashboard: {
     all: ['dashboard'] as const,
     user: (userId: string) => ['dashboard', 'user', userId] as const,
+    auctions: ['dashboard', 'auctions'] as const,
+    settlement: (listingId: string) => ['dashboard', 'settlement', listingId] as const,
     listings: {
       all: ['dashboard', 'listings'] as const,
       active: ['dashboard', 'listings', 'active'] as const,

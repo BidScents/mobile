@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { MultipleImagePicker } from "@/components/ui/multiple-image-picker";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
-import { useCreateListing } from "@/hooks/queries/use-create-listing";
+import { useCreateListing } from "@/hooks/queries/useDashboard";
 import {
   boxConditionOptions,
   categoryOptions,
