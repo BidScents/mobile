@@ -30,7 +30,7 @@ export function useGetUserDashboard() {
 /**
  * Get user's pending auctions with infinite scroll pagination
  */
-export function usePendingAuctions(perPage: number = 10) {
+export function usePendingAuctions(perPage: number = 20) {
   return useInfiniteQuery({
     queryKey: queryKeys.dashboard.auctions,
     queryFn: ({ pageParam = 1 }) => {
