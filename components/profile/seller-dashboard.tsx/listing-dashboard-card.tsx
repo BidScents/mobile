@@ -115,16 +115,25 @@ export function ListingDashboardCard({
 
         {/* Edit Icon */}
         {renderEditIcon()}
-      </View>
-      
-        <Text 
+
+        <Text
+          position="absolute"
+          bottom="$2"
+          left="$2"
+          borderRadius="$5"
           fontSize="$4" 
           fontWeight="500" 
           color="$foreground"
           numberOfLines={1}
+          backgroundColor="$muted"
+          paddingHorizontal="$2"
+          paddingVertical="$1.5"
         >
           {listing.name}
         </Text>
+      </View>
+      
+        
     </YStack>
   );
 }

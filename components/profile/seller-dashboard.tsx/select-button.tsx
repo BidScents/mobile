@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { Text, XStack } from "tamagui";
 
 interface SelectButtonProps {
@@ -27,13 +28,18 @@ export function SelectButton({ isSelectMode, selectedCount, onPress }: SelectBut
     }
   };
 
+  const handlePress = () => {
+    onPress();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+
   return (
     <XStack 
       backgroundColor={getVariant()}
       py="$1.5" 
       px="$2" 
       borderRadius="$5"
-      onPress={onPress}
+      onPress={handlePress}
       pressStyle={{ scale: 0.95 }}
     >
       <Text 
