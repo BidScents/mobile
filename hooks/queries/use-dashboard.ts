@@ -5,6 +5,8 @@ import type {
   FeaturedListingsResponse,
   ListingResponse,
   MessageResData,
+  SellerTransactionData,
+  TransactionResponse,
   UpdateListingRequest
 } from '@bid-scents/shared-sdk'
 import { DashboardService, useAuthStore } from '@bid-scents/shared-sdk'
@@ -78,13 +80,13 @@ export function useActiveListings(perPage: number = 20) {
 }
 
 /**
- * Get user's boosted listings with infinite scroll pagination
+ * Get user's featured listings with infinite scroll pagination
  */
-export function useBoostedListings(perPage: number = 20) {
+export function useFeaturedListings(perPage: number = 20) {
   return useInfiniteQuery({
-    queryKey: queryKeys.dashboard.listings.boosted,
+    queryKey: queryKeys.dashboard.listings.featured,
     queryFn: ({ pageParam = 1 }) => {
-      return DashboardService.getBoostedListingsV1DashboardListingsBoostedGet(perPage, pageParam)
+      return DashboardService.getFeaturedListingsV1DashboardListingsFeaturedGet(perPage, pageParam)
     },
     getNextPageParam: (lastPage) => {
       const { page, total_pages } = lastPage.pagination_data
@@ -92,6 +94,27 @@ export function useBoostedListings(perPage: number = 20) {
     },
     initialPageParam: 1,
     staleTime: 3 * 60 * 1000, // 3 minutes
+  })
+}
+
+/**
+ * Get user's transactions with cursor-based pagination
+ */
+export function useUserTransactions(limit: number = 20) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.dashboard.transactions,
+    queryFn: ({ pageParam }) => {
+      return DashboardService.getUserTransactionsV1DashboardTransactionsGet(pageParam, limit)
+    },
+    getNextPageParam: (lastPage: TransactionResponse) => {
+      const transactions = lastPage.transactions || []
+      if (transactions.length < limit) return undefined
+      // Use the last transaction's updated_at timestamp as cursor
+      const lastTransaction: SellerTransactionData = transactions[transactions.length - 1]
+      return lastTransaction?.updated_at
+    },
+    initialPageParam: undefined,
+    staleTime: 2 * 60 * 1000, // 2 minutes
   })
 }
 

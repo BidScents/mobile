@@ -45,10 +45,11 @@ export const queryKeys = {
     user: (userId: string) => ['dashboard', 'user', userId] as const,
     auctions: ['dashboard', 'auctions'] as const,
     settlement: (listingId: string) => ['dashboard', 'settlement', listingId] as const,
+    transactions: ['dashboard', 'transactions'] as const,
     listings: {
       all: ['dashboard', 'listings'] as const,
       active: ['dashboard', 'listings', 'active'] as const,
-      boosted: ['dashboard', 'listings', 'boosted'] as const,
+      featured: ['dashboard', 'listings', 'featured'] as const,
     }
   },
   
