@@ -14,10 +14,17 @@ export default function ListingLayout() {
             },
         }}
         >
-            <Stack.Screen name="[id]" 
+            <Stack.Screen name="[id]/index" 
             options={{
                 headerShown: false,
                 title: "Listing",
+                headerBackButtonDisplayMode: "minimal",
+            }}
+            />
+            <Stack.Screen name="[id]/edit/index" 
+            options={{
+                headerShown: false,
+                title: "Edit Listing",
                 headerBackButtonDisplayMode: "minimal",
             }}
             />

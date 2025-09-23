@@ -1,3 +1,8 @@
+import { useListingDetail } from ".../../hooks/queries/use-listing";
+import { useContactSeller } from ".../../hooks/queries/use-messages";
+import { useAuctionWebSocket } from ".../../hooks/use-auction-websocket";
+import { useAuctionWebSocketHandlers } from ".../../hooks/use-auction-websocket-handlers";
+import { isCurrentUserHighestBidder as checkIsCurrentUserHighestBidder } from ".../../utils/auction-helpers";
 import { ImageCarousel } from "@/components/listing/image-carousel";
 import { ListingActions } from "@/components/listing/listing-actions";
 import { ListingContent } from "@/components/listing/listing-content";
@@ -10,11 +15,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { AppState, AppStateStatus, Dimensions } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text } from "tamagui";
-import { useListingDetail } from "../../hooks/queries/use-listing";
-import { useContactSeller } from "../../hooks/queries/use-messages";
-import { useAuctionWebSocket } from "../../hooks/use-auction-websocket";
-import { useAuctionWebSocketHandlers } from "../../hooks/use-auction-websocket-handlers";
-import { isCurrentUserHighestBidder as checkIsCurrentUserHighestBidder } from "../../utils/auction-helpers";
 
 /**
  * Listing detail screen component
