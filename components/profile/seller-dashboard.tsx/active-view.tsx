@@ -6,6 +6,7 @@ import { useThemeColors } from '@/hooks/use-theme-colors';
 import { ListingPreview } from '@bid-scents/shared-sdk';
 import { LegendList } from '@legendapp/list';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { router } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { RefreshControl } from 'react-native';
 import { Text, View } from 'tamagui';
@@ -190,7 +191,7 @@ export default function ActiveView({
         <Text fontSize="$4" color="$mutedForeground" textAlign="center" marginBottom="$4">
           You don&apos;t have any active listings yet. Create your first listing to start selling.
         </Text>
-        <Button variant="primary" onPress={() => {/* TODO: Navigate to create listing */}}>
+        <Button variant="primary" onPress={() => router.push('/(screens)/add-listing')}>
           Create Listing
         </Button>
       </View>

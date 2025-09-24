@@ -75,7 +75,7 @@ export default function SellerDashboardTabs({
 
   // Update header right button based on active tab and selection state
   useEffect(() => {
-    if (activeTabKey === 'active') {
+    if (activeTabKey === 'active' || activeTabKey === 'featured') {
       navigation.setOptions({
         headerRight: () => (
           <SelectButton
@@ -106,7 +106,13 @@ export default function SellerDashboardTabs({
           />
         );
       case 'featured':
-        return <FeaturedView />;
+        return (
+          <FeaturedView
+            isSelectMode={isSelectMode}
+            selectedListings={selectedListings}
+            setSelectedListings={setSelectedListings}
+          />
+        );
       case 'pending':
         return <PendingView />;
       case 'sold':
