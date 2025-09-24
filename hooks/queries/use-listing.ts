@@ -7,7 +7,7 @@ import type {
   SearchResponse,
   SellersYouFollowResponse
 } from "@bid-scents/shared-sdk";
-import { AuctionsService, ListingService, ListingType, useAuthStore } from "@bid-scents/shared-sdk";
+import { AuctionsService, ListingService, useAuthStore } from "@bid-scents/shared-sdk";
 import {
   useInfiniteQuery,
   useMutation,
@@ -92,22 +92,15 @@ export function seedListingDetailCache(
  * Can be pre-seeded with ListingCard data for instant loading
  */
 export function useListingDetail(listingId: string) {
-  const queryClient = useQueryClient()
-  
-  // Get current cached data to determine listing type for refetch behavior
-  const cachedData = queryClient.getQueryData<ListingDetailsResponse>(
-    queryKeys.listings.detail(listingId)
-  )
-  
-  const isAuction = cachedData?.listing?.listing_type === ListingType.AUCTION
-  
   return useQuery({
     queryKey: queryKeys.listings.detail(listingId),
     queryFn: () => {
       return ListingService.getListingDetailsV1ListingListingIdDetailsGet(listingId)
     },
-    staleTime: isAuction ? 0 : 3 * 60 * 1000, // 30 seconds for auctions, 3 minutes for others
+    staleTime: 3 * 60 * 1000, // 3 minutes
     enabled: !!listingId,
+    refetchOnWindowFocus: "always",
+    refetchOnMount: "always",
   });
 }
 
