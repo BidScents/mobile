@@ -1,14 +1,22 @@
 import { ThemedIonicons } from "@/components/ui/themed-icons";
+import { useDeleteListing } from "@/hooks/queries/use-dashboard";
 import { ListingPreview } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
+import { Alert } from "react-native";
 import { Text, View, YStack } from "tamagui";
 
+// Union type to handle both listing types
+type ListingPreviewWithOptionalTimestamp = ListingPreview & {
+  featured_until?: string;
+};
+
 interface ListingDashboardCardProps {
-  listing: ListingPreview;
+  listing: ListingPreviewWithOptionalTimestamp;
   isSelectMode?: boolean;
   isSelected?: boolean;
-  onSelect?: (listing: ListingPreview) => void;
+  onSelect?: (listing: ListingPreviewWithOptionalTimestamp) => void;
 }
 
 export function ListingDashboardCard({
@@ -17,6 +25,7 @@ export function ListingDashboardCard({
   isSelected = false,
   onSelect,
 }: ListingDashboardCardProps) {
+  const deleteMutation = useDeleteListing();
   
   const handlePress = () => {
     if (isSelectMode) {
@@ -25,6 +34,44 @@ export function ListingDashboardCard({
     } else {
       // Normal mode, navigate to listing detail
       router.push(`/listing/${listing.id}` as any);
+    }
+  };
+
+  const handleDelete = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      "Delete Listing",
+      `Are you sure you want to delete "${listing.name}"? This action cannot be undone.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteMutation.mutate(listing.id);
+          },
+        },
+      ]
+    );
+  };
+
+  const formatFeaturedUntil = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays <= 0) {
+      return "Expired";
+    } else if (diffDays === 1) {
+      return "Expires tomorrow";
+    } else if (diffDays <= 7) {
+      return `Expires in ${diffDays} days`;
+    } else {
+      return `Featured until ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
     }
   };
 
@@ -38,8 +85,8 @@ export function ListingDashboardCard({
 
     return (
       <View
-      position="absolute"
-        top="$2"
+        position="absolute"
+        bottom="$2"
         right="$2"
         width={28}
         height={28}
@@ -67,22 +114,51 @@ export function ListingDashboardCard({
 
     return (
       <View
-      position="absolute"
+        position="absolute"
         top="$2"
         left="$2"
-        width={28}
-        height={28}
-        borderRadius={14}
+        width={24}
+        height={24}
+        borderRadius={12}
         backgroundColor={"$background"}
         justifyContent="center"
         alignItems="center"
         zIndex={10}
+        hitSlop={16}
         onPress={() => router.push(`/listing/${listing.id}/edit` as any)}
       >
         <ThemedIonicons 
           name="pencil" 
-          size={20} 
+          size={18} 
           color="$foreground" 
+        />
+      </View>
+    );
+  };
+
+  const renderDeleteButton = () => {
+    if (!isSelectMode) return null;
+
+    return (
+      <View
+        position="absolute"
+        top="$2"
+        right="$2"
+        width={24}
+        height={24}
+        borderRadius={12}
+        backgroundColor="$red9"
+        justifyContent="center"
+        alignItems="center"
+        zIndex={10}
+        hitSlop={16}
+        onPress={handleDelete}
+        pressStyle={{ scale: 0.95 }}
+      >
+        <ThemedIonicons 
+          name="close" 
+          size={16} 
+          color="white" 
         />
       </View>
     );
@@ -116,21 +192,43 @@ export function ListingDashboardCard({
         {/* Edit Icon */}
         {renderEditIcon()}
 
-        <Text
+        {/* Delete Button */}
+        {renderDeleteButton()}
+
+        <View
           position="absolute"
           bottom="$2"
           left="$2"
-          borderRadius="$5"
-          fontSize="$4" 
-          fontWeight="500" 
-          color="$foreground"
-          numberOfLines={1}
-          backgroundColor="$muted"
-          paddingHorizontal="$2"
-          paddingVertical="$1.5"
+          gap="$2"
         >
-          {listing.name}
-        </Text>
+          {listing.featured_until && (
+            <Text
+              borderRadius="$5"
+              fontSize="$3" 
+              fontWeight="400" 
+              color="$mutedForeground"
+              numberOfLines={1}
+              backgroundColor="$muted"
+              paddingHorizontal="$2"
+              paddingVertical="$1.5"
+            >
+              {formatFeaturedUntil(listing.featured_until)}
+            </Text>
+          )}
+          <Text
+            borderRadius="$5"
+            fontSize="$4" 
+            fontWeight="500" 
+            color="$foreground"
+            numberOfLines={1}
+            backgroundColor="$muted"
+            paddingHorizontal="$2"
+            paddingVertical="$1.5"
+            marginBottom={listing.featured_until ? "$1" : 0}
+          >
+            {listing.name}
+          </Text>
+        </View>
       </View>
       
         
