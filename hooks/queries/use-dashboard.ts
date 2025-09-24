@@ -1,8 +1,6 @@
 import type {
-  ActiveListingsResponse,
   CreateListingRequest,
   DashboardAuctionResponse,
-  FeaturedListingsResponse,
   ListingResponse,
   MessageResData,
   SellerTransactionData,
@@ -169,8 +167,8 @@ export function useUpdateListing() {
     },
     
     onSuccess: (data, { listingId }) => {
-      // Update specific listing cache
-      queryClient.setQueryData(queryKeys.listings.detail(listingId), data)
+      // invalidate specific listing cache
+      queryClient.invalidateQueries({ queryKey: queryKeys.listings.detail(listingId) })
       
       // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
