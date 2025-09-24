@@ -101,6 +101,7 @@ export function useListingDetail(listingId: string) {
     enabled: !!listingId,
     refetchOnWindowFocus: "always",
     refetchOnMount: "always",
+    retry: 1,
   });
 }
 
