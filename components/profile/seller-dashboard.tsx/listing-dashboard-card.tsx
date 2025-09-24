@@ -5,7 +5,7 @@ import FastImage from "@d11/react-native-fast-image";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { Alert } from "react-native";
-import { Text, View, YStack } from "tamagui";
+import { Spinner, Text, View, YStack } from "tamagui";
 
 // Union type to handle both listing types
 type ListingPreviewWithOptionalTimestamp = ListingPreview & {
@@ -164,6 +164,25 @@ export function ListingDashboardCard({
     );
   };
 
+  const renderDeleteSpinner = () => {
+    if (!deleteMutation.isPending) return null;
+
+    return (
+      <View
+        position="absolute"
+        top="0"
+        right="0"
+        bottom="0"
+        left="0"
+        justifyContent="center"
+        alignItems="center"
+        zIndex={10}
+      >
+        <Spinner size="large" color="black" />
+      </View>
+    );
+  };
+
   return (
     <YStack 
       onPress={handlePress}
@@ -194,6 +213,9 @@ export function ListingDashboardCard({
 
         {/* Delete Button */}
         {renderDeleteButton()}
+        
+        {/* Delete Spinner */}
+        {renderDeleteSpinner()}
 
         <View
           position="absolute"
