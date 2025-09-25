@@ -1,9 +1,11 @@
+import { SettlementBottomSheet, SettlementBottomSheetMethods } from "@/components/forms/settlement-bottom-sheet";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useDeleteListing } from "@/hooks/queries/use-dashboard";
 import { ListingPreview } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
+import { useRef } from "react";
 import { Alert } from "react-native";
 import { Spinner, Text, View, YStack } from "tamagui";
 
@@ -17,6 +19,7 @@ interface ListingDashboardCardProps {
   isSelectMode?: boolean;
   isSelected?: boolean;
   onSelect?: (listing: ListingPreviewWithOptionalTimestamp) => void;
+  isSettlementMode?: boolean;
 }
 
 export function ListingDashboardCard({
@@ -24,13 +27,23 @@ export function ListingDashboardCard({
   isSelectMode = false,
   isSelected = false,
   onSelect,
+  isSettlementMode = false,
 }: ListingDashboardCardProps) {
   const deleteMutation = useDeleteListing();
+
+  const settlementBottomSheetRef = useRef<SettlementBottomSheetMethods>(null);
+
+  const handleSettlementPress = () => {
+    settlementBottomSheetRef.current?.present();
+  };
   
   const handlePress = () => {
     if (isSelectMode) {
       // In select mode, toggle selection
       onSelect?.(listing);
+    } else if (isSettlementMode) {
+      // In settlement mode, open settlement bottom sheet
+      handleSettlementPress();
     } else {
       // Normal mode, navigate to listing detail
       router.push(`/listing/${listing.id}` as any);
@@ -252,7 +265,10 @@ export function ListingDashboardCard({
           </Text>
         </View>
       </View>
-      
+
+      {isSettlementMode && (
+        <SettlementBottomSheet ref={settlementBottomSheetRef} id={listing.id} />
+      )}
         
     </YStack>
   );
