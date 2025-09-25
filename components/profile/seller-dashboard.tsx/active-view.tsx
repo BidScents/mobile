@@ -36,7 +36,6 @@ export default function ActiveView({
   
   // Flatten the paginated data
   const flatListings = data?.pages.flatMap(page => page.listings) || [];
-  const totalFound = data?.pages[0]?.pagination_data.found || 0;
 
   // Enable load more after initial render and when we have sufficient data
   useEffect(() => {

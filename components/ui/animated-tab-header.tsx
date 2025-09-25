@@ -134,6 +134,7 @@ export function AnimatedTabHeader({
               paddingVertical="$2"
               textAlign="center"
               lineHeight="$9"
+              hitSlop={20}
             >
               {tab.title}
             </Text>

@@ -7,27 +7,13 @@ import type {
   TransactionResponse,
   UpdateListingRequest
 } from '@bid-scents/shared-sdk'
-import { DashboardService, useAuthStore } from '@bid-scents/shared-sdk'
+import { DashboardService } from '@bid-scents/shared-sdk'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from './query-keys'
 
 // ========================================
 // QUERY HOOKS
 // ========================================
-
-/**
- * Get dashboard data for the current user
- */
-export function useGetUserDashboard() {
-  const { user } = useAuthStore()
-  
-  return useQuery({
-    queryKey: queryKeys.dashboard.user(user?.id || ''),
-    queryFn: () => DashboardService.getUserDashboardV1DashboardGet(),
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
-}
 
 /**
  * Get user's pending auctions with infinite scroll pagination
@@ -56,6 +42,7 @@ export function useSettlementDetails(listingId: string) {
     queryFn: () => DashboardService.getSettlementDetailsV1DashboardAuctionsListingIdGet(listingId),
     enabled: !!listingId,
     staleTime: 1 * 60 * 1000, // 1 minute (more frequent updates for active auctions)
+    refetchOnMount: "always"
   })
 }
 

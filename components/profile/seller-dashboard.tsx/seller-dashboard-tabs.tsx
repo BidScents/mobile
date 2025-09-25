@@ -114,7 +114,7 @@ export default function SellerDashboardTabs({
           />
         );
       case 'pending':
-        return <PendingView />;
+        return <PendingView/>;
       case 'sold':
         return <SoldView />;
       default:
