@@ -36,11 +36,11 @@ export function usePendingAuctions(perPage: number = 20) {
 /**
  * Get settlement details for a specific auction
  */
-export function useSettlementDetails(listingId: string) {
+export function useSettlementDetails(listingId: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKeys.dashboard.settlement(listingId),
     queryFn: () => DashboardService.getSettlementDetailsV1DashboardAuctionsListingIdGet(listingId),
-    enabled: !!listingId,
+    enabled: !!listingId && (options?.enabled ?? true),
     staleTime: 1 * 60 * 1000, // 1 minute (more frequent updates for active auctions)
     refetchOnMount: "always"
   })

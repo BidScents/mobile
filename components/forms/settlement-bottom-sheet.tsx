@@ -69,7 +69,13 @@ export const SettlementBottomSheet = forwardRef<
   SettlementBottomSheetProps
 >(({ id }, ref) => {
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
-  const { data, isLoading, error, refetch } = useSettlementDetails(id);
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // Only fetch data when bottom sheet is open
+  const { data, isLoading, error, refetch } = useSettlementDetails(id, {
+    enabled: isOpen
+  });
+  
   const settleTransaction = useSettleAuctionTransaction();
   const markNoResponse = useMarkNoResponse();
   const [showAllBidders, setShowAllBidders] = useState(false);
@@ -80,9 +86,13 @@ export const SettlementBottomSheet = forwardRef<
 
   useImperativeHandle(ref, () => ({
     present: () => {
+      setIsOpen(true); // Enable data fetching
       bottomSheetRef.current?.present();
     },
-    dismiss: () => bottomSheetRef.current?.dismiss(),
+    dismiss: () => {
+      bottomSheetRef.current?.dismiss();
+      // Keep isOpen true to maintain cached data
+    },
   }));
 
   const clickBidder = (bidderId: string) => {
@@ -129,6 +139,20 @@ export const SettlementBottomSheet = forwardRef<
   };
 
   const renderContent = () => {
+    // Show empty state when not opened yet (no data fetching)
+    if (!isOpen) {
+      return (
+        <YStack
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          padding="$6"
+        >
+          <Text color="$mutedForeground">Opening settlement details...</Text>
+        </YStack>
+      );
+    }
+
     if (isLoading) {
       return (
         <YStack
