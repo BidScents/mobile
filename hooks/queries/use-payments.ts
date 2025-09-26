@@ -14,6 +14,7 @@ import {
   useQuery,
   useQueryClient
 } from "@tanstack/react-query";
+import { Alert } from "react-native";
 import { queryKeys } from "./query-keys";
 import { updateAllMessageCaches } from "./use-messages";
 
@@ -235,6 +236,7 @@ export function useCreateTransaction() {
       
       // You can emit a toast or error event here
       // For now, just log the user-friendly error
+      Alert.alert('Error', errorMessage);
       console.warn('User-friendly error:', errorMessage);
     },
     retry: (failureCount, error: any) => {
@@ -263,6 +265,7 @@ export function useAcceptTransaction() {
       const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to accept transaction';
       
       // You can emit a toast or error event here
+      Alert.alert('Error', errorMessage);
       console.warn('User-friendly error:', errorMessage);
     },
     retry: (failureCount, error: any) => {
