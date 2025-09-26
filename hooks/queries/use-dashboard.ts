@@ -89,7 +89,8 @@ export function useUserTransactions(limit: number = 20) {
   return useInfiniteQuery({
     queryKey: queryKeys.dashboard.transactions,
     queryFn: ({ pageParam }) => {
-      return DashboardService.getUserTransactionsV1DashboardTransactionsGet(pageParam, limit)
+      const cursorToUse = pageParam || new Date().toISOString();
+      return DashboardService.getUserTransactionsV1DashboardTransactionsGet(cursorToUse, limit)
     },
     getNextPageParam: (lastPage: TransactionResponse) => {
       const transactions = lastPage.transactions || []

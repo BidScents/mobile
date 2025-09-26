@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View } from 'tamagui';
 import { AnimatedTabHeader } from '../../ui/animated-tab-header';
 import ActiveView from './active-view';
+import AuctionSettlementView from './auction-settlement-view';
 import FeaturedView from './featured-view';
-import PendingView from './pending-view';
 import { SelectButton } from './select-button';
 import SoldView from './sold-view';
 
@@ -27,7 +27,7 @@ export default function SellerDashboardTabs({
   const tabs: DashboardTab[] = [
     { key: 'active', title: 'Active' },
     { key: 'featured', title: 'Featured' },
-    { key: 'pending', title: 'Pending' },
+    { key: 'auction', title: 'Auction' },
     { key: 'sold', title: 'Sold' },
   ];
 
@@ -113,8 +113,8 @@ export default function SellerDashboardTabs({
             setSelectedListings={setSelectedListings}
           />
         );
-      case 'pending':
-        return <PendingView/>;
+      case 'auction':
+        return <AuctionSettlementView/>;
       case 'sold':
         return <SoldView />;
       default:

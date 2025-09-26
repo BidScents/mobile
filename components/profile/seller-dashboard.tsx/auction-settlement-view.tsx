@@ -15,7 +15,7 @@ const MemoizedListingCardSkeleton = React.memo(ListingCardSkeleton);
 
 const GAP_SIZE = 12; // Same as search results
 
-export default function PendingView() {
+export default function AuctionSettlementView() {
   const [canLoadMore, setCanLoadMore] = useState(false);
   const tabbarHeight = useBottomTabBarHeight();
   const colors = useThemeColors();
