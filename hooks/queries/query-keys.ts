@@ -52,7 +52,13 @@ export const queryKeys = {
       featured: ['dashboard', 'listings', 'featured'] as const,
     }
   },
-  
+
+  orders: {
+    all: ['orders'] as const,
+    pending: ['orders', 'pending'] as const,
+    completed: ['orders', 'completed'] as const,
+  },
+
   notifications: {
     all: ['notifications'] as const,
     list: () => ['notifications', 'list'] as const,
