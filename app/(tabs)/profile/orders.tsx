@@ -1,23 +1,25 @@
+import CompletedView from "@/components/profile/orders/completed-view";
+import PendingView from "@/components/profile/orders/pending-view";
 import { AnimatedTabHeader } from "@/components/ui/animated-tab-header";
 import { Container } from "@/components/ui/container";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useState } from "react";
-import { Text, View } from "tamagui";
+import React, { useState } from "react";
+import { View } from "tamagui";
 
 export default function OrdersScreen() {
   const tabBarHeight = useBottomTabBarHeight();
-  const [activeTabKey, setActiveTabKey] = useState("active");
+  const [activeTabKey, setActiveTabKey] = useState("Pending");
   const tabs = [
-    { key: "active", title: "Active" },
-    { key: "completed", title: "Completed" },
+    { key: "Pending", title: "Pending" },
+    { key: "Bought", title: "Bought" },
   ];
 
   const renderTabContent = (tabKey: string) => {
     switch (tabKey) {
-      case "active":
-        return <Text>Active Tab Content</Text>;
-      case "completed":
-        return <Text>Completed Tab Content</Text>;
+      case "Pending":
+        return <PendingView />;
+      case "Bought":
+        return <CompletedView />;
       default:
         return null;
     }
