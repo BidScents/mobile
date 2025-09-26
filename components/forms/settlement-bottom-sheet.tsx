@@ -202,12 +202,21 @@ export const SettlementBottomSheet = forwardRef<
             size={48}
             color="$mutedForeground"
           />
-          <Text color="$foreground" fontWeight="600" marginTop="$3">
+          <Text fontSize="$6" fontWeight="600" color="$foreground" marginTop="$3">
             No Bids Available
           </Text>
-          <Text color="$mutedForeground" textAlign="center" marginTop="$2">
+          <Text fontSize="$4" color="$mutedForeground" textAlign="center" marginTop="$2">
             There are no remaining bids for this auction.
           </Text>
+          <Button
+            onPress={() => (bottomSheetRef.current?.dismiss(), router.push(`/listing/${id}`))}
+            size="md"
+            variant="primary"
+            marginTop="$7"
+            fullWidth
+          >
+            Go to Listing
+          </Button>
         </YStack>
       );
     }
@@ -218,9 +227,21 @@ export const SettlementBottomSheet = forwardRef<
       <YStack gap="$4" padding="$4" paddingBottom="$5">
         {/* Header */}
         <YStack gap="$2">
+          <XStack alignItems="center" justifyContent="space-between" gap="$2">
           <Text fontSize="$7" fontWeight="600" color="$foreground">
             Auction Settlement
           </Text>
+          <XStack alignItems="center" hitSlop={20} backgroundColor="$muted" paddingHorizontal="$2" paddingVertical="$1.5" borderRadius="$6" gap="$2" onPress={() => (bottomSheetRef.current?.dismiss(), router.push(`/listing/${id}`))}>
+            <Text fontSize="$3" fontWeight="500" color="$foreground">
+              Go to Listing
+            </Text>
+            <ThemedIonicons
+              name="navigate-circle"
+              size={18}
+              color="$mutedForeground"
+            />
+          </XStack>
+          </XStack>
           <Text color="$mutedForeground" fontSize="$4" lineHeight="$5">
             {hasActiveSettlement
               ? "Manage active settlement with highest bidder."
@@ -234,8 +255,6 @@ export const SettlementBottomSheet = forwardRef<
             gap="$1"
             padding="$3"
             borderRadius="$6"
-            borderWidth={1}
-            borderColor="$border"
           >
             <XStack alignItems="center" gap="$2">
               <ThemedIonicons
