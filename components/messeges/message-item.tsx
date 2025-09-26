@@ -136,7 +136,6 @@ const MessageItemComponent = ({
             <SystemReviewMessage
               content={message.content as RichSubmitReviewActionContent}
               isBuyer={isBuyerSystem}
-              isSeller={isCurrentUser}
               messageId={message.id}
               message={message}
             />

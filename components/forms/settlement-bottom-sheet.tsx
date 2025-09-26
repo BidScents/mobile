@@ -214,6 +214,7 @@ export const SettlementBottomSheet = forwardRef<
             variant="primary"
             marginTop="$7"
             fullWidth
+            borderRadius="$5"
           >
             Go to Listing
           </Button>
