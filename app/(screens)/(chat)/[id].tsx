@@ -2,12 +2,13 @@ import { ChatInputBar } from "@/components/messeges/chat-input-bar";
 import { MessagesList } from "@/components/messeges/messages-list";
 import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
+import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useConversation, useConversationSummary, useUpdateLastRead } from "@/hooks/queries/use-messages";
 import { ConversationSummary, UserPreview, useAuthStore } from "@bid-scents/shared-sdk";
-import { useFocusEffect, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
-import { Text, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
 
 export default function SpecificChatScreen() {
@@ -17,6 +18,7 @@ export default function SpecificChatScreen() {
   const { data: conversationSummary } = useConversationSummary();
   const { data: conversation, isLoading, error, refetch } = useConversation(id as string);
   const { user } = useAuthStore();
+
 
   // Update header title when conversation data is available
   useEffect(() => {
@@ -30,7 +32,27 @@ export default function SpecificChatScreen() {
           (participant: UserPreview) => participant.id !== user.id
         );
         
-        navigation.setOptions({ title: otherParticipant?.username || "Chat" });
+        navigation.setOptions({ title: otherParticipant?.username || "Chat", headerRight: () => (
+          <XStack 
+            alignItems="center" 
+            hitSlop={20} 
+            backgroundColor="$muted" 
+            paddingHorizontal="$2" 
+            paddingVertical="$1.5" 
+            borderRadius="$5" 
+            gap="$2" 
+            onPress={() => router.push(`/profile/${otherParticipant?.id}`)}
+          >
+            <Text fontSize="$3" fontWeight="500" color="$foreground">
+             View Store
+            </Text>
+            <ThemedIonicons
+              name="navigate-circle"
+              size={18}
+              color="$mutedForeground"
+            />
+        </XStack>
+        )});
       }
     }
   }, [conversationSummary, id, navigation, user?.id]);
