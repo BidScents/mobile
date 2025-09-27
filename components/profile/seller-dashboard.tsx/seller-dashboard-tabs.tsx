@@ -130,6 +130,7 @@ export default function SellerDashboardTabs({
         tabs={tabs}
         activeTabKey={activeTabKey}
         onTabPress={handleTabPress}
+        headerProps={{ marginTop: "$2", fontSize: "$5", paddingHorizontal: "$3" }}
       />
 
       {/* Tab Content */}

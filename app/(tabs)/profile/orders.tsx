@@ -31,7 +31,7 @@ export default function OrdersScreen() {
         tabs={tabs}
         activeTabKey={activeTabKey}
         onTabPress={(tabKey) => setActiveTabKey(tabKey)}
-        headerProps={{ marginTop: "0" }}
+        headerProps={{ marginTop: "0", fontSize: "$6", fontWeight: "500", paddingHorizontal: "$0" }}
       />
 
       <View flex={1} marginBottom={tabBarHeight} paddingHorizontal="$3">
