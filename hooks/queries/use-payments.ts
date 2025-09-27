@@ -19,6 +19,45 @@ import { queryKeys } from "./query-keys";
 import { updateAllMessageCaches } from "./use-messages";
 
 // ========================================
+// ERROR HANDLING HELPERS
+// ========================================
+
+/**
+ * Maps boost-related errors to user-friendly messages
+ * Removes internal listing IDs and provides actionable feedback
+ */
+function getBoostErrorMessage(error: any): string {
+  const status = error?.response?.status;
+  const detail = error?.response?.data?.detail || '';
+
+  // Network or server errors
+  if (!status || status >= 500) {
+    return 'Connection issue. Please check your internet and try again.';
+  }
+
+  // Client errors - map based on status and detail patterns
+  switch (status) {
+    case 404:
+      return "One of your listings couldn't be found. Please refresh and try again.";
+    
+    case 403:
+      return "You can only boost listings that you own.";
+    
+    case 400:
+      if (detail.includes('is not active')) {
+        return "Some of your listings are no longer active and can't be boosted.";
+      }
+      if (detail.includes('swap listing')) {
+        return "Swap listings cannot be boosted. Only sale listings can be promoted.";
+      }
+      return "Unable to boost listing. Please check your listing status and try again.";
+    
+    default:
+      return "Unable to boost listing right now. Please try again later.";
+  }
+}
+
+// ========================================
 // LISTING BOOST MUTATIONS
 // ========================================
 
@@ -28,11 +67,12 @@ import { updateAllMessageCaches } from "./use-messages";
  */
 export function useBoostListing() {
   const queryClient = useQueryClient();
+  
 
   return useMutation({
     mutationFn: (boostRequest: BoostRequest) =>
       PaymentsService.boostListingV1PaymentsBoostPost(boostRequest),
-    onSuccess: (response: PaymentResponse, boostRequest: BoostRequest) => {
+    onSuccess: async (response: PaymentResponse, boostRequest: BoostRequest) => {
       // Invalidate listing details for all boosted listings
       Object.values(boostRequest.boosts).flat().forEach((listingId) => {
         queryClient.invalidateQueries({
@@ -49,6 +89,22 @@ export function useBoostListing() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.homepage,
       });
+
+      // Refresh auth state to update payment details
+      try {
+        await AuthService.refreshCurrentUser();
+      } catch (error) {
+        console.error('Failed to refresh user after payment method update:', error);
+      }
+    },
+    onError: (error: any) => {
+      console.error('Failed to boost listing:', error);
+      
+      // Get user-friendly error message without exposing listing IDs
+      const userMessage = getBoostErrorMessage(error);
+      
+      Alert.alert('Error', userMessage);
+      console.warn('User-friendly boost error:', userMessage);
     },
   });
 }
