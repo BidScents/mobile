@@ -2,10 +2,9 @@ import type {
   EditProfileRequest,
   FollowerFollowingResponse,
   ListingSearchRequest,
-  ProfileTab,
   ReviewSearchRequest
 } from '@bid-scents/shared-sdk'
-import { ProfileService, ReviewSortField, useAuthStore } from '@bid-scents/shared-sdk'
+import { ProfileResponse, ProfileService, ProfileTab, ReviewSortField, useAuthStore } from '@bid-scents/shared-sdk'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from './query-keys'
 
@@ -14,8 +13,8 @@ import { queryKeys } from './query-keys'
 // ========================================
 
 /**
-* Profile detail query - gets ONLY profile details (no content data)
-* Content data should use dedicated hooks below
+* Profile detail query - gets complete profile response including initial listing data
+* This provides initial data for the infinite listing queries
 */
 export function useProfileDetail(userId: string) {
 return useQuery({
@@ -23,11 +22,8 @@ return useQuery({
   queryFn: () => ProfileService.getProfileV1ProfileUserIdGet(userId),
   staleTime: 5 * 60 * 1000, // 5 minutes
   enabled: !!userId,
-  select: (data) => ({
-    // Extract only the profile details, completely ignore all content data
-    profile: data.profile
-    // Explicitly NOT including: active_listings, featured_listings, sold_listings, reviews
-  })
+  refetchOnMount: "always",
+  // Return complete ProfileResponse to provide initial data for listings
 })
 }
 
@@ -48,13 +44,15 @@ return useQuery({
 // ========================================
 
 /**
-* Enhanced profile listings hook with sort support
+* Enhanced profile listings hook with sort support and initial data from profile detail
 */
 export function useProfileListings(
 userId: string,
 tab: ProfileTab,
 sortParams?: Partial<ListingSearchRequest>
 ) {
+const queryClient = useQueryClient()
+
 const searchRequest: ListingSearchRequest = {
   page: 1,
   per_page: 20,
@@ -67,14 +65,69 @@ const searchRequest: ListingSearchRequest = {
 
 return useInfiniteQuery({
   queryKey: queryKeys.profile.listings(userId, tab, searchRequest),
-  queryFn: ({ pageParam = 1 }) => {
-    const requestWithPage = { ...searchRequest, page: pageParam };
-    
-    return ProfileService.getUserListingsV1ProfileUserIdTabNamePost(
-      userId,
-      tab,
-      requestWithPage
-    );
+  queryFn: async ({ pageParam = 1 }) => {
+    try {
+      // First page: check cache first, then fetch if needed (messages pattern)
+      if (pageParam === 1) {
+        // Check if profile data is already cached
+        const cachedProfileData: ProfileResponse | undefined = queryClient.getQueryData(queryKeys.profile.detail(userId))
+        
+        if (cachedProfileData) {
+          // Extract the specific tab data from cache
+          let tabData
+          switch (tab) {
+            case ProfileTab.ACTIVE:
+              tabData = cachedProfileData.active_listings
+              break
+            case ProfileTab.FEATURED:
+              tabData = cachedProfileData.featured_listings
+              break
+            case ProfileTab.SOLD:
+              tabData = cachedProfileData.sold_listings
+              break
+            default:
+              tabData = null
+          }
+          
+          return tabData || { listings: [], pagination_data: { page: 1, total_pages: 1 } }
+        }
+        
+        // If not cached, fetch from profile endpoint
+        const profileData = await ProfileService.getProfileV1ProfileUserIdGet(userId)
+        
+        // Cache the complete profile data for other queries
+        queryClient.setQueryData(queryKeys.profile.detail(userId), profileData)
+        
+        // Extract the specific tab data
+        let tabData
+        switch (tab) {
+          case ProfileTab.ACTIVE:
+            tabData = profileData.active_listings
+            break
+          case ProfileTab.FEATURED:
+            tabData = profileData.featured_listings
+            break
+          case ProfileTab.SOLD:
+            tabData = profileData.sold_listings
+            break
+          default:
+            tabData = null
+        }
+        
+        return tabData || { listings: [], pagination_data: { page: 1, total_pages: 1 } }
+      }
+      
+      // Subsequent pages: use dedicated listing endpoint
+      const requestWithPage = { ...searchRequest, page: pageParam }
+      return ProfileService.getUserListingsV1ProfileUserIdTabNamePost(
+        userId,
+        tab,
+        requestWithPage
+      )
+    } catch (error) {
+      console.error('useProfileListings queryFn error:', { userId, tab, pageParam, error })
+      throw error
+    }
   },
   getNextPageParam: (lastPage) => {
     const { page, total_pages } = lastPage.pagination_data
