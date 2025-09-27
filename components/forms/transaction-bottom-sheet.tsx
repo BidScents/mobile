@@ -7,6 +7,7 @@ import { useProfileListings } from "@/hooks/queries/use-profile";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import {
   ListingCard,
+  ListingType,
   ProfileTab,
   TransactionRequest,
   useAuthStore,
@@ -15,7 +16,7 @@ import FastImage from "@d11/react-native-fast-image";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FlashList } from "@shopify/flash-list";
+import { LegendList } from "@legendapp/list";
 import * as Haptics from "expo-haptics";
 import React, {
   forwardRef,
@@ -25,14 +26,17 @@ import React, {
   useState,
 } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { ActivityIndicator, Alert, StyleSheet, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Alert, Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import {
+  Card,
   Text,
   View,
   XStack,
   YStack
 } from "tamagui";
 import { z } from "zod";
+
+const GAP_SIZE = 12; // Same as active-view.tsx
 
 // Transaction form validation schema
 const transactionFormSchema = z.object({
@@ -93,6 +97,10 @@ export const TransactionBottomSheet = forwardRef<
   const allListings = useMemo(() => {
     return listingsData?.pages.flatMap(page => page.listings) || [];
   }, [listingsData]);
+
+  const formatVolume = (volume: number, percentage: number): string => {
+    return `${percentage}% full • ${volume}ml`;
+  };
 
   // Form setup
   const {
@@ -169,47 +177,120 @@ export const TransactionBottomSheet = forwardRef<
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const renderListingItem = ({ item: listing }: { item: ListingCard }) => {
+  const getListingTypeBadge = (listingType: ListingType) => {
+    switch (listingType) {
+      case ListingType.FIXED_PRICE:
+        return "Fixed Price";
+      case ListingType.NEGOTIABLE:
+        return "Negotiable";
+      case ListingType.AUCTION:
+        return "Auction";
+      case ListingType.SWAP:
+        return "Swap";
+      default:
+        return "Buy Now";
+    }
+  };
+
+  const renderHeader = (listing: ListingCard) => {
+    const badge = getListingTypeBadge(listing.listing_type);
     return (
-        <XStack
-          alignItems="center"
-          gap="$3"
-          borderRadius="$4"
-          backgroundColor="$muted"
-          padding="$3"
-          marginVertical="$1"
-          pressStyle={{ opacity: 0.7, scale: 0.98 }}
+      <XStack
+        position="absolute"
+        top="$2"
+        left="$2"
+        backgroundColor="$muted"
+        alignItems="center"
+        borderRadius="$4"
+        paddingHorizontal="$2"
+        paddingVertical="$1"
+      >
+        <Text fontSize="$1" fontWeight="500" color="$foreground">
+          {badge}
+        </Text>
+      </XStack>
+    );
+  };
+
+  const formatPrice = (price: number): string => {
+    return `${currency} ${price.toFixed(0)}`;
+  };
+
+  const renderListingItem = ({ item: listing, index }: { item: ListingCard; index: number }) => {
+    const isLeftColumn = index % 2 === 0;
+    
+    return (
+      <View
+        style={{
+          paddingLeft: isLeftColumn ? 0 : GAP_SIZE / 2,
+          paddingRight: isLeftColumn ? GAP_SIZE / 2 : 0,
+          paddingBottom: GAP_SIZE,
+        }}
+      >
+        <Card
+          size="$3"
+          backgroundColor="$background"
+          borderRadius="$5"
+          pressStyle={{ opacity: 0.95, scale: 0.98 }}
           onPress={() => handleListingSelect(listing)}
+          flex={1}
         >
-          {listing.image_url && (
-            <FastImage
-              source={{ uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${listing.image_url}` }}
-              style={{
-                width: 60,
-                height: 60,
-                borderRadius: 10,
-              }}
-            />
-          )}
-          <YStack flex={1} gap="$1">
-            <Text fontSize="$4" fontWeight="600" color="$foreground">
-              {listing.name}
-            </Text>
-            <Text fontSize="$5" fontWeight="600" color="$foreground">
-              {currency} {listing.price.toFixed(2)}
-            </Text>
+          <YStack gap="$2" padding="$2">
+            {/* Product Image */}
+            <YStack position="relative">
+              {listing.image_url && process.env.EXPO_PUBLIC_IMAGE_BASE_URL ? (
+                <FastImage
+                  source={{
+                    uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${listing.image_url}`,
+                  }}
+                  style={{
+                    width: "100%",
+                    aspectRatio: 1,
+                    borderRadius: 8,
+                  }}
+                />
+              ) : (
+                <YStack
+                  width="100%"
+                  aspectRatio={1}
+                  borderRadius="$4"
+                  backgroundColor="$gray2"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Text color="$mutedForeground" fontSize="$2">No Image</Text>
+                </YStack>
+              )}
+              {renderHeader(listing)}
+            </YStack>
+
+            {/* Product Info */}
+            <YStack gap="$1" flex={1}>
+              <Text
+                fontSize="$3"
+                fontWeight="500"
+                numberOfLines={1}
+                color="$foreground"
+              >
+                {listing.name}
+              </Text>
+
+              <Text fontSize="$2" color="$mutedForeground" numberOfLines={1}>
+                {formatVolume(listing.volume, listing.remaining_percentage)}
+              </Text>
+
+              <Text fontSize="$3" fontWeight="600" color="$foreground">
+                {formatPrice(listing.price)}
+              </Text>
+            </YStack>
           </YStack>
-          <ThemedIonicons
-            name="chevron-forward"
-            size={20}
-            color="mutedForeground"
-          />
-        </XStack>
+        </Card>
+      </View>
     );
   };
 
   const renderListingSelection = () => (
-    <YStack gap="$4" padding="$4" flex={1}>
+    <YStack gap="$4" padding="$4" paddingBottom="$5" flex={1}>
       {/* Header */}
       <YStack gap="$2">
         <Text fontSize="$7" fontWeight="600" color="$foreground">
@@ -241,18 +322,22 @@ export const TransactionBottomSheet = forwardRef<
             </Text>
           </View>
         ) : (
-          <FlashList
+          <LegendList
             data={allListings}
             renderItem={renderListingItem}
-            estimatedItemSize={80}
+            estimatedItemSize={220}
+            numColumns={2}
             onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.1}
+            onEndReachedThreshold={0.3}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
+            recycleItems
+            drawDistance={500}
             ListFooterComponent={
               isFetchingNextPage ? (
-                <View padding="$3" alignItems="center">
-                  <ActivityIndicator size="small" />
+                <View paddingVertical="$4" flexDirection="row" style={{ gap: GAP_SIZE }}>
+                  <View style={{ flex: 1, height: 200, backgroundColor: "$muted", borderRadius: 8 }} />
+                  <View style={{ flex: 1, height: 200, backgroundColor: "$muted", borderRadius: 8 }} />
                 </View>
               ) : null
             }
@@ -260,19 +345,22 @@ export const TransactionBottomSheet = forwardRef<
         )}
       </YStack>
 
-      <Button
-        onPress={() => bottomSheetRef.current?.dismiss()}
-        variant="secondary"
-        size="lg"
-        borderRadius="$10"
-      >
-        Cancel
-      </Button>
+      <YStack gap="$3" marginTop="$2">
+        <Button
+          onPress={() => bottomSheetRef.current?.dismiss()}
+          variant="secondary"
+          size="lg"
+          borderRadius="$5"
+        >
+          Cancel
+        </Button>
+      </YStack>
     </YStack>
   );
 
   const renderTransactionForm = () => (
-    <YStack gap="$4" padding="$4">
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <YStack gap="$4" padding="$4" paddingBottom="$5">
       {/* Header with back button */}
       <XStack alignItems="center" gap="$3">
         <TouchableOpacity onPress={handleBackToListings}>
@@ -290,143 +378,235 @@ export const TransactionBottomSheet = forwardRef<
 
       {/* Selected Listing Preview */}
       {selectedListing && (
-        <XStack
-          alignItems="center"
-          gap="$3"
-          borderRadius="$4"
-          backgroundColor="$muted"
-          padding="$3"
-        >
-          {selectedListing.image_url && (
-            <FastImage
-              source={{ uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${selectedListing.image_url}` }}
-              style={{
-                width: 50,
-                height: 50,
-                borderRadius: 10,
-              }}
-            />
-          )}
-          <YStack flex={1}>
-            <Text fontSize="$4" fontWeight="600" color="$foreground">
-              {selectedListing.name}
+        <YStack gap="$3">
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text fontSize="$5" fontWeight="600" color="$foreground">
+              Selected Listing
             </Text>
-            <Text fontSize="$3" color="$mutedForeground">
-              Original: {currency} {selectedListing.price.toFixed(2)}
-            </Text>
-          </YStack>
-        </XStack>
+            <View
+              backgroundColor="$muted"
+              borderRadius="$5"
+              paddingHorizontal="$2"
+              paddingVertical="$1.5"
+            >
+              <Text fontSize="$2" fontWeight="500" color="$foreground">
+                {getListingTypeBadge(selectedListing.listing_type)}
+              </Text>
+            </View>
+          </XStack>
+          
+          <XStack padding="$4" backgroundColor="$muted" borderRadius="$6" alignItems="center" gap="$3">
+            {selectedListing.image_url ? (
+              <FastImage
+                source={{ uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${selectedListing.image_url}` }}
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 12,
+                }}
+              />
+            ) : (
+              <YStack
+                width={60}
+                height={60}
+                borderRadius="$4"
+                backgroundColor="$gray2"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Text color="$mutedForeground" fontSize="$2">No Image</Text>
+              </YStack>
+            )}
+            <YStack flex={1} gap="$1">
+              <Text fontSize="$4" fontWeight="600" color="$foreground" numberOfLines={1}>
+                {selectedListing.name}
+              </Text>
+              <Text fontSize="$3" color="$mutedForeground">
+                {formatVolume(selectedListing.volume, selectedListing.remaining_percentage)}
+              </Text>
+              <Text fontSize="$3" color="$mutedForeground">
+                Original: {currency} {selectedListing.price.toFixed(2)}
+              </Text>
+            </YStack>
+          </XStack>
+        </YStack>
       )}
 
-      {/* Price Input */}
-      <YStack gap="$2">
-        <Text fontSize="$4" fontWeight="500" color="$foreground">
-          Unit Price
-        </Text>
-        <Controller
-          control={control}
-          name="unit_price"
-          render={({ field: { onChange, value } }) => (
-            <BottomSheetTextInput
-              style={[
-                styles.textInput,
-                {
-                  backgroundColor: colors.muted,
-                  color: colors.foreground,
-                },
-              ]}
-              placeholder="0.00"
-              placeholderTextColor={colors.placeholder}
-              value={value?.toString() || ""}
-              onChangeText={(text) => {
-                const numValue = parseFloat(text) || 0;
-                onChange(numValue);
-              }}
-              keyboardType="decimal-pad"
-            />
-          )}
-        />
-        {errors.unit_price && (
-          <Text color="$red10" fontSize="$3">
-            {errors.unit_price.message}
+      {/* Form Inputs */}
+      <YStack gap="$4">
+        {/* Price Input */}
+        <YStack gap="$2">
+          <Text fontSize="$4" fontWeight="500" color="$foreground">
+            Unit Price
           </Text>
-        )}
-      </YStack>
+          <Controller
+            control={control}
+            name="unit_price"
+            render={({ field: { onChange, value } }) => (
+              <View
+                borderRadius="$4"
+                backgroundColor="$muted"
+                borderWidth={1}
+                borderColor={errors.unit_price ? "$red8" : "transparent"}
+              >
+                <BottomSheetTextInput
+                  style={[
+                    styles.textInput,
+                    {
+                      backgroundColor: "transparent",
+                      color: colors.foreground,
+                    },
+                  ]}
+                  placeholder="0.00"
+                  placeholderTextColor={colors.placeholder}
+                  value={value?.toString() || ""}
+                  onChangeText={(text) => {
+                    if (text === "") {
+                      // Allow empty field temporarily
+                      onChange("");
+                    } else {
+                      const numValue = parseFloat(text);
+                      if (!isNaN(numValue)) {
+                        onChange(numValue);
+                      }
+                    }
+                  }}
+                  onBlur={() => {
+                    // Set minimum value on blur if empty
+                    if (!value || value < 0.01) {
+                      onChange(0.01);
+                    }
+                  }}
+                  keyboardType="decimal-pad"
+                />
+              </View>
+            )}
+          />
+          {errors.unit_price && (
+            <Text color="$red10" fontSize="$3">
+              {errors.unit_price.message}
+            </Text>
+          )}
+        </YStack>
 
-      {/* Quantity Input */}
-      <YStack gap="$2">
-        <Text fontSize="$4" fontWeight="500" color="$foreground">
-          Quantity
-        </Text>
-        <Controller
-          control={control}
-          name="quantity"
-          render={({ field: { onChange, value } }) => (
-            <BottomSheetTextInput
-              style={[
-                styles.textInput,
-                {
-                  backgroundColor: colors.muted,
-                  color: colors.foreground,
-                },
-              ]}
-              placeholder="1"
-              placeholderTextColor={colors.placeholder}
-              value={value?.toString() || ""}
-              onChangeText={(text) => {
-                const numValue = parseInt(text) || 1;
-                onChange(numValue);
-              }}
-              keyboardType="number-pad"
-            />
-          )}
-        />
-        {errors.quantity && (
-          <Text color="$red10" fontSize="$3">
-            {errors.quantity.message}
+        {/* Quantity Input */}
+        <YStack gap="$2">
+          <Text fontSize="$4" fontWeight="500" color="$foreground">
+            Quantity
           </Text>
-        )}
+          <Controller
+            control={control}
+            name="quantity"
+            render={({ field: { onChange, value } }) => (
+              <View
+                borderRadius="$4"
+                backgroundColor="$muted"
+                borderWidth={1}
+                borderColor={errors.quantity ? "$red8" : "transparent"}
+              >
+                <BottomSheetTextInput
+                  style={[
+                    styles.textInput,
+                    {
+                      backgroundColor: "transparent",
+                      color: colors.foreground,
+                    },
+                  ]}
+                  placeholder="1"
+                  placeholderTextColor={colors.placeholder}
+                  value={value?.toString() || ""}
+                  onChangeText={(text) => {
+                    if (text === "") {
+                      // Allow empty field temporarily
+                      onChange("");
+                    } else {
+                      const numValue = parseInt(text);
+                      if (!isNaN(numValue)) {
+                        onChange(numValue);
+                      }
+                    }
+                  }}
+                  onBlur={() => {
+                    // Set minimum value on blur if empty
+                    if (!value || value < 1) {
+                      onChange(1);
+                    }
+                  }}
+                  keyboardType="number-pad"
+                />
+              </View>
+            )}
+          />
+          {errors.quantity && (
+            <Text color="$red10" fontSize="$3">
+              {errors.quantity.message}
+            </Text>
+          )}
+        </YStack>
       </YStack>
 
       {/* Total Preview */}
-      <View
-        backgroundColor="$muted"
-        borderRadius="$6"
-        padding="$3"
-      >
-        <XStack justifyContent="space-between" alignItems="center">
-          <Text fontSize="$5" fontWeight="500" color="$foreground">
-            Total Amount
-          </Text>
-          <Text fontSize="$6" fontWeight="600" color="$foreground">
-            {currency + " " + ((watchedValues.unit_price || 0) * (watchedValues.quantity || 1)).toFixed(2)}
-          </Text>
-        </XStack>
-      </View>
+      <YStack gap="$3">
+        <Text fontSize="$6" fontWeight="600" color="$foreground">
+          Transaction Summary
+        </Text>
+        <YStack gap="$2" padding="$3" backgroundColor="$muted" borderRadius="$5">
+          <XStack justifyContent="space-between" alignItems="center">
+            <Text fontSize="$4" color="$mutedForeground">
+              Unit Price
+            </Text>
+            <Text fontSize="$4" fontWeight="500" color="$foreground">
+              {currency} {(watchedValues.unit_price || 0).toFixed(2)}
+            </Text>
+          </XStack>
+          
+          <XStack justifyContent="space-between" alignItems="center">
+            <Text fontSize="$4" color="$mutedForeground">
+              Quantity
+            </Text>
+            <Text fontSize="$4" fontWeight="500" color="$foreground">
+              {watchedValues.quantity || 1}
+            </Text>
+          </XStack>
+          
+          <XStack justifyContent="space-between" alignItems="center" marginVertical="$1">
+            <Text fontSize="$5" fontWeight="600" color="$foreground">
+              Total Amount
+            </Text>
+            <Text fontSize="$5" fontWeight="600" color="$green11">
+              {currency} {((watchedValues.unit_price || 0) * (watchedValues.quantity || 1)).toFixed(2)}
+            </Text>
+          </XStack>
+        </YStack>
+      </YStack>
 
       {/* Action Buttons */}
-      <Button
-        onPress={handleSubmit(onSubmitTransaction)}
-        variant="primary"
-        size="lg"
-        borderRadius="$10"
-        disabled={createTransactionMutation.isPending}
-      >
-        {createTransactionMutation.isPending ? (
-          <ActivityIndicator color="white" size="small" />
-        ) : (
-          "Create Transaction"
-        )}
-      </Button>
-    </YStack>
+      <YStack gap="$3" marginTop="$2">
+        <Button
+          onPress={handleSubmit(onSubmitTransaction)}
+          variant="primary"
+          size="lg"
+          borderRadius="$5"
+          disabled={createTransactionMutation.isPending}
+        >
+          {createTransactionMutation.isPending ? (
+            <XStack alignItems="center" gap="$2">
+              <ActivityIndicator color="white" size="small" />
+              <Text color="white" fontWeight="600">Creating...</Text>
+            </XStack>
+          ) : (
+            "Create Transaction"
+          )}
+        </Button>
+      </YStack>
+      </YStack>
+    </TouchableWithoutFeedback>
   );
 
   return (
     <BottomSheet 
       ref={bottomSheetRef} 
-      snapPoints={currentView === "listing-selection" ? ["65%"] : ["60%"]}
       enableDynamicSizing={true}
-      keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
     >
       {currentView === "listing-selection" 
