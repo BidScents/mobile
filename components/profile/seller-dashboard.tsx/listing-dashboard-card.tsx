@@ -1,7 +1,7 @@
 import { SettlementBottomSheet, SettlementBottomSheetMethods } from "@/components/forms/settlement-bottom-sheet";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useDeleteListing } from "@/hooks/queries/use-dashboard";
-import { ListingCard } from "@bid-scents/shared-sdk";
+import { ListingCard, ListingType } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -28,7 +28,7 @@ export function ListingDashboardCard({
   featured_until,
 }: ListingDashboardCardProps) {
   const deleteMutation = useDeleteListing();
-
+  const isSwap = listing.listing_type === ListingType.SWAP;
   const settlementBottomSheetRef = useRef<SettlementBottomSheetMethods>(null);
 
   const handleSettlementPress = () => {
@@ -37,8 +37,12 @@ export function ListingDashboardCard({
   
   const handlePress = () => {
     if (isSelectMode) {
-      // In select mode, toggle selection
-      onSelect?.(listing);
+      if(isSwap) {
+        Alert.alert("Swap Listings", "Cant boost swap listings.");
+      } else {
+        // In select mode, toggle selection
+        onSelect?.(listing);
+      }
     } else if (isSettlementMode) {
       // In settlement mode, open settlement bottom sheet
       handleSettlementPress();
@@ -87,12 +91,12 @@ export function ListingDashboardCard({
   };
 
   const getCardOpacity = () => {
-    if (!isSelectMode) return 1;
+    if (!isSelectMode || isSwap) return 1;
     return isSelected ? 1 : 0.7;
   };
 
   const renderSelectionIcon = () => {
-    if (!isSelectMode) return null;
+    if (!isSelectMode || isSwap) return null;
 
     return (
       <View
