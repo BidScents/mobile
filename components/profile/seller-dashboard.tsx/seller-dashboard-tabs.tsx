@@ -1,7 +1,8 @@
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useNavigation } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'tamagui';
+import { BoostBottomSheet, BoostBottomSheetMethods } from '../../forms/boost-bottom-sheet';
 import { AnimatedTabHeader } from '../../ui/animated-tab-header';
 import ActiveView from './active-view';
 import AuctionSettlementView from './auction-settlement-view';
@@ -30,6 +31,8 @@ export default function SellerDashboardTabs({
     { key: 'auction', title: 'Auction' },
     { key: 'sold', title: 'Sold' },
   ];
+
+  const boostBottomSheetRef = useRef<BoostBottomSheetMethods>(null);
 
   // State management
   const [activeTabKey, setActiveTabKey] = useState(initialTab || tabs[0]?.key || '');
@@ -66,12 +69,10 @@ export default function SellerDashboardTabs({
     } else {
       // Boost selected listings
       console.log('Boost listings:', Array.from(selectedListings));
-      // TODO: Implement boost functionality
+      boostBottomSheetRef.current?.present();
       // Reset state after boost
-      setIsSelectMode(false);
-      setSelectedListings(new Set());
     }
-  }, [isSelectMode, selectedListings.size]);
+  }, [isSelectMode, selectedListings, boostBottomSheetRef]);
 
   // Update header right button based on active tab and selection state
   useEffect(() => {
@@ -145,6 +146,14 @@ export default function SellerDashboardTabs({
           </View>
         ))}
       </View>
+
+      <BoostBottomSheet 
+        ref={boostBottomSheetRef} 
+        tabKey={activeTabKey} 
+        selectedListings={selectedListings}
+        setSelectedListings={setSelectedListings} 
+        setIsSelectMode={setIsSelectMode} 
+      />  
     </View>
   );
 }
