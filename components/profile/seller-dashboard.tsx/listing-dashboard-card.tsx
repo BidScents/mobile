@@ -1,7 +1,7 @@
 import { SettlementBottomSheet, SettlementBottomSheetMethods } from "@/components/forms/settlement-bottom-sheet";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useDeleteListing } from "@/hooks/queries/use-dashboard";
-import { ListingPreview } from "@bid-scents/shared-sdk";
+import { ListingCard } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -9,17 +9,14 @@ import { useRef } from "react";
 import { Alert } from "react-native";
 import { Spinner, Text, View, YStack } from "tamagui";
 
-// Union type to handle both listing types
-type ListingPreviewWithOptionalTimestamp = ListingPreview & {
-  featured_until?: string;
-};
 
 interface ListingDashboardCardProps {
-  listing: ListingPreviewWithOptionalTimestamp;
+  listing: ListingCard;
   isSelectMode?: boolean;
   isSelected?: boolean;
-  onSelect?: (listing: ListingPreviewWithOptionalTimestamp) => void;
+  onSelect?: (listing: ListingCard) => void;
   isSettlementMode?: boolean;
+  featured_until?: string;
 }
 
 export function ListingDashboardCard({
@@ -28,6 +25,7 @@ export function ListingDashboardCard({
   isSelected = false,
   onSelect,
   isSettlementMode = false,
+  featured_until,
 }: ListingDashboardCardProps) {
   const deleteMutation = useDeleteListing();
 
@@ -236,7 +234,7 @@ export function ListingDashboardCard({
           left="$2"
           gap="$2"
         >
-          {listing.featured_until && (
+          {featured_until && (
             <Text
               borderRadius="$5"
               fontSize="$3" 
@@ -247,7 +245,7 @@ export function ListingDashboardCard({
               paddingHorizontal="$2"
               paddingVertical="$1.5"
             >
-              {formatFeaturedUntil(listing.featured_until)}
+              {formatFeaturedUntil(featured_until)}
             </Text>
           )}
           <Text
@@ -259,7 +257,7 @@ export function ListingDashboardCard({
             backgroundColor="$muted"
             paddingHorizontal="$2"
             paddingVertical="$1.5"
-            marginBottom={listing.featured_until ? "$1" : 0}
+            marginBottom={featured_until ? "$1" : 0}
           >
             {listing.name}
           </Text>

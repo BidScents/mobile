@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ThemedIonicons } from '@/components/ui/themed-icons';
 import { useFeaturedListings } from '@/hooks/queries/use-dashboard';
 import { useThemeColors } from '@/hooks/use-theme-colors';
+import { ListingCard, ListingCardWithTimestamp } from '@bid-scents/shared-sdk';
 import { LegendList } from '@legendapp/list';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -34,7 +35,6 @@ export default function FeaturedView({
   
   // Flatten the paginated data
   const flatListings = data?.pages.flatMap(page => page.listings) || [];
-  const totalFound = data?.pages[0]?.pagination_data.found || 0;
 
   // Enable load more after initial render and when we have sufficient data
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function FeaturedView({
   }, [refetch]);
 
   // Handle listing selection
-  const handleListingSelect = useCallback((listing: any) => {
+  const handleListingSelect = useCallback((listing: ListingCard) => {
     setSelectedListings(prev => {
       const newSet = new Set(prev);
       if (newSet.has(listing.id)) {
@@ -72,9 +72,9 @@ export default function FeaturedView({
   }, [setSelectedListings]);
 
   // Render listing item
-  const renderListingItem = useCallback(({ item, index }: { item: any, index: number }) => {
+  const renderListingItem = useCallback(({ item, index }: { item: ListingCardWithTimestamp, index: number }) => {
     const isLeftColumn = index % 2 === 0;
-    const isSelected = selectedListings.has(item.id);
+    const isSelected = selectedListings.has(item.listing.id);
     
     return (
       <View 
@@ -85,10 +85,11 @@ export default function FeaturedView({
         }}
       >
         <MemoizedListingCard 
-          listing={item} 
+          listing={item.listing} 
           isSelectMode={isSelectMode}
           isSelected={isSelected}
           onSelect={handleListingSelect}
+          featured_until={item.featured_until}
         />
       </View>
     );

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ThemedIonicons } from '@/components/ui/themed-icons';
 import { useActiveListings } from '@/hooks/queries/use-dashboard';
 import { useThemeColors } from '@/hooks/use-theme-colors';
-import { ListingPreview } from '@bid-scents/shared-sdk';
+import { ListingCard } from '@bid-scents/shared-sdk';
 import { LegendList } from '@legendapp/list';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { router } from 'expo-router';
@@ -60,7 +60,7 @@ export default function ActiveView({
   }, [refetch]);
 
   // Handle listing selection
-  const handleListingSelect = useCallback((listing: ListingPreview) => {
+  const handleListingSelect = useCallback((listing: ListingCard) => {
     setSelectedListings(prev => {
       const newSet = new Set(prev);
       if (newSet.has(listing.id)) {
@@ -73,7 +73,7 @@ export default function ActiveView({
   }, [setSelectedListings]);
 
   // Render listing item
-  const renderListingItem = useCallback(({ item, index }: { item: ListingPreview, index: number }) => {
+  const renderListingItem = useCallback(({ item, index }: { item: ListingCard, index: number }) => {
     const isLeftColumn = index % 2 === 0;
     const isSelected = selectedListings.has(item.id);
     
