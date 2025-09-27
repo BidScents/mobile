@@ -197,6 +197,11 @@ export class AuthService {
   static async completeOnboarding(data: OnboardingFormData & {
     profileImageUri?: string
     coverImageUri?: string
+    uploadedProfileImagePath?: string
+    uploadedCoverImagePath?: string
+  }, callbacks?: {
+    onProfileImageUploaded?: (path: string) => void
+    onCoverImageUploaded?: (path: string) => void
   }): Promise<OnboardingResult> {
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -204,21 +209,19 @@ export class AuthService {
         return { success: false, error: 'User not authenticated' }
       }
 
-      // Check username uniqueness
-      const usernameCheck = await ApiAuthService.checkUniqueUsernameV1AuthCheckUsernameGet(data.username)
-      
-      if (!usernameCheck.is_unique) {
-        return { success: false, error: 'Username already taken' }
-      }
 
       let profileImagePath: string | undefined
       let coverImagePath: string | undefined
 
-      // Upload profile image
-      if (data.profileImageUri) {
+      // Use pre-uploaded profile image path or upload new one
+      if (data.uploadedProfileImagePath) {
+        profileImagePath = data.uploadedProfileImagePath
+      } else if (data.profileImageUri) {
         try {
           const result = await uploadSingleImage(data.profileImageUri, ImageUploadConfigs.profile('profile'))
           profileImagePath = result.path
+          // Notify component of successful upload
+          callbacks?.onProfileImageUploaded?.(profileImagePath)
         } catch (error: any) {
           if (error.message !== 'USER_CANCELLED') {
             throw error
@@ -226,11 +229,15 @@ export class AuthService {
         }
       }
 
-      // Upload cover image
-      if (data.coverImageUri) {
+      // Use pre-uploaded cover image path or upload new one
+      if (data.uploadedCoverImagePath) {
+        coverImagePath = data.uploadedCoverImagePath
+      } else if (data.coverImageUri) {
         try {
           const result = await uploadSingleImage(data.coverImageUri, ImageUploadConfigs.profile('cover'))
           coverImagePath = result.path
+          // Notify component of successful upload
+          callbacks?.onCoverImageUploaded?.(coverImagePath)
         } catch (error: any) {
           if (error.message !== 'USER_CANCELLED') {
             throw error

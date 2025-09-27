@@ -96,9 +96,14 @@ export const handleOAuthUI = async (provider: 'google' | 'facebook'): Promise<vo
 export const handleOnboardingUI = async (data: OnboardingFormData & {
   profileImageUri?: string
   coverImageUri?: string
+  uploadedProfileImagePath?: string
+  uploadedCoverImagePath?: string
+}, callbacks?: {
+  onProfileImageUploaded?: (path: string) => void
+  onCoverImageUploaded?: (path: string) => void
 }): Promise<void> => {
   try {
-    const result = await AuthService.completeOnboarding(data)
+    const result = await AuthService.completeOnboarding(data, callbacks)
 
     if (result.success && result.profile) {
       // Refresh complete auth state from server to get all up-to-date data
