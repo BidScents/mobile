@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { createEmptyFilters, getActiveFiltersCount } from "@/utils/search.utils";
 import { FilterParameter, ListingBoxCondition, ListingCategory, ListingType } from "@bid-scents/shared-sdk";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { useThemeColors } from '../../hooks/use-theme-colors';
 import * as Haptics from "expo-haptics";
 import React, { forwardRef, useImperativeHandle } from "react";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
+import { useThemeColors } from '../../hooks/use-theme-colors';
 import { BOX_CONDITION_LABELS, CATEGORY_LABELS, LISTING_TYPE_LABELS } from "./constants";
 import { MultiSelectChip } from "./multi-select-chip";
 import { PriceRangeInput } from "./price-range-input";
@@ -69,10 +69,9 @@ export const SearchFilterBottomSheet = forwardRef<
     <BottomSheet
       ref={bottomSheetRef}
       backgroundStyle={{ backgroundColor: colors.background }}
-      snapPoints={['83%']}
       enableDynamicSizing
     >
-      <YStack gap="$4" padding="$4" paddingBottom="$8">
+      <YStack gap="$4" padding="$4" paddingBottom="$5">
         {/* Header */}
         <XStack alignItems="center" justifyContent="space-between">
           <Text fontSize="$7" fontWeight="600" color="$foreground">

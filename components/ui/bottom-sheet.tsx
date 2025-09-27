@@ -23,7 +23,7 @@ interface BottomSheetProps {
 export const BottomSheet = forwardRef<BottomSheetModalMethods, BottomSheetProps>(
   ({ 
     children, 
-    snapPoints = ['25%', '50%', '75%'], 
+    snapPoints, 
     enablePanDownToClose = true,
     backgroundStyle,
     handleStyle,

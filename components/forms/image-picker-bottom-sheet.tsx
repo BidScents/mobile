@@ -71,8 +71,8 @@ export const ImagePickerBottomSheet = forwardRef<
     };
 
     return (
-      <BottomSheet ref={bottomSheetRef} snapPoints={["42%"]}>
-        <YStack gap="$5" padding="$4" paddingBottom="$8">
+      <BottomSheet ref={bottomSheetRef}>
+        <YStack gap="$5" padding="$4" paddingBottom="$5">
           {/* Header */}
           <YStack gap="$2">
             <Text

@@ -1,12 +1,12 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { ThemedIonicons } from "../ui/themed-icons";
-import { useThemeColors } from '../../hooks/use-theme-colors';
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import * as Haptics from "expo-haptics";
 import React, { forwardRef, useImperativeHandle } from "react";
 import { Pressable } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
+import { useThemeColors } from '../../hooks/use-theme-colors';
 import { Button } from "../ui/button";
+import { ThemedIonicons } from "../ui/themed-icons";
 
 export interface SelectOption {
   label: string;
@@ -64,7 +64,6 @@ export const SelectBottomSheet = forwardRef<
     return (
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={["50%", "80%"]}
         backgroundStyle={{ backgroundColor: colors.background || "white" }}
       >
         <YStack gap="$2" padding="$4" flex={1}>

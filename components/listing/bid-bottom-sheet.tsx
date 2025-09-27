@@ -133,7 +133,6 @@ export const BidBottomSheet = forwardRef<
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      snapPoints={["37%"]}
       enablePanDownToClose={true}
       keyboardBehavior="interactive"
       enableDynamicSizing={true}

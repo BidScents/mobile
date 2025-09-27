@@ -117,7 +117,6 @@ export const EditBottomSheet = forwardRef<
     return (
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={isEditing ? ["30%"] : ["40%"]}
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         enableDynamicSizing={true}

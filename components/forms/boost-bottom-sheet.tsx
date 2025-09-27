@@ -335,7 +335,6 @@ export const BoostBottomSheet = forwardRef<
     <>
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={["90%"]}
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         enableDynamicSizing={true}

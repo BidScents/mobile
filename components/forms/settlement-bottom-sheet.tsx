@@ -394,7 +394,6 @@ export const SettlementBottomSheet = forwardRef<
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      snapPoints={["90%"]}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       enableDynamicSizing={true}

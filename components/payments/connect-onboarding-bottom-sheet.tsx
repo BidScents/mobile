@@ -24,17 +24,32 @@ export const ConnectOnboardingBottomSheet = forwardRef<
   ConnectOnboardingBottomSheetMethods,
   ConnectOnboardingBottomSheetProps
 >(({ onComplete, onDoLater }, ref) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [preloadedUrl, setPreloadedUrl] = useState<string | null>(null);
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
   const { paymentDetails, setPaymentDetails } = useAuthStore();
   const onboardMutation = useOnboardConnectAccount();
 
   useImperativeHandle(ref, () => ({
-    present: () => {
-      setError(null);
-      setIsLoading(false);
+    present: async () => {
+      setPreloadedUrl(null);
       bottomSheetRef.current?.present();
+      
+      // Start preloading the onboarding URL
+      try {
+        const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+        const returnUrl = `${apiBaseUrl}/api/v1/link/onboarding-complete?source=mobile`;
+        const refreshUrl = `${apiBaseUrl}/api/v1/link/onboarding-refresh?source=mobile`;
+
+        const onboardingUrl = await onboardMutation.mutateAsync({
+          returnUrl,
+          refreshUrl
+        });
+        
+        setPreloadedUrl(onboardingUrl);
+      } catch (error) {
+        // TanStack Query will handle error state automatically
+        console.error('Failed to preload onboarding URL:', error);
+      }
     },
     dismiss: () => bottomSheetRef.current?.dismiss(),
   }));
@@ -54,17 +69,19 @@ export const ConnectOnboardingBottomSheet = forwardRef<
 
   const handleContinue = async () => {
     try {
-      setError(null);
-      setIsLoading(true);
+      // Use preloaded URL if available, otherwise fall back to making the call
+      let onboardingUrl = preloadedUrl;
       
-      const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-      const returnUrl = `${apiBaseUrl}/api/v1/link/onboarding-complete?source=mobile`;
-      const refreshUrl = `${apiBaseUrl}/api/v1/link/onboarding-refresh?source=mobile`;
+      if (!onboardingUrl) {
+        const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+        const returnUrl = `${apiBaseUrl}/api/v1/link/onboarding-complete?source=mobile`;
+        const refreshUrl = `${apiBaseUrl}/api/v1/link/onboarding-refresh?source=mobile`;
 
-      const onboardingUrl = await onboardMutation.mutateAsync({
-        returnUrl,
-        refreshUrl
-      });
+        onboardingUrl = await onboardMutation.mutateAsync({
+          returnUrl,
+          refreshUrl
+        });
+      }
 
       updatePaymentDetails();
 
@@ -79,26 +96,24 @@ export const ConnectOnboardingBottomSheet = forwardRef<
       onComplete?.();
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to start onboarding';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+      // TanStack Query will handle error state automatically
+      console.error('Failed to start onboarding:', error);
     }
   };
 
   const handleDoLater = async () => {
     try {
-      setError(null);
-      setIsLoading(true);
-      
-      const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-      const returnUrl = `${apiBaseUrl}/api/v1/link/onboarding-complete?source=mobile`;
-      const refreshUrl = `${apiBaseUrl}/api/v1/link/onboarding-refresh?source=mobile`;
+      // Use preloaded URL if available, otherwise make the call
+      if (!preloadedUrl) {
+        const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+        const returnUrl = `${apiBaseUrl}/api/v1/link/onboarding-complete?source=mobile`;
+        const refreshUrl = `${apiBaseUrl}/api/v1/link/onboarding-refresh?source=mobile`;
 
-      await onboardMutation.mutateAsync({
-        returnUrl,
-        refreshUrl
-      });
+        await onboardMutation.mutateAsync({
+          returnUrl,
+          refreshUrl
+        });
+      }
 
       updatePaymentDetails();
       
@@ -106,24 +121,20 @@ export const ConnectOnboardingBottomSheet = forwardRef<
       onDoLater?.();
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to set up payment account';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+      // TanStack Query will handle error state automatically
+      console.error('Failed to set up payment account:', error);
     }
   };
 
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      snapPoints={["25%"]}
       enableDynamicSizing={true}
       onDismiss={() => {
-        setError(null);
-        setIsLoading(false);
+        setPreloadedUrl(null);
       }}
-      enablePanDownToClose={false}
-      pressBehavior="none"
+      enablePanDownToClose={!onboardMutation.isPending}
+      pressBehavior={onboardMutation.isPending ? "none" : "close"}
     >
       <YStack gap="$5" padding="$4" paddingBottom="$8">
         {/* Header */}
@@ -145,7 +156,7 @@ export const ConnectOnboardingBottomSheet = forwardRef<
         </YStack>
 
         {/* Error Display */}
-        {error && (
+        {onboardMutation.isError && (
           <XStack 
             alignItems="center" 
             gap="$3" 
@@ -156,7 +167,23 @@ export const ConnectOnboardingBottomSheet = forwardRef<
             borderColor="$error"
           >
             <ThemedIonicons name="alert-circle-outline" size={20} themeColor="error" />
-            <Text fontSize="$3" color="$error" flex={1}>{error}</Text>
+            <Text fontSize="$3" color="$error" flex={1}>{onboardMutation.error?.message}</Text>
+          </XStack>
+        )}
+
+        {/* Preloading Indicator */}
+        {onboardMutation.isPending && (
+          <XStack 
+            alignItems="center" 
+            gap="$3" 
+            padding="$3" 
+            backgroundColor="$background" 
+            borderRadius="$4"
+            borderWidth={1}
+            borderColor="$blue6"
+          >
+            <ThemedIonicons name="refresh-outline" size={20} color="$blue11" />
+            <Text fontSize="$3" color="$blue11" flex={1}>Preparing payment setup...</Text>
           </XStack>
         )}
 
@@ -167,7 +194,7 @@ export const ConnectOnboardingBottomSheet = forwardRef<
             size="lg"
             flex={1}
             onPress={handleDoLater}
-            disabled={isLoading}
+            disabled={onboardMutation.isPending}
           >
             Do It Later
           </Button>
@@ -177,7 +204,7 @@ export const ConnectOnboardingBottomSheet = forwardRef<
             size="lg"
             flex={1}
             onPress={handleContinue}
-            disabled={isLoading}
+            disabled={onboardMutation.isPending}
           >
             Continue
           </Button>
