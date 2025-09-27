@@ -1,9 +1,12 @@
 import { AvatarIcon } from "@/components/ui/avatar-icon";
+import Button from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
+import { handleSignOutUI } from "@/utils/auth-ui-handlers";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
+import { Alert } from "react-native";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const SettingsSections = [
@@ -46,11 +49,6 @@ const SettingsSections = [
         src: "/profile/help",
       },
       {
-        name: "About Us",
-        icon: "information-circle-outline",
-        src: "/profile/about-us",
-      },
-      {
         name: "Terms and Conditions",
         icon: "document-text-outline",
         src: "/profile/legal",
@@ -66,6 +64,21 @@ const handlePress = (link: string) => {
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
+
+  const handleLogout = () => {
+      Alert.alert("Log Out", "Are you sure you want to log out?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Log Out",
+          style: "destructive",
+          onPress: () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            handleSignOutUI();
+          },
+        },
+      ]);
+    };
+    
   return (
     <Container variant="padded" safeArea={false} backgroundColor="$background">
       <ScrollView
@@ -145,6 +158,16 @@ export default function ProfileScreen() {
               </YStack>
             </YStack>
           ))}
+          {/* Logout Section */}
+          <YStack borderRadius="$6">
+            <Button
+              onPress={handleLogout}
+              variant="secondary"
+              leftIcon="log-out-outline"
+            >
+              Log Out
+            </Button>
+          </YStack>
         </YStack>
       </ScrollView>
     </Container>
