@@ -14,11 +14,6 @@ const SettingsSections = [
     title: "General",
     sections: [
       {
-        name: "Badges",
-        icon: "star-outline",
-        src: "/profile/badges",
-      },
-      {
         name: "Favourite Listings",
         icon: "heart-outline",
         src: "/profile/favourite-listings",

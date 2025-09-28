@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
 import { useOnboardConnectAccount } from "@/hooks/queries/use-payments";
 import { AuthService } from "@/utils/auth-service";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { useState } from "react";
 import { Linking } from "react-native";
-import { YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
+import { ThemedIonicons } from "../ui/themed-icons";
 
 export default function RequiresOnboarding() {
   const { paymentDetails, setPaymentDetails } = useAuthStore();
@@ -73,16 +73,14 @@ export default function RequiresOnboarding() {
     !paymentDetails?.has_connect_account
   ) {
     return (
-      <YStack padding="$2" gap="$2">
-        <Button
-          variant="secondary"
-          size="md"
-          fullWidth
-          onPress={handleBannerPress}
-          disabled={isLoading}
-        >
-          {isLoading ? "Loading..." : getButtonMessage()}
-        </Button>
+      <YStack paddingHorizontal="$4" paddingVertical="$2">
+        <XStack alignItems="center" justifyContent="space-between" backgroundColor="$muted" borderRadius="$6" paddingHorizontal="$4" paddingVertical="$2">
+          <YStack padding="$2" gap="$1.5">
+            <Text color="$foreground" fontSize="$6" fontWeight="500">Complete onboarding</Text>
+            <Text color="$mutedForeground" fontSize="$4" fontWeight="400">To start earning from your listings</Text>
+          </YStack>
+          <ThemedIonicons name="chevron-forward" size={20} color="$foreground" />
+        </XStack>
       </YStack>
     );
   }
