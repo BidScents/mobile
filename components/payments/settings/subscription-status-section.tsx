@@ -178,10 +178,15 @@ export function SubscriptionStatusSection({
         No Active Subscription
       </Text>
       <YStack backgroundColor="$muted" borderRadius="$6" px="$4" py="$4" gap="$3">
-        <Text fontSize="$4" color="$mutedForeground">
-          Subscribe to access swap listings and get boost credits for your
-          listings.
-        </Text>
+        <YStack gap="$2">
+          <Text fontSize="$6" fontWeight="500" color="$foreground">
+            Subscribe to Swap Pass
+          </Text>
+          <Text fontSize="$4" color="$mutedForeground">
+            Gain access to swap listings and get boost credits for your
+            listings.
+          </Text>
+        </YStack>
 
         <ButtonUI
           variant="primary"
