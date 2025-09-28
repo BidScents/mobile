@@ -26,7 +26,7 @@ import React, {
   useState,
 } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { ActivityIndicator, Alert, Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
+import { ActivityIndicator, Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import {
   Card,
   Text,
@@ -144,8 +144,6 @@ export const TransactionBottomSheet = forwardRef<
 
   const onSubmitTransaction = async (data: TransactionFormData) => {
     if (!selectedListing) return;
-
-    try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       const transactionRequest: TransactionRequest = {
@@ -160,14 +158,6 @@ export const TransactionBottomSheet = forwardRef<
       
       bottomSheetRef.current?.dismiss();
       onTransactionCreated?.();
-    } catch (error) {
-      console.error("Failed to create transaction:", error);
-      Alert.alert(
-        "Transaction Failed",
-        "Failed to create transaction. Please try again.",
-        [{ text: "OK" }]
-      );
-    }
   };
 
   const handleLoadMore = useCallback(() => {

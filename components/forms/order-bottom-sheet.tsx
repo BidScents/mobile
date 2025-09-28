@@ -227,7 +227,7 @@ export const OrderBottomSheet = forwardRef<
                 Unit Price
               </Text>
               <Text fontSize="$4" fontWeight="500" color="$foreground">
-                {currency} {order.listing.price.toFixed(2)}
+                {currency} {((order.price) / order.quantity).toFixed(2)}
               </Text>
             </XStack>
             <XStack justifyContent="space-between" alignItems="center">

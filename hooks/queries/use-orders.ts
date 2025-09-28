@@ -9,7 +9,7 @@ export type OrderStatus = 'pending' | 'completed'
  */
 export function useOrders(status: OrderStatus, limit: number = 20) {
   return useInfiniteQuery({
-    queryKey: queryKeys.orders.all,
+    queryKey: status === 'pending' ? queryKeys.orders.pending : queryKeys.orders.completed,
     queryFn: ({ pageParam }) => {
       const cursorToUse = pageParam || new Date().toISOString();
       return OrdersService.getOrdersV1OrdersStatusGet(
