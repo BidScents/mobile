@@ -10,6 +10,7 @@ import { ListingDetailSkeleton } from "@/components/suspense/listing-detail-skel
 import { BlurBackButton } from "@/components/ui/blur-back-button";
 import Button from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { ListingEditButton } from "@/components/ui/listing-edit-button";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -179,6 +180,11 @@ export default function ListingScreen() {
     >
       {/* Back Button */}
       <BlurBackButton />
+
+      {/* Listing Edit Button */}
+      {isUserSeller && (
+        <ListingEditButton listingId={id!} />
+      )}
 
       <KeyboardAwareScrollView
         showsVerticalScrollIndicator={false}

@@ -30,6 +30,7 @@ export function usePendingAuctions(perPage: number = 20) {
     },
     initialPageParam: 1,
     staleTime: 3 * 60 * 1000, // 3 minutes
+    refetchOnMount: "always"
   })
 }
 
@@ -61,6 +62,7 @@ export function useActiveListings(perPage: number = 20) {
     },
     initialPageParam: 1,
     staleTime: 3 * 60 * 1000, // 3 minutes
+    refetchOnMount: "always"
   })
 }
 
@@ -79,6 +81,7 @@ export function useFeaturedListings(perPage: number = 20) {
     },
     initialPageParam: 1,
     staleTime: 3 * 60 * 1000, // 3 minutes
+    refetchOnMount: "always"
   })
 }
 
@@ -101,6 +104,7 @@ export function useUserTransactions(limit: number = 20) {
     },
     initialPageParam: undefined,
     staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnMount: "always"
   })
 }
 
