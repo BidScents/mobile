@@ -214,7 +214,7 @@ export const BidBottomSheet = forwardRef<
               )}
 
               {placeBidMutation.isError && (
-                <Text fontSize="$3" color="$error" textAlign="center">
+                <Text fontSize="$3" color="$error" textAlign="center" mb="$2">
                   {(placeBidMutation.error as any)?.body?.detail || "Failed to place bid. Please try again."}
                 </Text>
               )}
