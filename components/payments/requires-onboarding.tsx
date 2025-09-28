@@ -74,10 +74,10 @@ export default function RequiresOnboarding() {
   ) {
     return (
       <YStack paddingHorizontal="$4" paddingVertical="$2">
-        <XStack alignItems="center" justifyContent="space-between" backgroundColor="$muted" borderRadius="$6" paddingHorizontal="$4" paddingVertical="$2">
+        <XStack onPress={isLoading ? undefined : handleBannerPress} pressStyle={{ opacity: 0.8, transform: [{ scale: 0.98 }] }} alignItems="center" justifyContent="space-between" backgroundColor={isLoading ? "$mutedPress" : "$muted"} borderRadius="$6" paddingHorizontal="$4" paddingVertical="$2">
           <YStack padding="$2" gap="$1.5">
-            <Text color="$foreground" fontSize="$6" fontWeight="500">Complete onboarding</Text>
-            <Text color="$mutedForeground" fontSize="$4" fontWeight="400">To start earning from your listings</Text>
+            <Text color="$foreground" opacity={isLoading ? 0.5 : 1} fontSize="$6" fontWeight="500">{getButtonMessage()}</Text>
+            <Text color="$mutedForeground" opacity={isLoading ? 0.5 : 1} fontSize="$4" fontWeight="400">To start earning from your listings</Text>
           </YStack>
           <ThemedIonicons name="chevron-forward" size={20} color="$foreground" />
         </XStack>
