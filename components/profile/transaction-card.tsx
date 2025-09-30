@@ -100,7 +100,6 @@ export function TransactionCard({ transaction, onPress }: TransactionCardProps) 
           alignItems="center"
           justifyContent="space-between"
           padding="$2"
-          backgroundColor="$muted"
           borderRadius="$5"
           marginTop="$2"
         >

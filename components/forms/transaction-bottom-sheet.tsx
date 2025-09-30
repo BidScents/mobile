@@ -579,14 +579,7 @@ export const TransactionBottomSheet = forwardRef<
           borderRadius="$5"
           disabled={createTransactionMutation.isPending}
         >
-          {createTransactionMutation.isPending ? (
-            <XStack alignItems="center" gap="$2">
-              <ActivityIndicator color="white" size="small" />
-              <Text color="white" fontWeight="600">Creating...</Text>
-            </XStack>
-          ) : (
-            "Create Transaction"
-          )}
+          Create Transaction
         </Button>
       </YStack>
       </YStack>

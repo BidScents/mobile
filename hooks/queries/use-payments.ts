@@ -27,8 +27,8 @@ import { updateAllMessageCaches } from "./use-messages";
  * Removes internal listing IDs and provides actionable feedback
  */
 function getBoostErrorMessage(error: any): string {
-  const status = error?.response?.status;
-  const detail = error?.response?.data?.detail || '';
+  const status = error?.status;
+  const detail = error?.body?.detail || '';
 
   // Network or server errors
   if (!status || status >= 500) {
@@ -286,10 +286,11 @@ export function useCreateTransaction() {
     },
     onError: (error: any) => {
       console.error('Failed to create transaction:', error);
-      
+
       // Parse error message for user display
-      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to create transaction';
-      
+      const errorMessage =
+        error?.body?.detail || error?.message || 'Failed to create transaction';
+
       // You can emit a toast or error event here
       // For now, just log the user-friendly error
       Alert.alert('Error', errorMessage);
@@ -297,7 +298,7 @@ export function useCreateTransaction() {
     },
     retry: (failureCount, error: any) => {
       // Don't retry on 4xx errors (client errors)
-      if (error?.response?.status >= 400 && error?.response?.status < 500) {
+      if (error?.status >= 400 && error?.status < 500) {
         return false;
       }
       // Retry up to 2 times for 5xx errors or network errors
@@ -316,17 +317,20 @@ export function useAcceptTransaction() {
       PaymentsService.acceptTransactionV1PaymentsMessageIdAcceptPost(messageId),
     onError: (error: any) => {
       console.error('Failed to accept transaction:', error);
-      
+
       // Parse error message for user display
-      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to accept transaction';
-      
+      const errorMessage =
+        error?.body?.detail ||
+        error?.message ||
+        'Failed to accept transaction';
+
       // You can emit a toast or error event here
       Alert.alert('Error', errorMessage);
       console.warn('User-friendly error:', errorMessage);
     },
     retry: (failureCount, error: any) => {
       // Don't retry on 4xx errors (client errors)
-      if (error?.response?.status >= 400 && error?.response?.status < 500) {
+      if (error?.status >= 400 && error?.status < 500) {
         return false;
       }
       // Retry up to 2 times for 5xx errors or network errors
