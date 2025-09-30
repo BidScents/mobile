@@ -1,7 +1,12 @@
+import { BoostBottomSheet, BoostBottomSheetMethods } from "@/components/forms/boost-bottom-sheet";
 import { ControlledInput } from "@/components/forms/controlled-input";
-import { ConnectOnboardingBottomSheet, ConnectOnboardingBottomSheetMethods } from "@/components/payments/connect-onboarding-bottom-sheet";
+import {
+  ConnectOnboardingBottomSheet,
+  ConnectOnboardingBottomSheetMethods,
+} from "@/components/payments/connect-onboarding-bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import Input from "@/components/ui/input";
 import { MultipleImagePicker } from "@/components/ui/multiple-image-picker";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useCreateListing } from "@/hooks/queries/use-dashboard";
@@ -10,7 +15,10 @@ import {
   categoryOptions,
   listingTypeOptions,
 } from "@/types/create-listing-types";
-import { ImageUploadConfigs, uploadMultipleImages } from "@/utils/image-upload-service";
+import {
+  ImageUploadConfigs,
+  uploadMultipleImages,
+} from "@/utils/image-upload-service";
 import {
   CreateListingRequest,
   createListingSchema,
@@ -51,8 +59,12 @@ const DEFAULT_VALUES: CreateListingFormData = {
 export default function AddListingScreen() {
   const [imageUris, setImageUris] = useState<string[]>([]);
   const { showLoading, hideLoading } = useLoadingStore();
+  const [boostSwitch, setBoostSwitch] = useState(false);
+  const [listingId, setListingId] = useState<string | null>(null);
   const { user, paymentDetails } = useAuthStore();
-  const connectOnboardingBottomSheetRef = useRef<ConnectOnboardingBottomSheetMethods>(null);
+  const connectOnboardingBottomSheetRef =
+    useRef<ConnectOnboardingBottomSheetMethods>(null);
+  const boostBottomSheetRef = useRef<BoostBottomSheetMethods>(null);
 
   const {
     control,
@@ -70,21 +82,30 @@ export default function AddListingScreen() {
   const isSwap = listingType === ListingType.SWAP;
 
   // Check if user has swap access
-  const isSwapActive = Boolean(paymentDetails?.eligible_for_swap_until && new Date(paymentDetails.eligible_for_swap_until) > new Date());
+  const isSwapActive = Boolean(
+    paymentDetails?.eligible_for_swap_until &&
+      new Date(paymentDetails.eligible_for_swap_until) > new Date()
+  );
 
   // Filter listing type options based on swap access
-  const availableListingTypeOptions = isSwapActive 
-    ? listingTypeOptions 
-    : listingTypeOptions.filter(option => option.value !== ListingType.SWAP);
-
+  const availableListingTypeOptions = isSwapActive
+    ? listingTypeOptions
+    : listingTypeOptions.filter((option) => option.value !== ListingType.SWAP);
 
   const createListingMutation = useCreateListing({
     onSuccess: (data) => {
-      hideLoading();
-      router.replace(`/listing/${data.listing.id}`);
+      if (boostSwitch && data.listing.listing_type !== ListingType.SWAP) {
+        setListingId(data.listing.id);
+        boostBottomSheetRef.current?.present();
+        hideLoading();
+
+      } else {
+        hideLoading();
+        router.replace(`/listing/${data.listing.id}`);
+      }
     },
-    onError: (error) => {
-      console.error("Failed to create listing:", error);
+    onError: (error: any) => {
+      console.error("Failed to create listing:", error?.body?.detail);
       hideLoading();
       Alert.alert("Error", "Failed to create listing. Please try again.");
     },
@@ -119,7 +140,9 @@ export default function AddListingScreen() {
       );
 
       // Extract URLs from upload results
-      const uploadedImageUrls = uploadResults.map(result => `listing-images/${result.path}`);
+      const uploadedImageUrls = uploadResults.map(
+        (result) => `listing-images/${result.path}`
+      );
 
       // Step 2: Update form data with uploaded URLs
       const updatedData = {
@@ -174,11 +197,11 @@ export default function AddListingScreen() {
   }, [user, paymentDetails]);
 
   const handleOnboardingComplete = () => {
-    console.log('Onboarding completed successfully!');
+    console.log("Onboarding completed successfully!");
   };
 
   const handleOnboardingDoLater = () => {
-    console.log('User chose to set up payments later');
+    console.log("User chose to set up payments later");
   };
 
   return (
@@ -215,7 +238,11 @@ export default function AddListingScreen() {
                 alignItems="center"
                 gap="$2"
               >
-                <ThemedIonicons name="information-circle-outline" size={20} color="$blue11" />
+                <ThemedIonicons
+                  name="information-circle-outline"
+                  size={20}
+                  color="$blue11"
+                />
                 <Text
                   fontSize="$3"
                   color="$blue11"
@@ -226,7 +253,7 @@ export default function AddListingScreen() {
                 </Text>
               </XStack>
             )}
-            
+
             <ControlledInput
               control={control}
               name="type"
@@ -288,52 +315,52 @@ export default function AddListingScreen() {
 
             {isAuction && (
               <YStack gap="$4">
-              <ControlledInput
-                control={control}
-                name="starting_price"
-                variant="numeric"
-                label="Starting Price"
-                placeholder="0.00"
-                disabled={loading}
-              />
+                <ControlledInput
+                  control={control}
+                  name="starting_price"
+                  variant="numeric"
+                  label="Starting Price"
+                  placeholder="0.00"
+                  disabled={loading}
+                />
 
-              <ControlledInput
-                control={control}
-                name="buy_now_price"
-                variant="numeric"
-                label="Buy Now Price (Optional)"
-                placeholder="0.00"
-                disabled={loading}
-              />
+                <ControlledInput
+                  control={control}
+                  name="buy_now_price"
+                  variant="numeric"
+                  label="Buy Now Price (Optional)"
+                  placeholder="0.00"
+                  disabled={loading}
+                />
 
-              <ControlledInput
-                control={control}
-                name="bid_increment"
-                variant="numeric"
-                label="Bid Increment"
-                placeholder="5.00"
-                disabled={loading}
-              />
+                <ControlledInput
+                  control={control}
+                  name="bid_increment"
+                  variant="numeric"
+                  label="Bid Increment"
+                  placeholder="5.00"
+                  disabled={loading}
+                />
 
-              <ControlledInput
-                control={control}
-                name="ends_at"
-                variant="date"
-                label="End Date & Time"
-                placeholder="Select auction end time"
-                disabled={loading}
-              />
+                <ControlledInput
+                  control={control}
+                  name="ends_at"
+                  variant="date"
+                  label="End Date & Time"
+                  placeholder="Select auction end time"
+                  disabled={loading}
+                />
 
-              <ControlledInput
-                control={control}
-                name="is_extendable"
-                variant="switch"
-                label="Extendable (Optional)"
-                placeholder="Extendable"
-                switchChecked={watch("is_extendable")}
-                disabled={loading}
-              />
-            </YStack>
+                <ControlledInput
+                  control={control}
+                  name="is_extendable"
+                  variant="switch"
+                  label="Extendable (Optional)"
+                  placeholder="Extendable"
+                  switchChecked={watch("is_extendable")}
+                  disabled={loading}
+                />
+              </YStack>
             )}
 
             <XStack gap="$3">
@@ -402,6 +429,17 @@ export default function AddListingScreen() {
               placeholder="Enter batch code if available"
               disabled={loading}
             />
+
+            {listingType !== ListingType.SWAP &&
+            <Input
+              variant="switch"
+              label="Boost Listing"
+              placeholder="Boost"
+              disabled={loading}
+              onSwitchChange={(checked) => setBoostSwitch(checked)} value={""} 
+              onChangeText={() => {}}
+              />
+            }
           </YStack>
 
           <Button
@@ -416,12 +454,15 @@ export default function AddListingScreen() {
           </Button>
         </YStack>
       </KeyboardAwareScrollView>
-      
+
       <ConnectOnboardingBottomSheet
         ref={connectOnboardingBottomSheetRef}
         onComplete={handleOnboardingComplete}
         onDoLater={handleOnboardingDoLater}
       />
+      {listingId && (
+        <BoostBottomSheet ref={boostBottomSheetRef} tabKey="add-listing" selectedListings={new Set([listingId])} onSuccess={() => router.replace(`/listing/${listingId}`)} />
+      )}
     </Container>
   );
 }

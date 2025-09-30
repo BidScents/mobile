@@ -19,14 +19,15 @@ export interface BoostBottomSheetMethods {
 export interface BoostBottomSheetProps {
   tabKey: string;
   selectedListings: Set<string>;
-  setSelectedListings: (listings: Set<string>) => void;
-  setIsSelectMode: (selectMode: boolean) => void;
+  setSelectedListings?: (listings: Set<string>) => void;
+  setIsSelectMode?: (selectMode: boolean) => void;
+  onSuccess?: () => void;
 }
 
 export const BoostBottomSheet = forwardRef<
   BoostBottomSheetMethods,
   BoostBottomSheetProps
->(({ tabKey, selectedListings, setSelectedListings, setIsSelectMode }, ref) => {
+>(({ tabKey, selectedListings, setSelectedListings, setIsSelectMode, onSuccess }, ref) => {
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
   
   // Payment sheet state
@@ -134,6 +135,7 @@ export const BoostBottomSheet = forwardRef<
         // Success - credits were used
         Alert.alert('Success', `Successfully boosted ${selectedListings.size} listing${selectedListings.size > 1 ? 's' : ''}`);
         bottomSheetRef.current?.dismiss();
+        onSuccess?.();
       }
       
     } catch (error: any) {
@@ -150,10 +152,10 @@ export const BoostBottomSheet = forwardRef<
     Alert.alert('Success', 'Payment completed and listings boosted!');
     setPaymentSheetData(null);
     bottomSheetRef.current?.dismiss();
+    onSuccess?.();
   };
   
   const handlePaymentError = (error: Error) => {
-    Alert.alert('Payment Error', error.message);
     setPaymentSheetData(null);
   };
   
@@ -166,8 +168,8 @@ export const BoostBottomSheet = forwardRef<
       bottomSheetRef.current?.present();
     },
     dismiss: () => {
-      setSelectedListings(new Set());
-      setIsSelectMode(false);
+      setSelectedListings?.(new Set());
+      setIsSelectMode?.(false);
       bottomSheetRef.current?.dismiss();
     },
   }));
