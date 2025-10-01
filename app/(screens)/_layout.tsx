@@ -56,6 +56,12 @@ export default function ProfileLayout() {
           animation: "slide_from_bottom",
         }}
       />
+      <Stack.Screen
+        name="reset-password"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

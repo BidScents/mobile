@@ -11,9 +11,14 @@ const SettingsSections = [
     title: "Account",
     sections: [
       {
-        name: "Profile Details",
+        name: "Edit Profile Details",
         icon: "person-outline",
         src: "/(tabs)/profile/edit-profile",
+      },
+      {
+        name: "Change Password",
+        icon: "lock-closed-outline",
+        src: "/(screens)/reset-password",
       },
       {
         name: "Payments",
