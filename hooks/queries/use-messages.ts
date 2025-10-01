@@ -1,8 +1,11 @@
 import type {
   ConversationResponse,
+  ListingDetailsResponse,
   MessageRequest,
   MessageResData,
   MessagesSummary,
+  RichTextContent,
+  TextContent,
 } from "@bid-scents/shared-sdk";
 import { MessageService, MessageType, useAuthStore } from "@bid-scents/shared-sdk";
 import {
@@ -286,12 +289,41 @@ export function useSendMessage() {
         queryKeys.messages.list(conversationId)
       );
 
+      // Create optimistic content - enrich with listing data if available
+      let optimisticContent = messageRequest.content;
+
+      // If this is a text message with listing context, try to enrich it
+      if (messageRequest.content_type === MessageType.TEXT) {
+        const textContent = messageRequest.content as TextContent;
+        
+        if (textContent.listing_id) {
+          // Try to get listing data from cache
+          const listingData = queryClient.getQueryData<ListingDetailsResponse>(
+            queryKeys.listings.detail(textContent.listing_id)
+          );
+          
+          if (listingData?.listing) {
+            // Transform to RichTextContent with listing preview
+            optimisticContent = {
+              text: textContent.text,
+              listing: {
+                id: listingData.listing.id,
+                seller_id: listingData.seller.id,
+                name: listingData.listing.name,
+                price: listingData.listing.price,
+                image_url: listingData.image_urls[0] || null,
+              }
+            } as RichTextContent;
+          }
+        }
+      }
+
       // Create optimistic message with current user data (text messages only)
       const optimisticMessage: MessageResData = {
         id: `temp-${Date.now()}`, // Temporary ID
         conversation_id: conversationId,
         content_type: messageRequest.content_type,
-        content: messageRequest.content,
+        content: optimisticContent,
         sender: user ? {
           id: user.id,
           username: user.username || "You",
