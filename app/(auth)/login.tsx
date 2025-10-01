@@ -15,7 +15,7 @@ import { ControlledInput } from '@/components/forms/controlled-input'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { KeyboardAwareView } from '@/components/ui/keyboard-aware-view'
-import { handleLoginUI, handleForgotPasswordUI } from '@/utils/auth-ui-handlers'
+import { handleLoginUI } from '@/utils/auth-ui-handlers'
 import { loginSchema, type LoginFormData } from '@bid-scents/shared-sdk'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { router } from 'expo-router'
@@ -134,7 +134,7 @@ export default function LoginScreen() {
                 <Text 
                   color="$foreground" 
                   fontSize="$3"
-                  onPress={handleForgotPasswordUI}
+                  onPress={() => router.push('/(auth)/forgot-password?isRequest=true')}
                   disabled={isLoading}
                 >
                   Forgot Password?

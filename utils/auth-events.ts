@@ -10,6 +10,7 @@ import {
   handleAuthStateChange,
   useAuthStore,
 } from "@bid-scents/shared-sdk"
+import { router } from "expo-router"
 import { AuthService } from './auth-service'
 import { AuthStateManager } from './auth-state-manager'
 
@@ -143,6 +144,10 @@ const refreshUserDataInBackground = async (session: any): Promise<void> => {
   }
 }
 
+const handlePasswordRecoveryEvent =  () => {
+  router.replace("/(screens)/reset-password")
+}
+
 /**
  * Set up Supabase auth state change listener
  */
@@ -160,6 +165,9 @@ export const setupAuthStateListener = (): (() => void) => {
     } else if (event === "TOKEN_REFRESHED") {
       console.log("Token refreshed")
       handleAuthStateChange("TOKEN_REFRESHED", session)
+    } else if (event === "PASSWORD_RECOVERY") {
+      console.log("Password recovery")
+      handlePasswordRecoveryEvent()
     }
   })
 
