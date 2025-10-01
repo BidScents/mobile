@@ -202,59 +202,7 @@ export const handleForgotPasswordRequestUI = async (data: ForgotPasswordRequestF
   }
 }
 
-/**
- * Handle password reset with UI feedback
- */
-export const handleResetPasswordUI = async (data: ResetPasswordFormData): Promise<void> => {
-  try {
-    const result = await AuthService.updateUserPassword(data.password)
 
-    if (result.success) {
-      Alert.alert(
-        'Password Updated',
-        'Password successfully updated. You can now sign in with your new password.',
-        [{ 
-          text: 'Sign In', 
-          onPress: () => router.replace('/(auth)/login')
-        }]
-      )
-    } else {
-      handleResetPasswordError(result.error!)
-    }
-  } catch (error: any) {
-    handleResetPasswordError(error.message)
-    throw error
-  }
-}
-
-/**
- * Handle token-based authentication for password reset
- */
-export const handleTokenAuthenticationUI = async (token: string): Promise<boolean> => {
-  try {
-    const result = await AuthService.authenticateWithResetToken(token)
-
-    if (result.success && result.session && result.loginResponse) {
-      // Set authenticated state with complete server data
-      AuthStateManager.setAuthenticatedState(result.session, result.loginResponse)
-      return true
-    } else {
-      Alert.alert(
-        'Authentication Failed',
-        result.error || 'Unable to authenticate with the provided token. Please request a new password reset.',
-        [{ text: 'OK' }]
-      )
-      return false
-    }
-  } catch (error: any) {
-    Alert.alert(
-      'Authentication Error',
-      'An error occurred while authenticating. Please try requesting a new password reset.',
-      [{ text: 'OK' }]
-    )
-    return false
-  }
-}
 
 // Error Handlers
 
@@ -366,17 +314,3 @@ const handleForgotPasswordError = (error: string): void => {
   }
 }
 
-/**
- * Handle password reset errors with appropriate user feedback
- */
-const handleResetPasswordError = (error: string): void => {
-  if (error.includes('Password should be at least')) {
-    Alert.alert('Password Too Short', 'Password must be at least 8 characters long.')
-  } else if (error.includes('Session not found')) {
-    Alert.alert('Session Expired', 'Your password reset session has expired. Please request a new password reset.')
-  } else if (error.includes('Invalid password')) {
-    Alert.alert('Invalid Password', 'Please choose a stronger password.')
-  } else {
-    Alert.alert('Update Failed', error || 'Unable to update your password. Please try again.')
-  }
-}

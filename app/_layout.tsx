@@ -8,16 +8,16 @@
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { supabase } from "@/lib/supabase";
 import { handleNotificationNavigation } from "@/services/notification-navigation";
-import { initializeAuth, OpenAPI, useAuthStore } from "@bid-scents/shared-sdk";
+import { initializeAuth, OpenAPI, useAuthStore, useLoadingStore } from "@bid-scents/shared-sdk";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { TamaguiProvider, Theme } from "@tamagui/core";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Platform, useColorScheme } from "react-native";
+import { Alert, Platform, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -45,6 +45,7 @@ export default function RootLayout() {
   const [isAppReady, setIsAppReady] = useState(false);
   const colorScheme = useColorScheme();
   const { isAuthenticated, isOnboarded } = useAuthStore();
+  const { showLoading, hideLoading } = useLoadingStore();
 
   // Initialize theme settings on app startup to load saved preferences
   useThemeSettings();
@@ -156,20 +157,73 @@ export default function RootLayout() {
     if (!isAppReady) return;
 
     const handleDeepLink = (url: string) => {
-      console.log('Deep link received:', url);
+      // Parse URL to extract components
+      try {
+        const parsedUrl = new URL(url);
+        
+        // Check for password reset token
+        if (url.includes('forgot-password')) {
+          // Show loading overlay immediately for smooth UX
+          showLoading();
+          
+          // Check query parameters first
+          const urlParams = new URLSearchParams(parsedUrl.search);
+          let token = urlParams.get('token');
+          let access_token = urlParams.get('access_token');
+          let refresh_token = urlParams.get('refresh_token');
+          
+          // If not found in query parameters, check URL fragment (where Supabase puts them)
+          if (!token && !access_token && parsedUrl.hash) {
+            const hashParams = new URLSearchParams(parsedUrl.hash.substring(1)); // Remove # prefix
+            token = hashParams.get('token');
+            access_token = hashParams.get('access_token');
+            refresh_token = hashParams.get('refresh_token');
+          }
+          
+          // Authenticate user with tokens and navigate to reset screen
+          if (access_token && refresh_token) {
+            // Set session with the reset tokens to authenticate the user
+            supabase.auth.setSession({ access_token, refresh_token }).then(async ({ data, error }) => {
+              if (error) {
+                hideLoading(); // Hide loading on error
+                Alert.alert(
+                  'Authentication Failed',
+                  'Unable to authenticate with the reset link. Please request a new password reset.',
+                  [{ text: 'OK' }]
+                );
+              } else if (data.session) {
+                // The auth state listener will handle updating the auth store
+                // Small delay to ensure auth state is updated, then navigate
+                // Loading will be hidden by the reset password screen
+                setTimeout(() => {
+                  router.replace('/(screens)/reset-password');
+                }, 500);
+              }
+            });
+          } else if (token) {
+            hideLoading(); // Hide loading on error
+            Alert.alert(
+              'Invalid Reset Link',
+              'This password reset link is not supported. Please request a new password reset.',
+              [{ text: 'OK' }]
+            );
+          } else {
+            hideLoading(); // Hide loading if no tokens found
+          }
+        }
+      } catch (error) {
+        // Silently handle URL parsing errors
+      }
       
       // Handle payment return URLs
       if (url.includes('payment/return')) {
         // Payment completed, this is handled by the payment return route
-        console.log('Payment return detected');
       } 
       else if (url.includes('seller/onboarding/complete')) {
         // Seller onboarding completed
-        console.log('Seller onboarding completed');
       } 
       else if (url.includes('payment-methods/return')) {
         // Payment method setup completed
-        console.log('Payment method setup completed');
       }
       // Add more deep link handlers as needed
     };
