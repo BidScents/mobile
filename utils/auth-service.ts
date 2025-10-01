@@ -50,6 +50,18 @@ export interface DeleteAccountResult {
   errorType?: 'active_transactions' | 'unreleased_payments' | 'generic'
 }
 
+export interface ForgotPasswordResult {
+  success: boolean
+  error?: string
+}
+
+export interface TokenAuthResult {
+  success: boolean
+  session?: any
+  loginResponse?: LoginResponse
+  error?: string
+}
+
 export class AuthService {
   /**
    * Authenticate with existing session and fetch user data
@@ -314,6 +326,117 @@ export class AuthService {
     const { error } = await supabase.auth.signOut()
     if (error) {
       throw new Error(error.message)
+    }
+  }
+
+  /**
+   * Send password reset email
+   */
+  static async resetPasswordForEmail(email: string, redirectTo?: string): Promise<ForgotPasswordResult> {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo
+      })
+
+      if (error) {
+        return { success: false, error: error.message }
+      }
+
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
+  }
+
+  /**
+   * Update user password (after reset)
+   */
+  static async updateUserPassword(newPassword: string): Promise<ForgotPasswordResult> {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      })
+
+      if (error) {
+        return { success: false, error: error.message }
+      }
+
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
+  }
+
+  /**
+   * Authenticate with password reset token
+   * Token comes from deep link and contains access_token and refresh_token
+   */
+  static async authenticateWithResetToken(token: string): Promise<TokenAuthResult> {
+    try {
+      // The token might be the full URL or just the token part
+      // Let's handle different possible formats
+      let tokenToProcess = token
+      
+      // If the token looks like a full URL, extract the fragment or query part
+      if (token.includes('://')) {
+        try {
+          const url = new URL(token)
+          
+          if (url.hash) {
+            tokenToProcess = url.hash.substring(1) // Remove the # prefix
+          } else if (url.search) {
+            tokenToProcess = url.search.substring(1) // Remove the ? prefix
+          }
+        } catch (urlError) {
+          // Failed to parse as URL, treat as raw token
+        }
+      }
+      
+      // Parse the token parameters
+      let parsedParams: URLSearchParams
+      
+      if (tokenToProcess.includes('&') || tokenToProcess.includes('=')) {
+        // Direct parameter string
+        parsedParams = new URLSearchParams(tokenToProcess)
+      } else {
+        return { 
+          success: false, 
+          error: `Unrecognized token format. Received: ${token.substring(0, 100)}...` 
+        }
+      }
+
+      const access_token = parsedParams.get('access_token')
+      const refresh_token = parsedParams.get('refresh_token')
+
+      if (!access_token || !refresh_token) {
+        return { 
+          success: false, 
+          error: `Missing required tokens. Access token: ${!!access_token}, Refresh token: ${!!refresh_token}` 
+        }
+      }
+      
+      // Set the session using the extracted tokens
+      const { data: sessionData, error: sessionError } = 
+        await supabase.auth.setSession({ access_token, refresh_token })
+
+      if (sessionError) {
+        return { success: false, error: sessionError.message }
+      }
+
+      if (!sessionData.session) {
+        return { success: false, error: 'Failed to create session from token' }
+      }
+
+      // Authenticate with the API using the new session
+      const loginResult = await this.authenticateWithSession(sessionData.session)
+      
+      return {
+        success: true,
+        session: sessionData.session,
+        loginResponse: loginResult
+      }
+    } catch (error: any) {
+      return { success: false, error: error.message }
     }
   }
 
