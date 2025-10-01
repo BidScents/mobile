@@ -80,7 +80,8 @@ export default function ResetPasswordScreen() {
    * Navigate back to home
    */
   const goToHome = () => {
-    router.replace('/(tabs)/home/')
+
+    router.dismissTo('/(tabs)/home/')
   }
 
   return (
