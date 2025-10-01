@@ -4,6 +4,7 @@ import { currency } from "@/constants/constants";
 import { useAcceptTransaction, useCancelTransaction } from "@/hooks/queries/use-payments";
 import { MessageResData, PaymentResponse, RichInitiateTransactionActionContent } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "tamagui";
 
@@ -74,7 +75,7 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
     <>
       <View gap="$2">
         {content.listing && (
-          <View >
+          <View onPress={() => router.push(`/listing/${content.listing?.id}`)} >
             <FastImage
               source={{ uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${content.listing.image_url}` }}
               style={{ width: 200, height: 150, borderRadius: 16 }}
@@ -104,6 +105,7 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
             variant="destructive" 
             onPress={handleCancel} 
             disabled={!content.is_active || cancelTransaction.isPending}
+            borderRadius="$5"
           >
             {cancelTransaction.isPending ? "Canceling..." : content.is_active ? "Cancel" : "Cancelled"}
           </Button>
@@ -113,6 +115,7 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
             variant="primary" 
             onPress={handleAccept} 
             disabled={!content.is_active || acceptTransaction.isPending}
+            borderRadius="$5"
           >
             {acceptTransaction.isPending ? "Processing..." : content.is_active ? "Buy" : "Completed"}
           </Button>
