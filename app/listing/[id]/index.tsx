@@ -100,8 +100,8 @@ export default function ListingScreen() {
 
     contactSellerMutation.mutate(listing.seller.id, {
       onSuccess: (conversationResponse) => {
-        // Navigate to the chat screen with the conversation ID
-        router.push(`/(screens)/(chat)/${conversationResponse.id}`);
+        // Navigate to the chat screen with the conversation ID and listing context
+        router.push(`/(screens)/(chat)/${conversationResponse.id}?listingId=${listing.listing.id}`);
       },
       onError: (error) => {
         console.error("Error contacting seller:", error);

@@ -12,7 +12,7 @@ import { Text, XStack, YStack } from "tamagui";
 
 
 export default function SpecificChatScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, listingId } = useLocalSearchParams();
   const updateLastRead = useUpdateLastRead();
   const navigation = useNavigation();
   const { data: conversationSummary } = useConversationSummary();
@@ -118,7 +118,7 @@ export default function SpecificChatScreen() {
         ) : (
             <MessagesList conversation={conversation!} />
         )}
-        <ChatInputBar id={id as string} />
+        <ChatInputBar id={id as string} referenceListingId={listingId as string} />
       </KeyboardAwareView>
     </Container>
   );

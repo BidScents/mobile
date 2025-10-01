@@ -8,12 +8,14 @@ import { Alert } from "react-native";
 
 interface UseChatInputProps {
   conversationId: string;
+  referenceListingId?: string;
 }
 
-export const useChatInput = ({ conversationId }: UseChatInputProps) => {
-  const [messageText, setMessageText] = useState("");
+export const useChatInput = ({ conversationId, referenceListingId }: UseChatInputProps) => {
+  const [messageText, setMessageText] = useState(referenceListingId ? "I am interested in this listing" : "");
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [currentReferenceListingId, setCurrentReferenceListingId] = useState<string | undefined>(referenceListingId);
   
   const sendMessageMutation = useSendMessage();
   const { typing } = useMessagingContext();
@@ -32,10 +34,15 @@ export const useChatInput = ({ conversationId }: UseChatInputProps) => {
       conversationId,
       messageRequest: {
         content_type: MessageType.TEXT,
-        content: { text: messageText.trim() }
+        content: { 
+          text: messageText.trim(),
+          listing_id: currentReferenceListingId || null
+        }
       },
     });
     setMessageText("");
+    // Clear reference listing after sending
+    setCurrentReferenceListingId(undefined);
   };
 
   const sendImageMessage = async () => {
@@ -107,6 +114,10 @@ export const useChatInput = ({ conversationId }: UseChatInputProps) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const clearReferenceListing = () => {
+    setCurrentReferenceListingId(undefined);
+  };
+
   const hasContent = messageText.trim().length > 0 || selectedImages.length > 0;
   const isLoading = sendMessageMutation.isPending || isUploading;
 
@@ -116,11 +127,13 @@ export const useChatInput = ({ conversationId }: UseChatInputProps) => {
     isUploading,
     isLoading,
     hasContent,
+    currentReferenceListingId,
     handleTextChange,
     sendTextMessage,
     sendImageMessage,
     handleImagesSelected,
     removeImage,
+    clearReferenceListing,
     typing,
   };
 };

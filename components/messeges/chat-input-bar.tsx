@@ -5,17 +5,23 @@ import { Input, XStack, YStack } from "tamagui";
 import { ImagePickerBottomSheet, ImagePickerBottomSheetMethods } from "../forms/image-picker-bottom-sheet";
 import { TransactionBottomSheet } from "../forms/transaction-bottom-sheet";
 import { ImagePreview } from "./chat-input-bar/image-preview";
+import { ListingPreview } from "./chat-input-bar/listing-preview";
 import { InputActions } from "./chat-input-bar/input-actions";
 import { SendButton } from "./chat-input-bar/send-button";
 import { useChatInput } from "@/hooks/use-chat-input";
 import { useTransactionActions } from "@/hooks/use-transaction-actions";
+import { useListingDetail } from "@/hooks/queries/use-listing";
 
 interface ChatInputBarProps {
   id: string;
+  referenceListingId?: string;
 }
 
-export const ChatInputBar = ({ id }: ChatInputBarProps) => {
+export const ChatInputBar = ({ id, referenceListingId }: ChatInputBarProps) => {
   const imagePickerRef = useRef<ImagePickerBottomSheetMethods>(null);
+  
+  // Fetch listing details if referenceListingId is provided
+  const { data: listingData } = useListingDetail(referenceListingId || '');
 
   const {
     messageText,
@@ -23,13 +29,15 @@ export const ChatInputBar = ({ id }: ChatInputBarProps) => {
     isUploading,
     isLoading,
     hasContent,
+    currentReferenceListingId,
     handleTextChange,
     sendTextMessage,
     sendImageMessage,
     handleImagesSelected,
     removeImage,
+    clearReferenceListing,
     typing,
-  } = useChatInput({ conversationId: id });
+  } = useChatInput({ conversationId: id, referenceListingId });
 
   const {
     showTransactionButton,
@@ -47,6 +55,20 @@ export const ChatInputBar = ({ id }: ChatInputBarProps) => {
 
   return (
     <YStack>
+      {/* Listing Preview */}
+      {currentReferenceListingId && listingData?.listing && (
+        <ListingPreview
+          listing={{
+            id: listingData.listing.id,
+            seller_id: listingData.seller.id,
+            name: listingData.listing.name,
+            price: listingData.listing.price,
+            image_url: listingData.image_urls[0] || null,
+          }}
+          onDismiss={clearReferenceListing}
+        />
+      )}
+
       <ImagePreview 
         selectedImages={selectedImages}
         isUploading={isUploading}
