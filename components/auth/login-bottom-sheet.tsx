@@ -1,11 +1,11 @@
+import { LegalDocumentsBottomSheet, LegalDocumentsBottomSheetMethods } from '@/components/forms/legal-documents-bottom-sheet'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { handleOAuthUI } from '@/utils/auth-ui-handlers'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { router } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
-import React, { forwardRef, useImperativeHandle, useState } from 'react'
-import { Alert, Linking } from 'react-native'
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { Text, XStack, YStack } from 'tamagui'
 
 // Complete auth session if needed
@@ -24,6 +24,7 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
   const [isLoading, setIsLoading] = useState(false)
   const [loadingProvider, setLoadingProvider] = useState<'google' | 'facebook' | null>(null)
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null)
+  const legalBottomSheetRef = useRef<LegalDocumentsBottomSheetMethods>(null)
 
   useImperativeHandle(ref, () => ({
     present: () => bottomSheetRef.current?.present(),
@@ -51,20 +52,12 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
     }
   }
 
-  const handleTermsPress = async () => {
-    try {
-      const termsUrl = process.env.EXPO_PUBLIC_TERMS_URL || 'https://bidscents.com/terms-of-service'
-      const canOpen = await Linking.canOpenURL(termsUrl)
-      
-      if (canOpen) {
-        await Linking.openURL(termsUrl)
-      } else {
-        Alert.alert('Error', 'Unable to open Terms of Service')
-      }
-    } catch (error) {
-      console.log('Failed to open Terms of Service:', error)
-      Alert.alert('Error', 'Unable to open Terms of Service')
-    }
+  const handleTermsPress = () => {
+    legalBottomSheetRef.current?.presentWithTab('terms')
+  }
+
+  const handlePrivacyPress = () => {
+    legalBottomSheetRef.current?.presentWithTab('privacy')
   }
 
   return (
@@ -129,8 +122,8 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
           </XStack>
         </YStack>
 
-        {/* Footer with clickable Terms of Service */}
-        <XStack justifyContent="center" alignItems="center">
+        {/* Footer with clickable legal links */}
+        <XStack justifyContent="center" alignItems="center" flexWrap="wrap" gap="$1">
           <Text 
             textAlign="center" 
             color="$mutedForeground" 
@@ -139,7 +132,6 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
             By continuing, you agree to our{' '}
           </Text>
           <Text
-            textAlign="center"
             color="$foreground"
             fontSize="$3"
             textDecorationLine="underline"
@@ -148,8 +140,26 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
           >
             Terms of Service
           </Text>
+          <Text 
+            color="$mutedForeground" 
+            fontSize="$3"
+          >
+            {' '}and{' '}
+          </Text>
+          <Text
+            color="$foreground"
+            fontSize="$3"
+            textDecorationLine="underline"
+            onPress={handlePrivacyPress}
+            cursor="pointer"
+          >
+            Privacy Policy
+          </Text>
         </XStack>
       </YStack>
+      
+      {/* Legal Documents Bottom Sheet */}
+      <LegalDocumentsBottomSheet ref={legalBottomSheetRef} />
     </BottomSheet>
   )
 })

@@ -1,7 +1,8 @@
+import { LegalDocumentsBottomSheet, LegalDocumentsBottomSheetMethods } from "@/components/forms/legal-documents-bottom-sheet";
 import { Button as ButtonUI } from "@/components/ui/button";
 import type { SubscriptionPlan } from "@/types/products";
-import { Alert, Linking } from "react-native";
-import { Text, YStack } from "tamagui";
+import React, { useRef } from "react";
+import { Text, XStack, YStack } from "tamagui";
 
 interface SubscriptionBottomActionProps {
   selectedPlan: SubscriptionPlan | null;
@@ -10,30 +11,21 @@ interface SubscriptionBottomActionProps {
   onContinue: () => void;
 }
 
-const handleTermsPress = async () => {
-  try {
-    const termsUrl =
-      process.env.EXPO_PUBLIC_TERMS_URL ||
-      "https://bidscents.com/terms-of-service";
-    const canOpen = await Linking.canOpenURL(termsUrl);
-
-    if (canOpen) {
-      await Linking.openURL(termsUrl);
-    } else {
-      Alert.alert("Error", "Unable to open Terms of Service");
-    }
-  } catch (error) {
-    console.log("Failed to open Terms of Service:", error);
-    Alert.alert("Error", "Unable to open Terms of Service");
-  }
-};
-
 export function SubscriptionBottomAction({
   selectedPlan,
   isLoading,
   hasPaymentMethod,
   onContinue,
 }: SubscriptionBottomActionProps) {
+  const legalBottomSheetRef = useRef<LegalDocumentsBottomSheetMethods>(null);
+
+  const handleTermsPress = () => {
+    legalBottomSheetRef.current?.presentWithTab('terms');
+  };
+
+  const handlePrivacyPress = () => {
+    legalBottomSheetRef.current?.presentWithTab('privacy');
+  };
   const getButtonText = () => {
     if (isLoading) return "Processing...";
 
@@ -54,18 +46,41 @@ export function SubscriptionBottomAction({
       paddingBottom="$5"
       gap="$3"
     >
-      <Text
-        textAlign="center"
-        color="$mutedForeground"
-        fontSize="$4"
-        onPress={handleTermsPress}
-        cursor="pointer"
-        hitSlop={10}
-        marginTop="$4"
-        textDecorationLine="underline"
-      >
-        Terms of Service
-      </Text>
+      <XStack justifyContent="center" alignItems="center" flexWrap="wrap" gap="$1" marginTop="$4">
+        <Text 
+          textAlign="center" 
+          color="$mutedForeground" 
+          fontSize="$3"
+        >
+          By subscribing, you agree to our{' '}
+        </Text>
+        <Text
+          color="$foreground"
+          fontSize="$3"
+          textDecorationLine="underline"
+          onPress={handleTermsPress}
+          cursor="pointer"
+          hitSlop={10}
+        >
+          Terms of Service
+        </Text>
+        <Text 
+          color="$mutedForeground" 
+          fontSize="$3"
+        >
+          {' '}and{' '}
+        </Text>
+        <Text
+          color="$foreground"
+          fontSize="$3"
+          textDecorationLine="underline"
+          onPress={handlePrivacyPress}
+          cursor="pointer"
+          hitSlop={10}
+        >
+          Privacy Policy
+        </Text>
+      </XStack>
 
       <ButtonUI
         variant="primary"
@@ -78,6 +93,9 @@ export function SubscriptionBottomAction({
       >
         {getButtonText()}
       </ButtonUI>
+
+      {/* Legal Documents Bottom Sheet */}
+      <LegalDocumentsBottomSheet ref={legalBottomSheetRef} />
     </YStack>
   );
 }
