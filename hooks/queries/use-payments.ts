@@ -296,14 +296,7 @@ export function useCreateTransaction() {
       Alert.alert('Error', errorMessage);
       console.warn('User-friendly error:', errorMessage);
     },
-    retry: (failureCount, error: any) => {
-      // Don't retry on 4xx errors (client errors)
-      if (error?.status >= 400 && error?.status < 500) {
-        return false;
-      }
-      // Retry up to 2 times for 5xx errors or network errors
-      return failureCount < 2;
-    },
+    retry: false,
   });
 }
 
