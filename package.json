@@ -57,6 +57,7 @@
     "expo-system-ui": "~5.0.11",
     "expo-task-manager": "^13.1.6",
     "expo-web-browser": "^14.2.0",
+    "lottie-react-native": "7.2.2",
     "react": "19.0.0",
     "react-content-loader": "^7.0.2",
     "react-dom": "19.0.0",
