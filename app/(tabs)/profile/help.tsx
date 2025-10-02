@@ -44,7 +44,7 @@ export default function HelpScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
     try {
-      const emailUrl = "mailto:admin@bidscents.com?subject=Help Request - BidScents App";
+      const emailUrl = "mailto:support@bidscents.com?subject=Help Request - BidScents App";
       const canOpen = await Linking.canOpenURL(emailUrl);
       
       if (canOpen) {
@@ -52,7 +52,7 @@ export default function HelpScreen() {
       } else {
         Alert.alert(
           "Email Not Available",
-          "Please send your inquiry to admin@bidscents.com",
+          "Please send your inquiry to support@bidscents.com",
           [{ text: "OK" }]
         );
       }
@@ -60,7 +60,7 @@ export default function HelpScreen() {
       console.log("Failed to open email:", error);
       Alert.alert(
         "Contact Information",
-        "Please reach out to us at admin@bidscents.com for assistance.",
+        "Please reach out to us at support@bidscents.com for assistance.",
         [{ text: "OK" }]
       );
     }
