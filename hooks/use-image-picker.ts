@@ -33,7 +33,7 @@ export const useImagePicker = (options: ImagePickerOptions = {}): ImagePickerHoo
   const {
     allowsEditing = true,
     aspect = [4, 3],
-    quality = 0.8,
+    quality = 0.4,
     allowMultiple = false,
     maxImages = 1,
     maxSizeInMB = 10

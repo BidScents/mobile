@@ -25,11 +25,13 @@ import { ScrollView } from 'react-native'
 import { Text, YStack } from 'tamagui'
 
 /**
- * Extended form data to include local image URIs
+ * Extended form data to include local image URIs and uploaded paths
  */
 interface ExtendedOnboardingData extends OnboardingFormData {
   profileImageUri?: string
   coverImageUri?: string
+  uploadedProfileImagePath?: string
+  uploadedCoverImagePath?: string
 }
 
 /**
@@ -48,6 +50,25 @@ export default function OnboardingScreen() {
   const [isLoading, setIsLoading] = useState(false)
   const [profileImageUri, setProfileImageUri] = useState<string | null>(null)
   const [coverImageUri, setCoverImageUri] = useState<string | null>(null)
+  // Track uploaded photo paths to prevent re-upload on retry
+  const [uploadedProfileImagePath, setUploadedProfileImagePath] = useState<string | null>(null)
+  const [uploadedCoverImagePath, setUploadedCoverImagePath] = useState<string | null>(null)
+
+  // Reset uploaded path when user selects new profile image
+  const handleProfileImageChange = (uri: string | null) => {
+    setProfileImageUri(uri)
+    if (uri !== profileImageUri) {
+      setUploadedProfileImagePath(null) // Reset on new selection
+    }
+  }
+
+  // Reset uploaded path when user selects new cover image
+  const handleCoverImageChange = (uri: string | null) => {
+    setCoverImageUri(uri)
+    if (uri !== coverImageUri) {
+      setUploadedCoverImagePath(null) // Reset on new selection
+    }
+  }
 
   const {
     control,
@@ -62,21 +83,26 @@ export default function OnboardingScreen() {
   /**
    * Handle form submission
    * 
-   * Uploads selected images first, then submits onboarding data.
+   * Includes pre-uploaded photo paths to prevent re-upload on retry.
    * Manages loading state and delegates logic to utility function.
    */
   const onSubmit = async (data: OnboardingFormData) => {
     setIsLoading(true)
     
     try {
-      // Create extended data with local image URIs
+      // Create extended data with local image URIs and uploaded paths
       const extendedData: ExtendedOnboardingData = {
         ...data,
         profileImageUri: profileImageUri || undefined,
-        coverImageUri: coverImageUri || undefined
+        coverImageUri: coverImageUri || undefined,
+        uploadedProfileImagePath: uploadedProfileImagePath || undefined,
+        uploadedCoverImagePath: uploadedCoverImagePath || undefined
       }
 
-      await handleOnboardingUI(extendedData)
+      await handleOnboardingUI(extendedData, {
+        onProfileImageUploaded: setUploadedProfileImagePath,
+        onCoverImageUploaded: setUploadedCoverImagePath
+      })
     } catch (error) {
       // Error handling is done in the utility function
       // Loading state is cleared here regardless of outcome
@@ -99,8 +125,8 @@ export default function OnboardingScreen() {
             <ProfilePreviewPicker
               profileImageUri={profileImageUri}
               coverImageUri={coverImageUri}
-              onProfileImageChange={setProfileImageUri}
-              onCoverImageChange={setCoverImageUri}
+              onProfileImageChange={handleProfileImageChange}
+              onCoverImageChange={handleCoverImageChange}
               disabled={isLoading}
             />
               

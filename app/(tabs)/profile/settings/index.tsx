@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
-import { handleSignOutUI } from "@/utils/auth-ui-handlers";
+import { handleDeleteAccountUI } from "@/utils/auth-ui-handlers";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { Alert } from "react-native";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const SettingsSections = [
@@ -12,24 +11,19 @@ const SettingsSections = [
     title: "Account",
     sections: [
       {
-        name: "Profile Details",
+        name: "Edit Profile Details",
         icon: "person-outline",
         src: "/(tabs)/profile/edit-profile",
       },
       {
-        name: "Account Details",
-        icon: "card-outline",
-        src: "/(tabs)/profile/settings/account",
+        name: "Change Password",
+        icon: "lock-closed-outline",
+        src: "/(screens)/reset-password",
       },
       {
         name: "Payments",
         icon: "wallet-outline",
         src: "/(tabs)/profile/settings/payments",
-      },
-      {
-        name: "Postage",
-        icon: "mail-outline",
-        src: "/(tabs)/profile/settings/postage",
       },
     ],
   },
@@ -56,20 +50,6 @@ const handlePress = (link: string) => {
 };
 
 export default function SettingsScreen() {
-
-  const handleLogout = () => {
-    Alert.alert("Log Out", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: () => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          handleSignOutUI();
-        },
-      },
-    ]);
-  };
 
   return (
     <Container variant="padded" safeArea={false} backgroundColor="$background">
@@ -120,14 +100,13 @@ export default function SettingsScreen() {
             </YStack>
           ))}
 
-          {/* Logout Section */}
           <YStack borderRadius="$6">
             <Button
-              onPress={handleLogout}
-              variant="ghost"
-              leftIcon="log-out-outline"
+              onPress={handleDeleteAccountUI}
+              variant="destructive"
+              leftIcon="trash-outline"
             >
-              Log Out
+              Delete Account
             </Button>
           </YStack>
         </YStack>

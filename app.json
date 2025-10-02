@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "bidscents",
+    "name": "BidScents",
     "slug": "bidscents",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -87,6 +87,13 @@
             "image": "./assets/icons/splash-icon-light.png",
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      [
+        "@stripe/stripe-react-native/app.plugin.js",
+        {
+          // "merchantIdentifier": "merchant.com.bidscents.app",
+          "enableGooglePay": true
         }
       ],
       "expo-notifications",

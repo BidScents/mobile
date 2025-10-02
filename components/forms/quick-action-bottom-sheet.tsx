@@ -1,9 +1,9 @@
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
-import { useThemeColors } from '../../hooks/use-theme-colors'
 import * as Haptics from 'expo-haptics'
 import React, { forwardRef, useImperativeHandle } from 'react'
 import { Text, XStack, YStack } from 'tamagui'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 import { Button } from '../ui/button'
 
 interface QuickActionBottomSheetMethods extends BottomSheetModalMethods {
@@ -44,7 +44,6 @@ export const QuickActionBottomSheet = forwardRef<QuickActionBottomSheetMethods, 
     return (
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={['50%']}
         backgroundStyle={{ backgroundColor: colors.background || 'white' }}
       >
         <YStack gap="$4" padding="$4" paddingBottom="$8" flex={1}>

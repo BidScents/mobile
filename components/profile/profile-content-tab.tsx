@@ -1,10 +1,12 @@
 import { ListingCard } from '@/components/listing/listing-card';
+import { AvatarIcon } from '@/components/ui/avatar-icon';
+import { ThemedIonicons } from '@/components/ui/themed-icons';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { LegendList } from '@legendapp/list';
 import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Image } from 'react-native';
-import { Text, View } from 'tamagui';
+import { Text, View, XStack, YStack } from 'tamagui';
 import type { ProfileContentTabProps } from '../../types/profile-content-tab.types';
 import {
   getCurrentSortLabel,
@@ -84,44 +86,61 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
   ), []);
 
   const renderReviewItem = useCallback(({ item }: { item: any }) => (
-    <View paddingHorizontal="$4" paddingVertical="$3">
-      <View backgroundColor="$background" borderRadius="$4" padding="$4" gap="$3">
-        <View flexDirection="row" alignItems="center" gap="$3">
-          <View width={40} height={40} borderRadius={20} overflow="hidden" backgroundColor="$gray3">
-            {item.reviewer?.profile_image_url ? (
-              <Image
-                source={{ uri: item.reviewer.profile_image_url }}
-                style={{ width: 40, height: 40 }}
-                resizeMode="cover"
-              />
-            ) : (
-              <View flex={1} alignItems="center" justifyContent="center">
-                <Text fontSize="$4" color="$mutedForeground">
-                  {(item.reviewer?.username || 'A').charAt(0).toUpperCase()}
+    <View paddingHorizontal="$4">
+      <YStack 
+        backgroundColor="$muted" 
+        borderRadius="$6" 
+        padding="$4" 
+        gap="$3"
+      >
+        <XStack alignItems="center" gap="$3">
+          <XStack 
+            alignItems="center" 
+            gap="$3" 
+            flex={1}
+            onPress={() => {
+              if (item.reviewer?.id) {
+                router.push(`/profile/${item.reviewer.id}`);
+              }
+            }}
+            hitSlop={10}
+          >
+            <AvatarIcon 
+              url={item.reviewer?.profile_image_url} 
+              size="$6" 
+            />
+            <YStack flex={1}>
+              <Text fontWeight="600" fontSize="$5" color="$foreground">
+                {item.reviewer?.username || 'Anonymous'}
+              </Text>
+              {item.reviewed_at && (
+                <Text fontSize="$3" color="$mutedForeground">
+                  {new Date(item.reviewed_at).toLocaleDateString()}
                 </Text>
-              </View>
-            )}
-          </View>
-          <View flex={1} flexDirection="row" alignItems="center" justifyContent="space-between">
-            <Text fontWeight="600" fontSize="$5" color="$foreground">
-              {item.reviewer?.username || 'Anonymous'}
-            </Text>
-            <Text fontSize="$4" color="$mutedForeground">
-              {item.rating ? `⭐ ${item.rating}/5` : ''}
-            </Text>
-          </View>
-        </View>
+              )}
+            </YStack>
+          </XStack>
+          
+          {item.rating && (
+            <XStack alignItems="center" gap="$1.5">
+              <ThemedIonicons 
+                name="star" 
+                size={16} 
+                themeColor="rating" 
+              />
+              <Text fontSize="$4" fontWeight="500" color="$foreground">
+                {item.rating}/5
+              </Text>
+            </XStack>
+          )}
+        </XStack>
+        
         {item.comment && (
           <Text fontSize="$4" color="$foreground" lineHeight="$5">
             {item.comment}
           </Text>
         )}
-        {item.reviewed_at && (
-          <Text fontSize="$3" color="$mutedForeground">
-            {new Date(item.reviewed_at).toLocaleDateString()}
-          </Text>
-        )}
-      </View>
+      </YStack>
     </View>
   ), []);
 
@@ -200,7 +219,7 @@ export const ProfileContentTab = React.memo(function ProfileContentTab({
           keyExtractor={reviewKeyExtractor}
           drawDistance={300}
           recycleItems
-          contentContainerStyle={{ paddingTop: 16 }}
+          contentContainerStyle={{ paddingTop: 8, gap: 12 }}
           ListFooterComponent={
             <ProfileContentFooter
               isFetchingNextPage={isFetchingNextPage}

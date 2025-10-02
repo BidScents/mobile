@@ -1,20 +1,20 @@
+import { LegalDocumentsBottomSheet, LegalDocumentsBottomSheetMethods } from "@/components/forms/legal-documents-bottom-sheet";
 import { AvatarIcon } from "@/components/ui/avatar-icon";
+import Button from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
+import { handleSignOutUI } from "@/utils/auth-ui-handlers";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
+import React, { useRef } from "react";
+import { Alert } from "react-native";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const SettingsSections = [
   {
     title: "General",
     sections: [
-      {
-        name: "Badges",
-        icon: "star-outline",
-        src: "/profile/badges",
-      },
       {
         name: "Favourite Listings",
         icon: "heart-outline",
@@ -46,26 +46,54 @@ const SettingsSections = [
         src: "/profile/help",
       },
       {
-        name: "About Us",
-        icon: "information-circle-outline",
-        src: "/profile/about-us",
-      },
-      {
         name: "Terms and Conditions",
         icon: "document-text-outline",
-        src: "/profile/legal",
+        action: "terms",
+      },
+      {
+        name: "Privacy Policy",
+        icon: "shield-checkmark-outline",
+        action: "privacy",
       },
     ],
   },
 ];
 
-const handlePress = (link: string) => {
-  router.push(link as any);
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-};
-
 export default function ProfileScreen() {
   const { user } = useAuthStore();
+  const legalBottomSheetRef = useRef<LegalDocumentsBottomSheetMethods>(null);
+
+  const handlePress = (item: { src?: string; action?: string }) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    if (item.src) {
+      router.push(item.src as any);
+    } else if (item.action === "terms") {
+      legalBottomSheetRef.current?.presentWithTab('terms');
+    } else if (item.action === "privacy") {
+      legalBottomSheetRef.current?.presentWithTab('privacy');
+    }
+  };
+
+  const handleProfilePress = (link: string) => {
+    router.push(link as any);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handleLogout = () => {
+      Alert.alert("Log Out", "Are you sure you want to log out?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Log Out",
+          style: "destructive",
+          onPress: () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            handleSignOutUI();
+          },
+        },
+      ]);
+    };
+    
   return (
     <Container variant="padded" safeArea={false} backgroundColor="$background">
       <ScrollView
@@ -79,7 +107,7 @@ export default function ProfileScreen() {
           borderRadius="$6"
           px="$4"
           py="$3"
-          onPress={() => handlePress(`/profile/${user?.id}`)}
+          onPress={() => handleProfilePress(`/profile/${user?.id}`)}
           pressStyle={{
             backgroundColor: "$mutedPress",
           }}
@@ -118,7 +146,7 @@ export default function ProfileScreen() {
                     px="$4"
                     py="$4"
                     borderRadius="$6"
-                    onPress={() => handlePress(item.src)}
+                    onPress={() => handlePress(item)}
                     pressStyle={{
                       backgroundColor: "$mutedPress",
                     }}
@@ -145,8 +173,21 @@ export default function ProfileScreen() {
               </YStack>
             </YStack>
           ))}
+          {/* Logout Section */}
+          <YStack borderRadius="$6">
+            <Button
+              onPress={handleLogout}
+              variant="secondary"
+              leftIcon="log-out-outline"
+            >
+              Log Out
+            </Button>
+          </YStack>
         </YStack>
       </ScrollView>
+
+      {/* Legal Documents Bottom Sheet */}
+      <LegalDocumentsBottomSheet ref={legalBottomSheetRef} />
     </Container>
   );
 }

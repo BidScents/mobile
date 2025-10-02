@@ -23,6 +23,8 @@ interface ProfileDetailsProps {
   isProfileOwner: boolean;
   isFollowLoading: boolean;
   onFollowToggle: () => void;
+  onFollowingPress?: () => void;
+  onFollowersPress?: () => void;
 }
 
 export const ProfileDetails: React.FC<ProfileDetailsProps> = ({
@@ -30,6 +32,8 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({
   isProfileOwner,
   isFollowLoading,
   onFollowToggle,
+  onFollowingPress,
+  onFollowersPress,
 }) => {
   return (
     <View paddingHorizontal="$4" mt="$4" gap="$4">
@@ -47,6 +51,8 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({
           <ProfileStats
             followingCount={profile.following_count}
             followerCount={profile.follower_count}
+            onFollowingPress={onFollowingPress}
+            onFollowersPress={onFollowersPress}
           />
 
           {/* Rating */}

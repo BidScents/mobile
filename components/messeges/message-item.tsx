@@ -2,18 +2,22 @@ import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { formatDate } from "@/utils/utility-functions";
 import {
   ConversationResponse,
+  FileContent,
+  MessageActionType,
   MessageResData,
   MessageType,
   RichConfirmReceiptActionContent,
   RichInitiateTransactionActionContent,
   RichSubmitReviewActionContent,
-  useAuthStore
+  RichTextContent,
+  useAuthStore,
 } from "@bid-scents/shared-sdk";
 import React, { useCallback, useMemo } from "react";
 import { Avatar, Text, View, XStack, YStack } from "tamagui";
 import { ActionMessage } from "./message-content/action-message";
 import { FileMessage } from "./message-content/file-message";
-import { SystemMessage } from "./message-content/system-message";
+import { SystemReceiptMessage } from "./message-content/system-receipt-message";
+import { SystemReviewMessage } from "./message-content/system-review-message";
 import { TextMessage } from "./message-content/text-message";
 
 interface MessageItemProps {
@@ -33,15 +37,20 @@ const MessageItemComponent = ({
   
   // Memoize expensive calculations
   const isCurrentUser = useMemo(() => 
-    message.sender.id === user?.id, 
-    [message.sender.id, user?.id]
+    message.sender?.id === user?.id, 
+    [message.sender?.id, user?.id]
+  );
+
+  const isSystemMessage = useMemo(() => 
+    message.sender?.id === "00000000-0000-0000-0000-000000000000", 
+    [message.sender?.id]
   );
   
   // Memoize read status calculation
   const isRead = useMemo(() => {
     // A message is read if every participant (except the sender) has read it.
     const otherParticipants = conversation.participants.filter(
-      (p) => p.user.id !== message.sender.id
+      (p) => p.user.id !== message.sender?.id
     );
 
     // If there are no other participants, the message is not considered 'read' by others.
@@ -54,10 +63,15 @@ const MessageItemComponent = ({
     return otherParticipants.every((p) => {
       return p.last_read_at && new Date(p.last_read_at) >= new Date(message.created_at);
     });
-  }, [conversation.participants, message.created_at, message.sender.id]);
+  }, [conversation.participants, message.created_at, message.sender?.id]);
 
   // Memoize message type and alignment calculation
   const { actualType, align } = useMemo(() => {
+    // Check if it's a system message first (simplest approach)
+    if (isSystemMessage) {
+      return { actualType: 'SYSTEM', align: 'center' };
+    }
+    
     if (message.content_type === MessageType.ACTION) {
       const content = message.content as any;
       
@@ -67,115 +81,82 @@ const MessageItemComponent = ({
       if (isTransaction) {
         return { actualType: 'ACTION', align: isCurrentUser ? 'right' : 'left' };
       } else {
-        // Receipt confirmations and review submissions are SYSTEM messages
-        // Show on right if current user is the seller (buyer_id !== current user)
-        const isSeller = content?.buyer_id !== user?.id;
-        const shouldAlignRight = isCurrentUser || (isSeller && isCurrentUser);
-        return { actualType: 'SYSTEM', align: shouldAlignRight ? 'right' : 'center' };
+        // This shouldn't happen now that we check isSystemMessage first, but keep as fallback
+        return { actualType: 'SYSTEM', align: 'center' };
       }
     }
     
-    if (message.content_type === MessageType.SYSTEM) {
-      return { actualType: 'SYSTEM', align: 'center' };
-    }
-    
     return { actualType: message.content_type, align: isCurrentUser ? 'right' : 'left' };
-  }, [message.content_type, message.content, isCurrentUser, user?.id]);
+  }, [message.content_type, message.content, isCurrentUser, user?.id, isSystemMessage]);
 
   const renderMessageContent = useCallback(() => {
-    const isCurrentUserMessage = align === 'right';
     
     switch (actualType) {
       case MessageType.TEXT:
         return (
           <TextMessage
-            content={message.content as any}
-            isCurrentUser={isCurrentUserMessage}
+            content={message.content as RichTextContent}
+            isCurrentUser={isCurrentUser}
           />
         );
       case MessageType.FILE:
         return (
           <FileMessage
-            content={message.content as any}
-            isCurrentUser={isCurrentUserMessage}
+            content={message.content as FileContent}
+            isCurrentUser={isCurrentUser}
             messageId={message.id}
           />
         );
       case 'ACTION':
+        const isBuyerAction = (message.content as RichInitiateTransactionActionContent).buyer_id === user?.id;
         return (
           <ActionMessage
             content={message.content as RichInitiateTransactionActionContent}
-            isCurrentUser={isCurrentUserMessage}
+            isCurrentUser={isCurrentUser}
+            messageId={message.id}
+            isBuyer={isBuyerAction}
+            message={message}
           />
         );
       case 'SYSTEM':
-        // Check if it's a receipt/review system message or generic system message
-        const content = message.content as any;
-        const isReceiptOrReview = content && ('buyer_id' in content);
-        
-        if (isReceiptOrReview) {
+        const isBuyerSystem = (message.content as RichConfirmReceiptActionContent | RichSubmitReviewActionContent).buyer_id === user?.id;
+        const isConfirmReceipt = (message.content as RichConfirmReceiptActionContent).action_type === MessageActionType.CONFIRM_RECEIPT;
+
+        if (isConfirmReceipt) {
           return (
-            <SystemMessage
-              content={content as RichConfirmReceiptActionContent | RichSubmitReviewActionContent}
-              isCurrentUser={isCurrentUserMessage}
+            <SystemReceiptMessage
+              content={message.content as RichConfirmReceiptActionContent}
+              isBuyer={isBuyerSystem}
+              messageId={message.id}
+              message={message}
             />
           );
-        } else {
+        }else{
           return (
-            <View
-              paddingVertical="$1"
-              paddingHorizontal="$2"
-            >
-            <Text
-              fontSize="$3"
-              color="$mutedForeground"
-              textAlign="center"
-              fontStyle="italic"
-            >
-              {content?.text || "System message"}
-            </Text>
-            </View>
+            <SystemReviewMessage
+              content={message.content as RichSubmitReviewActionContent}
+              isBuyer={isBuyerSystem}
+              messageId={message.id}
+              message={message}
+            />
           );
         }
       default:
         return (
           <Text
             fontSize="$4"
-            color={isCurrentUserMessage ? "$white" : "$foreground"}
+            color={isCurrentUser ? "$white" : "$foreground"}
           >
             Unsupported message type
           </Text>
         );
     }
-  }, [actualType, align, message.content]);
+  }, [actualType, align, message.content, message.id, user?.id]);
 
   // Handle different alignments
   if (align === 'center') {
     return (
-      <View marginVertical="$2" alignItems="center">
-        <View
-          backgroundColor="$muted"
-          paddingHorizontal="$3"
-          paddingVertical="$2"
-          borderRadius="$4"
-          maxWidth="80%"
-        >
-          {renderMessageContent()}
-        </View>
-      </View>
-    );
-  }
-
-  // Special handling for system messages that should be aligned right/left
-  if (actualType === 'SYSTEM' && align !== 'center') {
-    return (
-      <View marginVertical="$1">
-        <XStack
-          justifyContent={align === 'right' ? "flex-end" : "flex-start"}
-        >
-          {renderMessageContent()}
-        </XStack>
-      </View>
+      renderMessageContent()
     );
   }
 
@@ -189,12 +170,12 @@ const MessageItemComponent = ({
           <Avatar circular size="$2" marginRight="$2">
             <Avatar.Image
               source={{
-                uri: message.sender.profile_image_url || undefined,
+                uri: message.sender?.profile_image_url || undefined,
               }}
             />
             <Avatar.Fallback backgroundColor="$muted">
               <Text fontSize="$2" fontWeight="600" color="$mutedForeground">
-                {message.sender.username?.charAt(0).toUpperCase() || "U"}
+                {message.sender?.username?.charAt(0).toUpperCase() || "?"}
               </Text>
             </Avatar.Fallback>
           </Avatar>
@@ -251,6 +232,16 @@ const areEqual = (
 ) => {
   // If message ID is different, it's a different message.
   if (prevProps.message.id !== nextProps.message.id) {
+    return false;
+  }
+
+  // Check if message content has changed (important for transaction status updates)
+  if (JSON.stringify(prevProps.message.content) !== JSON.stringify(nextProps.message.content)) {
+    return false;
+  }
+
+  // Check if message created_at has changed (rare but possible)
+  if (prevProps.message.created_at !== nextProps.message.created_at) {
     return false;
   }
 

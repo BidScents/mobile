@@ -174,34 +174,76 @@ export const uploadMultipleImages = async (
     throw new Error('No images to upload')
   }
   
-  const uploadedResults: ImageUploadResult[] = []
+  console.log(`Starting parallel upload of ${imageUris.length} images`)
   
-  try {
-    for (let i = 0; i < imageUris.length; i++) {
-      console.log(`Uploading image ${i + 1} of ${imageUris.length}`)
-      
-      const result = await uploadSingleImage(imageUris[i], {
+  // Track completed uploads for progress and cleanup
+  let completedUploads = 0
+  const successfulResults: ImageUploadResult[] = []
+  
+  // Create upload promises for all images
+  const uploadPromises = imageUris.map(async (imageUri, index) => {
+    try {
+      const result = await uploadSingleImage(imageUri, {
         ...config,
         showUserPrompts: config.showUserPrompts !== false // Default to true for batch uploads
       })
       
-      uploadedResults.push(result)
-      
-      // Call progress callback
+      // Update progress when each upload completes
+      completedUploads++
       onProgress?.({ 
-        uploaded: i + 1, 
+        uploaded: completedUploads, 
         total: imageUris.length,
         currentFile: result.filePath 
       })
+      
+      return { success: true, result, index }
+    } catch (error) {
+      return { success: false, error, index }
+    }
+  })
+  
+  try {
+    // Wait for all uploads to complete
+    const results = await Promise.allSettled(uploadPromises)
+    
+    // Process results and maintain order
+    const orderedResults: (ImageUploadResult | undefined)[] = new Array(imageUris.length)
+    const errors: any[] = []
+    
+    for (const [index, promiseResult] of results.entries()) {
+      if (promiseResult.status === 'fulfilled') {
+        const uploadResult = promiseResult.value
+        if (uploadResult.success) {
+          orderedResults[uploadResult.index] = uploadResult.result
+          successfulResults.push(uploadResult.result!)
+        } else {
+          errors.push({ index: uploadResult.index, error: uploadResult.error })
+        }
+      } else {
+        errors.push({ index, error: promiseResult.reason })
+      }
     }
     
-    return uploadedResults
+    // If any uploads failed, clean up successful ones and throw error
+    if (errors.length > 0) {
+      if (successfulResults.length > 0) {
+        console.log(`Cleaning up ${successfulResults.length} uploaded images due to ${errors.length} failed uploads...`)
+        const filePathsToDelete = successfulResults.map(result => result.filePath)
+        await cleanupUploadedImages(config.bucket, filePathsToDelete)
+      }
+      
+      // Throw the first error encountered
+      throw errors[0].error
+    }
+    
+    console.log(`Successfully uploaded ${orderedResults.length} images in parallel`)
+    return orderedResults.filter((result): result is ImageUploadResult => result !== undefined)
     
   } catch (error: any) {
-    // Clean up any uploaded images on failure
-    if (uploadedResults.length > 0) {
-      console.log(`Cleaning up ${uploadedResults.length} uploaded images due to error...`)
-      const filePathsToDelete = uploadedResults.map(result => result.filePath)
+    // Clean up any successful uploads if there was an unexpected error
+    if (successfulResults.length > 0) {
+      console.log(`Cleaning up ${successfulResults.length} uploaded images due to error...`)
+      const filePathsToDelete = successfulResults.map(result => result.filePath)
       await cleanupUploadedImages(config.bucket, filePathsToDelete)
     }
     

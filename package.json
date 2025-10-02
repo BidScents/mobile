@@ -11,7 +11,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@bid-scents/shared-sdk": "^1.1.5",
+    "@bid-scents/shared-sdk": "^1.2.10",
     "@d11/react-native-fast-image": "^8.11.1",
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5.1.6",
@@ -23,6 +23,7 @@
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
     "@shopify/flash-list": "1.7.6",
+    "@stripe/stripe-react-native": "^0.51.0",
     "@supabase/supabase-js": "^2.50.1",
     "@tamagui/button": "^1.129.2",
     "@tamagui/config": "^1.129.2",
@@ -56,6 +57,7 @@
     "expo-system-ui": "~5.0.11",
     "expo-task-manager": "^13.1.6",
     "expo-web-browser": "^14.2.0",
+    "lottie-react-native": "7.2.2",
     "react": "19.0.0",
     "react-content-loader": "^7.0.2",
     "react-dom": "19.0.0",

@@ -18,7 +18,7 @@ export function FileMessage({
 
   if (isImage) {
     return (
-      <View>
+      <View maxWidth={200}>
         <FastImage
           key={`${messageId}-${content.file_url}`}
           source={{ uri: content.file_url, priority: FastImage.priority.high }}

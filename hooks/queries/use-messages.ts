@@ -1,19 +1,20 @@
 import type {
   ConversationResponse,
+  ListingDetailsResponse,
   MessageRequest,
   MessageResData,
   MessagesSummary,
+  RichTextContent,
+  TextContent,
 } from "@bid-scents/shared-sdk";
 import { MessageService, MessageType, useAuthStore } from "@bid-scents/shared-sdk";
 import {
-  InfiniteData,
   QueryClient,
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { queryKeys } from "./query-keys";
 
 // ========================================
@@ -28,10 +29,9 @@ export function useConversationSummary() {
   return useQuery({
     queryKey: queryKeys.messages.summary,
     queryFn: () => MessageService.getConversationSummaryV1MessageSummaryGet(),
-    staleTime: 2 * 60 * 1000, // 2 minutes - conversations change frequently with new messages
-    // Conversations are critical for messaging, enable background refetch
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
+    refetchOnWindowFocus: "always",
+    refetchOnMount: "always",
+    gcTime: 2 * 60 * 1000,
   });
 }
 
@@ -46,10 +46,8 @@ export function useConversation(conversationId: string) {
       MessageService.getConversationV1MessageConversationConversationIdGet(
         conversationId
       ),
-    staleTime: 1 * 60 * 1000, // 1 minute - conversation content changes frequently
+    staleTime: 2 * 60 * 1000, // 2 minutes - reduce excessive requests
     enabled: !!conversationId,
-    // Enable background refetch for active conversations
-    refetchOnWindowFocus: true,
   });
 }
 
@@ -58,22 +56,39 @@ export function useConversation(conversationId: string) {
 // ========================================
 
 /**
- * Infinite query for loading messages with cursor pagination (WhatsApp pattern)
- * Used for loading message history in conversation screens
+ * Infinite query for loading messages with cursor pagination
+ * Uses conversation endpoint for first page, then messages endpoint for subsequent pages
  */
-export function useMessages(conversationId: string, initialMessages: MessageResData[] = []) {
+export function useMessages(conversationId: string) {  
   return useInfiniteQuery({
     queryKey: queryKeys.messages.list(conversationId),
-    queryFn: ({ pageParam }) => {
-      // Only fetch if we have a cursor (meaning we need older messages)
-      if (!pageParam) return [];
+    queryFn: async ({ pageParam }) => {
+      console.log('🔄 useMessages queryFn called:', { conversationId, pageParam });
       
-      return MessageService.getMessagesV1MessageConversationIdMessagesGet(
-        conversationId,
-        pageParam, // cursor timestamp
-        50 // limit
-      );
+      try {
+        // First page: use conversation endpoint to get initial messages
+        if (!pageParam) {
+          console.log('📡 Fetching first page from conversation endpoint');
+          const conversation = await MessageService.getConversationV1MessageConversationConversationIdGet(conversationId);
+          console.log('✅ First page loaded:', conversation.messages?.length || 0, 'messages');
+          return conversation.messages || [];
+        }
+        
+        // Subsequent pages: use messages endpoint with cursor
+        console.log('📡 Fetching next page with cursor:', pageParam);
+        const messages = await MessageService.getMessagesV1MessageConversationIdMessagesGet(
+          conversationId,
+          pageParam, // cursor timestamp
+          50 // limit
+        );
+        console.log('✅ Next page loaded:', messages?.length || 0, 'messages');
+        return messages || [];
+      } catch (error) {
+        console.error('❌ useMessages queryFn error:', { conversationId, pageParam, error });
+        throw error;
+      }
     },
+    initialPageParam: undefined,
     getNextPageParam: (lastPage: MessageResData[]) => {
       // No more pages if we got less than the limit
       if (!lastPage || lastPage.length < 50) {
@@ -84,68 +99,49 @@ export function useMessages(conversationId: string, initialMessages: MessageResD
       const oldestMessage = lastPage[lastPage.length - 1];
       return oldestMessage.created_at;
     },
-    initialPageParam: initialMessages.length > 0 
-      ? initialMessages[0]?.created_at  // Start pagination from oldest initial message
-      : undefined, // No initial cursor if no initial messages
-    staleTime: 5 * 60 * 1000, // Increased stale time - less refetching
+    staleTime: 30 * 1000, // 30 seconds - reduce excessive refetching
     enabled: !!conversationId,
-    // Don't automatically fetch on mount - we have initial messages
-    refetchOnMount: false,
+    refetchOnWindowFocus: "always",
+    refetchOnMount: "always",
+    gcTime: 2 * 60 * 1000, // 2 minutes - reduce excessive refetching
   });
 }
 
-/**
- * Message deduplication hook - merges initial messages with paginated messages
- * Ensures no duplicate messages and maintains chronological order
- */
-export function useDeduplicatedMessages(
-  initialMessages: MessageResData[],
-  infiniteData: InfiniteData<MessageResData[]> | undefined
-) {
-  return useMemo(() => {
-    // Start with initial messages (most recent from conversation)
-    const messageMap = new Map<string, MessageResData>();
-    
-    // Add initial messages first
-    initialMessages.forEach(message => {
-      messageMap.set(message.id, message);
-    });
-    
-    // Add paginated messages (older messages)
-    if (infiniteData?.pages) {
-      infiniteData.pages.forEach(page => {
-        page.forEach(message => {
-          // Only add if not already present (deduplication)
-          if (!messageMap.has(message.id)) {
-            messageMap.set(message.id, message);
-          }
-        });
-      });
-    }
-    
-    // Convert to array and sort chronologically (oldest first)
-    return Array.from(messageMap.values())
-  }, [initialMessages, infiniteData]);
-}
 
 // ========================================
 // CACHE HELPERS
 // ========================================
 
 /**
- * Updates conversation caches after sending a message (WhatsApp pattern)
- * Only updates conversation cache, lets deduplication hook handle merging
+ * Universal function to update all message-related caches
+ * Updates both conversation and infinite message caches for real-time consistency
  */
-function updateConversationCachesWithNewMessage(
+export function updateAllMessageCaches(
   queryClient: QueryClient,
   conversationId: string,
-  newMessage: MessageResData
+  newMessage: MessageResData,
+  shouldUpdate: boolean = false
 ) {
-  // 1. Update conversation cache - add to messages array
+  // 1. Update conversation cache - update or add to messages array
   queryClient.setQueryData<ConversationResponse>(
     queryKeys.messages.conversation(conversationId),
     (old) => {
       if (!old) return old;
+      
+      if (shouldUpdate) {
+        // Find and replace existing message, or add if not found
+        const existingIndex = old.messages.findIndex(msg => msg.id === newMessage.id);
+        if (existingIndex !== -1) {
+          const updatedMessages = [...old.messages];
+          updatedMessages[existingIndex] = newMessage;
+          return {
+            ...old,
+            messages: updatedMessages,
+          };
+        }
+      }
+      
+      // Default behavior: add new message
       return {
         ...old,
         messages: [newMessage, ...old.messages],
@@ -153,9 +149,47 @@ function updateConversationCachesWithNewMessage(
     }
   );
 
-  // 2. DON'T update infinite messages cache directly
-  // Let the deduplication hook handle merging on next render
-  // This prevents cache inconsistencies
+  // 2. Update infinite messages cache for immediate UI visibility
+  queryClient.setQueryData(
+    queryKeys.messages.list(conversationId),
+    (old: any) => {
+      if (!old?.pages) return old;
+      
+      if (shouldUpdate) {
+        // Find and replace existing message across all pages
+        const updatedPages = old.pages.map((page: MessageResData[]) => {
+          const existingIndex = page.findIndex(msg => msg.id === newMessage.id);
+          if (existingIndex !== -1) {
+            const updatedPage = [...page];
+            updatedPage[existingIndex] = newMessage;
+            return updatedPage;
+          }
+          return page;
+        });
+        
+        // Check if message was found and updated
+        const messageFound = updatedPages.some((page: MessageResData[], pageIndex: number) =>
+          page !== old.pages[pageIndex]
+        );
+        
+        if (messageFound) {
+          return {
+            ...old,
+            pages: updatedPages,
+          };
+        }
+      }
+      
+      // Default behavior: add to the first page (most recent messages)
+      const firstPage = old.pages[0] || [];
+      const updatedFirstPage = [newMessage, ...firstPage];
+      
+      return {
+        ...old,
+        pages: [updatedFirstPage, ...old.pages.slice(1)],
+      };
+    }
+  );
 
   // 3. Update conversation summary cache
   queryClient.setQueryData<MessagesSummary>(
@@ -255,22 +289,51 @@ export function useSendMessage() {
         queryKeys.messages.list(conversationId)
       );
 
+      // Create optimistic content - enrich with listing data if available
+      let optimisticContent = messageRequest.content;
+
+      // If this is a text message with listing context, try to enrich it
+      if (messageRequest.content_type === MessageType.TEXT) {
+        const textContent = messageRequest.content as TextContent;
+        
+        if (textContent.listing_id) {
+          // Try to get listing data from cache
+          const listingData = queryClient.getQueryData<ListingDetailsResponse>(
+            queryKeys.listings.detail(textContent.listing_id)
+          );
+          
+          if (listingData?.listing) {
+            // Transform to RichTextContent with listing preview
+            optimisticContent = {
+              text: textContent.text,
+              listing: {
+                id: listingData.listing.id,
+                seller_id: listingData.seller.id,
+                name: listingData.listing.name,
+                price: listingData.listing.price,
+                image_url: listingData.image_urls[0] || null,
+              }
+            } as RichTextContent;
+          }
+        }
+      }
+
       // Create optimistic message with current user data (text messages only)
       const optimisticMessage: MessageResData = {
         id: `temp-${Date.now()}`, // Temporary ID
         conversation_id: conversationId,
         content_type: messageRequest.content_type,
-        content: messageRequest.content,
-        sender: {
-          id: user?.id || "current-user",
-          username: user?.username || "You",
-          profile_image_url: user?.profile_image_url || null,
-        },
+        content: optimisticContent,
+        sender: user ? {
+          id: user.id,
+          username: user.username || "You",
+          profile_image_url: user.profile_image_url || null,
+        } : null,
         created_at: new Date().toISOString(),
       };
 
       // Apply optimistic updates (text messages only)
-      updateConversationCachesWithNewMessage(
+      updateAllMessageCaches(
         queryClient,
         conversationId,
         optimisticMessage
@@ -303,7 +366,7 @@ export function useSendMessage() {
         );
       } else {
         // For image messages: add the new message to cache (no optimistic update to replace)
-        updateConversationCachesWithNewMessage(
+        updateAllMessageCaches(
           queryClient,
           conversationId,
           response

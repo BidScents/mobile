@@ -12,6 +12,7 @@ import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
 import { useCallback } from 'react'
 import { queryKeys } from './queries/query-keys'
+import { updateAllMessageCaches, } from './queries/use-messages'
 
 /**
  * Configuration options for messaging WebSocket handlers
@@ -35,6 +36,8 @@ interface UseMessagingWebSocketHandlersReturn {
   handleDisconnect: () => void
   /** Handler for new message updates */
   handleMessage: (messageData: MessageResData) => Promise<void>
+  /** Handler for message updates */
+  handleUpdateMessage: (messageData: MessageResData) => Promise<void>
   /** Handler for typing indicator updates */
   handleTyping: (typingData: TypingResData) => void
   /** Handler for last read updates */
@@ -110,36 +113,41 @@ export function useMessagingWebSocketHandlers({
   }, [typingUsersRef, onUIUpdate])
 
   /**
-   * Handles new message updates with optimistic cache updates
+   * Handles new messages (adds to cache)
    */
   const handleMessage = useCallback(async (messageData: MessageResData) => {
-    console.log('New message received:', messageData)
-
-    // Skip processing if it's the current user's own message (already optimistically added)
-    if (messageData.sender?.id === currentUserId) {
-      return
-    }
-
-    // Provide subtle haptic feedback for new message
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    console.log('New message received via WebSocket:', messageData)
 
     const conversationId = messageData.conversation_id
 
-    // 1. Update conversation cache with new message
+    // Check if message already exists in conversation cache
+    const existingConversation = queryClient.getQueryData<ConversationResponse>(
+      queryKeys.messages.conversation(conversationId)
+    )
+    const messageExists = existingConversation?.messages.some(msg => msg.id === messageData.id)
+
+    if (messageExists) {
+      console.log('Message already exists in cache, skipping duplicate')
+      return
+    }
+
+    // Only provide haptic feedback for messages from other users
+    if (messageData.sender?.id !== currentUserId) {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    }
+
+    // Add new message to caches
+    updateAllMessageCaches(queryClient, conversationId, messageData)
+
+    // Update participant read status and unread counts
     queryClient.setQueryData<ConversationResponse>(
       queryKeys.messages.conversation(conversationId),
       (old) => {
         if (!old) return old
-        
-        // Check if message already exists (prevent duplicates)
-        const messageExists = old.messages.some(msg => msg.id === messageData.id)
-        if (messageExists) return old
-
         return {
           ...old,
-          messages: [messageData, ...old.messages],
           participants: old.participants.map((participant) => {
-            if (participant.user.id === messageData.sender.id) {
+            if (participant.user.id === messageData.sender?.id) {
               return {
                 ...participant,
                 last_read_at: messageData.created_at,
@@ -151,7 +159,7 @@ export function useMessagingWebSocketHandlers({
       }
     )
 
-    // 3. Update conversation summary cache
+    // Update conversation summary unread counts
     queryClient.setQueryData<MessagesSummary>(
       queryKeys.messages.summary,
       (old) => {
@@ -164,7 +172,6 @@ export function useMessagingWebSocketHandlers({
             conv.id === conversationId
               ? {
                   ...conv,
-                  last_message: messageData,
                   unread_count: conv.unread_count + 1, // Increment conversation unread
                 }
               : conv
@@ -173,36 +180,50 @@ export function useMessagingWebSocketHandlers({
       }
     )
 
-    // 4. Clear typing indicator for sender if they were typing
+    // Clear typing indicator for sender if they were typing
     if (typingUsersRef?.current[conversationId]) {
       typingUsersRef.current[conversationId] = typingUsersRef.current[conversationId].filter(
-        typing => typing.user.id !== messageData.sender.id
+        typing => typing.user.id !== messageData.sender?.id
       )
       onUIUpdate?.()
     }
 
-    // 5. Show notification for new message (only if not from current user)
-    const getNotificationBody = () => {
-      if (!messageData.content) {
+    // Show notification for new message (only if not from current user)
+    if (messageData.sender?.id !== currentUserId) {
+      const getNotificationBody = () => {
+        if (!messageData.content) {
+          return 'Sent a message'
+        }
+        
+        if (typeof messageData.content === 'object' && 'text' in messageData.content) {
+          return (messageData.content as any).text || 'Sent a message'
+        }
+        
         return 'Sent a message'
       }
-      
-      if (typeof messageData.content === 'object' && 'text' in messageData.content) {
-        return (messageData.content as any).text || 'Sent a message'
-      }
-      
-      return 'Sent a message'
-    }
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: messageData.sender.username || 'New Message',
-        body: getNotificationBody(),
-        sound: true,
-      },
-      trigger: null, // Show immediately
-    })
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: messageData.sender?.username || 'New Message',
+          body: getNotificationBody(),
+          sound: true,
+        },
+        trigger: null, // Show immediately
+      })
+    }
   }, [currentUserId, queryClient, typingUsersRef, onUIUpdate])
+
+  /**
+   * Handles message updates (updates existing message in cache)
+   */
+  const handleUpdateMessage = useCallback(async (messageData: MessageResData) => {
+    console.log('Message update received via WebSocket:', messageData)
+
+    const conversationId = messageData.conversation_id
+
+    // Update existing message in caches
+    updateAllMessageCaches(queryClient, conversationId, messageData, true)
+  }, [queryClient])
 
   /**
    * Handles typing indicator updates
@@ -292,6 +313,7 @@ export function useMessagingWebSocketHandlers({
     handleConnect,
     handleDisconnect,
     handleMessage,
+    handleUpdateMessage,
     handleTyping,
     handleUpdateLastRead,
     handleError,

@@ -1,19 +1,19 @@
 import type {
-  BidResponse,
   FavoriteResponse,
   HomepageResponse,
   ListingCard,
   ListingDetailsResponse,
   SearchRequest,
-  SearchResponse
+  SearchResponse,
+  SellersYouFollowResponse
 } from "@bid-scents/shared-sdk";
 import { AuctionsService, ListingService, useAuthStore } from "@bid-scents/shared-sdk";
 import {
-  QueryClient,
   useInfiniteQuery,
   useMutation,
   useQuery,
-  useQueryClient
+  useQueryClient,
+  type QueryClient
 } from "@tanstack/react-query";
 import { queryKeys } from "./query-keys";
 
@@ -21,6 +21,7 @@ import { queryKeys } from "./query-keys";
 // CACHE SEEDING HELPERS
 // ========================================
 
+//TODO: Add as a placeholder https://tkdodo.eu/blog/placeholder-and-initial-data-in-react-query
 /**
  * Transforms ListingCard data into a partial ListingDetailsResponse
  * Used to pre-populate detail cache for instant loading
@@ -93,11 +94,14 @@ export function seedListingDetailCache(
 export function useListingDetail(listingId: string) {
   return useQuery({
     queryKey: queryKeys.listings.detail(listingId),
-    queryFn: () =>
-      ListingService.getListingDetailsV1ListingListingIdDetailsGet(listingId),
-    staleTime: 3 * 60 * 1000, // 3 minutes - listings can change frequently
+    queryFn: () => {
+      return ListingService.getListingDetailsV1ListingListingIdDetailsGet(listingId)
+    },
+    staleTime: 3 * 60 * 1000, // 3 minutes
     enabled: !!listingId,
-    // Background refetch will happen due to invalidation in cache seeding
+    refetchOnWindowFocus: "always",
+    refetchOnMount: "always",
+    retry: 1,
   });
 }
 
@@ -683,13 +687,13 @@ export function usePlaceBid() {
 
       return { previousData };
     },
-    onSuccess: (response: BidResponse, { listingId }) => {
-      // Invalidate and refetch to get the real bid data from server
-      // This ensures we have the correct bid ID, timestamps, and any server-side updates
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.listings.detail(listingId),
-      });
-    },
+    // onSuccess: (response: BidResponse, { listingId }) => {
+    //   // Invalidate and refetch to get the real bid data from server
+    //   // This ensures we have the correct bid ID, timestamps, and any server-side updates
+    //   queryClient.invalidateQueries({
+    //     queryKey: queryKeys.listings.detail(listingId),
+    //   });
+    // },
     onError: (err, { listingId }, context) => {
       // Rollback optimistic update on error
       if (context?.previousData) {
@@ -704,4 +708,28 @@ export function usePlaceBid() {
       });
     },
   });
+}
+
+// ========================================
+// SOCIAL LISTINGS QUERIES
+// ========================================
+
+/**
+ * Get listings from sellers you follow with cursor-based pagination
+ * Used for social feed of listings from followed sellers
+ */
+export function useSellersYouFollowListings(limit: number = 20) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.listings.sellersYouFollow(),
+    queryFn: ({ pageParam }) => 
+      ListingService.getSellersYouFollowListingsV1ListingSellersYouFollowGet(
+        pageParam as string | undefined,
+        limit
+      ),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage: SellersYouFollowResponse) => {
+      return lastPage.next_cursor || undefined
+    },
+    staleTime: 3 * 60 * 1000, // 3 minutes - social feeds change moderately
+  })
 }

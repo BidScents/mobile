@@ -2,9 +2,9 @@ import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import RNDateTimePicker from '@react-native-community/datetimepicker'
-import { useThemeColors } from '../../hooks/use-theme-colors'
 import React, { forwardRef, useImperativeHandle, useState } from 'react'
 import { Text, XStack, YStack } from 'tamagui'
+import { useThemeColors } from '../../hooks/use-theme-colors'
 
 interface DateTimeBottomSheetMethods extends BottomSheetModalMethods {
   dismiss: () => void
@@ -56,10 +56,9 @@ export const DateTimeBottomSheet = forwardRef<DateTimeBottomSheetMethods, DateTi
     return (
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={['70%', '90%']}
         backgroundStyle={{ backgroundColor: colors.background || 'white' }}
       >
-        <YStack gap="$4" padding="$4" paddingBottom="$8" flex={1}>
+        <YStack gap="$4" padding="$4" paddingBottom="$5" flex={1}>
           {/* Header */}
           <YStack gap="$2">
             <Text 

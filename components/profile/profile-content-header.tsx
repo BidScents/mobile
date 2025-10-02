@@ -1,8 +1,8 @@
-import { ThemedIonicons } from '../ui/themed-icons';
 import React from 'react';
 import { Text, XStack } from 'tamagui';
 import { useThemeColors } from '../../hooks/use-theme-colors';
 import type { ContentType } from '../../types/profile-content-tab.types';
+import { ThemedIonicons } from '../ui/themed-icons';
 
 interface ProfileContentHeaderProps {
   contentType: ContentType;
@@ -28,16 +28,9 @@ export const ProfileContentHeader = React.memo(function ProfileContentHeader({
     return `${dataLength} Results`;
   };
 
-  const getHeaderStyle = () => {
-    if (contentType === 'reviews') {
-      return { fontSize: "$6", fontWeight: "600" } as const;
-    }
-    return { fontSize: "$4", fontWeight: "500", color: "$mutedForeground" } as const;
-  };
-
   return (
     <XStack alignItems="center" justifyContent="space-between" paddingHorizontal="$4">
-      <Text {...getHeaderStyle()}>
+      <Text fontSize="$4" fontWeight="500" color="$mutedForeground">
         {getHeaderText()}
       </Text>
       {showSort && (

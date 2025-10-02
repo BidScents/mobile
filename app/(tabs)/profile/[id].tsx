@@ -121,6 +121,14 @@ export default function DetailedProfileScreen() {
     }
   };
 
+  const handleFollowingPress = useCallback(() => {
+    router.push(`/(screens)/(following)/${id}`);
+  }, [id]);
+
+  const handleFollowersPress = useCallback(() => {
+    router.push(`/(screens)/(followers)/${id}`);
+  }, [id]);
+
   // Loading state
   if (profileLoading && !profileData) {
     return <ProfileSkeleton />;
@@ -178,6 +186,8 @@ export default function DetailedProfileScreen() {
             isProfileOwner={isProfileOwner}
             isFollowLoading={followMutation.isPending || unfollowMutation.isPending}
             onFollowToggle={handleFollowToggle}
+            onFollowingPress={handleFollowingPress}
+            onFollowersPress={handleFollowersPress}
           />
 
           {/* Enhanced Tab System with Sort Support */}

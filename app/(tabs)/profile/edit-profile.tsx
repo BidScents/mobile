@@ -5,19 +5,17 @@ import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { ProfilePreviewPicker } from "@/components/ui/profile-preview-picker";
 import { useEditProfile } from "@/hooks/queries/use-profile";
-import { uploadSingleImage, ImageUploadConfigs } from "@/utils/image-upload-service";
+import { ImageUploadConfigs, uploadSingleImage } from "@/utils/image-upload-service";
 import {
-  AuthService,
   onboardingSchema,
   useAuthStore,
-  type OnboardingFormData,
+  type OnboardingFormData
 } from "@bid-scents/shared-sdk";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert } from "react-native";
 import { ScrollView, YStack } from "tamagui";
 
 export default function EditProfileScreen() {
@@ -92,22 +90,6 @@ export default function EditProfileScreen() {
     setIsLoading(true);
 
     try {
-      // Check username uniqueness if it was changed
-      if (isUsernameChanged) {
-        const usernameCheck =
-          await AuthService.checkUniqueUsernameV1AuthCheckUsernameGet(
-            data.username
-          );
-
-        if (!usernameCheck.is_unique) {
-          Alert.alert(
-            "Username Taken",
-            "This username is already taken. Please choose a different one."
-          );
-          return;
-        }
-      }
-
       // Handle image uploads only if images were changed and exist
       let profileImage = user?.profile_image_url;
       if (isProfileImageChanged) {

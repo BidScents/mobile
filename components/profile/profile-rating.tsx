@@ -1,3 +1,4 @@
+import { ThemedIonicons } from '@/components/ui/themed-icons';
 import React from 'react';
 import { Text, XStack } from 'tamagui';
 
@@ -12,17 +13,31 @@ export const ProfileRating: React.FC<ProfileRatingProps> = ({
     <>
       {averageRating && averageRating > 0 ? (
         <XStack alignItems="center" gap="$2">
-          <Text fontWeight="bold" fontSize="$5" color="$foreground">
+          <Text fontWeight="600" fontSize="$5" color="$foreground">
             {averageRating.toFixed(1)}
           </Text>
-          <Text fontSize="$4" color="$mutedForeground">
-            ⭐ average rating
-          </Text>
+          <XStack alignItems="center" gap="$1.5">
+            <ThemedIonicons 
+              name="star" 
+              size={16} 
+              themeColor="rating" 
+            />
+            <Text fontSize="$4" fontWeight="500" color="$mutedForeground">
+              Average rating
+            </Text>
+          </XStack>
         </XStack>
       ) : (
-        <Text fontSize="$5" color="$mutedForeground">
-          No ratings yet
-        </Text>
+        <XStack alignItems="center" gap="$1.5">
+          <ThemedIonicons 
+            name="star-outline" 
+            size={16} 
+            themeColor="muted" 
+          />
+          <Text fontSize="$4" fontWeight="500" color="$mutedForeground">
+            No ratings yet
+          </Text>
+        </XStack>
       )}
     </>
   );

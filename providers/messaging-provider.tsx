@@ -67,7 +67,7 @@ interface MessagingProviderProps {
  * - Automatic WebSocket connection management based on auth state
  * - Background/foreground connection optimization
  * - Global typing indicator management
- * - Cache invalidation on foreground return
+ * - Short cache strategy with aggressive refetching for fresh data
  * - Battery and data usage optimization
  *
  * Background Strategy:
@@ -77,7 +77,7 @@ interface MessagingProviderProps {
  *
  * Foreground Strategy:
  * - Reconnects WebSocket when app becomes active
- * - Invalidates message-related caches to sync with any missed updates
+ * - Invalidates caches for immediate sync (short cache handles freshness)
  * - Resumes real-time typing indicators and message updates
  *
  * Usage:
@@ -124,6 +124,7 @@ export function MessagingProvider({ children }: MessagingProviderProps) {
     onConnect: handlers.handleConnect,
     onDisconnect: handlers.handleDisconnect,
     onMessage: handlers.handleMessage,
+    onUpdateMessage: handlers.handleUpdateMessage,
     onTyping: handlers.handleTyping,
     onUpdateLastRead: handlers.handleUpdateLastRead,
     onError: handlers.handleError,
@@ -145,6 +146,17 @@ export function MessagingProvider({ children }: MessagingProviderProps) {
 
       if (appState !== "active" && nextAppState === "active") {
         console.log("App returned to foreground - refreshing message data");
+
+        // Reset infinite message queries (clears all pages, refetches first page only)
+        queryClient.invalidateQueries({ 
+          queryKey: ['messages', 'list'],
+          exact: false,
+        });
+
+        queryClient.invalidateQueries({ 
+          queryKey: ['messages', 'summary'],
+          exact: false,
+        });
 
         // Clear all typing indicators since they would be stale
         if (typingUsersRef.current) {

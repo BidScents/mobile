@@ -1,20 +1,23 @@
+import { useListingDetail } from ".../../hooks/queries/use-listing";
+import { useContactSeller } from ".../../hooks/queries/use-messages";
+import { useAuctionWebSocket } from ".../../hooks/use-auction-websocket";
+import { useAuctionWebSocketHandlers } from ".../../hooks/use-auction-websocket-handlers";
+import { isCurrentUserHighestBidder as checkIsCurrentUserHighestBidder } from ".../../utils/auction-helpers";
 import { ImageCarousel } from "@/components/listing/image-carousel";
 import { ListingActions } from "@/components/listing/listing-actions";
 import { ListingContent } from "@/components/listing/listing-content";
 import { ListingDetailSkeleton } from "@/components/suspense/listing-detail-skeleton";
 import { BlurBackButton } from "@/components/ui/blur-back-button";
+import Button from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { ListingEditButton } from "@/components/ui/listing-edit-button";
+import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, AppStateStatus, Dimensions } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Text } from "tamagui";
-import { useListingDetail } from "../../hooks/queries/use-listing";
-import { useContactSeller } from "../../hooks/queries/use-messages";
-import { useAuctionWebSocket } from "../../hooks/use-auction-websocket";
-import { useAuctionWebSocketHandlers } from "../../hooks/use-auction-websocket-handlers";
-import { isCurrentUserHighestBidder as checkIsCurrentUserHighestBidder } from "../../utils/auction-helpers";
+import { Text, View } from "tamagui";
 
 /**
  * Listing detail screen component
@@ -97,8 +100,8 @@ export default function ListingScreen() {
 
     contactSellerMutation.mutate(listing.seller.id, {
       onSuccess: (conversationResponse) => {
-        // Navigate to the chat screen with the conversation ID
-        router.push(`/(screens)/(chat)/${conversationResponse.id}`);
+        // Navigate to the chat screen with the conversation ID and listing context
+        router.push(`/(screens)/(chat)/${conversationResponse.id}?listingId=${listing.listing.id}`);
       },
       onError: (error) => {
         console.error("Error contacting seller:", error);
@@ -107,19 +110,38 @@ export default function ListingScreen() {
     });
   }, [listing?.seller?.id, contactSellerMutation, router]);
 
+  console.log(isLoading)
+
   // Show skeleton only if no data at all (no seeded cache)
-  if (isLoading && !listing) {
+  if (isLoading) {
     return <ListingDetailSkeleton width={width} />;
   }
+
   
-  if (error && !listing)
+  if (error)
     return (
       <Container
         variant="padded"
         safeArea={["top", "bottom"]}
         backgroundColor="$background"
       >
-        <Text>Error loading listing</Text>
+        <View flex={1} justifyContent="center" alignItems="center" paddingHorizontal="$6">
+          <ThemedIonicons 
+            name="alert-circle-outline" 
+            size={64} 
+            color="$mutedForeground" 
+            style={{ marginBottom: 16 }} 
+          />
+          <Text fontSize="$6" fontWeight="600" color="$foreground" textAlign="center" marginBottom="$2">
+            Error Loading Listing
+          </Text>
+          <Text fontSize="$4" color="$mutedForeground" textAlign="center" marginBottom="$4">
+            This listing is inactive or deleted.
+          </Text>
+          <Button variant="primary" onPress={() => router.replace('/(tabs)/home')}>
+            Go to Home
+          </Button>
+        </View>
       </Container>
     );
     
@@ -130,7 +152,23 @@ export default function ListingScreen() {
         safeArea={["top", "bottom"]}
         backgroundColor="$background"
       >
-        <Text>Listing not found</Text>
+        <View flex={1} justifyContent="center" alignItems="center" paddingHorizontal="$6">
+          <ThemedIonicons 
+            name="alert-circle-outline" 
+            size={64} 
+            color="$mutedForeground" 
+            style={{ marginBottom: 16 }} 
+          />
+          <Text fontSize="$6" fontWeight="600" color="$foreground" textAlign="center" marginBottom="$2">
+            Listing Not Found
+          </Text>
+          <Text fontSize="$4" color="$mutedForeground" textAlign="center" marginBottom="$4">
+            This listing is inactive or deleted.
+          </Text>
+          <Button variant="primary" onPress={() => router.replace('/(tabs)/home')}>
+            Go to Home
+          </Button>
+        </View>
       </Container>
     );
 
@@ -142,6 +180,11 @@ export default function ListingScreen() {
     >
       {/* Back Button */}
       <BlurBackButton />
+
+      {/* Listing Edit Button */}
+      {isUserSeller && (
+        <ListingEditButton listingId={id!} />
+      )}
 
       <KeyboardAwareScrollView
         showsVerticalScrollIndicator={false}
@@ -183,7 +226,7 @@ export default function ListingScreen() {
           auctionDetails={listing.auction_details}
           isCurrentUserHighestBidder={isCurrentUserHighestBidder}
           isLoading={isLoading || (listing as any)?.__seeded === true || contactSellerMutation.isPending}
-          onAction={handleContactSeller}
+          onContactSeller={handleContactSeller}
         />
       )}
     </Container>

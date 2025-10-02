@@ -11,6 +11,7 @@
  */
 
 import { ControlledInput } from '@/components/forms/controlled-input'
+import { LegalDocumentsBottomSheet, LegalDocumentsBottomSheetMethods } from '@/components/forms/legal-documents-bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { KeyboardAwareView } from '@/components/ui/keyboard-aware-view'
@@ -18,7 +19,7 @@ import { handleSignUpUI } from '@/utils/auth-ui-handlers'
 import { signUpSchema, type SignUpFormData } from '@bid-scents/shared-sdk'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { router } from 'expo-router'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ScrollView } from 'react-native'
 import { Text, XStack, YStack } from 'tamagui'
@@ -34,6 +35,7 @@ const DEFAULT_VALUES: SignUpFormData = {
 
 export default function SignUpScreen() {
   const [isLoading, setIsLoading] = useState(false)
+  const legalBottomSheetRef = useRef<LegalDocumentsBottomSheetMethods>(null)
 
   const {
     control,
@@ -76,6 +78,17 @@ export default function SignUpScreen() {
    */
   const goBack = () => {
     router.replace('/(auth)')
+  }
+
+  /**
+   * Open legal documents bottom sheet
+   */
+  const handleTermsPress = () => {
+    legalBottomSheetRef.current?.presentWithTab('terms')
+  }
+
+  const handlePrivacyPress = () => {
+    legalBottomSheetRef.current?.presentWithTab('privacy')
   }
   
   return (
@@ -139,6 +152,47 @@ export default function SignUpScreen() {
               />
             </YStack>
 
+            {/* Legal Agreement Section */}
+            <YStack gap="$3">
+              <XStack justifyContent="center" alignItems="center" flexWrap="wrap" gap="$1">
+                <Text 
+                  textAlign="center" 
+                  color="$mutedForeground" 
+                  fontSize="$3"
+                  lineHeight="$4"
+                >
+                  By creating an account, you agree to our{' '}
+                </Text>
+                <Text
+                  color="$foreground"
+                  fontSize="$3"
+                  textDecorationLine="underline"
+                  onPress={handleTermsPress}
+                  cursor="pointer"
+                  lineHeight="$4"
+                >
+                  Terms of Service
+                </Text>
+                <Text 
+                  color="$mutedForeground" 
+                  fontSize="$3"
+                  lineHeight="$4"
+                >
+                  {' '}and{' '}
+                </Text>
+                <Text
+                  color="$foreground"
+                  fontSize="$3"
+                  textDecorationLine="underline"
+                  onPress={handlePrivacyPress}
+                  cursor="pointer"
+                  lineHeight="$4"
+                >
+                  Privacy Policy
+                </Text>
+              </XStack>
+            </YStack>
+
             {/* Navigation Section */}
             <YStack gap="$1" paddingBottom="$6">
               <Text color="$mutedForeground" fontSize="$3" textAlign="center">
@@ -170,6 +224,9 @@ export default function SignUpScreen() {
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
         </XStack>
+
+        {/* Legal Documents Bottom Sheet */}
+        <LegalDocumentsBottomSheet ref={legalBottomSheetRef} />
       </KeyboardAwareView>
     </Container>
   )

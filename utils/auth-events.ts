@@ -6,12 +6,13 @@
  */
 
 import { supabase } from "@/lib/supabase"
-import { AuthService } from './auth-service'
-import { AuthStateManager } from './auth-state-manager'
 import {
   handleAuthStateChange,
   useAuthStore,
 } from "@bid-scents/shared-sdk"
+import { router } from "expo-router"
+import { AuthService } from './auth-service'
+import { AuthStateManager } from './auth-state-manager'
 
 /**
  * Handle existing session on app startup
@@ -55,9 +56,12 @@ export const handleExistingSession = async (
         }
       }
     } else {
-      // Use cached user data
-      console.log("Using cached user data")
+      // Use cached user data for fast startup
+      console.log("Using cached user data for fast startup")
       AuthStateManager.setAuthenticatedStateWithFallback(session, existingUser)
+      
+      // Fetch fresh data in background to keep store updated
+      refreshUserDataInBackground(session)
     }
   } catch (error) {
     console.error("Error handling existing session:", error)
@@ -83,7 +87,7 @@ export const handleSignInEvent = async (session: any): Promise<void> => {
     const { user: currentUser } = useAuthStore.getState()
     
     if (AuthStateManager.needsUserData(currentUser)) {
-      // Need to fetch user data
+      // Need to fetch fresh user data
       try {
         const loginResult = await AuthService.authenticateWithSession(session)
         AuthStateManager.setAuthenticatedState(session, loginResult)
@@ -123,16 +127,25 @@ export const handleSignInEvent = async (session: any): Promise<void> => {
 }
 
 /**
- * Handle sign out event
+ * Background refresh function to update user data without blocking UI
  */
-export const handleSignOut = async (): Promise<void> => {
+const refreshUserDataInBackground = async (session: any): Promise<void> => {
   try {
-    await AuthService.signOut()
+    console.log("Refreshing user data in background")
+    const loginResult = await AuthService.authenticateWithSession(session)
+    
+    AuthStateManager.setAuthenticatedState(session, loginResult)
+
+    
+    console.log("Background refresh completed")
   } catch (error) {
-    console.error("Error during sign out:", error)
-    // Clear state even if signout fails
-    AuthStateManager.clearAuthState()
+    console.log("Background refresh failed, keeping cached data:", error)
+    // Silently fail - user keeps cached data
   }
+}
+
+const handlePasswordRecoveryEvent =  () => {
+  router.replace("/(screens)/reset-password")
 }
 
 /**
@@ -152,6 +165,9 @@ export const setupAuthStateListener = (): (() => void) => {
     } else if (event === "TOKEN_REFRESHED") {
       console.log("Token refreshed")
       handleAuthStateChange("TOKEN_REFRESHED", session)
+    } else if (event === "PASSWORD_RECOVERY") {
+      console.log("Password recovery")
+      handlePasswordRecoveryEvent()
     }
   })
 

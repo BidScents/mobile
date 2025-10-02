@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import type { ButtonProps as TamaguiButtonProps } from "tamagui";
@@ -162,6 +163,7 @@ export const Button: React.FC<ButtonProps> = ({
           name={leftIcon}
           size={iconSizes[size]}
           pointerEvents="none"
+          color={variantProps[variant].color}
         />
       )}
 
@@ -181,6 +183,7 @@ export const Button: React.FC<ButtonProps> = ({
           name={rightIcon}
           size={iconSizes[size]}
           pointerEvents="none"
+          color={variantProps[variant].color}
         />
       )}
     </TamaguiButton>

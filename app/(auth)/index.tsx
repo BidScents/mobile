@@ -2,6 +2,7 @@ import { LoginBottomSheet } from '@/components/auth/login-bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
+import LottieView from 'lottie-react-native'
 import React, { useCallback, useRef } from 'react'
 import { H1, Text, YStack } from 'tamagui'
 
@@ -21,7 +22,15 @@ export default function WelcomeScreen() {
       >
         {/* Illustration Section */}
         <YStack alignItems="center" flex={1} justifyContent="center">
-
+          <LottieView
+            autoPlay
+            loop
+            source={require('@/assets/videos/Wonder Things.json')}
+            style={{
+              width: 350,
+              height: 350,
+            }}
+          />
         </YStack>
 
         {/* CTA Section */}

@@ -26,6 +26,7 @@ const LISTING_RELATED_NOTIFICATION_TYPES = [
   NotificationType.AUCTION_EXTENSION,
   NotificationType.FOLLOWED_SELLER_LISTING,
   NotificationType.LISTING_COMMENT,
+  NotificationType.PAYMENT_MADE,
 ];
 
 export default function NotificationCard({
@@ -63,7 +64,7 @@ export default function NotificationCard({
           style={{
             width: 60,
             height: 60,
-            borderRadius: 6,
+            borderRadius: 8,
             backgroundColor: colors.muted,
           }}
         />
@@ -78,7 +79,7 @@ export default function NotificationCard({
 
     if (notification.type === NotificationType.MESSAGE) {
       const content = notification.content as MessageContent;
-      return <AvatarIcon url={content.sender.profile_image_url} size="$5" />;
+      return <AvatarIcon url={content.sender?.profile_image_url} size="$5" />;
     }
 
     // Default fallback
@@ -103,7 +104,7 @@ export default function NotificationCard({
       router.push(`/chat/${content.conversation_id}`);
     } else if (notification.type === NotificationType.NEW_FOLLOWER) {
       const content = notification.content as FollowerContent;
-      router.push(`/profile/${content.follower.username}`);
+      router.push(`/profile/${content.follower.id}`);
     }
   };
 

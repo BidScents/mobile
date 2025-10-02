@@ -28,8 +28,38 @@ export default function ProfileLayout() {
         name="(chat)/[id]"
         options={{
           title: "Chat",
-          animation: "slide_from_bottom",
           headerLeft: () => <BackButton />,
+        }}
+      />
+      <Stack.Screen
+        name="subscription-paywall"
+        options={{
+          title: "Subscriptions",
+          headerLeft: () => <BackButton />,
+        }}
+      />
+      <Stack.Screen
+        name="(followers)/[id]"
+        options={{
+          title: "Followers",
+          headerLeft: () => <BackButton />,
+          presentation: "modal",
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="(following)/[id]"
+        options={{
+          title: "Following",
+          headerLeft: () => <BackButton />,
+          presentation: "modal",
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="reset-password"
+        options={{
+          headerShown: false,
         }}
       />
     </Stack>

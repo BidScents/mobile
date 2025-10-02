@@ -1,9 +1,10 @@
-import { useDeduplicatedMessages, useMessages } from "@/hooks/queries/use-messages";
+import { useMessages } from "@/hooks/queries/use-messages";
 import { ConversationResponse, ConversationType, MessageResData, MessageType } from "@bid-scents/shared-sdk";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useMessagingContext } from "providers/messaging-provider";
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { Text, View } from "tamagui";
+import { ActivityIndicator } from "react-native";
+import { Text, View, YStack } from "tamagui";
 import { MessageItem } from "./message-item";
 import { ScrollLoadingIndicator } from "./scroll-loading-indicator";
 import { ScrollToBottomButton } from "./scroll-to-bottom-button";
@@ -17,22 +18,21 @@ export function MessagesList({ conversation }: MessagesListProps) {
   const listRef = useRef<any>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const { getTypingUsers } = useMessagingContext();
-  // Get initial messages from conversation
-  const initialMessages = conversation.messages || [];
 
   const typingUsers = getTypingUsers(conversation.id);
   
-  // Get infinite query for older messages
+  // Get infinite query for messages - automatically seeded with conversation data
   const {
-    data: infiniteData,
+    data,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
     isFetching,
-  } = useMessages(conversation.id, initialMessages);
+    isLoading
+  } = useMessages(conversation.id);
   
-  // Merge and deduplicate all messages
-  const allMessages = useDeduplicatedMessages(initialMessages, infiniteData);
+  // Flatten all pages into a single array
+  const allMessages = data?.pages.flat() || [];
 
   // Handle loading more messages (FlashList onEndReached)
   const handleEndReached = useCallback(() => {
@@ -107,6 +107,17 @@ export function MessagesList({ conversation }: MessagesListProps) {
       />
     );
   }, [typingUsers, conversation.type, showAvatars]);
+
+  if (isLoading) {
+    return (
+      <YStack flex={1} justifyContent="center" alignItems="center">
+        <ActivityIndicator size="large" />
+        <Text fontSize="$4" color="$color11" marginTop="$3">
+          Loading conversation...
+        </Text>
+      </YStack>
+    )
+  }
 
   if (!allMessages.length) {
     return (
