@@ -1,19 +1,40 @@
 import { ConversationSummaryItem } from "@/components/messeges/conversation-summary-item";
 import { Container } from "@/components/ui/container";
 import { useConversationSummary } from "@/hooks/queries/use-messages";
-import { ConversationSummary } from "@bid-scents/shared-sdk";
+import { ConversationSummary, MessageService } from "@bid-scents/shared-sdk";
 import { LegendList } from "@legendapp/list";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import React, { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { Text, View, YStack } from "tamagui";
+import { queryKeys } from "@/hooks/queries/query-keys";
 
 const MemoizedConversationSummaryItem = React.memo(ConversationSummaryItem);
 
 export default function ChatScreen() {
   const { data, isLoading, refetch, error } = useConversationSummary();
   const tabbarHeight = useBottomTabBarHeight();
+  const queryClient = useQueryClient();
 
-  const conversations = data?.conversations || [];
+  const conversations = useMemo(() => data?.conversations || [], [data?.conversations]);
+
+  // Prefetch the first 3 conversations for better UX
+  useEffect(() => {
+    if (conversations.length > 0) {
+      const conversationsToPrefetch = conversations.slice(0, 3);
+      
+      conversationsToPrefetch.forEach((conversation) => {
+        queryClient.prefetchQuery({
+          queryKey: queryKeys.messages.conversation(conversation.id),
+          queryFn: () => MessageService.getConversationV1MessageConversationConversationIdGet(conversation.id),
+          staleTime: 2 * 60 * 1000, // 2 minutes - same as useConversation hook
+        }).catch((error) => {
+          // Silently handle prefetch errors to avoid affecting main UI
+          console.warn(`Failed to prefetch conversation ${conversation.id}:`, error);
+        });
+      });
+    }
+  }, [conversations, queryClient]);
 
   // Render conversation item
   const renderConversationItem = useCallback(
