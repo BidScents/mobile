@@ -6,8 +6,7 @@
  */
 
 import {
-  type ForgotPasswordRequestFormData,
-  type ResetPasswordFormData
+  type ForgotPasswordRequestFormData
 } from '@/schemas/forgot-password.schemas'
 import {
   type LoginFormData,

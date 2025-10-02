@@ -28,6 +28,7 @@ import {
 } from '@bid-scents/shared-sdk'
 import { makeRedirectUri } from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
+import { AuthStateManager } from './auth-state-manager'
 
 export interface AuthResult {
   success: boolean
@@ -280,7 +281,7 @@ export class AuthService {
       // Call API to delete account
       await ApiAuthService.deleteAccountV1AuthDeleteAccountDelete()
       
-      AuthService.signOut()
+      AuthStateManager.clearAuthState()
       
       return { success: true }
     } catch (error: any) {
