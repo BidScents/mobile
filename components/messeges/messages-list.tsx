@@ -12,9 +12,10 @@ import { TypingIndicatorItem } from "./typing-indicator-item";
 
 interface MessagesListProps {
   conversation: ConversationResponse;
+  onSellThisPress?: (listing: any) => void;
 }
 
-export function MessagesList({ conversation }: MessagesListProps) {
+export function MessagesList({ conversation, onSellThisPress }: MessagesListProps) {
   const listRef = useRef<any>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const { getTypingUsers } = useMessagingContext();
@@ -61,9 +62,10 @@ export function MessagesList({ conversation }: MessagesListProps) {
         message={item}
         conversation={conversation}
         isGroupConversation={showAvatars}
+        onSellThisPress={onSellThisPress}
       />
     );
-  }, [conversation, showAvatars]);
+  }, [conversation, showAvatars, onSellThisPress]);
 
   const keyExtractor = useCallback((item: MessageResData) => item.id, []);
 

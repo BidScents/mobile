@@ -1,12 +1,13 @@
 import { ChatInputBar } from "@/components/messeges/chat-input-bar";
 import { MessagesList } from "@/components/messeges/messages-list";
+import { TransactionBottomSheet, TransactionBottomSheetMethods } from "@/components/forms/transaction-bottom-sheet";
 import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useConversation, useConversationSummary, useUpdateLastRead } from "@/hooks/queries/use-messages";
 import { ConversationSummary, UserPreview, useAuthStore } from "@bid-scents/shared-sdk";
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from "expo-router";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
@@ -18,7 +19,16 @@ export default function SpecificChatScreen() {
   const { data: conversationSummary } = useConversationSummary();
   const { data: conversation, isLoading, error, refetch } = useConversation(id as string);
   const { user } = useAuthStore();
+  const transactionBottomSheetRef = useRef<TransactionBottomSheetMethods>(null);
 
+  const handleSellThisPress = useCallback((listing: any) => {
+    transactionBottomSheetRef.current?.presentWithListing(listing);
+  }, []);
+
+  // Get the other participant for the transaction
+  const otherParticipantId = conversation?.participants.find(
+    (participant) => participant.user.id !== user?.id
+  )?.user.id;
 
   // Update header title when conversation data is available
   useEffect(() => {
@@ -116,10 +126,19 @@ export default function SpecificChatScreen() {
             </Text>
           </YStack>
         ) : (
-            <MessagesList conversation={conversation!} />
+            <MessagesList conversation={conversation!} onSellThisPress={handleSellThisPress} />
         )}
         <ChatInputBar id={id as string} referenceListingId={listingId as string} />
       </KeyboardAwareView>
+      
+      {/* Transaction Bottom Sheet */}
+      {otherParticipantId && (
+        <TransactionBottomSheet
+          ref={transactionBottomSheetRef}
+          conversationId={id as string}
+          buyerId={otherParticipantId}
+        />
+      )}
     </Container>
   );
 }

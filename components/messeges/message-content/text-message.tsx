@@ -1,20 +1,26 @@
-import { RichTextContent } from "@bid-scents/shared-sdk";
+import { ThemedIonicons } from "@/components/ui/themed-icons";
+import { RichTextContent, useAuthStore } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
 import { router } from "expo-router";
-import { Text, View } from "tamagui";
+import { Text, View, XStack } from "tamagui";
 
 interface TextMessageProps {
   content: RichTextContent;
   isCurrentUser: boolean;
+  onSellThisPress?: (listing: any) => void;
 }
 
-export function TextMessage({ content, isCurrentUser }: TextMessageProps) {
+export function TextMessage({ content, isCurrentUser, onSellThisPress }: TextMessageProps) {
+  const {user} = useAuthStore();
+
+  const isSeller = user?.id === content.listing?.seller_id;
+
   if (content.listing) {
     return (
-      <View maxWidth={200}>
+      <View maxWidth={200} gap="$2">
         {content.listing && (
           <View
-            padding="$2"
+            position="relative"
             gap="$2"
             onPress={() => router.push(`/listing/${content.listing?.id}`)}
           >
@@ -31,6 +37,32 @@ export function TextMessage({ content, isCurrentUser }: TextMessageProps) {
                   borderRadius: 8,
                 }}
               />
+            )}
+            
+            {/* Sell This Button - Only show if user is the seller */}
+            {isSeller && onSellThisPress && (
+              <XStack 
+                alignItems="center" 
+                hitSlop={20} 
+                backgroundColor="$muted" 
+                paddingHorizontal="$2" 
+                paddingVertical="$1.5" 
+                borderRadius="$5" 
+                gap="$2" 
+                onPress={() => onSellThisPress(content.listing)}
+                position="absolute"
+                right="$2"
+                top="$2"
+              >
+                <Text fontSize="$3" fontWeight="500" color="$foreground">
+                  Sell This
+                </Text>
+                <ThemedIonicons
+                  name="navigate-circle"
+                  size={18}
+                  color="$mutedForeground"
+                />
+              </XStack>
             )}
             
             {/* Listing Info */}
@@ -52,9 +84,7 @@ export function TextMessage({ content, isCurrentUser }: TextMessageProps) {
             </View>
           </View>
         )}
-        <View
-          paddingHorizontal="$2"
-        >
+        <View>
           <Text
             fontSize="$4"
             color="$foreground"

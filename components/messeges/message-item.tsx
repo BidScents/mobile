@@ -25,6 +25,7 @@ interface MessageItemProps {
   conversation: ConversationResponse;
   showTimestamp?: boolean;
   isGroupConversation?: boolean;
+  onSellThisPress?: (listing: any) => void;
 }
 
 const MessageItemComponent = ({
@@ -32,6 +33,7 @@ const MessageItemComponent = ({
   conversation,
   showTimestamp = true,
   isGroupConversation = false,
+  onSellThisPress,
 }: MessageItemProps) => {
   const { user } = useAuthStore();
   
@@ -97,6 +99,7 @@ const MessageItemComponent = ({
           <TextMessage
             content={message.content as RichTextContent}
             isCurrentUser={isCurrentUser}
+            onSellThisPress={onSellThisPress}
           />
         );
       case MessageType.FILE:

@@ -67,6 +67,7 @@ interface TransactionBottomSheetProps {
 export interface TransactionBottomSheetMethods {
   present: () => void;
   dismiss: () => void;
+  presentWithListing: (listing: any) => void;
 }
 
 export const TransactionBottomSheet = forwardRef<
@@ -127,6 +128,13 @@ export const TransactionBottomSheet = forwardRef<
       bottomSheetRef.current?.present();
     },
     dismiss: () => bottomSheetRef.current?.dismiss(),
+    presentWithListing: (listing: any) => {
+      setSelectedListing(listing);
+      setValue("listing_id", listing.id);
+      setValue("unit_price", listing.price);
+      setCurrentView("transaction-form");
+      bottomSheetRef.current?.present();
+    },
   }));
 
   const handleListingSelect = (listing: ListingCard) => {
