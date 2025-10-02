@@ -7,9 +7,11 @@ import type { BoostRequest } from "@bid-scents/shared-sdk";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import * as Crypto from "expo-crypto";
+import { router } from "expo-router";
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from "react";
-import { ActivityIndicator, Alert } from "react-native";
+import { ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
+import { ThemedIonicons } from "../ui/themed-icons";
 
 export interface BoostBottomSheetMethods {
   present: () => void;
@@ -192,6 +194,13 @@ export const BoostBottomSheet = forwardRef<
             <Text fontSize="$7" fontWeight="600" color="$foreground">
               {tabKey === 'featured' ? 'Extend Featured Time' : 'Boost Listings'}
             </Text>
+
+            <TouchableOpacity onPress={() => {
+              bottomSheetRef.current?.dismiss()
+              router.replace(`/(tabs)/profile/seller-dashboard`)
+              }} style={{ paddingHorizontal: 10 }} hitSlop={20} >
+                <ThemedIonicons color="$foreground" name="close" size={24} />
+            </TouchableOpacity>
           </XStack>
 
           <Text fontSize="$4" color="$mutedForeground" opacity={0.8}>
@@ -340,6 +349,8 @@ export const BoostBottomSheet = forwardRef<
         keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         enableDynamicSizing={true}
+        enablePanDownToClose={false}
+        pressBehavior="none"
       >
         {renderContent()}
       </BottomSheet>

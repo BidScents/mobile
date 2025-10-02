@@ -96,7 +96,6 @@ export default function AddListingScreen() {
     onSuccess: (data) => {
       if (boostSwitch && data.listing.listing_type !== ListingType.SWAP) {
         setListingId(data.listing.id);
-        boostBottomSheetRef.current?.present();
         hideLoading();
 
       } else {
@@ -124,6 +123,9 @@ export default function AddListingScreen() {
       Alert.alert("Error", "Please add at least one image");
       return;
     }
+
+    // Reset listing ID for new submission
+    setListingId(null);
 
     try {
       showLoading();
@@ -195,6 +197,13 @@ export default function AddListingScreen() {
       }, 500);
     }
   }, [user, paymentDetails]);
+
+  // Present boost bottom sheet when listing is created and boost is enabled
+  useEffect(() => {
+    if (listingId && boostSwitch) {
+      boostBottomSheetRef.current?.present();
+    }
+  }, [listingId, boostSwitch]);
 
   const handleOnboardingComplete = () => {
     console.log("Onboarding completed successfully!");
