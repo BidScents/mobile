@@ -1,6 +1,6 @@
 import { LegalDocumentsBottomSheet, LegalDocumentsBottomSheetMethods } from "@/components/forms/legal-documents-bottom-sheet";
 import { AvatarIcon } from "@/components/ui/avatar-icon";
-import Button from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { handleSignOutUI } from "@/utils/auth-ui-handlers";
@@ -62,6 +62,9 @@ const SettingsSections = [
 export default function ProfileScreen() {
   const { user } = useAuthStore();
   const legalBottomSheetRef = useRef<LegalDocumentsBottomSheetMethods>(null);
+
+  const {session} = useAuthStore();
+  // console.log(session);
 
   const handlePress = (item: { src?: string; action?: string }) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

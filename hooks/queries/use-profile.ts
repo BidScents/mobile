@@ -49,7 +49,8 @@ return useQuery({
 export function useProfileListings(
 userId: string,
 tab: ProfileTab,
-sortParams?: Partial<ListingSearchRequest>
+sortParams?: Partial<ListingSearchRequest>,
+options?: { enabled?: boolean }
 ) {
 const queryClient = useQueryClient()
 
@@ -134,7 +135,7 @@ return useInfiniteQuery({
     return page < total_pages ? page + 1 : undefined
   },
   initialPageParam: 1,
-  enabled: !!userId,
+  enabled: options?.enabled !== undefined ? options.enabled : !!userId,
   staleTime: 3 * 60 * 1000, // 3 minutes
 })
 }

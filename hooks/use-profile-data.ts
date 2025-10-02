@@ -27,11 +27,12 @@ export const useProfileData = ({
   const {
     data: profileData,
     isLoading: profileLoading,
+    isFetching: profileFetching,
     error: profileError,
     refetch: refetchProfile,
   } = useProfileDetail(userId);
 
-  // Listings data
+  // Listings data - wait for profile to finish loading/fetching to avoid duplicate API calls
   const {
     data: activeListingsData,
     isLoading: activeListingsLoading,
@@ -39,7 +40,9 @@ export const useProfileData = ({
     hasNextPage: activeListingsHasNext,
     fetchNextPage: fetchNextActiveListings,
     refetch: refetchActiveListings,
-  } = useProfileListings(userId, ProfileTab.ACTIVE, listingSortParams.active);
+  } = useProfileListings(userId, ProfileTab.ACTIVE, listingSortParams.active, {
+    enabled: !!userId && !profileLoading && !profileFetching
+  });
 
   const {
     data: featuredListingsData,
@@ -48,7 +51,9 @@ export const useProfileData = ({
     hasNextPage: featuredListingsHasNext,
     fetchNextPage: fetchNextFeaturedListings,
     refetch: refetchFeaturedListings,
-  } = useProfileListings(userId, ProfileTab.FEATURED, listingSortParams.featured);
+  } = useProfileListings(userId, ProfileTab.FEATURED, listingSortParams.featured, {
+    enabled: !!userId && !profileLoading && !profileFetching
+  });
 
   const {
     data: soldListingsData,
@@ -57,7 +62,9 @@ export const useProfileData = ({
     hasNextPage: soldListingsHasNext,
     fetchNextPage: fetchNextSoldListings,
     refetch: refetchSoldListings,
-  } = useProfileListings(userId, ProfileTab.SOLD, listingSortParams.sold);
+  } = useProfileListings(userId, ProfileTab.SOLD, listingSortParams.sold, {
+    enabled: !!userId && !profileLoading && !profileFetching
+  });
 
   // Reviews data
   const {
