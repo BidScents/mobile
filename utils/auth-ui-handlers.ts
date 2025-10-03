@@ -131,7 +131,8 @@ export const handleSignOutUI = async (): Promise<void> => {
     await AuthService.signOut()
     // Auth state will be cleared by the auth state listener
   } catch (error: any) {
-    Alert.alert('Sign Out Failed', 'Unable to sign out. Please try again.')
+    AuthStateManager.clearAuthState()
+    Alert.alert('Sign Out Failed', 'Unable to sign out. Please try again. ' + error.message)
   }
 }
 

@@ -90,12 +90,13 @@ export function useBoostListing() {
         queryKey: queryKeys.homepage,
       });
 
-      // Refresh auth state to update payment details
-      try {
-        await AuthService.refreshCurrentUser();
-      } catch (error) {
-        console.error('Failed to refresh user after payment method update:', error);
-      }
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.dashboard.listings.featured,
+      });
+
+      // Note: AuthService.refreshCurrentUser() is now called conditionally at component level
+      // - When credits used: called immediately
+      // - When payment required: called after payment success
     },
     onError: (error: any) => {
       console.error('Failed to boost listing:', error);
@@ -105,6 +106,23 @@ export function useBoostListing() {
       
       Alert.alert('Error', userMessage);
       console.warn('User-friendly boost error:', userMessage);
+    },
+  });
+}
+
+/**
+ * Cancel boost credits
+ */
+export function useCancelBoostCredits(requestId: string) {
+  return useMutation({
+    mutationFn: () => PaymentsService.cancelRequestV1PaymentsBoostDelete(requestId),
+    onSuccess: async () => {
+      // Refresh auth state to update payment details
+      try {
+        await AuthService.refreshCurrentUser();
+      } catch (error) {
+        console.error('Failed to refresh user after boost credits cancellation:', error);
+      }
     },
   });
 }

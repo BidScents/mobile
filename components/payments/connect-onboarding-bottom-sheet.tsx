@@ -133,8 +133,8 @@ export const ConnectOnboardingBottomSheet = forwardRef<
       onDismiss={() => {
         setPreloadedUrl(null);
       }}
-      enablePanDownToClose={!onboardMutation.isPending}
-      pressBehavior={onboardMutation.isPending ? "none" : "close"}
+      enablePanDownToClose={false}
+      pressBehavior={"none"}
     >
       <YStack gap="$5" padding="$4" paddingBottom="$8">
         {/* Header */}

@@ -99,7 +99,7 @@ export default function Homepage() {
     if (isLoading) {
       // Loading state with proper skeleton structure
       return [
-        { type: 'header', title: 'Featured', showViewAll: true },
+        { type: 'header', title: 'Featured', showViewAll: false },
         { type: 'featured_grid', listings: Array(6).fill({}) as ListingCardType[] },
         { type: 'spacer', height: 20 },
         { type: 'header', title: 'Active Auctions', showViewAll: true },
@@ -114,7 +114,7 @@ export default function Homepage() {
     // Featured section
     if (homepage?.featured?.length) {
       items.push(
-        { type: 'header', title: 'Featured', showViewAll: true },
+        { type: 'header', title: 'Featured', showViewAll: false },
         { type: 'featured_grid', listings: homepage.featured.slice(0, 6) }
       )
     }

@@ -43,6 +43,7 @@ export default function EditProfileScreen() {
       first_name: user?.first_name || "",
       last_name: user?.last_name || "",
       username: user?.username || "",
+      location: user?.location || "",
       bio: user?.bio || "",
       profile_image_url: user?.profile_image_url || undefined,
       cover_image_url: user?.cover_image_url || undefined,
@@ -65,6 +66,7 @@ export default function EditProfileScreen() {
   const isProfileImageChanged =
     formatImageUri(profileImageUri || "") !== (user?.profile_image_url || "");
   const isUsernameChanged = watch("username") !== user?.username;
+  const isLocationChanged = watch("location") !== user?.location;
   const isBioChanged = watch("bio") !== user?.bio;
   const isFirstNameChanged = watch("first_name") !== user?.first_name;
   const isLastNameChanged = watch("last_name") !== user?.last_name;
@@ -73,6 +75,7 @@ export default function EditProfileScreen() {
     isCoverImageChanged ||
     isProfileImageChanged ||
     isUsernameChanged ||
+    isLocationChanged ||
     isBioChanged ||
     isFirstNameChanged ||
     isLastNameChanged;
@@ -190,6 +193,15 @@ export default function EditProfileScreen() {
                 variant="username"
                 label="Username"
                 placeholder="Choose a unique username"
+                disabled={isLoading || disabled}
+              />
+
+              <ControlledInput
+                control={control}
+                name="location"
+                variant="username"
+                label="Location (Optional)"
+                placeholder="Enter your location"
                 disabled={isLoading || disabled}
               />
 

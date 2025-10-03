@@ -1,11 +1,12 @@
 import { SettlementBottomSheet, SettlementBottomSheetMethods } from "@/components/forms/settlement-bottom-sheet";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useDeleteListing } from "@/hooks/queries/use-dashboard";
+import { calculateTimeLeft, formatTimeLeft } from "@/utils/countdown";
 import { ListingCard, ListingType } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert } from "react-native";
 import { Spinner, Text, View, YStack } from "tamagui";
 
@@ -30,6 +31,9 @@ export function ListingDashboardCard({
   const deleteMutation = useDeleteListing();
   const isSwap = listing.listing_type === ListingType.SWAP;
   const settlementBottomSheetRef = useRef<SettlementBottomSheetMethods>(null);
+  
+  // State for live countdown
+  const [countdownText, setCountdownText] = useState<string>("");
 
   const handleSettlementPress = () => {
     settlementBottomSheetRef.current?.present();
@@ -73,22 +77,28 @@ export function ListingDashboardCard({
     );
   };
 
-  const formatFeaturedUntil = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays <= 0) {
-      return "Expired";
-    } else if (diffDays === 1) {
-      return "Expires tomorrow";
-    } else if (diffDays <= 7) {
-      return `Expires in ${diffDays} days`;
-    } else {
-      return `Featured until ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-    }
-  };
+  // Live countdown effect
+  useEffect(() => {
+    if (!featured_until) return;
+
+    const updateCountdown = () => {
+      const timeLeft = calculateTimeLeft(featured_until);
+      if (timeLeft) {
+        setCountdownText(formatTimeLeft(timeLeft));
+      } else {
+        setCountdownText("Expired");
+      }
+    };
+
+    // Update immediately
+    updateCountdown();
+
+    // Set up interval to update every second
+    const interval = setInterval(updateCountdown, 1000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
+  }, [featured_until]);
 
   const getCardOpacity = () => {
     if (!isSelectMode || isSwap) return 1;
@@ -234,24 +244,31 @@ export function ListingDashboardCard({
 
         <View
           position="absolute"
-          bottom="$2"
+          top="$2"
           left="$2"
           gap="$2"
         >
-          {featured_until && (
+          {featured_until && countdownText && (
             <Text
               borderRadius="$5"
               fontSize="$3" 
               fontWeight="400" 
-              color="$mutedForeground"
+              color="$foreground"
               numberOfLines={1}
               backgroundColor="$muted"
               paddingHorizontal="$2"
               paddingVertical="$1.5"
             >
-              {formatFeaturedUntil(featured_until)}
+              {countdownText}
             </Text>
           )}
+        </View>
+        <View
+          position="absolute"
+          bottom="$2"
+          left="$2"
+          gap="$2"
+        >
           <Text
             borderRadius="$5"
             fontSize="$4" 

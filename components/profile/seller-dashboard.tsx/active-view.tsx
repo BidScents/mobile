@@ -201,7 +201,7 @@ export default function ActiveView({
   return (
     <View flex={1}>
       <LegendList
-        key={`${isSelectMode}-${selectedListings.size}`} // TODO Maby change the key for the individual listing cards??
+        key={`listings-${isSelectMode ? 'select' : 'normal'}-${selectedListings.size}-${flatListings.length}`}
         data={flatListings}
         renderItem={renderListingItem}
         estimatedItemSize={260}
