@@ -226,7 +226,7 @@ export class AuthService {
       } else if (data.profileImageUri) {
         try {
           const result = await uploadSingleImage(data.profileImageUri, ImageUploadConfigs.profile('profile'))
-          profileImagePath = result.path
+          profileImagePath = `profile-images/${result.path}`
           // Notify component of successful upload
           callbacks?.onProfileImageUploaded?.(profileImagePath)
         } catch (error: any) {
@@ -242,7 +242,7 @@ export class AuthService {
       } else if (data.coverImageUri) {
         try {
           const result = await uploadSingleImage(data.coverImageUri, ImageUploadConfigs.profile('cover'))
-          coverImagePath = result.path
+          coverImagePath = `profile-images/${result.path}`
           // Notify component of successful upload
           callbacks?.onCoverImageUploaded?.(coverImagePath)
         } catch (error: any) {
@@ -251,12 +251,12 @@ export class AuthService {
           }
         }
       }
-      
       // Submit onboarding data
       const onboardingResult = await ApiAuthService.onboardUserV1AuthOnboardPost({
         username: data.username.trim(),
         first_name: data.first_name.trim(),
         last_name: data.last_name.trim(),
+        location: data.location?.trim() || undefined,
         profile_image_url: profileImagePath,
         cover_image_url: coverImagePath,
         bio: data.bio?.trim() || undefined

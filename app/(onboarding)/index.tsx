@@ -41,6 +41,7 @@ const DEFAULT_VALUES: OnboardingFormData = {
     first_name: '',
     last_name: '',
     username: '',
+    location: '',
     bio: '',
     profile_image_url: undefined,
     cover_image_url: undefined,
@@ -167,6 +168,15 @@ export default function OnboardingScreen() {
                 variant="username"
                 label="Username"
                 placeholder="Choose a unique username"
+                disabled={isLoading}
+              />
+
+              <ControlledInput
+                control={control}
+                name="location"
+                variant="username"
+                label="Location (Optional)"
+                placeholder="Enter your location"
                 disabled={isLoading}
               />
 
