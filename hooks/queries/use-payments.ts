@@ -90,6 +90,10 @@ export function useBoostListing() {
         queryKey: queryKeys.homepage,
       });
 
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.dashboard.listings.featured,
+      });
+
       // Refresh auth state to update payment details
       try {
         await AuthService.refreshCurrentUser();
