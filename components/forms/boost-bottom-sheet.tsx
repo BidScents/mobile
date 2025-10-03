@@ -1,7 +1,8 @@
 import { StripePaymentSheet } from "@/components/payments/stripe-payment-sheet";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
-import { useBoostListing, useListProducts } from "@/hooks/queries/use-payments";
+import { useBoostListing, useCancelBoostCredits, useListProducts } from "@/hooks/queries/use-payments";
+import { AuthService } from "@/utils/auth-service";
 import { formatPrice } from "@/utils/pricing";
 import type { BoostRequest } from "@bid-scents/shared-sdk";
 import { useAuthStore } from "@bid-scents/shared-sdk";
@@ -41,10 +42,14 @@ export const BoostBottomSheet = forwardRef<
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
   
+  // Request ID for cancellation
+  const [requestId, setRequestId] = useState<string | null>(null);
+  
   // Hooks
   const { paymentDetails } = useAuthStore();
   const { data: productsData, isLoading: productsLoading } = useListProducts();
   const boostMutation = useBoostListing();
+  const cancelBoostMutation = useCancelBoostCredits(requestId || "");
   
   // Boost data calculation
   const boostData = useMemo(() => {
@@ -85,19 +90,20 @@ export const BoostBottomSheet = forwardRef<
     const selectedCount = boostData.selectedCount;
     
     const calculatePrice = (boost: any, boostType: 'normal_boost' | 'premium_boost') => {
-      const isBulk = selectedCount >= boost.bulk_limit;
-      const pricePerItem = isBulk ? boost.bulk_price : boost.normal_price;
-      const fullTotalPrice = pricePerItem * selectedCount;
-      const savings = isBulk ? (boost.normal_price - boost.bulk_price) * selectedCount : 0;
-      
       // Calculate how many credits user has for this boost type
       const userCredits = boostType === 'normal_boost' 
         ? boostData.userCredits.normal_boost 
         : boostData.userCredits.premium_boost;
       
-      // Calculate credits needed and actual cost after using existing credits
+      // Calculate credits needed after using existing credits
       const creditsNeeded = Math.max(0, selectedCount - userCredits);
+      
+      // Bulk discount applies when credits needed (not selected count) meets bulk limit
+      const isBulk = creditsNeeded >= boost.bulk_limit;
+      const pricePerItem = isBulk ? boost.bulk_price : boost.normal_price;
+      const fullTotalPrice = pricePerItem * selectedCount;
       const actualTotalPrice = creditsNeeded * pricePerItem;
+      const savings = isBulk ? (boost.normal_price - boost.bulk_price) * creditsNeeded : 0;
       
       return {
         pricePerItem,
@@ -127,12 +133,16 @@ export const BoostBottomSheet = forwardRef<
     setIsLoading(true);
     
     try {
+      const newRequestId = Crypto.randomUUID();
       const boostRequest: BoostRequest = {
-        id: Crypto.randomUUID(),
+        id: newRequestId,
         boosts: {
           [boostType]: Array.from(selectedListings),
         },
       };
+      
+      // Store request ID for potential cancellation
+      setRequestId(newRequestId);
       
       const response = await boostMutation.mutateAsync(boostRequest);
       
@@ -146,6 +156,15 @@ export const BoostBottomSheet = forwardRef<
         });
       } else {
         // Success - credits were used
+        setRequestId(null); // Clear request ID on successful boost with credits
+        
+        // Refresh auth state to update payment details (only when credits were used)
+        try {
+          await AuthService.refreshCurrentUser();
+        } catch (error) {
+          console.error('Failed to refresh user after boost with credits:', error);
+        }
+        
         Alert.alert('Success', `Successfully boosted ${selectedListings.size} listing${selectedListings.size > 1 ? 's' : ''}`);
         bottomSheetRef.current?.dismiss();
         onSuccess?.();
@@ -161,19 +180,46 @@ export const BoostBottomSheet = forwardRef<
   };
   
   // Payment handlers
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     Alert.alert('Success', 'Payment completed and listings boosted!');
     setPaymentSheetData(null);
+    setRequestId(null); // Clear request ID on successful payment
+    
+    // Refresh auth state to update payment details after successful payment
+    try {
+      await AuthService.refreshCurrentUser();
+    } catch (error) {
+      console.error('Failed to refresh user after payment success:', error);
+    }
+    
     bottomSheetRef.current?.dismiss();
     onSuccess?.();
   };
   
   const handlePaymentError = (error: Error) => {
     setPaymentSheetData(null);
+    
+    // Cancel the boost request in background
+    if (requestId) {
+      cancelBoostMutation.mutate();
+      console.log('Boost request cancelled due to payment error:', error.message);
+      setRequestId(null);
+    }
   };
   
   const handlePaymentCancel = () => {
     setPaymentSheetData(null);
+    
+    // Cancel the boost request in background and close sheet immediately
+    if (requestId) {
+      cancelBoostMutation.mutate();
+      console.log('Boost request cancelled due to payment cancellation');
+      setRequestId(null);
+    }
+    
+    // Close the entire bottom sheet to prevent boost type switching
+    bottomSheetRef.current?.dismiss();
+    onSuccess?.(); // Reset selection state
   };
 
   const cancelSheet = () => {
