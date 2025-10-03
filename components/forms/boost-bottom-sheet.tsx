@@ -7,7 +7,6 @@ import type { BoostRequest } from "@bid-scents/shared-sdk";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import * as Crypto from "expo-crypto";
-import { router } from "expo-router";
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -85,24 +84,36 @@ export const BoostBottomSheet = forwardRef<
     
     const selectedCount = boostData.selectedCount;
     
-    const calculatePrice = (boost: any) => {
+    const calculatePrice = (boost: any, boostType: 'normal_boost' | 'premium_boost') => {
       const isBulk = selectedCount >= boost.bulk_limit;
       const pricePerItem = isBulk ? boost.bulk_price : boost.normal_price;
-      const totalPrice = pricePerItem * selectedCount;
+      const fullTotalPrice = pricePerItem * selectedCount;
       const savings = isBulk ? (boost.normal_price - boost.bulk_price) * selectedCount : 0;
+      
+      // Calculate how many credits user has for this boost type
+      const userCredits = boostType === 'normal_boost' 
+        ? boostData.userCredits.normal_boost 
+        : boostData.userCredits.premium_boost;
+      
+      // Calculate credits needed and actual cost after using existing credits
+      const creditsNeeded = Math.max(0, selectedCount - userCredits);
+      const actualTotalPrice = creditsNeeded * pricePerItem;
       
       return {
         pricePerItem,
-        totalPrice,
+        fullTotalPrice,
+        actualTotalPrice,
+        creditsNeeded,
         isBulk,
         savings,
         bulkLimit: boost.bulk_limit,
+        hasEnoughCredits: userCredits >= selectedCount,
       };
     };
     
     return {
-      normal: calculatePrice(boostData.normalBoost),
-      premium: calculatePrice(boostData.premiumBoost),
+      normal: calculatePrice(boostData.normalBoost, 'normal_boost'),
+      premium: calculatePrice(boostData.premiumBoost, 'premium_boost'),
     };
   }, [boostData]);
   
@@ -165,6 +176,13 @@ export const BoostBottomSheet = forwardRef<
     setPaymentSheetData(null);
   };
 
+  const cancelSheet = () => {
+      bottomSheetRef.current?.dismiss()
+      if(onSuccess){
+        onSuccess()
+      }
+  };
+
   useImperativeHandle(ref, () => ({
     present: () => {
       bottomSheetRef.current?.present();
@@ -195,10 +213,7 @@ export const BoostBottomSheet = forwardRef<
               {tabKey === 'featured' ? 'Extend Featured Time' : 'Boost Listings'}
             </Text>
 
-            <TouchableOpacity onPress={() => {
-              bottomSheetRef.current?.dismiss()
-              router.replace(`/(tabs)/profile/seller-dashboard`)
-              }} style={{ paddingHorizontal: 10 }} hitSlop={20} >
+            <TouchableOpacity onPress={cancelSheet} style={{ paddingHorizontal: 10 }} hitSlop={20} >
                 <ThemedIonicons color="$foreground" name="close" size={24} />
             </TouchableOpacity>
           </XStack>
@@ -274,10 +289,10 @@ export const BoostBottomSheet = forwardRef<
                 
                 <XStack alignItems="center" justifyContent="space-between">
                   <Text fontSize="$4" color="$mutedForeground">
-                    Total: {formatPrice(pricingInfo.normal.totalPrice)}
+                    Total: {formatPrice(pricingInfo.normal.actualTotalPrice)}
                   </Text>
                   <Text fontSize="$4" color="$mutedForeground">
-                    Need: {boostData.selectedCount} credits
+                    Need: {pricingInfo.normal.creditsNeeded} credits
                   </Text>
                 </XStack>
               </YStack>
@@ -289,7 +304,7 @@ export const BoostBottomSheet = forwardRef<
                 disabled={isLoading || boostData.selectedCount === 0}
                 borderRadius="$4"
               >
-                {isLoading ? 'Processing...' : `24h Boost${boostData.userCredits.normal_boost >= boostData.selectedCount ? ' (Use Credits)' : ' (Buy Credits)'}`}
+                {isLoading ? 'Processing...' : `24h Boost${pricingInfo.normal.hasEnoughCredits ? ' (Use Credits)' : ' (Buy Credits)'}`}
               </Button>
             </YStack>
 
@@ -318,10 +333,10 @@ export const BoostBottomSheet = forwardRef<
                 
                 <XStack alignItems="center" justifyContent="space-between">
                   <Text fontSize="$4" color="$mutedForeground">
-                    Total: {formatPrice(pricingInfo.premium.totalPrice)}
+                    Total: {formatPrice(pricingInfo.premium.actualTotalPrice)}
                   </Text>
                   <Text fontSize="$4" color="$mutedForeground">
-                    Need: {boostData.selectedCount} credits
+                    Need: {pricingInfo.premium.creditsNeeded} credits
                   </Text>
                 </XStack>
               </YStack>
@@ -333,7 +348,7 @@ export const BoostBottomSheet = forwardRef<
                 disabled={isLoading || boostData.selectedCount === 0}
                 borderRadius="$4"
               >
-                {isLoading ? 'Processing...' : `48h Boost${boostData.userCredits.premium_boost >= boostData.selectedCount ? ' (Use Credits)' : ' (Buy Credits)'}`}
+                {isLoading ? 'Processing...' : `48h Boost${pricingInfo.premium.hasEnoughCredits ? ' (Use Credits)' : ' (Buy Credits)'}`}
               </Button>
             </YStack>
           </YStack>
