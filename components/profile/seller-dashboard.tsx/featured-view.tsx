@@ -114,7 +114,7 @@ export default function FeaturedView({
   }, []);
 
   // Key extractor
-  const keyExtractor = useCallback((item: any) => item.id, []);
+  const keyExtractor = useCallback((item: any) => item.listing.id, []);
 
   // Render loading footer
   const renderFooter = useCallback(() => {
@@ -198,7 +198,7 @@ export default function FeaturedView({
   return (
     <View flex={1}>
       <LegendList
-        key={`${isSelectMode}-${selectedListings.size}`}
+        key={`featured-${isSelectMode ? 'select' : 'normal'}-${selectedListings.size}-${flatListings.length}`}
         data={flatListings}
         renderItem={renderListingItem}
         estimatedItemSize={260}
