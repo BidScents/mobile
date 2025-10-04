@@ -119,6 +119,7 @@ const MessageItemComponent = ({
             messageId={message.id}
             isBuyer={isBuyerAction}
             message={message}
+            conversationId={conversation.id}
           />
         );
       case 'SYSTEM':

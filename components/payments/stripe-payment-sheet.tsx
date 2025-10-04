@@ -1,6 +1,7 @@
 import {
   useStripe
 } from '@stripe/stripe-react-native';
+import * as Linking from 'expo-linking';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
@@ -23,6 +24,8 @@ interface StripePaymentSheetProps {
   onError: (error: Error) => void;
   /** Called when user cancels */
   onCancel?: () => void;
+  /** Return URL for payment */
+  returnURL?: string;
 }
 
 /**
@@ -38,7 +41,8 @@ export const StripePaymentSheet = memo<StripePaymentSheetProps>(({
   ephemeralKeySecret,
   onSuccess,
   onError,
-  onCancel
+  onCancel,
+  returnURL
 }) => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [isReady, setIsReady] = useState(false);
@@ -83,7 +87,7 @@ export const StripePaymentSheet = memo<StripePaymentSheetProps>(({
 
         // Allow future payments (saves payment methods)
         allowsDelayedPaymentMethods: true,
-        returnURL: 'com.bidscents.mobile://payment/return',
+        returnURL: returnURL || Linking.createURL('(tabs)/profile/seller-dashboard'),
       });
 
       if (error) {
@@ -101,7 +105,8 @@ export const StripePaymentSheet = memo<StripePaymentSheetProps>(({
     ephemeralKeySecret,
     customerEmail,
     currency,
-    onError
+    onError,
+    returnURL
   ]);
 
   // Initialize PaymentSheet when component mounts

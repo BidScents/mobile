@@ -4,6 +4,7 @@ import { currency } from "@/constants/constants";
 import { useAcceptTransaction, useCancelTransaction } from "@/hooks/queries/use-payments";
 import { MessageResData, PaymentResponse, RichInitiateTransactionActionContent } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
+import * as Linking from 'expo-linking';
 import { router } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "tamagui";
@@ -131,6 +132,7 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
           onSuccess={handlePaymentSuccess}
           onError={handlePaymentError}
           onCancel={handlePaymentCancel}
+          returnURL={Linking.createURL(`(screens)/(chat)/${message.id}`)}
         />
       )}
     </>

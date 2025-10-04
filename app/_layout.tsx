@@ -214,18 +214,6 @@ export default function RootLayout() {
       } catch (error) {
         // Silently handle URL parsing errors
       }
-      
-      // Handle payment return URLs
-      if (url.includes('payment/return')) {
-        // Payment completed, this is handled by the payment return route
-      } 
-      else if (url.includes('seller/onboarding/complete')) {
-        // Seller onboarding completed
-      } 
-      else if (url.includes('payment-methods/return')) {
-        // Payment method setup completed
-      }
-      // Add more deep link handlers as needed
     };
 
     // Handle initial URL (if app was closed)
