@@ -72,11 +72,13 @@ android {
         jniLibs {
             useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
-        // Add these to fix Glide duplicate class issue
         pickFirst 'lib/x86/libc++_shared.so'
         pickFirst 'lib/x86_64/libc++_shared.so'
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
         pickFirst 'lib/arm64-v8a/libc++_shared.so'
+        
+        exclude 'META-INF/services/com.bumptech.glide.module.LibraryGlideModule'
+        exclude 'META-INF/services/com.bumptech.glide.module.AppGlideModule'
     }
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
@@ -122,7 +124,6 @@ dependencies {
     }
 }
 
-// Fix Glide duplicate class issue - MUST be after dependencies block
 configurations.all {
     exclude group: 'com.github.bumptech.glide', module: 'compiler'
 }
