@@ -18,6 +18,7 @@ import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/typ
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LegendList } from "@legendapp/list";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import React, {
   forwardRef,
   useCallback,
@@ -309,16 +310,23 @@ export const TransactionBottomSheet = forwardRef<
             </Text>
           </View>
         ) : allListings.length === 0 ? (
-          <View alignItems="center" justifyContent="center" flex={1}>
-            <ThemedIonicons
-              name="storefront-outline"
-              size={48}
-              color="mutedForeground"
-            />
-            <Text color="$mutedForeground" marginTop="$2" textAlign="center">
-              No active listings found
-            </Text>
-          </View>
+           <View flex={1} justifyContent="center" alignItems="center" paddingHorizontal="$6" marginVertical="$6">
+              <ThemedIonicons 
+                name="storefront-outline" 
+                size={64} 
+                color={colors.mutedForeground} 
+                style={{ marginBottom: 16 }} 
+              />
+              <Text fontSize="$6" fontWeight="600" color="$foreground" textAlign="center" marginBottom="$2">
+                No Active Listings
+              </Text>
+              <Text fontSize="$4" color="$mutedForeground" textAlign="center" marginBottom="$4">
+                You don&apos;t have any active listings yet. Create your first listing to start selling.
+              </Text>
+              <Button variant="primary" onPress={() => router.push('/(screens)/add-listing')}>
+                Create Listing
+              </Button>
+            </View>
         ) : (
           <LegendList
             data={allListings}

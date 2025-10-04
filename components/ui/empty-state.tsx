@@ -1,4 +1,5 @@
 import { Text, View } from "tamagui";
+import { ThemedIonicons } from "./themed-icons";
 
 interface EmptyStateProps {
   title: string;
@@ -14,10 +15,16 @@ export function EmptyState({ title, description }: EmptyStateProps) {
       paddingHorizontal="$4"
       backgroundColor="$background"
     >
+      <ThemedIonicons 
+        name="receipt-outline" 
+        size={64} 
+        color={"$mutedForeground"} 
+        style={{ marginBottom: 16 }} 
+      />
       <Text
         fontSize="$6"
         fontWeight="600"
-        color="$mutedForeground"
+        color="$foreground"
         textAlign="center"
       >
         {title}

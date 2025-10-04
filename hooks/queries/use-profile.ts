@@ -137,6 +137,7 @@ return useInfiniteQuery({
   initialPageParam: 1,
   enabled: options?.enabled !== undefined ? options.enabled : !!userId,
   staleTime: 3 * 60 * 1000, // 3 minutes
+  refetchOnMount: "always",
 })
 }
 
