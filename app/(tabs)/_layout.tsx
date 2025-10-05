@@ -6,11 +6,9 @@ import {
 } from "@/hooks/queries/use-notifications";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useThemeColors } from "@/hooks/use-theme-colors";
-import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { router, Tabs } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
 
 export default function TabsLayout() {
   const colors = useThemeColors();
@@ -59,23 +57,9 @@ export default function TabsLayout() {
           tabBarActiveTintColor: colors.foreground,
           tabBarInactiveTintColor: colors.mutedForeground,
           tabBarStyle: {
-            position: "absolute",
             borderTopWidth: 0,
-            height: 75,
+            backgroundColor: colors.background,
           },
-          tabBarItemStyle: {
-            padding: 5,
-          },
-          tabBarBackground: () => (
-            <BlurView
-              tint={colors.blurTint as any}
-              style={{
-                ...StyleSheet.absoluteFillObject,
-                overflow: "hidden",
-                backgroundColor: "transparent",
-              }}
-            />
-          ),
         }}
         screenListeners={{
           tabPress: () => handleHapticFeedback(),

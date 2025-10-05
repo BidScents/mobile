@@ -1,18 +1,20 @@
 import { BackButton } from "@/components/ui/back-button";
 import { CloseButton } from "@/components/ui/close-button";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { Stack } from "expo-router";
 
 export default function ProfileLayout() {
+  const colors = useThemeColors();
   return (
     <Stack
       screenOptions={{
         headerShown: true,
         headerShadowVisible: false,
         headerStyle: {
-          backgroundColor: "$background",
+          backgroundColor: colors.background,
         },
         headerTitleStyle: {
-          color: "$foreground",
+          color: colors.foreground,
         },
       }}
     >
