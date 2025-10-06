@@ -11,8 +11,26 @@ import {
   useAuthStore,
 } from "@bid-scents/shared-sdk"
 import { router } from "expo-router"
+import Purchases from 'react-native-purchases'
 import { AuthService } from './auth-service'
 import { AuthStateManager } from './auth-state-manager'
+
+/**
+ * Sync RevenueCat user with Supabase user ID
+ */
+const syncRevenueCatUser = async (session: any): Promise<void> => {
+  try {
+    const userId = session?.user?.id
+    if (userId) {
+      console.log("Syncing RevenueCat user:", userId)
+      await Purchases.logIn(userId)
+      console.log("RevenueCat user synced successfully")
+    }
+  } catch (error) {
+    console.log("Error syncing RevenueCat user:", error)
+    // Don't throw - RevenueCat sync shouldn't block auth flow
+  }
+}
 
 /**
  * Handle existing session on app startup
@@ -23,6 +41,9 @@ export const handleExistingSession = async (
 ): Promise<void> => {
   try {
     AuthStateManager.setLoading(true)
+    
+    // Sync RevenueCat user with Supabase user ID
+    await syncRevenueCatUser(session)
 
     if (AuthStateManager.needsUserData(existingUser)) {
       // Need to fetch fresh user data
@@ -84,6 +105,9 @@ export const handleSignInEvent = async (session: any): Promise<void> => {
   try {
     AuthStateManager.setLoading(true)
     
+    // Sync RevenueCat user with Supabase user ID
+    await syncRevenueCatUser(session)
+    
     const { user: currentUser } = useAuthStore.getState()
     
     if (AuthStateManager.needsUserData(currentUser)) {
@@ -132,6 +156,10 @@ export const handleSignInEvent = async (session: any): Promise<void> => {
 const refreshUserDataInBackground = async (session: any): Promise<void> => {
   try {
     console.log("Refreshing user data in background")
+    
+    // Ensure RevenueCat user is still synced
+    await syncRevenueCatUser(session)
+    
     const loginResult = await AuthService.authenticateWithSession(session)
     
     AuthStateManager.setAuthenticatedState(session, loginResult)
