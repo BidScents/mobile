@@ -20,6 +20,7 @@ import React, { useEffect, useState } from "react";
 import { Alert, Platform, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import config from "tamagui.config";
 import { useThemeSettings } from "../hooks/use-theme-settings";
@@ -53,6 +54,19 @@ export default function RootLayout() {
   const [fontsLoaded] = useFonts(
     Platform.OS === "android" ? ANDROID_FONTS : {}
   );
+
+  useEffect(() => {
+    Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+
+    if (Platform.OS === 'ios') {
+       Purchases.configure({apiKey: 'appl_zojxPqwCFZkxAZcgptlWJuxPYUq'});
+    } else if (Platform.OS === 'android') {
+       Purchases.configure({apiKey: 'goog_mOyAxkpXxPoViKbjsdZXLlOEktR'});
+    }
+
+    // Note: RevenueCat user login will happen after Supabase authentication
+    // This ensures RevenueCat is synced with the correct user ID
+  }, []);
 
   /**
    * Initialize application on mount
