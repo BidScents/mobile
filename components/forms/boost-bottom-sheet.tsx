@@ -1,7 +1,7 @@
-import { StripePaymentSheet } from "@/components/payments/stripe-payment-sheet";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
-import { useBoostListing, useCancelBoostCredits, useListProducts } from "@/hooks/queries/use-payments";
+import { useBoostListing, useListProducts } from "@/hooks/queries/use-payments";
+import { BOOST_PRODUCT_IDS, useRevenueCatBoostPurchase } from "@/hooks/queries/use-revenuecat-purchases";
 import { AuthService } from "@/utils/auth-service";
 import { formatPrice } from "@/utils/pricing";
 import type { BoostRequest } from "@bid-scents/shared-sdk";
@@ -20,36 +20,25 @@ export interface BoostBottomSheetMethods {
 
 export interface BoostBottomSheetProps {
   tabKey: string;
-  selectedListings: Set<string>;
-  setSelectedListings?: (listings: Set<string>) => void;
   setIsSelectMode?: (selectMode: boolean) => void;
   onSuccess?: () => void;
+  listingId: string;
 }
 
 export const BoostBottomSheet = forwardRef<
   BoostBottomSheetMethods,
   BoostBottomSheetProps
->(({ tabKey, selectedListings, setSelectedListings, setIsSelectMode, onSuccess }, ref) => {
+>(({ tabKey, setIsSelectMode, onSuccess, listingId }, ref) => {
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
-  
-  // Payment sheet state
-  const [paymentSheetData, setPaymentSheetData] = useState<{
-    clientSecret: string;
-    amount: number;
-    currency: string;
-  } | null>(null);
   
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Request ID for cancellation
-  const [requestId, setRequestId] = useState<string | null>(null);
   
   // Hooks
   const { paymentDetails } = useAuthStore();
   const { data: productsData, isLoading: productsLoading } = useListProducts();
   const boostMutation = useBoostListing();
-  const cancelBoostMutation = useCancelBoostCredits(requestId || "");
+  const revenueCatBoostPurchase = useRevenueCatBoostPurchase();
   
   // Boost data calculation
   const boostData = useMemo(() => {
@@ -58,13 +47,11 @@ export const BoostBottomSheet = forwardRef<
         normalBoost: null,
         premiumBoost: null,
         userCredits: { normal_boost: 0, premium_boost: 0 },
-        selectedCount: selectedListings.size,
       };
     }
     
     const { boosts } = productsData;
     const userCredits = paymentDetails.boost_credits || {};
-    const selectedCount = selectedListings.size;
     
     // Find normal (24h) and premium (48h) boosts
     const normalBoost = Object.values(boosts).find(boost => boost.duration === 24);
@@ -77,9 +64,8 @@ export const BoostBottomSheet = forwardRef<
         normal_boost: userCredits.normal_boost || 0,
         premium_boost: userCredits.premium_boost || 0,
       },
-      selectedCount,
     };
-  }, [productsData, paymentDetails, selectedListings]);
+  }, [productsData, paymentDetails]);
   
   // Calculate pricing for current selection
   const pricingInfo = useMemo(() => {
@@ -87,33 +73,19 @@ export const BoostBottomSheet = forwardRef<
       return { normal: null, premium: null };
     }
     
-    const selectedCount = boostData.selectedCount;
-    
     const calculatePrice = (boost: any, boostType: 'normal_boost' | 'premium_boost') => {
       // Calculate how many credits user has for this boost type
       const userCredits = boostType === 'normal_boost' 
         ? boostData.userCredits.normal_boost 
         : boostData.userCredits.premium_boost;
       
-      // Calculate credits needed after using existing credits
-      const creditsNeeded = Math.max(0, selectedCount - userCredits);
-      
-      // Bulk discount applies when credits needed (not selected count) meets bulk limit
-      const isBulk = creditsNeeded >= boost.bulk_limit;
-      const pricePerItem = isBulk ? boost.bulk_price : boost.normal_price;
-      const fullTotalPrice = pricePerItem * selectedCount;
-      const actualTotalPrice = creditsNeeded * pricePerItem;
-      const savings = isBulk ? (boost.normal_price - boost.bulk_price) * creditsNeeded : 0;
+      // For single listing, we only need normal price and credit check
+      const pricePerItem = boost.normal_price;
+      const hasEnoughCredits = userCredits >= 1;
       
       return {
         pricePerItem,
-        fullTotalPrice,
-        actualTotalPrice,
-        creditsNeeded,
-        isBulk,
-        savings,
-        bulkLimit: boost.bulk_limit,
-        hasEnoughCredits: userCredits >= selectedCount,
+        hasEnoughCredits,
       };
     };
     
@@ -125,47 +97,48 @@ export const BoostBottomSheet = forwardRef<
   
   // Boost handlers
   const handleBoost = async (boostType: 'normal_boost' | 'premium_boost') => {
-    if (selectedListings.size === 0) {
-      Alert.alert('Error', 'No listings selected');
+    if (!listingId) {
+      Alert.alert('Error', 'No listing selected');
       return;
     }
     
     setIsLoading(true);
     
     try {
-      const newRequestId = Crypto.randomUUID();
-      const boostRequest: BoostRequest = {
-        id: newRequestId,
-        boosts: {
-          [boostType]: Array.from(selectedListings),
-        },
-      };
+      // Check if user has enough credits
+      const userCredits = boostType === 'normal_boost' 
+        ? boostData.userCredits.normal_boost 
+        : boostData.userCredits.premium_boost;
       
-      // Store request ID for potential cancellation
-      setRequestId(newRequestId);
-      
-      const response = await boostMutation.mutateAsync(boostRequest);
-      
-      // Check if payment is required
-      if (response.client_secret) {
-        // Insufficient credits - show payment sheet
-        setPaymentSheetData({
-          clientSecret: response.client_secret,
-          amount: response.amount,
-          currency: response.currency,
-        });
+      if (userCredits >= 1) {
+        // User has enough credits, use credits only
+        const newRequestId = Crypto.randomUUID();
+        const boostRequest: BoostRequest = {
+          id: newRequestId,
+          boosts: {
+            [boostType]: [listingId],
+          },
+        };
+        
+        await boostMutation.mutateAsync({ boostRequest, creditsOnly: true });
+        
+        // Refresh auth state to update payment details
+        AuthService.refreshCurrentUser();
+        
+        Alert.alert('Success', 'Successfully boosted listing!');
+        bottomSheetRef.current?.dismiss();
+        onSuccess?.();
       } else {
-        // Success - credits were used
-        setRequestId(null); // Clear request ID on successful boost with credits
+        // Insufficient credits, purchase via RevenueCat
+        const productId = boostType === 'normal_boost' ? BOOST_PRODUCT_IDS.NORMAL_BOOST : BOOST_PRODUCT_IDS.PREMIUM_BOOST;
         
-        // Refresh auth state to update payment details (only when credits were used)
-        try {
-          await AuthService.refreshCurrentUser();
-        } catch (error) {
-          console.error('Failed to refresh user after boost with credits:', error);
-        }
+        await revenueCatBoostPurchase.mutateAsync({ 
+          productIdentifier: productId, 
+          listingId: listingId 
+        });
         
-        Alert.alert('Success', `Successfully boosted ${selectedListings.size} listing${selectedListings.size > 1 ? 's' : ''}`);
+        // After successful purchase, the listing will be boosted automatically via the RevenueCat success handler
+        Alert.alert('Success', 'Purchase completed and listing boosted!');
         bottomSheetRef.current?.dismiss();
         onSuccess?.();
       }
@@ -179,49 +152,6 @@ export const BoostBottomSheet = forwardRef<
     }
   };
   
-  // Payment handlers
-  const handlePaymentSuccess = async () => {
-    Alert.alert('Success', 'Payment completed and listings boosted!');
-    setPaymentSheetData(null);
-    setRequestId(null); // Clear request ID on successful payment
-    
-    // Refresh auth state to update payment details after successful payment
-    try {
-      await AuthService.refreshCurrentUser();
-    } catch (error) {
-      console.error('Failed to refresh user after payment success:', error);
-    }
-    
-    bottomSheetRef.current?.dismiss();
-    onSuccess?.();
-  };
-  
-  const handlePaymentError = (error: Error) => {
-    setPaymentSheetData(null);
-    
-    // Cancel the boost request in background
-    if (requestId) {
-      cancelBoostMutation.mutate();
-      console.log('Boost request cancelled due to payment error:', error.message);
-      setRequestId(null);
-    }
-  };
-  
-  const handlePaymentCancel = () => {
-    setPaymentSheetData(null);
-    
-    // Cancel the boost request in background and close sheet immediately
-    if (requestId) {
-      cancelBoostMutation.mutate();
-      console.log('Boost request cancelled due to payment cancellation');
-      setRequestId(null);
-    }
-    
-    // Close the entire bottom sheet to prevent boost type switching
-    bottomSheetRef.current?.dismiss();
-    onSuccess?.(); // Reset selection state
-  };
-
   const cancelSheet = () => {
       bottomSheetRef.current?.dismiss()
       if(onSuccess){
@@ -234,8 +164,7 @@ export const BoostBottomSheet = forwardRef<
       bottomSheetRef.current?.present();
     },
     dismiss: () => {
-      setSelectedListings?.(new Set());
-      setIsSelectMode?.(false);
+      // setIsSelectMode?.(false);
       bottomSheetRef.current?.dismiss();
     },
   }));
@@ -267,14 +196,8 @@ export const BoostBottomSheet = forwardRef<
           <Text fontSize="$4" color="$mutedForeground" opacity={0.8}>
             {tabKey === 'featured' 
               ? 'Extend your featured time to attract more buyers' 
-              : 'Boost your listings to attract more buyers'}
+              : 'Boost your listing to attract more buyers'}
           </Text>
-          
-          {boostData.selectedCount > 0 && (
-            <Text fontSize="$4" color="$foreground" fontWeight="500">
-              {boostData.selectedCount} listing{boostData.selectedCount > 1 ? 's' : ''} selected
-            </Text>
-          )}
         </YStack>
 
         {/* Current Credits */}
@@ -312,89 +235,45 @@ export const BoostBottomSheet = forwardRef<
             
             {/* 24h Normal Boost */}
             <YStack backgroundColor="$muted" borderRadius="$6" p="$4" gap="$3">
-              <YStack gap="$2">
-                <XStack alignItems="center" justifyContent="space-between">
-                  <Text fontSize="$5" fontWeight="600" color="$foreground">
-                    24h Normal Boost
-                  </Text>
-                  <Text fontSize="$4" color="$foreground">
-                    {formatPrice(pricingInfo.normal.pricePerItem)} each
-                  </Text>
-                </XStack>
-                
-                {pricingInfo.normal.isBulk && (
-                  <XStack alignItems="center" justifyContent="space-between">
-                    <Text fontSize="$3" color="$green10">
-                      Bulk discount applied!
-                    </Text>
-                    <Text fontSize="$3" color="$green10">
-                      Save {formatPrice(pricingInfo.normal.savings)}
-                    </Text>
-                  </XStack>
-                )}
-                
-                <XStack alignItems="center" justifyContent="space-between">
-                  <Text fontSize="$4" color="$mutedForeground">
-                    Total: {formatPrice(pricingInfo.normal.actualTotalPrice)}
-                  </Text>
-                  <Text fontSize="$4" color="$mutedForeground">
-                    Need: {pricingInfo.normal.creditsNeeded} credits
-                  </Text>
-                </XStack>
-              </YStack>
+              <XStack alignItems="center" justifyContent="space-between">
+                <Text fontSize="$5" fontWeight="600" color="$foreground">
+                  24h Normal Boost
+                </Text>
+                <Text fontSize="$4" color="$foreground">
+                  {formatPrice(pricingInfo.normal.pricePerItem)}
+                </Text>
+              </XStack>
               
               <Button
                 variant="outline"
                 size="md"
                 onPress={() => handleBoost('normal_boost')}
-                disabled={isLoading || boostData.selectedCount === 0}
+                disabled={isLoading}
                 borderRadius="$4"
               >
-                {isLoading ? 'Processing...' : `24h Boost${pricingInfo.normal.hasEnoughCredits ? ' (Use Credits)' : ' (Buy Credits)'}`}
+                {isLoading ? 'Processing...' : `${pricingInfo.normal.hasEnoughCredits ? 'Use Credit' : 'Buy Credit'}`}
               </Button>
             </YStack>
 
             {/* 48h Premium Boost */}
             <YStack backgroundColor="$muted" borderRadius="$6" p="$4" gap="$3">
-              <YStack gap="$2">
-                <XStack alignItems="center" justifyContent="space-between">
-                  <Text fontSize="$5" fontWeight="600" color="$foreground">
-                    48h Premium Boost
-                  </Text>
-                  <Text fontSize="$4" color="$foreground">
-                    {formatPrice(pricingInfo.premium.pricePerItem)} each
-                  </Text>
-                </XStack>
-                
-                {pricingInfo.premium.isBulk && (
-                  <XStack alignItems="center" justifyContent="space-between">
-                    <Text fontSize="$3" color="$green10">
-                      Bulk discount applied!
-                    </Text>
-                    <Text fontSize="$3" color="$green10">
-                      Save {formatPrice(pricingInfo.premium.savings)}
-                    </Text>
-                  </XStack>
-                )}
-                
-                <XStack alignItems="center" justifyContent="space-between">
-                  <Text fontSize="$4" color="$mutedForeground">
-                    Total: {formatPrice(pricingInfo.premium.actualTotalPrice)}
-                  </Text>
-                  <Text fontSize="$4" color="$mutedForeground">
-                    Need: {pricingInfo.premium.creditsNeeded} credits
-                  </Text>
-                </XStack>
-              </YStack>
+              <XStack alignItems="center" justifyContent="space-between">
+                <Text fontSize="$5" fontWeight="600" color="$foreground">
+                  48h Premium Boost
+                </Text>
+                <Text fontSize="$4" color="$foreground">
+                  {formatPrice(pricingInfo.premium.pricePerItem)}
+                </Text>
+              </XStack>
               
               <Button
                 variant="primary"
                 size="md"
                 onPress={() => handleBoost('premium_boost')}
-                disabled={isLoading || boostData.selectedCount === 0}
+                disabled={isLoading}
                 borderRadius="$4"
               >
-                {isLoading ? 'Processing...' : `48h Boost${pricingInfo.premium.hasEnoughCredits ? ' (Use Credits)' : ' (Buy Credits)'}`}
+                {isLoading ? 'Processing...' : `${pricingInfo.premium.hasEnoughCredits ? 'Use Credit' : 'Buy Credit'}`}
               </Button>
             </YStack>
           </YStack>
@@ -415,18 +294,7 @@ export const BoostBottomSheet = forwardRef<
       >
         {renderContent()}
       </BottomSheet>
-      
-      {/* Payment Sheet */}
-      {paymentSheetData && (
-        <StripePaymentSheet
-          clientSecret={paymentSheetData.clientSecret}
-          amount={paymentSheetData.amount}
-          currency={paymentSheetData.currency}
-          onSuccess={handlePaymentSuccess}
-          onError={handlePaymentError}
-          onCancel={handlePaymentCancel}
-        />
-      )}
+
     </>
   );
 });
