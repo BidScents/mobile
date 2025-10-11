@@ -40,7 +40,7 @@ export default function SellerDashboardTabs({
   
   // Selection state for active tab
   const [isSelectMode, setIsSelectMode] = useState(false);
-  const [selectedListings, setSelectedListings] = useState<Set<string>>(new Set());
+  const [currentBoostListingId, setCurrentBoostListingId] = useState<string | null>(null);
 
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation();
@@ -54,7 +54,6 @@ export default function SellerDashboardTabs({
       
       // Reset selection state when changing tabs
       setIsSelectMode(false);
-      setSelectedListings(new Set());
     }
   }, [activeTabKey, onTabChange]);
 
@@ -63,16 +62,23 @@ export default function SellerDashboardTabs({
     if (!isSelectMode) {
       // Enter select mode
       setIsSelectMode(true);
-    } else if (selectedListings.size === 0) {
+    } else {
       // Cancel selection mode
       setIsSelectMode(false);
-    } else {
-      // Boost selected listings
-      console.log('Boost listings:', Array.from(selectedListings));
-      boostBottomSheetRef.current?.present();
-      // Reset state after boost
     }
-  }, [isSelectMode, selectedListings, boostBottomSheetRef]);
+  }, [isSelectMode]);
+
+  // Handle individual listing boost
+  const handleBoostListing = useCallback((listing: any) => {
+    setCurrentBoostListingId(listing.id);
+    boostBottomSheetRef.current?.present();
+  }, []);
+
+  // Handle boost success
+  const handleBoostSuccess = useCallback(() => {
+    setCurrentBoostListingId(null);
+    // setIsSelectMode(false);
+  }, []);
 
   // Update header right button based on active tab and selection state
   useEffect(() => {
@@ -81,7 +87,6 @@ export default function SellerDashboardTabs({
         headerRight: () => (
           <SelectButton
             isSelectMode={isSelectMode}
-            selectedCount={selectedListings.size}
             onPress={handleSelectAction}
           />
         ),
@@ -91,7 +96,7 @@ export default function SellerDashboardTabs({
         headerRight: () => null,
       });
     }
-  }, [activeTabKey, isSelectMode, selectedListings.size, navigation, handleSelectAction]);
+  }, [activeTabKey, isSelectMode, navigation, handleSelectAction]);
 
   // Render tab content
   const renderTabContent = (tabKey: string) => {
@@ -102,16 +107,14 @@ export default function SellerDashboardTabs({
         return (
           <ActiveView
             isSelectMode={isSelectMode}
-            selectedListings={selectedListings}
-            setSelectedListings={setSelectedListings}
+            onBoost={handleBoostListing}
           />
         );
       case 'featured':
         return (
           <FeaturedView
             isSelectMode={isSelectMode}
-            selectedListings={selectedListings}
-            setSelectedListings={setSelectedListings}
+            onBoost={handleBoostListing}
           />
         );
       case 'auction':
@@ -148,13 +151,15 @@ export default function SellerDashboardTabs({
         ))}
       </View>
 
-      <BoostBottomSheet 
-        ref={boostBottomSheetRef} 
-        tabKey={activeTabKey} 
-        selectedListings={selectedListings}
-        setSelectedListings={setSelectedListings} 
-        setIsSelectMode={setIsSelectMode} 
-      />  
+      {currentBoostListingId && (
+        <BoostBottomSheet 
+          ref={boostBottomSheetRef} 
+          tabKey={activeTabKey} 
+          setIsSelectMode={setIsSelectMode}
+          onSuccess={handleBoostSuccess}
+          listingId={currentBoostListingId}
+        />
+      )}  
     </View>
   );
 }
