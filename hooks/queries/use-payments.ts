@@ -70,9 +70,9 @@ export function useBoostListing() {
   
 
   return useMutation({
-    mutationFn: (boostRequest: BoostRequest, creditsOnly?: boolean) =>
+    mutationFn: ({ boostRequest, creditsOnly }: { boostRequest: BoostRequest; creditsOnly?: boolean }) =>
       PaymentsService.boostListingV1PaymentsBoostPost(boostRequest, creditsOnly),
-    onSuccess: async (response: PaymentResponse, boostRequest: BoostRequest, creditsOnly?: boolean) => {
+    onSuccess: async (response: PaymentResponse, { boostRequest, creditsOnly }: { boostRequest: BoostRequest; creditsOnly?: boolean }) => {
       // Invalidate listing details for all boosted listings
       Object.values(boostRequest.boosts).flat().forEach((listingId) => {
         queryClient.invalidateQueries({
