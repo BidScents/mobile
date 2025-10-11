@@ -70,9 +70,9 @@ export function useBoostListing() {
   
 
   return useMutation({
-    mutationFn: (boostRequest: BoostRequest) =>
-      PaymentsService.boostListingV1PaymentsBoostPost(boostRequest),
-    onSuccess: async (response: PaymentResponse, boostRequest: BoostRequest) => {
+    mutationFn: (boostRequest: BoostRequest, creditsOnly?: boolean) =>
+      PaymentsService.boostListingV1PaymentsBoostPost(boostRequest, creditsOnly),
+    onSuccess: async (response: PaymentResponse, boostRequest: BoostRequest, creditsOnly?: boolean) => {
       // Invalidate listing details for all boosted listings
       Object.values(boostRequest.boosts).flat().forEach((listingId) => {
         queryClient.invalidateQueries({
@@ -100,6 +100,7 @@ export function useBoostListing() {
     },
     onError: (error: any) => {
       console.error('Failed to boost listing:', error);
+      console.log("error", error.message)
       
       // Get user-friendly error message without exposing listing IDs
       const userMessage = getBoostErrorMessage(error);
@@ -123,6 +124,24 @@ export function useCancelBoostCredits(requestId: string) {
       } catch (error) {
         console.error('Failed to refresh user after boost credits cancellation:', error);
       }
+    },
+  });
+}
+
+/**
+ * Claim boost credits
+ * @param requestId - ID of the boost request to claim
+ * @param listingId - ID of the listing to boost
+ */
+export function useClaimBoost() {
+  return useMutation({
+    mutationFn: ({ requestId, listingId }: { requestId: string; listingId: string }) => 
+      PaymentsService.claimBoostV1PaymentsBoostClaimPost({ request_id: requestId, listing_id: listingId} ),
+    onSuccess: async () => {
+      console.log('Boost claimed successfully')
+    },
+    onError: (error: any) => {
+      console.error('Failed to claim boost:', error);
     },
   });
 }
