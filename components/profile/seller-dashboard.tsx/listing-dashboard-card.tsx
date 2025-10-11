@@ -14,8 +14,7 @@ import { Spinner, Text, View, YStack } from "tamagui";
 interface ListingDashboardCardProps {
   listing: ListingCard;
   isSelectMode?: boolean;
-  isSelected?: boolean;
-  onSelect?: (listing: ListingCard) => void;
+  onBoost?: (listing: ListingCard) => void;
   isSettlementMode?: boolean;
   featured_until?: string;
 }
@@ -23,8 +22,7 @@ interface ListingDashboardCardProps {
 export function ListingDashboardCard({
   listing,
   isSelectMode = false,
-  isSelected = false,
-  onSelect,
+  onBoost,
   isSettlementMode = false,
   featured_until,
 }: ListingDashboardCardProps) {
@@ -40,19 +38,20 @@ export function ListingDashboardCard({
   };
   
   const handlePress = () => {
-    if (isSelectMode) {
-      if(isSwap) {
-        Alert.alert("Swap Listings", "Cant boost swap listings.");
-      } else {
-        // In select mode, toggle selection
-        onSelect?.(listing);
-      }
-    } else if (isSettlementMode) {
+    if (isSettlementMode) {
       // In settlement mode, open settlement bottom sheet
       handleSettlementPress();
     } else {
       // Normal mode, navigate to listing detail
       router.push(`/listing/${listing.id}` as any);
+    }
+  };
+
+  const handleBoostPress = () => {
+    if (isSwap) {
+      Alert.alert("Swap Listings", "Can't boost swap listings.");
+    } else {
+      onBoost?.(listing);
     }
   };
 
@@ -101,11 +100,10 @@ export function ListingDashboardCard({
   }, [featured_until]);
 
   const getCardOpacity = () => {
-    if (!isSelectMode || isSwap) return 1;
-    return isSelected ? 1 : 0.7;
+    return 1;
   };
 
-  const renderSelectionIcon = () => {
+  const renderBoostButton = () => {
     if (!isSelectMode || isSwap) return null;
 
     return (
@@ -113,23 +111,20 @@ export function ListingDashboardCard({
         position="absolute"
         bottom="$2"
         right="$2"
-        width={28}
-        height={28}
-        borderRadius={14}
-        backgroundColor={isSelected ? "$blue11" : "black"}
-        borderWidth={isSelected ? 0 : 2}
-        borderColor="white"
+        backgroundColor="$blue11"
+        borderRadius="$4"
+        paddingHorizontal="$2"
+        paddingVertical="$1.5"
         justifyContent="center"
         alignItems="center"
         zIndex={10}
+        onPress={handleBoostPress}
+        pressStyle={{ scale: 0.95 }}
+        hitSlop={8}
       >
-        {isSelected && (
-          <ThemedIonicons 
-            name="checkmark" 
-            size={20} 
-            color="white" 
-          />
-        )}
+        <Text color="white" fontSize="$3" fontWeight="600">
+          Boost
+        </Text>
       </View>
     );
   };
@@ -230,8 +225,8 @@ export function ListingDashboardCard({
           }}
         />
         
-        {/* Selection Icon */}
-        {renderSelectionIcon()}
+        {/* Boost Button */}
+        {renderBoostButton()}
 
         {/* Edit Icon */}
         {renderEditIcon()}
