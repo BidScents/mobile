@@ -248,7 +248,7 @@ export const useRevenueCatBoostPurchase = () => {
   const claimBoost = useClaimBoost()
 
   return useMutation({
-    mutationFn: async (productIdentifier: string) => {
+    mutationFn: async ({ productIdentifier, listingId }: { productIdentifier: string; listingId?: string }) => {
       console.log(`Attempting to purchase boost: ${productIdentifier}`)
       
       // Get the product first, then purchase it
@@ -265,9 +265,11 @@ export const useRevenueCatBoostPurchase = () => {
       
       return purchaseResult
     },
-    onSuccess: async (purchaseResult) => {
+    onSuccess: async (purchaseResult, { listingId }) => {
       setTimeout(() => {
-        claimBoost.mutate({ requestId: purchaseResult.transaction.transactionIdentifier, listingId: '41a04434-54f0-456c-970e-3295a80817e1' })
+        if (listingId) {
+          claimBoost.mutate({ requestId: purchaseResult.transaction.transactionIdentifier, listingId })
+        }
       }, 1000);
       
       // Refresh RevenueCat customer info
