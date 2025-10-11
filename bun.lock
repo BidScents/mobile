@@ -4,7 +4,7 @@
     "": {
       "name": "bidscents",
       "dependencies": {
-        "@bid-scents/shared-sdk": "^1.2.12",
+        "@bid-scents/shared-sdk": "^1.2.14",
         "@d11/react-native-fast-image": "^8.11.1",
         "@expo/vector-icons": "^14.1.0",
         "@gorhom/bottom-sheet": "^5.1.6",
@@ -270,7 +270,7 @@
 
     "@babel/types": ["@babel/types@7.27.6", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.27.1" } }, "sha512-ETyHEk2VHHvl9b9jZP5IHPavHYk57EhanlRRuae9XCpb/j5bDCbPPMOBfCWhnl/7EDJz0jEMCi/RhccCE8r1+Q=="],
 
-    "@bid-scents/shared-sdk": ["@bid-scents/shared-sdk@1.2.12", "", { "dependencies": { "@react-native-async-storage/async-storage": "^2.2.0", "@tanstack/react-query": "^5.80.7", "zod": "^3.25.64", "zustand": "^5.0.5" }, "peerDependencies": { "react": ">=18.0.0", "typescript": "^5.0.0" } }, "sha512-za+ILZozToJZ/61McU6jaSc60ncYQM2vIJxL3X2NT8o6NQfeRKKCz39kQq/GDyTV7xYFEOoIUy4tFRhKJSI1cA=="],
+    "@bid-scents/shared-sdk": ["@bid-scents/shared-sdk@1.2.14", "", { "dependencies": { "@react-native-async-storage/async-storage": "^2.2.0", "@tanstack/react-query": "^5.80.7", "zod": "^3.25.64", "zustand": "^5.0.5" }, "peerDependencies": { "react": ">=18.0.0", "typescript": "^5.0.0" } }, "sha512-NzulBlwvJz5NNcSCSxslU8mniDyv0jMf0N60uWKqLkTf5jfnlIcjpK580E9JaesfzOCZp77yaj51JTaCuKQPLg=="],
 
     "@d11/react-native-fast-image": ["@d11/react-native-fast-image@8.11.1", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-KG5Oxs1TWbwMf0ibZwE4EKMSSC0vpBQG6yPAB3WwcYtSzlY4JICjjpXPP+oixwQ/hO/sm6EGBNkVHOlfg4aJ+g=="],
 
