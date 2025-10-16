@@ -3,7 +3,7 @@ import { useCancelSubscription } from "@/hooks/queries/use-payments";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert } from "react-native";
+import { Alert, Linking } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 interface SubscriptionStatusSectionProps {
@@ -11,6 +11,8 @@ interface SubscriptionStatusSectionProps {
   isSwapActive: boolean;
   planType: string | null;
   swapAccessUntil: Date | null;
+  isRevenueCat?: boolean;
+  managementURL?: string | null;
 }
 
 export function SubscriptionStatusSection({
@@ -18,6 +20,8 @@ export function SubscriptionStatusSection({
   isSwapActive,
   planType,
   swapAccessUntil,
+  isRevenueCat,
+  managementURL,
 }: SubscriptionStatusSectionProps) {
   const [showEditSubscription, setShowEditSubscription] = useState(false);
   const cancelSubscriptionMutation = useCancelSubscription();
@@ -73,6 +77,23 @@ export function SubscriptionStatusSection({
     setShowEditSubscription(!showEditSubscription);
   };
 
+  const handleManageRevenueCatSubscription = useCallback(() => {
+    if (managementURL) {
+      Linking.openURL(managementURL).catch((error) => {
+        console.error('Failed to open management URL:', error);
+        Alert.alert(
+          "Error",
+          "Failed to open subscription management. Please try again."
+        );
+      });
+    } else {
+      Alert.alert(
+        "Error", 
+        "Subscription management not available. Please contact support."
+      );
+    }
+  }, [managementURL]);
+
   // Active recurring subscription
   if (isActive) {
     return (
@@ -81,11 +102,19 @@ export function SubscriptionStatusSection({
           <Text fontSize="$5" fontWeight="500" color="$foreground">
             Active Subscription
           </Text>
-          <XStack alignItems="center" backgroundColor="$muted" borderRadius="$5" px="$3" py="$2" onPress={handleEditSubscription}>
-            <Text fontSize="$3" fontWeight="500" color="$foreground">
-              Edit
-            </Text>
-          </XStack>
+          {isRevenueCat ? (
+            <XStack alignItems="center" backgroundColor="$muted" borderRadius="$5" px="$3" py="$2" onPress={handleManageRevenueCatSubscription}>
+              <Text fontSize="$3" fontWeight="500" color="$foreground">
+                Manage
+              </Text>
+            </XStack>
+          ) : (
+            <XStack alignItems="center" backgroundColor="$muted" borderRadius="$5" px="$3" py="$2" onPress={handleEditSubscription}>
+              <Text fontSize="$3" fontWeight="500" color="$foreground">
+                Edit
+              </Text>
+            </XStack>
+          )}
         </XStack>
         <YStack backgroundColor="$muted" borderRadius="$6" px="$4" py="$4" gap="$3">
 
@@ -108,7 +137,7 @@ export function SubscriptionStatusSection({
           </XStack>
 
           {/* Subscription Management Actions */}
-          {showEditSubscription && (
+          {showEditSubscription && !isRevenueCat && (
             <XStack gap="$3" mt="$2">
               <ButtonUI
                 variant="primary"
@@ -127,6 +156,20 @@ export function SubscriptionStatusSection({
                 size="sm"
               >
                 {cancelSubscriptionMutation.isPending ? "Cancelling..." : "Cancel"}
+              </ButtonUI>
+            </XStack>
+          )}
+
+          {/* RevenueCat Management */}
+          {isRevenueCat && (
+            <XStack mt="$2">
+              <ButtonUI
+                variant="primary"
+                onPress={handleManageRevenueCatSubscription}
+                flex={1}
+                size="sm"
+              >
+                Manage Subscription
               </ButtonUI>
             </XStack>
           )}
@@ -166,6 +209,20 @@ export function SubscriptionStatusSection({
           <Text fontSize="$3" color="$mutedForeground">
             Your subscription is cancelled but you retain access until your current billing period ends. You cannot create a new subscription until this access expires.
           </Text>
+
+          {/* RevenueCat Management for cancelled subscription */}
+          {isRevenueCat && (
+            <XStack mt="$2">
+              <ButtonUI
+                variant="primary"
+                onPress={handleManageRevenueCatSubscription}
+                flex={1}
+                size="sm"
+              >
+                Manage Subscription
+              </ButtonUI>
+            </XStack>
+          )}
         </YStack>
       </YStack>
     );

@@ -74,11 +74,14 @@ export const useRevenueCatOfferings = () => {
           }
 
           // Calculate features based on plan type
-          const features: string[] = ["Swap Access"]
+          const features: string[] = []
           
-          if (planType === 'monthly_swap') {
+          if (planType === 'weekly_swap') {
+            features.push('Swap Access')
+          } else if (planType === 'monthly_swap') {
+            features.push('7 day free trial')
             features.push('1 Normal boost credit')
-          } else if (planType === 'yearly_swap') {
+          } else{
             features.push('3 Normal boost credits')
             features.push('3 Premium boost credits')
           }
@@ -236,6 +239,75 @@ export const useRevenueCatBoostProducts = () => {
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
     retry: 3,
+  })
+}
+
+/**
+ * Restore RevenueCat purchases
+ */
+export const useRevenueCatRestore = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      console.log('Attempting to restore RevenueCat purchases')
+      
+      const restoreResult = await Purchases.restorePurchases()
+      
+      console.log('Restore successful:', restoreResult)
+      
+      return restoreResult
+    },
+    retry: false,
+    onSuccess: async () => {
+      // Refresh RevenueCat customer info
+      Purchases.getCustomerInfo()
+      
+      // Refresh user auth state to get updated subscription
+      AuthService.refreshCurrentUser()
+      
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['revenuecat-customer-info'] })
+      queryClient.invalidateQueries({ queryKey: ['revenuecat-offerings'] })
+      
+      // Show success message
+      Alert.alert(
+        'Purchases Restored',
+        'Your purchases have been successfully restored.'
+      )
+    },
+    onError: (error: any) => {
+      console.error('Restore failed:', error)
+      
+      // Check for cancellation by message content or error code
+      const errorMessage = error && typeof error === 'object' && 'message' in error 
+        ? (error as any).message 
+        : String(error)
+      
+      // Don't show alert for user cancellation
+      if (errorMessage.toLowerCase().includes('cancelled') || 
+          (error && typeof error === 'object' && 'code' in error && 
+           (error as any).code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR)) {
+        return
+      }
+
+      // Handle specific error for "Keep with original App User ID" behavior
+      if (errorMessage.toLowerCase().includes('different') || 
+          errorMessage.toLowerCase().includes('user id') ||
+          errorMessage.toLowerCase().includes('original')) {
+        Alert.alert(
+          'Restore Failed',
+          'These purchases were made with a different account. Please sign in with the original account that made the purchase, or contact support for assistance.'
+        )
+        return
+      }
+
+      // Show generic error for all other cases
+      Alert.alert(
+        'Restore Failed',
+        `Failed to restore purchases: ${error?.message || 'Unknown error'}`
+      )
+    },
   })
 }
 

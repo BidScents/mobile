@@ -6,7 +6,7 @@ import {
 } from "@/components/payments/paywall";
 import { Button as ButtonUI } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { useRevenueCatCustomerInfo, useRevenueCatOfferings, useRevenueCatPurchase } from "@/hooks/queries/use-revenuecat-purchases";
+import { useRevenueCatCustomerInfo, useRevenueCatOfferings, useRevenueCatPurchase, useRevenueCatRestore } from "@/hooks/queries/use-revenuecat-purchases";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
@@ -21,6 +21,7 @@ export default function SubscriptionPaywallScreen() {
   const offeringsQuery = useRevenueCatOfferings();
   const purchaseMutation = useRevenueCatPurchase();
   const customerInfoQuery = useRevenueCatCustomerInfo();
+  const restoreMutation = useRevenueCatRestore();
 
   // Check if user has redeemed free trial
   const hasRedeemedFreeTrial = paymentDetails?.redeemed_free_trial || false;
@@ -122,6 +123,10 @@ export default function SubscriptionPaywallScreen() {
     });
   }, [selectedPlan, subscriptionPlans, paymentDetails, purchaseMutation, isEligibleForNewSubscription, customerInfoQuery.data]);
 
+  const handleRestorePurchases = useCallback(() => {
+    restoreMutation.mutate();
+  }, [restoreMutation]);
+
   // Show loading state while fetching offerings or customer info
   if (offeringsQuery.isLoading || customerInfoQuery.isLoading) {
     return <SubscriptionLoadingState type="loading" />;
@@ -181,6 +186,8 @@ export default function SubscriptionPaywallScreen() {
         isLoading={isLoading}
         hasPaymentMethod={true} // RevenueCat handles payment natively
         onContinue={handleContinue}
+        onRestore={handleRestorePurchases}
+        isRestoring={restoreMutation.isPending}
       />
     </Container>
   );

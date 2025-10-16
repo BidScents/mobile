@@ -20,7 +20,6 @@ export interface BoostBottomSheetMethods {
 
 export interface BoostBottomSheetProps {
   tabKey: string;
-  setIsSelectMode?: (selectMode: boolean) => void;
   onSuccess?: () => void;
   listingId: string;
 }
@@ -28,7 +27,7 @@ export interface BoostBottomSheetProps {
 export const BoostBottomSheet = forwardRef<
   BoostBottomSheetMethods,
   BoostBottomSheetProps
->(({ tabKey, setIsSelectMode, onSuccess, listingId }, ref) => {
+>(({ tabKey, onSuccess, listingId }, ref) => {
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
   
   // Loading state
