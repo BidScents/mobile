@@ -9,7 +9,6 @@ import {
 } from '@bid-scents/shared-sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import * as Haptics from 'expo-haptics'
-import * as Notifications from 'expo-notifications'
 import { useCallback } from 'react'
 import { queryKeys } from './queries/query-keys'
 import { updateAllMessageCaches, } from './queries/use-messages'
@@ -188,29 +187,29 @@ export function useMessagingWebSocketHandlers({
       onUIUpdate?.()
     }
 
-    // Show notification for new message (only if not from current user)
-    if (messageData.sender?.id !== currentUserId) {
-      const getNotificationBody = () => {
-        if (!messageData.content) {
-          return 'Sent a message'
-        }
+    // // Show notification for new message (only if not from current user)
+    // if (messageData.sender?.id !== currentUserId) {
+    //   const getNotificationBody = () => {
+    //     if (!messageData.content) {
+    //       return 'Sent a message'
+    //     }
         
-        if (typeof messageData.content === 'object' && 'text' in messageData.content) {
-          return (messageData.content as any).text || 'Sent a message'
-        }
+    //     if (typeof messageData.content === 'object' && 'text' in messageData.content) {
+    //       return (messageData.content as any).text || 'Sent a message'
+    //     }
         
-        return 'Sent a message'
-      }
+    //     return 'Sent a message'
+    //   }
 
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: messageData.sender?.username || 'New Message',
-          body: getNotificationBody(),
-          sound: true,
-        },
-        trigger: null, // Show immediately
-      })
-    }
+    //   await Notifications.scheduleNotificationAsync({
+    //     content: {
+    //       title: messageData.sender?.username || 'New Message',
+    //       body: getNotificationBody(),
+    //       sound: true,
+    //     },
+    //     trigger: null, // Show immediately
+    //   })
+    // }
   }, [currentUserId, queryClient, typingUsersRef, onUIUpdate])
 
   /**
