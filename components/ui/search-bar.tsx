@@ -66,20 +66,22 @@ export function SearchBar({
   };
 
   const handleSearchIconPress = () => {
-    if (editable && navigateToResults && searchQuery.trim()) {
+    if (editable && navigateToResults) {
       handleSearchSubmit();
-    } else if (editable && onSearchSubmit && searchQuery.trim()) {
-      onSearchSubmit(searchQuery.trim());
+    } else if (editable && onSearchSubmit) {
+      const query = searchQuery.trim() || '*';
+      onSearchSubmit(query);
     } else {
       onSearchPress?.();
     }
   };
 
   const handleSearchSubmit = () => {
-    if (!searchQuery.trim() || !navigateToResults) return;
+    if (!navigateToResults) return;
     
+    const query = searchQuery.trim() || '*';
     const params = new URLSearchParams();
-    params.append('q', searchQuery.trim());
+    params.append('q', query);
     
     if (initialFilters) {
       params.append('filters', JSON.stringify(initialFilters));
@@ -95,8 +97,9 @@ export function SearchBar({
   const handleSubmitEditing = () => {
     if (navigateToResults) {
       handleSearchSubmit();
-    } else if (onSearchSubmit && searchQuery.trim()) {
-      onSearchSubmit(searchQuery.trim());
+    } else if (onSearchSubmit) {
+      const query = searchQuery.trim() || '*';
+      onSearchSubmit(query);
     }
     // Blur is handled by SearchInput component when needed
   };
