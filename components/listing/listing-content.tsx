@@ -1,5 +1,5 @@
 import { AuctionDetails, CommentDetails, ListingDetailsResponse, ListingType, UserPreview } from "@bid-scents/shared-sdk";
-import { View } from "tamagui";
+import { View, XStack } from "tamagui";
 import { AuctionDetailsSkeleton } from "../suspense/auction-details-skeleton";
 import { CommentsHeaderSkeleton } from "../suspense/comments-header-skeleton";
 import { CommentsSkeleton } from "../suspense/comments-skeleton";
@@ -12,6 +12,7 @@ import { CommentsSection } from "./comments-section";
 import { ListingDetailsSection } from "./listing-details-section";
 import { ListingHeader } from "./listing-header";
 import { SellerCard } from "./sellar-card";
+import { VoteButtons } from "./vote-buttons";
 
 interface ListingContentProps {
   listing: ListingDetailsResponse;
@@ -57,13 +58,32 @@ export function ListingContent({
         {/* Seller Card */}
         <SellerCard seller={seller} />
 
-        {/* Listing Header */}
-        <ListingHeader
-          name={listing.listing.name}
-          brand={listing.listing.brand}
-          price={listing.listing.price}
-          listingType={listing.listing.listing_type}
-        />
+        <XStack
+          gap="$2"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          {/* Listing Header */}
+          <ListingHeader
+            name={listing.listing.name}
+            brand={listing.listing.brand}
+            price={listing.listing.price}
+            listingType={listing.listing.listing_type}
+          />
+          {/* Vote Buttons */}
+          {!isSeededData && (
+            <View 
+              alignSelf="flex-start"
+              >
+                <VoteButtons
+                  totalVotes={totalVotes}
+                  isUpvoted={isUpvoted}
+                  listingId={listing.listing.id}
+                />
+              </View>
+            )}
+        </XStack>
+
         <View gap="$4">
           {/* Description */}
           {isSeededData || !listing.listing.description ? (
@@ -114,11 +134,7 @@ export function ListingContent({
         {isSeededData || (isLoadingFullData && totalVotes === 0 && isUpvoted === null) ? (
           <CommentsHeaderSkeleton />
         ) : (
-          <CommentsHeader
-            totalVotes={totalVotes}
-            isUpvoted={isUpvoted}
-            listingId={listing.listing.id}
-          />
+          <CommentsHeader />
         )}
 
         {/* Show skeleton for comments if using seeded data */}
