@@ -104,7 +104,7 @@ export function ListingDashboardCard({
   };
 
   const renderBoostButton = () => {
-    if (!isSelectMode || isSwap) return null;
+    if (!isSelectMode) return null;
 
     return (
       <View

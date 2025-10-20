@@ -250,7 +250,7 @@ export const BoostBottomSheet = forwardRef<
                 disabled={isLoading}
                 borderRadius="$4"
               >
-                {isLoading ? 'Processing...' : `${pricingInfo.normal.hasEnoughCredits ? 'Use Credit' : 'Buy Credit'}`}
+                {isLoading ? 'Processing...' : `${pricingInfo.normal.hasEnoughCredits ? 'Use credit' : 'Buy normal boost'}`}
               </Button>
             </YStack>
 
@@ -272,7 +272,7 @@ export const BoostBottomSheet = forwardRef<
                 disabled={isLoading}
                 borderRadius="$4"
               >
-                {isLoading ? 'Processing...' : `${pricingInfo.premium.hasEnoughCredits ? 'Use Credit' : 'Buy Credit'}`}
+                {isLoading ? 'Processing...' : `${pricingInfo.premium.hasEnoughCredits ? 'Use credit' : 'Buy premium boost'}`}
               </Button>
             </YStack>
           </YStack>
