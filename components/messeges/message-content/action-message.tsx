@@ -132,7 +132,7 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
           onSuccess={handlePaymentSuccess}
           onError={handlePaymentError}
           onCancel={handlePaymentCancel}
-          returnURL={Linking.createURL(`(screens)/(chat)/${message.id}`)}
+          returnURL={Linking.createURL(`(tabs)/chat`)}
         />
       )}
     </>

@@ -470,7 +470,7 @@ export default function AddListingScreen() {
         onDoLater={handleOnboardingDoLater}
       />
       {listingId && (
-        <BoostBottomSheet ref={boostBottomSheetRef} tabKey="add-listing" selectedListings={new Set([listingId])} onSuccess={() => router.replace(`/listing/${listingId}`)} />
+        <BoostBottomSheet ref={boostBottomSheetRef} tabKey="add-listing" listingId={listingId} onSuccess={() => router.replace(`/listing/${listingId}`)} />
       )}
     </Container>
   );

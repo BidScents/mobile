@@ -57,9 +57,6 @@ export function SubscriptionPlanCard({
             <Text fontSize="$5" fontWeight="500" color="$foreground">
               {plan.title}
             </Text>
-            <Text fontSize="$4" color="$mutedForeground">
-              {plan.subtitle}
-            </Text>
           </YStack>
 
           <XStack alignItems="baseline" gap="$1">

@@ -1,19 +1,21 @@
 import { BackButton } from "@/components/ui/back-button";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import Stack from "expo-router/stack";
 import { Platform } from "react-native";
 
 export default function ListingLayout() {
     const isIOS = Platform.OS === "ios";
+    const colors = useThemeColors();
     return (
         <Stack
         screenOptions={{
             headerShown: true,
             headerShadowVisible: false,
             headerStyle: {
-                backgroundColor: '$background',
+                backgroundColor: colors.background,
             },
             headerTitleStyle: {
-                color: '$foreground',
+                color: colors.foreground,
             },
         }}
         >

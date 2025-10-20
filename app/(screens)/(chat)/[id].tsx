@@ -1,6 +1,6 @@
+import { TransactionBottomSheet, TransactionBottomSheetMethods } from "@/components/forms/transaction-bottom-sheet";
 import { ChatInputBar } from "@/components/messeges/chat-input-bar";
 import { MessagesList } from "@/components/messeges/messages-list";
-import { TransactionBottomSheet, TransactionBottomSheetMethods } from "@/components/forms/transaction-bottom-sheet";
 import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
@@ -8,7 +8,7 @@ import { useConversation, useConversationSummary, useUpdateLastRead } from "@/ho
 import { ConversationSummary, UserPreview, useAuthStore } from "@bid-scents/shared-sdk";
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, Platform } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 
@@ -114,7 +114,7 @@ export default function SpecificChatScreen() {
   return (
     <Container
       variant="fullscreen"
-      safeArea={false}
+      safeArea={Platform.OS === "android" ? ["bottom"] : false}
       backgroundColor="$background"
     >
       <KeyboardAwareView>

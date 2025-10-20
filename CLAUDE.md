@@ -39,6 +39,10 @@ eas build --platform android --profile development
 
 # Clean prebuild (for native dependency changes)
 bun expo prebuild --clean
+
+# Android direct build (requires ANDROID_HOME set)
+ANDROID_HOME=/Users/muhammadabdullah/Library/Android/sdk ./gradlew app:assembleDebug
+NODE_ENV=development ANDROID_HOME=/Users/muhammadabdullah/Library/Android/sdk ./gradlew app:assembleDebug
 ```
 
 ## Architecture Overview

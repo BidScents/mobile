@@ -28,6 +28,7 @@ import {
 } from '@bid-scents/shared-sdk'
 import { makeRedirectUri } from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
+import Purchases from 'react-native-purchases'
 import { AuthStateManager } from './auth-state-manager'
 
 export interface AuthResult {
@@ -59,12 +60,32 @@ export interface ForgotPasswordResult {
 
 export class AuthService {
   /**
+   * Sync RevenueCat user with Supabase user ID
+   */
+  private static async syncRevenueCatUser(session: any): Promise<void> {
+    try {
+      const userId = session?.user?.id
+      if (userId) {
+        console.log("Syncing RevenueCat user:", userId)
+        await Purchases.logIn(userId)
+        console.log("RevenueCat user synced successfully")
+      }
+    } catch (error) {
+      console.log("Error syncing RevenueCat user:", error)
+      // Don't throw - RevenueCat sync shouldn't block auth flow
+    }
+  }
+
+  /**
    * Authenticate with existing session and fetch user data
    * This method directly calls the API and should be used by auth event handlers
    */
   static async authenticateWithSession(session: any): Promise<LoginResponse> {
     // Configure API token before making calls
     handleAuthStateChange('SIGNED_IN', session)
+    
+    // Sync RevenueCat user
+    await this.syncRevenueCatUser(session)
     
     // Fetch complete user data from API
     return await ApiAuthService.loginV1AuthLoginGet()
@@ -278,6 +299,16 @@ export class AuthService {
    */
   static async deleteAccount(): Promise<DeleteAccountResult> {
     try {
+      // Logout from RevenueCat first (before backend deletion)
+      try {
+        console.log("Logging out from RevenueCat before account deletion")
+        await Purchases.logOut()
+        console.log("RevenueCat logout successful")
+      } catch (error) {
+        console.log("Error logging out from RevenueCat:", error)
+        // Don't throw - RevenueCat logout shouldn't block account deletion
+      }
+      
       // Call API to delete account
       await ApiAuthService.deleteAccountV1AuthDeleteAccountDelete()
       
@@ -318,6 +349,16 @@ export class AuthService {
    * Sign out user
    */
   static async signOut(): Promise<void> {
+    try {
+      // Logout from RevenueCat first
+      console.log("Logging out from RevenueCat")
+      await Purchases.logOut()
+      console.log("RevenueCat logout successful")
+    } catch (error) {
+      console.log("Error logging out from RevenueCat:", error)
+      // Don't throw - RevenueCat logout shouldn't block auth flow
+    }
+
     const { error } = await supabase.auth.signOut()
     if (error) {
       throw new Error(error.message)

@@ -19,14 +19,12 @@ const GAP_SIZE = 12; // Same as search results
 
 interface ActiveViewProps {
   isSelectMode: boolean;
-  selectedListings: Set<string>;
-  setSelectedListings: React.Dispatch<React.SetStateAction<Set<string>>>;
+  onBoost: (listing: ListingCard) => void;
 }
 
 export default function ActiveView({ 
   isSelectMode, 
-  selectedListings, 
-  setSelectedListings 
+  onBoost
 }: ActiveViewProps) {
   const [canLoadMore, setCanLoadMore] = useState(false);
   const tabbarHeight = useBottomTabBarHeight();
@@ -59,23 +57,10 @@ export default function ActiveView({
     refetch();
   }, [refetch]);
 
-  // Handle listing selection
-  const handleListingSelect = useCallback((listing: ListingCard) => {
-    setSelectedListings(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(listing.id)) {
-        newSet.delete(listing.id);
-      } else {
-        newSet.add(listing.id);
-      }
-      return newSet;
-    });
-  }, [setSelectedListings]);
 
   // Render listing item
   const renderListingItem = useCallback(({ item, index }: { item: ListingCard, index: number }) => {
     const isLeftColumn = index % 2 === 0;
-    const isSelected = selectedListings.has(item.id);
     
     return (
       <View 
@@ -88,12 +73,11 @@ export default function ActiveView({
         <MemoizedListingCard 
           listing={item} 
           isSelectMode={isSelectMode}
-          isSelected={isSelected}
-          onSelect={handleListingSelect}
+          onBoost={onBoost}
         />
       </View>
     );
-  }, [isSelectMode, selectedListings, handleListingSelect]);
+  }, [isSelectMode, onBoost]);
 
   // Render loading skeleton
   const renderSkeletonItem = useCallback(({ index }: { index: number }) => {
@@ -201,7 +185,7 @@ export default function ActiveView({
   return (
     <View flex={1}>
       <LegendList
-        key={`listings-${isSelectMode ? 'select' : 'normal'}-${selectedListings.size}-${flatListings.length}`}
+        key={`listings-${isSelectMode ? 'select' : 'normal'}-${flatListings.length}`}
         data={flatListings}
         renderItem={renderListingItem}
         estimatedItemSize={260}

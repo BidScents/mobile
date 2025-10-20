@@ -9,6 +9,8 @@ interface SubscriptionBottomActionProps {
   isLoading: boolean;
   hasPaymentMethod: boolean;
   onContinue: () => void;
+  onRestore?: () => void;
+  isRestoring?: boolean;
 }
 
 export function SubscriptionBottomAction({
@@ -16,6 +18,8 @@ export function SubscriptionBottomAction({
   isLoading,
   hasPaymentMethod,
   onContinue,
+  onRestore,
+  isRestoring,
 }: SubscriptionBottomActionProps) {
   const legalBottomSheetRef = useRef<LegalDocumentsBottomSheetMethods>(null);
 
@@ -82,13 +86,31 @@ export function SubscriptionBottomAction({
         </Text>
       </XStack>
 
+      {/* Restore Purchases Text */}
+      {onRestore && (
+        <XStack justifyContent="center" marginBottom="$3">
+          <Text
+            fontSize="$4"
+            color="$foreground"
+            textDecorationLine="underline"
+            onPress={onRestore}
+            cursor="pointer"
+            hitSlop={15}
+            opacity={isRestoring ? 0.5 : 1}
+            textAlign="center"
+          >
+            {isRestoring ? 'Restoring Purchases...' : 'Restore Purchases'}
+          </Text>
+        </XStack>
+      )}
+
       <ButtonUI
         variant="primary"
         haptic
         size="lg"
         fullWidth
         onPress={onContinue}
-        disabled={!selectedPlan || isLoading}
+        disabled={!selectedPlan || isLoading || isRestoring}
         borderRadius="$10"
       >
         {getButtonText()}

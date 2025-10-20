@@ -18,14 +18,12 @@ const GAP_SIZE = 12; // Same as search results
 
 interface FeaturedViewProps {
   isSelectMode: boolean;
-  selectedListings: Set<string>;
-  setSelectedListings: React.Dispatch<React.SetStateAction<Set<string>>>;
+  onBoost: (listing: ListingCard) => void;
 }
 
 export default function FeaturedView({ 
   isSelectMode, 
-  selectedListings, 
-  setSelectedListings 
+  onBoost
 }: FeaturedViewProps) {
   const [canLoadMore, setCanLoadMore] = useState(false);
   const tabbarHeight = useBottomTabBarHeight();
@@ -58,23 +56,10 @@ export default function FeaturedView({
     refetch();
   }, [refetch]);
 
-  // Handle listing selection
-  const handleListingSelect = useCallback((listing: ListingCard) => {
-    setSelectedListings(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(listing.id)) {
-        newSet.delete(listing.id);
-      } else {
-        newSet.add(listing.id);
-      }
-      return newSet;
-    });
-  }, [setSelectedListings]);
 
   // Render listing item
   const renderListingItem = useCallback(({ item, index }: { item: ListingCardWithTimestamp, index: number }) => {
     const isLeftColumn = index % 2 === 0;
-    const isSelected = selectedListings.has(item.listing.id);
     
     return (
       <View 
@@ -87,13 +72,12 @@ export default function FeaturedView({
         <MemoizedListingCard 
           listing={item.listing} 
           isSelectMode={isSelectMode}
-          isSelected={isSelected}
-          onSelect={handleListingSelect}
+          onBoost={onBoost}
           featured_until={item.featured_until}
         />
       </View>
     );
-  }, [isSelectMode, selectedListings, handleListingSelect]);
+  }, [isSelectMode, onBoost]);
 
   // Render loading skeleton
   const renderSkeletonItem = useCallback(({ index }: { index: number }) => {
@@ -198,7 +182,7 @@ export default function FeaturedView({
   return (
     <View flex={1}>
       <LegendList
-        key={`featured-${isSelectMode ? 'select' : 'normal'}-${selectedListings.size}-${flatListings.length}`}
+        key={`featured-${isSelectMode ? 'select' : 'normal'}-${flatListings.length}`}
         data={flatListings}
         renderItem={renderListingItem}
         estimatedItemSize={260}
