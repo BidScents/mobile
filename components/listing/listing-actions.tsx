@@ -1,4 +1,5 @@
 import { AuctionDetails, ListingType } from "@bid-scents/shared-sdk";
+import { isAuctionActive } from "../../utils/countdown";
 import AuctionButton from "./auction-button";
 import BottomButton from "./bottom-button";
 
@@ -23,12 +24,15 @@ export function ListingActions({
   isLoading, 
   onContactSeller 
 }: ListingActionsProps) {
+  const auctionActive = auctionDetails?.ends_at ? isAuctionActive(auctionDetails.ends_at) : false;
+  
   return listingType === ListingType.AUCTION ? (
     <AuctionButton 
       listingId={listingId}
       auctionDetails={auctionDetails}
       isCurrentUserHighestBidder={isCurrentUserHighestBidder}
-      isActive={!isLoading}
+      isActive={auctionActive}
+      isLoading={isLoading}
       contactSeller={() => onContactSeller()}
     />
   ) : (

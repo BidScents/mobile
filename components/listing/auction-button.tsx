@@ -12,6 +12,8 @@ interface AuctionButtonProps {
   auctionDetails: AuctionDetails | null | undefined;
   /** Whether the auction is currently active */
   isActive?: boolean;
+  /** Whether data is currently loading */
+  isLoading?: boolean;
   /** Whether the current user is the highest bidder */
   isCurrentUserHighestBidder?: boolean;
   /** Optional callback when bid is placed successfully */
@@ -25,17 +27,20 @@ export default function AuctionButton({
   listingId,
   auctionDetails,
   isActive = true,
+  isLoading = false,
   isCurrentUserHighestBidder = false,
   contactSeller
 }: AuctionButtonProps) {
   const bidBottomSheetRef = useRef<BidBottomSheetMethods>(null);
 
   const handleBidPress = async () => {
-    if (!isActive) return;
+    if (!isActive || isLoading) return;
     
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     bidBottomSheetRef.current?.present();
   };
+
+  const hasWon = !isActive && isCurrentUserHighestBidder;
 
   return (
     <>
@@ -52,11 +57,15 @@ export default function AuctionButton({
           variant="primary"
           size="lg"
           fullWidth
-          onPress={!isActive && isCurrentUserHighestBidder ? contactSeller : handleBidPress}
-          disabled={!isActive}
+          onPress={handleBidPress}
+          disabled={isLoading || !isActive}
           borderRadius="$10"
         >
-          {!isActive 
+          {isLoading
+            ? "Loading..."
+            : hasWon
+            ? "You Won!"
+            : !isActive 
             ? "Auction Ended" 
             : isCurrentUserHighestBidder 
             ? "Winning" 
@@ -69,6 +78,7 @@ export default function AuctionButton({
         listingId={listingId}
         auctionDetails={auctionDetails}
         isCurrentUserHighestBidder={isCurrentUserHighestBidder}
+        isActive={isActive}
       />
     </>
   );
