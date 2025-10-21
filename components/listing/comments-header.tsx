@@ -1,29 +1,15 @@
-import { Text, XStack } from "tamagui";
-import { VoteButtons } from "./vote-buttons";
-
-interface CommentsHeaderProps {
-  totalVotes: number;
-  isUpvoted: boolean | null | undefined;
-  listingId: string;
-}
+import { Text, View } from "tamagui";
 
 /**
- * Comments section header with vote buttons
- * Displays "Comments" title and like/dislike voting functionality
+ * Comments section header
+ * Displays "Comments" title
  */
-export function CommentsHeader({ totalVotes, isUpvoted, listingId }: CommentsHeaderProps) {
+export function CommentsHeader() {
   return (
-    <XStack alignItems="center" justifyContent="space-between">
+    <View>
       <Text fontSize="$8" fontWeight="600" color="$foreground">
         Comments
       </Text>
-
-      {/* Like/Dislike Buttons */}
-      <VoteButtons
-        totalVotes={totalVotes}
-        isUpvoted={isUpvoted}
-        listingId={listingId}
-      />
-    </XStack>
+    </View>
   );
 }

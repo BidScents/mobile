@@ -1,5 +1,5 @@
-import React, { ReactNode } from 'react';
-import { Platform, View, ViewStyle } from 'react-native';
+import React, { ReactNode, useEffect } from 'react';
+import { Platform, View, ViewStyle, Keyboard, Dimensions } from 'react-native';
 import { useKeyboardHandler } from 'react-native-keyboard-controller';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
@@ -14,6 +14,7 @@ interface KeyboardAwareViewProps {
 
 const useKeyboardAnimation = (padding: number) => {
  const height = useSharedValue(padding);
+ const screenHeight = useSharedValue(Dimensions.get('window').height);
  
  useKeyboardHandler({
    onMove: (e) => {
@@ -21,6 +22,32 @@ const useKeyboardAnimation = (padding: number) => {
      height.value = Math.max(e.height, padding);
    },
  }, [padding]);
+
+ useEffect(() => {
+   const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+     height.value = Math.max(e.endCoordinates.height, padding);
+   });
+
+   const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+     height.value = padding;
+   });
+
+   const dimensionListener = Dimensions.addEventListener('change', ({ window }) => {
+     const newScreenHeight = window.height;
+     if (Math.abs(newScreenHeight - screenHeight.value) > 100) {
+       screenHeight.value = newScreenHeight;
+       if (newScreenHeight < screenHeight.value) {
+         height.value = Math.max(screenHeight.value - newScreenHeight + padding, padding);
+       }
+     }
+   });
+
+   return () => {
+     keyboardDidShowListener?.remove();
+     keyboardDidHideListener?.remove();
+     dimensionListener?.remove();
+   };
+ }, [height, padding, screenHeight]);
  
  return { height };
 };

@@ -134,7 +134,7 @@ export function VoteButtons({
 
   return (
     <XStack alignItems="center" justifyContent="center" gap="$2">
-      <XStack alignItems="center" gap="$2">
+      <XStack alignItems="center" gap="$3">
         <View onPress={() => handleUpvote()} hitSlop={10}>
           <ThemedIonicons name={upvoteIcon} size={30} />
         </View>

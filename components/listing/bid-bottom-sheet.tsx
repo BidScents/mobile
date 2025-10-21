@@ -24,12 +24,14 @@ export interface BidBottomSheetProps {
   auctionDetails: AuctionDetails | null | undefined;
   /** Whether the current user is the highest bidder */
   isCurrentUserHighestBidder?: boolean;
+  /** Whether the auction is still active */
+  isActive?: boolean;
 }
 
 export const BidBottomSheet = forwardRef<
   BidBottomSheetMethods,
   BidBottomSheetProps
->(({ listingId, auctionDetails, isCurrentUserHighestBidder = false }, ref) => {
+>(({ listingId, auctionDetails, isCurrentUserHighestBidder = false, isActive = true }, ref) => {
   const colors = useThemeColors();
   const [bidAmount, setBidAmount] = useState("");
   
@@ -49,6 +51,7 @@ export const BidBottomSheet = forwardRef<
   const minimumBid = currentBid + bidIncrement;
   const numericBidAmount = parseFloat(bidAmount) || 0;
   const isValidBid = bidAmount.trim().length > 0 && numericBidAmount >= minimumBid && !isCurrentUserHighestBidder;
+  const hasWon = !isActive && isCurrentUserHighestBidder;
   
   const bidInputStyles = [
     styles.bidInput,
@@ -149,16 +152,22 @@ export const BidBottomSheet = forwardRef<
         {/* Header */}
         <YStack gap="$3" marginBottom="$4">
           <Text fontSize="$6" fontWeight="700" color="$foreground" textAlign="center">
-            {isCurrentUserHighestBidder ? "You're the Highest Bidder" : "Place Your Bid"}
+            {hasWon 
+              ? "🎉 Congratulations!" 
+              : isCurrentUserHighestBidder 
+              ? "You're the Highest Bidder" 
+              : "Place Your Bid"}
           </Text>
           <Text fontSize="$4" color="$mutedForeground" textAlign="center">
-            Current bid: {currency} {currentBid}
+            {hasWon 
+              ? "You've won this auction! The seller will contact you soon." 
+              : `Current bid: ${currency} ${currentBid}`}
           </Text>
         </YStack>
 
         {/* Bid input section */}
         <YStack gap="$4" flex={1}>
-          {!isCurrentUserHighestBidder && (
+          {!isCurrentUserHighestBidder && isActive && (
             <YStack gap="$3">
               <XStack alignItems="center" gap="$3">
                 <View
@@ -224,15 +233,17 @@ export const BidBottomSheet = forwardRef<
 
         {/* Action button */}
         <Button
-          onPress={isCurrentUserHighestBidder ? () => bottomSheetRef.current?.dismiss() : handlePlaceBid}
-          variant={isCurrentUserHighestBidder ? "secondary" : "primary"}
+          onPress={hasWon || isCurrentUserHighestBidder ? () => bottomSheetRef.current?.dismiss() : handlePlaceBid}
+          variant={hasWon || isCurrentUserHighestBidder ? "secondary" : "primary"}
           size="lg"
           fullWidth
-          disabled={(!isValidBid || isLoading) && !isCurrentUserHighestBidder}
+          disabled={(!isValidBid || isLoading) && !hasWon && !isCurrentUserHighestBidder}
           borderRadius="$10"
           marginTop="auto"
         >
-          {isCurrentUserHighestBidder
+          {hasWon
+            ? "Close"
+            : isCurrentUserHighestBidder
             ? "Close"
             : isLoading
             ? "Placing Bid..."

@@ -174,6 +174,50 @@ return useInfiniteQuery({
 })
 }
 
+export function useProfileListingsFresh(
+userId: string,
+tab: ProfileTab,
+sortParams?: Partial<ListingSearchRequest>,
+options?: { enabled?: boolean }
+) {
+
+const searchRequest: ListingSearchRequest = {
+  page: 1,
+  per_page: 20,
+  sort: undefined, // Let backend decide default sort per tab
+  descending: true,
+  listing_types: undefined,
+  categories: undefined,
+  ...sortParams, // Override with user preferences
+}
+
+return useInfiniteQuery({
+  queryKey: queryKeys.profile.listings(userId, tab, searchRequest),
+  queryFn: async ({ pageParam = 1 }) => {
+    try {
+      
+      // Subsequent pages: use dedicated listing endpoint
+      const requestWithPage = { ...searchRequest, page: pageParam }
+      return ProfileService.getUserListingsV1ProfileUserIdTabNamePost(
+        userId,
+        tab,
+        requestWithPage
+      )
+    } catch (error) {
+      console.error('useProfileListings queryFn error:', { userId, tab, pageParam, error })
+      throw error
+    }
+  },
+  getNextPageParam: (lastPage) => {
+    const { page, total_pages } = lastPage.pagination_data
+    return page < total_pages ? page + 1 : undefined
+  },
+  initialPageParam: 1,
+  enabled: options?.enabled !== undefined ? options.enabled : !!userId,
+  refetchOnMount: "always",
+})
+}
+
 // ========================================
 // MUTATIONS (unchanged)
 // ========================================

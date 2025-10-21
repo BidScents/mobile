@@ -151,15 +151,12 @@ export default function SellerDashboardTabs({
         ))}
       </View>
 
-      {currentBoostListingId && (
-        <BoostBottomSheet 
-          ref={boostBottomSheetRef} 
-          tabKey={activeTabKey} 
-          setIsSelectMode={setIsSelectMode}
-          onSuccess={handleBoostSuccess}
-          listingId={currentBoostListingId}
-        />
-      )}  
+      <BoostBottomSheet 
+        ref={boostBottomSheetRef} 
+        tabKey={activeTabKey} 
+        onSuccess={handleBoostSuccess}
+        listingId={currentBoostListingId!}
+      />
     </View>
   );
 }

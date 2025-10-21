@@ -61,3 +61,12 @@ export function getDynamicLabel(value: number, label: string): string {
 export function createZeroTimeLeft(): TimeLeft {
   return { days: 0, hours: 0, minutes: 0, seconds: 0 };
 }
+
+/**
+ * Check if an auction is still active based on end time
+ * @param endsAt - ISO string representing the auction end time
+ * @returns true if auction is still active, false if it has ended
+ */
+export function isAuctionActive(endsAt: string): boolean {
+  return calculateTimeLeft(endsAt) !== null;
+}

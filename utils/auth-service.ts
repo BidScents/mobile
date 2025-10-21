@@ -180,6 +180,9 @@ export class AuthService {
         options: {
           redirectTo,
           skipBrowserRedirect: true,
+          queryParams: {
+            prompt: 'select_account',
+          },
         },
       })
 

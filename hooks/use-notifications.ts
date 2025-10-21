@@ -18,6 +18,7 @@ export function useNotifications() {
   
   // Handle notification events (always active)
   const eventManager = useNotificationEvents();
+  eventManager.clearNotifications();
 
   return {
     // Device token management
@@ -63,3 +64,4 @@ export async function areNotificationsEnabled(): Promise<boolean> {
 // Re-export individual hooks for advanced usage
 export { useDeviceToken } from './use-device-token';
 export { useNotificationEvents } from './use-notification-events';
+

@@ -13,6 +13,7 @@ interface SearchResultsListProps {
   searchParams: SearchRequest;
   onRefresh?: () => void;
   onDataChange?: (data: { totalFound: number; isLoading: boolean; hasError: boolean }) => void;
+  handleClearFilters?: () => void;
 }
 
 const MemoizedListingCard = React.memo(ListingCard);
@@ -23,7 +24,8 @@ const GAP_SIZE = 12; // Same as homepage $3 gap
 export const SearchResultsList = React.memo(function SearchResultsList({
   searchParams,
   onRefresh,
-  onDataChange
+  onDataChange,
+  handleClearFilters
 }: SearchResultsListProps) {
   const [canLoadMore, setCanLoadMore] = useState(false);
   const tabbarHeight = useBottomTabBarHeight();
@@ -177,7 +179,7 @@ export const SearchResultsList = React.memo(function SearchResultsList({
               ? `No listings found for "${searchParams.q}"`
               : "No listings match your filters"
           }
-          onClearFilters={() => onRefresh?.()}
+          onClearFilters={() => handleClearFilters?.()}
         />
       );
     }

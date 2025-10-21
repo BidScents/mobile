@@ -5,6 +5,7 @@ import { useMessagingContext } from "providers/messaging-provider";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { Text, View, YStack } from "tamagui";
+import { EmptyChatOnboarding } from "./empty-chat-onboarding";
 import { MessageItem } from "./message-item";
 import { ScrollLoadingIndicator } from "./scroll-loading-indicator";
 import { ScrollToBottomButton } from "./scroll-to-bottom-button";
@@ -122,16 +123,7 @@ export function MessagesList({ conversation, onSellThisPress }: MessagesListProp
   }
 
   if (!allMessages.length) {
-    return (
-      <View flex={1} justifyContent="center" alignItems="center" padding="$4">
-        <Text fontSize="$5" fontWeight="600" color="$mutedForeground" marginBottom="$2">
-          No messages yet
-        </Text>
-        <Text fontSize="$4" color="$mutedForeground" textAlign="center">
-          Start the conversation by sending a message
-        </Text>
-      </View>
-    );
+    return <EmptyChatOnboarding />;
   }
 
   return (

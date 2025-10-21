@@ -159,20 +159,6 @@ export function SubscriptionStatusSection({
               </ButtonUI>
             </XStack>
           )}
-
-          {/* RevenueCat Management */}
-          {isRevenueCat && (
-            <XStack mt="$2">
-              <ButtonUI
-                variant="primary"
-                onPress={handleManageRevenueCatSubscription}
-                flex={1}
-                size="sm"
-              >
-                Manage Subscription
-              </ButtonUI>
-            </XStack>
-          )}
         </YStack>
       </YStack>
     );

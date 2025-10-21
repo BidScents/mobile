@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { currency } from "@/constants/constants";
 import { useCreateTransaction } from "@/hooks/queries/use-payments";
-import { useProfileListings } from "@/hooks/queries/use-profile";
+import { useProfileListingsFresh } from "@/hooks/queries/use-profile";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import {
   ListingCard,
@@ -17,6 +17,7 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LegendList } from "@legendapp/list";
+import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, {
@@ -24,7 +25,7 @@ import React, {
   useCallback,
   useImperativeHandle,
   useMemo,
-  useState,
+  useState
 } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ActivityIndicator, Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
@@ -82,6 +83,7 @@ export const TransactionBottomSheet = forwardRef<
   const { user } = useAuthStore();
   const colors = useThemeColors();
   const createTransactionMutation = useCreateTransaction();
+  const queryClient = useQueryClient();
 
   // Get user's listings for selection
   const {
@@ -90,7 +92,7 @@ export const TransactionBottomSheet = forwardRef<
     hasNextPage,
     isFetchingNextPage,
     isLoading: isLoadingListings,
-  } = useProfileListings(user?.id || "", ProfileTab.ACTIVE, {
+  } = useProfileListingsFresh(user?.id || "", ProfileTab.ACTIVE, {
     per_page: 20,
   });
 
