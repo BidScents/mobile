@@ -8,6 +8,7 @@ import { AuthService } from '@/utils/auth-service'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert } from 'react-native'
 import Purchases, { PURCHASES_ERROR_CODE, PurchasesPackage } from 'react-native-purchases'
+import { queryKeys } from './query-keys'
 import { useClaimBoost } from './use-payments'
 
 // Types matching the existing plan structure
@@ -138,10 +139,10 @@ export const useRevenueCatPurchase = () => {
     retry: false,
     onSuccess: async () => {
       // Refresh RevenueCat customer info
-      await Purchases.getCustomerInfo()
+      Purchases.getCustomerInfo()
       
       // Refresh user auth state to get updated subscription
-      await AuthService.refreshCurrentUser()
+      AuthService.refreshCurrentUser()
       
       // Invalidate offerings in case they changed
       queryClient.invalidateQueries({ queryKey: ['revenuecat-offerings'] })
@@ -353,6 +354,8 @@ export const useRevenueCatBoostPurchase = () => {
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['revenuecat-customer-info'] })
       queryClient.invalidateQueries({ queryKey: ['revenuecat-boost-products'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.listings.featured })
+
     },
     onError: (error: any) => {
       console.error('Boost purchase failed:', error)
