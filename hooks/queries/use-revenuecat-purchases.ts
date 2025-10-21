@@ -295,10 +295,12 @@ export const useRevenueCatRestore = () => {
       // Handle specific error for "Keep with original App User ID" behavior
       if (errorMessage.toLowerCase().includes('different') || 
           errorMessage.toLowerCase().includes('user id') ||
-          errorMessage.toLowerCase().includes('original')) {
+          errorMessage.toLowerCase().includes('original') ||
+          errorMessage.toLowerCase().includes('active subscriber') ||
+          errorMessage.toLowerCase().includes('same receipt')) {
         Alert.alert(
           'Restore Failed',
-          'These purchases were made with a different account. Please sign in with the original account that made the purchase, or contact support for assistance.'
+          'These purchases belong to a different account. Please sign in with the original account or contact support.'
         )
         return
       }
