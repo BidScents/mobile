@@ -67,7 +67,7 @@ export const handleLoginUI = async (data: LoginFormData): Promise<void> => {
 /**
  * Handle OAuth authentication with UI feedback
  */
-export const handleOAuthUI = async (provider: 'google' | 'facebook'): Promise<void> => {
+export const handleOAuthUI = async (provider: 'google' | 'facebook' | 'apple'): Promise<void> => {
   try {
     const result = await AuthService.signInWithOAuth(provider)
 

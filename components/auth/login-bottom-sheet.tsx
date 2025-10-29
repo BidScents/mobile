@@ -6,6 +6,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import { router } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
+import { Platform } from 'react-native'
 import { Text, XStack, YStack } from 'tamagui'
 
 // Complete auth session if needed
@@ -22,7 +23,7 @@ interface LoginBottomSheetMethods {
  */
 export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref) => {
   const [isLoading, setIsLoading] = useState(false)
-  const [loadingProvider, setLoadingProvider] = useState<'google' | 'facebook' | null>(null)
+  const [loadingProvider, setLoadingProvider] = useState<'google' | 'facebook' | 'apple' | null>(null)
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null)
   const legalBottomSheetRef = useRef<LegalDocumentsBottomSheetMethods>(null)
 
@@ -36,7 +37,7 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
     bottomSheetRef.current?.dismiss()
   }
 
-  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+  const handleOAuthSignIn = async (provider: 'google' | 'facebook' | 'apple') => {
     setIsLoading(true)
     setLoadingProvider(provider)
     
@@ -96,6 +97,20 @@ export const LoginBottomSheet = forwardRef<LoginBottomSheetMethods>((props, ref)
           >
             Continue with Email
           </Button>
+
+          {/* Apple Sign In - iOS only */}
+          {Platform.OS === 'ios' && (
+            <Button
+              variant="secondary"
+              size="lg"
+              fullWidth
+              leftIcon="logo-apple"
+              onPress={() => handleOAuthSignIn('apple')}
+              disabled={isLoading}
+            >
+              {loadingProvider === 'apple' ? 'Signing in...' : 'Continue with Apple'}
+            </Button>
+          )}
 
           <XStack alignItems="center" gap="$3">
             <Button

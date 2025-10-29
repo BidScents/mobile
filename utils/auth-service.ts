@@ -28,6 +28,7 @@ import {
 } from '@bid-scents/shared-sdk'
 import { makeRedirectUri } from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
+import { Platform } from 'react-native'
 import Purchases from 'react-native-purchases'
 import { AuthStateManager } from './auth-state-manager'
 
@@ -171,8 +172,49 @@ export class AuthService {
   /**
    * Sign in with OAuth provider
    */
-  static async signInWithOAuth(provider: 'google' | 'facebook'): Promise<AuthResult> {
+  static async signInWithOAuth(provider: 'google' | 'facebook' | 'apple'): Promise<AuthResult> {
     try {
+      // Handle Apple Sign In with native authentication on iOS
+      if (provider === 'apple' && Platform.OS === 'ios') {
+        try {
+          // Dynamically import Apple Authentication only on iOS
+          const AppleAuthentication = await import('expo-apple-authentication')
+          
+          const credential = await AppleAuthentication.signInAsync({
+            requestedScopes: [
+              AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+              AppleAuthentication.AppleAuthenticationScope.EMAIL,
+            ],
+          })
+
+          if (!credential.identityToken) {
+            return { success: false, error: 'No identity token received from Apple' }
+          }
+
+          // Sign in via Supabase Auth with Apple ID token
+          const { data: authData, error: authError } = await supabase.auth.signInWithIdToken({
+            provider: 'apple',
+            token: credential.identityToken,
+          })
+
+          if (authError) return { success: false, error: authError.message }
+          if (!authData.session) return { success: false, error: 'Session creation failed' }
+
+          const loginResult = await this.authenticateWithSession(authData.session)
+          return {
+            success: true,
+            session: authData.session,
+            loginResponse: loginResult
+          }
+        } catch (appleError: any) {
+          if (appleError.code === 'ERR_REQUEST_CANCELED') {
+            return { success: false, error: 'User cancelled' }
+          }
+          return { success: false, error: appleError.message || 'Apple Sign In failed' }
+        }
+      }
+
+      // Handle Google and Facebook OAuth with web browser flow
       const redirectTo = makeRedirectUri({ preferLocalhost: false })
 
       const { data, error } = await supabase.auth.signInWithOAuth({
