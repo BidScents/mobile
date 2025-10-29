@@ -59,6 +59,7 @@ export default function TabsLayout() {
           tabBarStyle: {
             borderTopWidth: 0,
             backgroundColor: colors.background,
+            height: 70,
           },
         }}
         screenListeners={{

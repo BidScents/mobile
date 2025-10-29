@@ -20,7 +20,7 @@ export function ListingHeader({ name, brand, price, listingType }: ListingHeader
       : undefined;
 
   return (
-    <View gap="$3">
+    <View gap="$3" flex={1}>
       <View>
         <Text
           fontSize="$8"
