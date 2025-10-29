@@ -56,16 +56,21 @@ export default function RootLayout() {
   );
 
   useEffect(() => {
-    Purchases.setLogLevel(LOG_LEVEL.ERROR);
+    try {
+      Purchases.setLogLevel(LOG_LEVEL.ERROR);
 
-    if (Platform.OS === 'ios') {
-       Purchases.configure({apiKey: 'appl_zojxPqwCFZkxAZcgptlWJuxPYUq'});
-    } else if (Platform.OS === 'android') {
-       Purchases.configure({apiKey: 'goog_mOyAxkpXxPoViKbjsdZXLlOEktR'});
+      if (Platform.OS === 'ios') {
+         Purchases.configure({apiKey: 'appl_zojxPqwCFZkxAZcgptlWJuxPYUq'});
+      } else if (Platform.OS === 'android') {
+         Purchases.configure({apiKey: 'goog_mOyAxkpXxPoViKbjsdZXLlOEktR'});
+      }
+
+      // Note: RevenueCat user login will happen after Supabase authentication
+      // This ensures RevenueCat is synced with the correct user ID
+    } catch (error) {
+      console.log('RevenueCat initialization failed:', error);
+      // App can continue without RevenueCat for now
     }
-
-    // Note: RevenueCat user login will happen after Supabase authentication
-    // This ensures RevenueCat is synced with the correct user ID
   }, []);
 
   /**
