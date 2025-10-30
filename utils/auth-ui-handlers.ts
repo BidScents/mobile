@@ -107,7 +107,7 @@ export const handleOnboardingUI = async (data: OnboardingFormData & {
 
     if (result.success && result.profile) {
       // Refresh complete auth state from server to get all up-to-date data
-      await AuthService.refreshCurrentUser()
+      AuthService.refreshCurrentUser()
 
       Alert.alert(
         'Welcome!', 

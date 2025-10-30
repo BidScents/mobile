@@ -201,6 +201,24 @@ export class AuthService {
           if (!authData.session) return { success: false, error: 'Session creation failed' }
 
           const loginResult = await this.authenticateWithSession(authData.session)
+          
+          // Store Apple-provided user data in auth store for onboarding
+          const appleFirstName = credential.fullName?.givenName || null
+          const appleLastName = credential.fullName?.familyName || null
+          
+          if (appleFirstName || appleLastName) {
+            const { setUser } = useAuthStore.getState()
+            const currentUser = loginResult.profile || {}
+            
+            const updatedUser = {
+              ...currentUser,
+              appleFirstName,
+              appleLastName
+            } as any
+            
+            setUser(updatedUser)
+          }
+
           return {
             success: true,
             session: authData.session,

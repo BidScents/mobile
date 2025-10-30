@@ -17,9 +17,9 @@ import { Container } from '@/components/ui/container'
 import { KeyboardAwareView } from '@/components/ui/keyboard-aware-view'
 import { ProfilePreviewPicker } from '@/components/ui/profile-preview-picker'
 import { handleOnboardingUI } from '@/utils/auth-ui-handlers'
-import { onboardingSchema, type OnboardingFormData } from '@bid-scents/shared-sdk'
+import { onboardingSchema, useAuthStore, type OnboardingFormData } from '@bid-scents/shared-sdk'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ScrollView } from 'react-native'
 import { Text, YStack } from 'tamagui'
@@ -38,16 +38,18 @@ interface ExtendedOnboardingData extends OnboardingFormData {
  * Default form values for onboarding
  */
 const DEFAULT_VALUES: OnboardingFormData = {
-    first_name: '',
-    last_name: '',
-    username: '',
-    location: '',
-    bio: '',
-    profile_image_url: undefined,
-    cover_image_url: undefined,
+  first_name: '',
+  last_name: '',
+  username: '',
+  location: '',
+  bio: '',
+  profile_image_url: undefined,
+  cover_image_url: undefined,
 }
 
 export default function OnboardingScreen() {
+  // Subscribe to auth store for Apple user data
+  const user = useAuthStore((state) => state.user)
   const [isLoading, setIsLoading] = useState(false)
   const [profileImageUri, setProfileImageUri] = useState<string | null>(null)
   const [coverImageUri, setCoverImageUri] = useState<string | null>(null)
@@ -74,12 +76,28 @@ export default function OnboardingScreen() {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { isValid }
   } = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     mode: 'onChange',
     defaultValues: DEFAULT_VALUES
   })
+
+  // Update form when Apple user data becomes available
+  useEffect(() => {
+    if (user && ((user as any).appleFirstName || (user as any).appleLastName)) {
+      reset({
+        first_name: (user as any).appleFirstName || '',
+        last_name: (user as any).appleLastName || '',
+        username: '',
+        location: '',
+        bio: '',
+        profile_image_url: undefined,
+        cover_image_url: undefined,
+      })
+    }
+  }, [user, reset])
 
   /**
    * Handle form submission
