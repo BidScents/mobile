@@ -7,6 +7,7 @@ import TabView from "@/components/ui/tab-view";
 import { useProfileData } from "@/hooks/use-profile-data";
 import { useProfileSort } from "@/hooks/use-profile-sort";
 import { useProfileTabs } from "@/hooks/use-profile-tabs";
+import { requireAuth } from "@/utils/auth-helper";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
@@ -22,6 +23,7 @@ export default function DetailedProfileScreen() {
   const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
+  const navigating = useRef(false);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'featured' | 'sold' | 'reviews'>('active');
 
@@ -112,7 +114,7 @@ export default function DetailedProfileScreen() {
   }, [refreshAll]);
 
   const handleFollowToggle = () => {
-    if (!profileData?.profile || isProfileOwner) return;
+    if (!profileData?.profile || isProfileOwner || !requireAuth()) return;
 
   if (profileData.profile.is_following) {
       unfollowMutation.mutate(id!);
@@ -122,11 +124,27 @@ export default function DetailedProfileScreen() {
   };
 
   const handleFollowingPress = useCallback(() => {
+    if (navigating.current) return;
+    navigating.current = true;
+    
     router.push(`/(screens)/(following)/${id}`);
+    
+    // Reset after a delay to prevent double-clicks
+    setTimeout(() => {
+      navigating.current = false;
+    }, 1000);
   }, [id]);
 
   const handleFollowersPress = useCallback(() => {
+    if (navigating.current) return;
+    navigating.current = true;
+    
     router.push(`/(screens)/(followers)/${id}`);
+    
+    // Reset after a delay to prevent double-clicks
+    setTimeout(() => {
+      navigating.current = false;
+    }, 1000);
   }, [id]);
 
   // Loading state
