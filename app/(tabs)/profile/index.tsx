@@ -92,6 +92,7 @@ export default function ProfileScreen() {
           onPress: () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             handleSignOutUI();
+            router.dismissTo("/(auth)");
           },
         },
       ]);

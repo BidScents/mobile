@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { AuctionDetails } from "@bid-scents/shared-sdk";
+import { requireAuth } from "@/utils/auth-helper";
 import * as Haptics from 'expo-haptics';
 import React, { useRef } from 'react';
 import { View } from "tamagui";
@@ -34,6 +35,11 @@ export default function AuctionButton({
   const bidBottomSheetRef = useRef<BidBottomSheetMethods>(null);
 
   const handleBidPress = async () => {
+    // Check authentication before allowing bid action
+    if (!requireAuth()) {
+      return;
+    }
+
     if (!isActive || isLoading) return;
     
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

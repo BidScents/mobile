@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { requireAuth } from "@/utils/auth-helper";
 import { View } from "tamagui";
 
 export default function BottomButton({
@@ -8,6 +9,14 @@ export default function BottomButton({
   isLoading?: boolean;
   onPress?: () => void;
 }) {
+  const handlePress = () => {
+    // Check authentication before allowing contact seller action
+    if (!requireAuth()) {
+      return;
+    }
+    
+    onPress?.();
+  };
   return (
     <View
       paddingHorizontal="$4"
@@ -22,7 +31,7 @@ export default function BottomButton({
           variant="primary"
           size="lg"
           fullWidth
-          onPress={onPress}
+          onPress={handlePress}
           disabled={isLoading}
           borderRadius="$10"
         >

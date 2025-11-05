@@ -110,8 +110,6 @@ export default function ListingScreen() {
     });
   }, [listing?.seller?.id, contactSellerMutation, router]);
 
-  console.log(isLoading)
-
   // Show skeleton only if no data at all (no seeded cache)
   if (isLoading) {
     return <ListingDetailSkeleton width={width} />;

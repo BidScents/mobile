@@ -1,6 +1,7 @@
 import { queryKeys } from "@/hooks/queries/query-keys";
 import { useUnvoteListing, useVoteListing } from "@/hooks/queries/use-listing";
 import { useOptimisticMutation } from "@/hooks/use-optimistic-mutation";
+import { requireAuth } from "@/utils/auth-helper";
 import type { ListingDetailsResponse } from "@bid-scents/shared-sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -114,6 +115,9 @@ export function VoteButtons({
 
   const handleUpvote = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+    if (!requireAuth()) {
+      return
+    }
 
     if (currentIsUpvoted === true) {
       optimisticVote.mutate({ action: "unvote" });
@@ -124,6 +128,9 @@ export function VoteButtons({
 
   const handleDownvote = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+    if (!requireAuth()) {
+      return
+    }
 
     if (currentIsUpvoted === false) {
       optimisticVote.mutate({ action: "unvote" });

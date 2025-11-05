@@ -1,3 +1,4 @@
+import { useAuthStore } from "@bid-scents/shared-sdk";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import { Keyboard } from "react-native";
@@ -17,6 +18,7 @@ interface AddCommentFormProps {
 export function AddCommentForm({ listingId }: AddCommentFormProps) {
   const [newComment, setNewComment] = useState("");
   const addComment = useAddComment();
+  const { isAuthenticated } = useAuthStore();
 
   const handlePostComment = () => {
     if (newComment.trim()) {
@@ -36,6 +38,7 @@ export function AddCommentForm({ listingId }: AddCommentFormProps) {
           value={newComment}
           onChangeText={setNewComment}
           numberOfLines={2}
+          disabled={!isAuthenticated}
         />
       </View>
       <View

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Text, XStack } from 'tamagui'
 import { useFavoriteListing, useUnfavoriteListing } from '../../hooks/queries/use-listing'
 import { useIsFavorited } from '../../hooks/use-favorite'
+import { requireAuth } from '../../utils/auth-helper'
 import { ThemedIonicons } from '../ui/themed-icons'
 
 interface FavoriteButtonProps {
@@ -47,6 +48,11 @@ export function FavoriteButton({
   }, [serverIsFavorited])
 
   const handleToggle = useCallback(async () => {
+    // Check authentication before allowing favorite action
+    if (!requireAuth()) {
+      return
+    }
+
     if (favoritesLoading) return
 
     const newIsFavorited = !isFavorited

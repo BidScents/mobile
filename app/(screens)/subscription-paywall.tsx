@@ -7,12 +7,12 @@ import {
 import { Button as ButtonUI } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { useRevenueCatCustomerInfo, useRevenueCatOfferings, useRevenueCatPurchase, useRevenueCatRestore } from "@/hooks/queries/use-revenuecat-purchases";
+import { requireAuth } from "@/utils/auth-helper";
 import { useAuthStore } from "@bid-scents/shared-sdk";
 import { router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Alert } from "react-native";
 import { Text, YStack } from "tamagui";
-
 
 export default function SubscriptionPaywallScreen() {
   const { paymentDetails } = useAuthStore();
@@ -68,6 +68,9 @@ export default function SubscriptionPaywallScreen() {
 
 
   const handleContinue = useCallback(async () => {
+    if (!requireAuth()) {
+      return
+    }
     // Check eligibility first
     if (!isEligibleForNewSubscription) {
       const customerInfo = customerInfoQuery.data;
@@ -124,6 +127,9 @@ export default function SubscriptionPaywallScreen() {
   }, [selectedPlan, subscriptionPlans, paymentDetails, purchaseMutation, isEligibleForNewSubscription, customerInfoQuery.data]);
 
   const handleRestorePurchases = useCallback(() => {
+    if (!requireAuth()) {
+      return
+    }
     restoreMutation.mutate();
   }, [restoreMutation]);
 
