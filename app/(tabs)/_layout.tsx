@@ -6,30 +6,39 @@ import {
 } from "@/hooks/queries/use-notifications";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import { useAuthHelper } from "@/utils/auth-helper";
 import * as Haptics from "expo-haptics";
 import { router, Tabs } from "expo-router";
 import React from "react";
 
 export default function TabsLayout() {
   const colors = useThemeColors();
+  const { requireAuth, isAuthenticated } = useAuthHelper();
 
-  // Get notification data and badge management
+  // Get notification data and badge management (only if authenticated)
   const { data: notificationData } = useNotificationsList();
   const markAsSeen = useMarkNotificationsSeen();
   const { clearBadge, clearNotifications } = useNotifications();
 
-  // Get conversation data for chat badge
+  // Get conversation data for chat badge (only if authenticated)
   const { data: conversationData } = useConversationSummary();
 
-  const unseenCount = notificationData?.unseen_count || 0;
-  const unreadMessagesCount = conversationData?.total_unread || 0;
+  const unseenCount = isAuthenticated ? (notificationData?.unseen_count || 0) : 0;
+  const unreadMessagesCount = isAuthenticated ? (conversationData?.total_unread || 0) : 0;
 
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  const handleNotificationsTap = async () => {
-    // Mark all notifications as seen
+  const handleNotificationsTap = async (e: any) => {
+    // Only prevent navigation if user is not authenticated
+    if (!isAuthenticated) {
+      e.preventDefault();
+      requireAuth();
+      return;
+    }
+
+    // If authenticated, mark notifications as seen and allow normal navigation
     if (unseenCount > 0) {
       try {
         await markAsSeen.mutateAsync();
@@ -39,6 +48,35 @@ export default function TabsLayout() {
         console.error("Error marking notifications as seen:", error);
       }
     }
+  };
+
+  const handleChatTap = (e: any) => {
+    // Only prevent navigation if user is not authenticated
+    if (!isAuthenticated) {
+      e.preventDefault();
+      requireAuth();
+      return;
+    }
+    // If authenticated, allow normal tab navigation
+  };
+
+  const handleAddListingTap = (e: any) => {
+    e.preventDefault();
+    if (!requireAuth()) {
+      return;
+    }
+    router.push("/add-listing");
+  };
+
+  const handleProfileTap = async (e: any) => {
+    // Only prevent navigation if user is not authenticated
+    if (!isAuthenticated) {
+      e.preventDefault();
+      requireAuth();
+      return;
+    }
+    // If authenticated, navigate to profile
+    router.dismissTo("/profile");
   };
 
   return (
@@ -99,6 +137,9 @@ export default function TabsLayout() {
               />
             ),
           }}
+          listeners={{
+            tabPress: handleChatTap,
+          }}
         />
 
         <Tabs.Screen
@@ -114,10 +155,7 @@ export default function TabsLayout() {
             ),
           }}
           listeners={{
-            tabPress: (e) => {
-              e.preventDefault();
-              router.push("/add-listing");
-            },
+            tabPress: handleAddListingTap,
           }}
         />
 
@@ -158,10 +196,7 @@ export default function TabsLayout() {
             ),
           }}
           listeners={{
-            tabPress: async (e) => {
-              // e.preventDefault();
-              router.dismissTo("/profile");
-            },
+            tabPress: handleProfileTap,
           }}
         />
       </Tabs>
