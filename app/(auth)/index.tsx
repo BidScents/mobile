@@ -2,6 +2,7 @@ import { LoginBottomSheet } from '@/components/auth/login-bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
+import { router } from 'expo-router'
 import LottieView from 'lottie-react-native'
 import React, { useCallback, useRef } from 'react'
 import { H1, Text, YStack } from 'tamagui'
@@ -51,19 +52,31 @@ export default function WelcomeScreen() {
               fontSize="$5"
               lineHeight="$6"
             >
-              Buy, sell, swap your favorite scents
+              Buy, sell, and swap your favorite scents
             </Text>
           </YStack>
+          
+          <YStack alignItems="center" gap="$2">
+            <Button
+              variant="primary"
+              size="lg"
+              borderRadius="$10"
+              fullWidth
+              onPress={handleGetStarted}
+            >
+              Get Started
+            </Button>
 
-          <Button
-            variant="primary"
-            size="lg"
-            borderRadius="$10"
-            fullWidth
-            onPress={handleGetStarted}
-          >
-            Get Started
-          </Button>
+            <Button
+              variant="ghost"
+              size="lg"
+              borderRadius="$10"
+              fullWidth
+              onPress={() => router.replace('/(tabs)/home')}
+            >
+              Skip
+            </Button>
+          </YStack>
         </YStack>
       </YStack>
 
