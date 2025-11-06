@@ -362,6 +362,9 @@ export class AuthService {
    */
   static async deleteAccount(): Promise<DeleteAccountResult> {
     try {
+      // Call API to delete account
+      await ApiAuthService.deleteAccountV1AuthDeleteAccountDelete()
+      
       // Logout from RevenueCat first (before backend deletion)
       try {
         console.log("Logging out from RevenueCat before account deletion")
@@ -371,9 +374,6 @@ export class AuthService {
         console.log("Error logging out from RevenueCat:", error)
         // Don't throw - RevenueCat logout shouldn't block account deletion
       }
-      
-      // Call API to delete account
-      await ApiAuthService.deleteAccountV1AuthDeleteAccountDelete()
       
       AuthStateManager.clearAuthState()
       
