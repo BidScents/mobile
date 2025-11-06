@@ -24,6 +24,7 @@ import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import config from "tamagui.config";
 import { useThemeSettings } from "../hooks/use-theme-settings";
+import { AuthProvider } from "../providers/auth-provider";
 import { MessagingProvider } from "../providers/messaging-provider";
 import { QueryProvider } from "../providers/query-provider";
 import {
@@ -261,7 +262,7 @@ export default function RootLayout() {
         </Stack.Protected>
 
         {/* Authenticated and onboarded (main app) */}
-        <Stack.Protected guard={isAuthenticated && isOnboarded}>
+        <Stack.Protected guard={isAuthenticated && isOnboarded || !isAuthenticated}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(screens)" />
           <Stack.Screen name="listing" />
@@ -289,8 +290,10 @@ export default function RootLayout() {
                 <Theme name={colorScheme === "dark" ? "dark" : "light"}>
                   <SafeAreaProvider>
                     <BottomSheetModalProvider>
-                      {routes()}
-                      <LoadingOverlay />
+                      <AuthProvider>
+                        {routes()}
+                        <LoadingOverlay />
+                      </AuthProvider>
                     </BottomSheetModalProvider>
                   </SafeAreaProvider>
                 </Theme>
