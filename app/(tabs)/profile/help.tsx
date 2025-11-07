@@ -1,11 +1,19 @@
+import { StripeConnectGuide } from "@/components/profile/StripeConnectGuide";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import * as Haptics from "expo-haptics";
+import { useState } from "react";
 import { Alert, Linking } from "react-native";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const HELP_TOPICS = [
+  {
+    title: "Seller Onboarding & Payments",
+    description: "Complete Stripe Connect setup to receive payouts",
+    icon: "card-outline",
+    hasGuide: true,
+  },
   {
     title: "Account & Profile",
     description: "Managing your account settings and profile information",
@@ -39,6 +47,12 @@ const HELP_TOPICS = [
 ];
 
 export default function HelpScreen() {
+  const [expandedGuide, setExpandedGuide] = useState(false);
+
+  const handleGuidePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setExpandedGuide(!expandedGuide);
+  };
 
   const handleContactPress = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -67,8 +81,8 @@ export default function HelpScreen() {
   };
 
   return (
-    <Container variant="padded" safeArea backgroundColor="$background">
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <Container variant="fullscreen" safeArea={false} backgroundColor="$background">
+      <ScrollView padding="$4">
         <YStack gap="$6" paddingBottom="$8">
           {/* Welcome Section */}
           <YStack gap="$3" alignItems="center">
@@ -140,46 +154,58 @@ export default function HelpScreen() {
           {/* Help Topics */}
           <YStack gap="$4">
             <Text fontSize="$6" fontWeight="600" color="$foreground">
-              Common Topics (Coming Soon)
+              Help Topics
             </Text>
             
             <YStack gap="$3">
               {HELP_TOPICS.map((topic, index) => (
-                <XStack
-                  key={index}
-                  backgroundColor="$muted"
-                  borderRadius="$6"
-                  padding="$4"
-                  alignItems="center"
-                  opacity={0.6}
-                  gap="$3"
-                  pressStyle={{
-                    backgroundColor: "$mutedPress",
-                  }}
-                >
-                  <YStack
-                    backgroundColor="$background"
-                    borderRadius="$5"
-                    padding="$2"
+                <YStack key={index}>
+                  <XStack
+                    backgroundColor="$muted"
+                    borderRadius="$6"
+                    padding="$4"
                     alignItems="center"
-                    justifyContent="center"
+                    opacity={topic.hasGuide ? 1 : 0.6}
+                    gap="$3"
+                    onPress={topic.hasGuide ? handleGuidePress : undefined}
+                    pressStyle={{
+                      backgroundColor: "$mutedPress",
+                    }}
                   >
-                    <ThemedIonicons
-                      name={topic.icon as any}
-                      size={20}
-                      color="$foreground"
-                    />
-                  </YStack>
-                  
-                  <YStack flex={1} gap="$1">
-                    <Text fontSize="$4" fontWeight="500" color="$foreground">
-                      {topic.title}
-                    </Text>
-                    <Text fontSize="$3" color="$mutedForeground" lineHeight="$4">
-                      {topic.description}
-                    </Text>
-                  </YStack>
-                </XStack>
+                    <YStack
+                      backgroundColor="$background"
+                      borderRadius="$5"
+                      padding="$2"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <ThemedIonicons
+                        name={topic.icon as any}
+                        size={20}
+                        color="$foreground"
+                      />
+                    </YStack>
+                    
+                    <YStack flex={1} gap="$1">
+                      <Text fontSize="$4" fontWeight="500" color="$foreground">
+                        {topic.title}
+                      </Text>
+                      <Text fontSize="$3" color="$mutedForeground" lineHeight="$4">
+                        {topic.description}
+                      </Text>
+                    </YStack>
+
+                    {topic.hasGuide && (
+                      <ThemedIonicons
+                        name={expandedGuide ? "chevron-up" : "chevron-down"}
+                        size={20}
+                        color="$mutedForeground"
+                      />
+                    )}
+                  </XStack>
+
+                  {topic.hasGuide && expandedGuide && <StripeConnectGuide />}
+                </YStack>
               ))}
             </YStack>
           </YStack>
