@@ -152,6 +152,7 @@ export const handleDeleteAccountUI = async (): Promise<void> => {
           onPress: async () => {
             try {
               const result = await AuthService.deleteAccount()
+              router.replace("/(tabs)");
               if (result.success) {
                 // Auth state will be cleared by the auth state listener
                 Alert.alert(
