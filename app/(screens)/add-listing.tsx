@@ -6,7 +6,7 @@ import {
 } from "@/components/payments/connect-onboarding-bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import Input from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { MultipleImagePicker } from "@/components/ui/multiple-image-picker";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useCreateListing } from "@/hooks/queries/use-dashboard";

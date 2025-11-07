@@ -1,5 +1,4 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { Button } from "@/components/ui/button";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { useOnboardConnectAccount } from "@/hooks/queries/use-payments";
 import { useAuthStore } from "@bid-scents/shared-sdk";
@@ -7,6 +6,7 @@ import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/typ
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { Linking } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
+import { OnboardingGuideCarousel } from "./onboarding-guide-carousel";
 
 export interface ConnectOnboardingBottomSheetMethods {
   present: () => void;
@@ -25,6 +25,7 @@ export const ConnectOnboardingBottomSheet = forwardRef<
   ConnectOnboardingBottomSheetProps
 >(({ onComplete, onDoLater }, ref) => {
   const [preloadedUrl, setPreloadedUrl] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(true);
   const bottomSheetRef = React.useRef<BottomSheetModalMethods>(null);
   const { paymentDetails, setPaymentDetails } = useAuthStore();
   const onboardMutation = useOnboardConnectAccount();
@@ -32,6 +33,7 @@ export const ConnectOnboardingBottomSheet = forwardRef<
   useImperativeHandle(ref, () => ({
     present: async () => {
       setPreloadedUrl(null);
+      setShowGuide(true);
       bottomSheetRef.current?.present();
       
       // Start preloading the onboarding URL
@@ -137,78 +139,28 @@ export const ConnectOnboardingBottomSheet = forwardRef<
       pressBehavior={"none"}
     >
       <YStack gap="$5" padding="$4" paddingBottom="$8">
-        {/* Header */}
-        <YStack gap="$2">
-          <Text
-            fontSize="$7"
-            fontWeight="600"
-            color="$foreground"
-          >
-            Payment Setup Required
-          </Text>
-          <Text
-            color="$mutedForeground"
-            fontSize="$4"
-            lineHeight="$5"
-          >
-            Setup your profile to receive payments
-          </Text>
-        </YStack>
 
-        {/* Error Display */}
-        {onboardMutation.isError && (
-          <XStack 
-            alignItems="center" 
-            gap="$3" 
-            padding="$3" 
-            backgroundColor="$background" 
-            borderRadius="$4"
-            borderWidth={1}
-            borderColor="$error"
-          >
-            <ThemedIonicons name="alert-circle-outline" size={20} themeColor="error" />
-            <Text fontSize="$3" color="$error" flex={1}>{onboardMutation.error?.message}</Text>
-          </XStack>
-        )}
+            <OnboardingGuideCarousel 
+            onComplete={handleContinue}
+            onSkip={handleDoLater}
+            loading={onboardMutation.isPending}
+            />
 
-        {/* Preloading Indicator */}
-        {onboardMutation.isPending && (
-          <XStack 
-            alignItems="center" 
-            gap="$3" 
-            padding="$3" 
-            backgroundColor="$background" 
-            borderRadius="$4"
-            borderWidth={1}
-            borderColor="$blue6"
-          >
-            <ThemedIonicons name="refresh-outline" size={20} color="$blue11" />
-            <Text fontSize="$3" color="$blue11" flex={1}>Preparing payment setup...</Text>
-          </XStack>
-        )}
-
-        {/* Buttons */}
-        <XStack gap="$3">
-          <Button
-            variant="secondary"
-            size="lg"
-            flex={1}
-            onPress={handleDoLater}
-            disabled={onboardMutation.isPending}
-          >
-            Do It Later
-          </Button>
-          
-          <Button
-            variant="primary"
-            size="lg"
-            flex={1}
-            onPress={handleContinue}
-            disabled={onboardMutation.isPending}
-          >
-            Continue
-          </Button>
-        </XStack>
+            {/* Error Display */}
+            {onboardMutation.isError && (
+              <XStack 
+                alignItems="center" 
+                gap="$3" 
+                padding="$3" 
+                backgroundColor="$background" 
+                borderRadius="$4"
+                borderWidth={1}
+                borderColor="$error"
+              >
+                <ThemedIonicons name="alert-circle-outline" size={20} themeColor="error" />
+                <Text fontSize="$3" color="$error" flex={1}>{onboardMutation.error?.message}</Text>
+              </XStack>
+            )}
       </YStack>
     </BottomSheet>
   );
