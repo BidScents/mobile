@@ -194,8 +194,8 @@ export const useRevenueCatCustomerInfo = () => {
  * Product identifiers for RevenueCat boost consumables
  */
 export const BOOST_PRODUCT_IDS = {
-  NORMAL_BOOST: 'normal_boost',
-  PREMIUM_BOOST: 'premium_boost',
+  NORMAL_BOOST: 'normal_boost1',
+  PREMIUM_BOOST: 'premium_boost1',
 } as const
 
 /**
@@ -208,7 +208,7 @@ export interface BoostProduct {
   price: string
   priceValue: number
   currencyCode: string
-  type: 'normal_boost' | 'premium_boost'
+  type: 'normal_boost1' | 'premium_boost1'
   storeProduct: any // The actual RevenueCat store product
 }
 
@@ -230,7 +230,7 @@ export const useRevenueCatBoostProducts = () => {
           price: product.priceString,
           priceValue: product.price,
           currencyCode: product.currencyCode,
-          type: product.identifier as 'normal_boost' | 'premium_boost',
+          type: product.identifier as 'normal_boost1' | 'premium_boost1',
           storeProduct: product,
         }))
       } catch (error) {
