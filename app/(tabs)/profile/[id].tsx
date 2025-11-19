@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "tamagui";
 
 const HEADER_HEIGHT_EXPANDED = 55;
-const HEADER_HEIGHT_NARROWED = 110;
+const HEADER_HEIGHT_NARROWED = 100;
 
 export default function DetailedProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
