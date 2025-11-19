@@ -177,7 +177,7 @@ export default function DetailedProfileScreen() {
           if (isProfileOwner) {
             router.push("/(tabs)/profile/edit-profile");
           } else {
-            router.push("/(tabs)/profile/report-profile");
+            router.push("/(tabs)/profile/help");
           }
         }}
       />
