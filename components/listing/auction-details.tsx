@@ -69,6 +69,7 @@ export function AuctionDetailsSection({
       )}
 
       {listingDetails.map((detail) => (
+        detail.value !== undefined && (
         <XStack
           key={detail.title}
           alignItems="center"
@@ -88,6 +89,7 @@ export function AuctionDetailsSection({
             </Text>
           </XStack>
         </XStack>
+        )
       ))}
     </YStack>
   );
