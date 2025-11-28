@@ -482,6 +482,12 @@ export function useAddComment() {
 
       return { previousData };
     },
+    onSuccess: (response, { listingId }) => {
+      // Use server response to sync count in essential caches
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
+    },
     onError: (err, { listingId }, context) => {
       // Rollback optimistic update on error
       if (context?.previousData) {
