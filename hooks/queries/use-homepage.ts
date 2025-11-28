@@ -6,8 +6,8 @@ export const useHomepage = () => {
     return useQuery({
         queryKey: queryKeys.homepage,
         queryFn: () => HomepageService.getHomepageV1HomepageGet(),
-        staleTime: 5 * 60 * 1000,
-        gcTime: 10 * 60 * 1000,
+        staleTime: 60 * 1000,
+        gcTime: 5 * 60 * 1000,
         retry: 2,
     })
 }
