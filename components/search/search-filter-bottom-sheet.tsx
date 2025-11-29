@@ -181,7 +181,7 @@ export const SearchFilterBottomSheet = forwardRef<
           borderRadius="$10"
           mt="$4"
         >
-          Apply Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+          Apply Filters
         </Button>
       </YStack>
     </BottomSheet>
