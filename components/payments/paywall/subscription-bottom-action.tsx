@@ -111,7 +111,7 @@ export function SubscriptionBottomAction({
         fullWidth
         onPress={onContinue}
         disabled={!selectedPlan || isLoading || isRestoring}
-        borderRadius="$10"
+        borderRadius="$6"
       >
         {getButtonText()}
       </ButtonUI>

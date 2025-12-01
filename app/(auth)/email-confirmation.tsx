@@ -38,7 +38,7 @@ export default function EmailConfirmationScreen() {
             size="lg"
             fullWidth
             onPress={backToSignIn}
-            borderRadius="$10"
+            borderRadius="$6"
             >
             Continue to Sign In
             </Button>

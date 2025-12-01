@@ -132,7 +132,7 @@ export const SelectBottomSheet = forwardRef<
               size="lg"
               fullWidth
               disabled={!selectedValue}
-              borderRadius="$10"
+              borderRadius="$6"
               mt="$4"
             >
               Apply

@@ -76,7 +76,7 @@ export const QuickActionBottomSheet = forwardRef<QuickActionBottomSheetMethods, 
               size="lg"
               disabled={!secondaryOption}
               flex={1}
-              borderRadius="$10"
+              borderRadius="$6"
             >
               {secondaryOption}
             </Button>
@@ -88,7 +88,7 @@ export const QuickActionBottomSheet = forwardRef<QuickActionBottomSheetMethods, 
               size="lg"
               disabled={!primaryOption}
               flex={1}
-              borderRadius="$10"
+              borderRadius="$6"
             >
               {primaryOption}
             </Button>

@@ -177,7 +177,7 @@ export const ImagePickerBottomSheet = forwardRef<
             onPress={() => bottomSheetRef.current?.dismiss()}
             variant="primary"
             size="lg"
-            borderRadius="$10"
+            borderRadius="$6"
           >
             Cancel
           </Button>

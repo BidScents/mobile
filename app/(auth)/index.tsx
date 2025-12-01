@@ -60,7 +60,7 @@ export default function WelcomeScreen() {
             <Button
               variant="primary"
               size="lg"
-              borderRadius="$10"
+              borderRadius="$6"
               fullWidth
               onPress={handleGetStarted}
             >
@@ -70,7 +70,7 @@ export default function WelcomeScreen() {
             <Button
               variant="ghost"
               size="lg"
-              borderRadius="$10"
+              borderRadius="$6"
               fullWidth
               onPress={() => router.replace('/(tabs)/home')}
             >

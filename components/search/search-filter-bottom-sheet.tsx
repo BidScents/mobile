@@ -178,7 +178,7 @@ export const SearchFilterBottomSheet = forwardRef<
           variant="primary"
           size="lg"
           fullWidth
-          borderRadius="$10"
+          borderRadius="$6"
           mt="$4"
         >
           Apply Filters

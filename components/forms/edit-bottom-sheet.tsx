@@ -178,7 +178,7 @@ export const EditBottomSheet = forwardRef<
                     variant="secondary"
                     size="md"
                     flex={1}
-                    borderRadius="$10"
+                    borderRadius="$6"
                   >
                     Cancel
                   </Button>
@@ -190,7 +190,7 @@ export const EditBottomSheet = forwardRef<
                     disabled={
                       !editText.trim() || editText.trim() === initialText.trim()
                     }
-                    borderRadius="$10"
+                    borderRadius="$6"
                   >
                     <XStack alignItems="center" gap="$2">
                       <Text color="$background" fontWeight="600">

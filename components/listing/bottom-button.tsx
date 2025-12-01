@@ -33,7 +33,7 @@ export default function BottomButton({
           fullWidth
           onPress={handlePress}
           disabled={isLoading}
-          borderRadius="$10"
+          borderRadius="$6"
         >
           {isLoading ? "Loading..." : "Contact Seller"}
         </Button>

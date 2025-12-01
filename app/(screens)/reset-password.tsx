@@ -162,7 +162,7 @@ export default function ResetPasswordScreen() {
             fullWidth
             onPress={form.handleSubmit(onSubmit)}
             disabled={isLoading}
-            borderRadius="$10"
+            borderRadius="$6"
           >
             {isLoading ? 'Updating...' : 'Update Password'}
           </Button>

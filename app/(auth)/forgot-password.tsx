@@ -166,7 +166,7 @@ export default function ForgotPasswordScreen() {
             fullWidth
             onPress={form.handleSubmit(onSubmit)}
             disabled={isLoading || isInCooldown}
-            borderRadius="$10"
+            borderRadius="$6"
           >
             {isLoading 
               ? 'Sending...' 

@@ -238,7 +238,7 @@ export const BidBottomSheet = forwardRef<
           size="lg"
           fullWidth
           disabled={(!isValidBid || isLoading) && !hasWon && !isCurrentUserHighestBidder}
-          borderRadius="$10"
+          borderRadius="$6"
           marginTop="auto"
         >
           {hasWon

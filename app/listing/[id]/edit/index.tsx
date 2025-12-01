@@ -446,7 +446,7 @@ export default function ListingEditScreen() {
                 fullWidth
                 onPress={handleSubmit(onSubmit)}
                 disabled={submitting || !isAnyChange}
-                borderRadius="$10"
+                borderRadius="$6"
               >
                 {submitting ? "Updating Listing..." : "Update Listing"}
               </Button>

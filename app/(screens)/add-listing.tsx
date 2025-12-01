@@ -449,18 +449,17 @@ export default function AddListingScreen() {
               onChangeText={() => {}}
               />
             }
-          </YStack>
-
           <Button
             variant="primary"
             size="lg"
             fullWidth
             onPress={handleSubmit(onSubmit)}
             disabled={loading || !isValid}
-            borderRadius="$10"
+            borderRadius="$6"
           >
             {loading ? "Creating Listing..." : "Create Listing"}
           </Button>
+          </YStack>
         </YStack>
       </KeyboardAwareScrollView>
 

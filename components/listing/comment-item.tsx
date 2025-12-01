@@ -77,7 +77,7 @@ export function CommentItem({
               onPress={() => onEdit(comment.id)}
               hitSlop={20}
               pressStyle={{ opacity: 0.6, scale: 0.93 }}
-              borderRadius="$10"
+              borderRadius="$6"
             >
               <Text
                 fontSize="$1"

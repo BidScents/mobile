@@ -217,7 +217,7 @@ export default function OnboardingScreen() {
           fullWidth
           onPress={handleSubmit(onSubmit)}
           disabled={isLoading || !isValid}
-          borderRadius="$10"
+          borderRadius="$6"
         >
           {isLoading ? 'Creating Profile...' : 'Complete Profile'}
         </Button>

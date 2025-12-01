@@ -168,7 +168,7 @@ export default function LoginScreen() {
             fullWidth
             onPress={handleSubmit(onSubmit)}
             disabled={isLoading}
-            borderRadius="$10"
+            borderRadius="$6"
           >
             {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>

@@ -17,7 +17,6 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LegendList } from "@legendapp/list";
-import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, {
@@ -83,7 +82,6 @@ export const TransactionBottomSheet = forwardRef<
   const { user } = useAuthStore();
   const colors = useThemeColors();
   const createTransactionMutation = useCreateTransaction();
-  const queryClient = useQueryClient();
 
   // Get user's listings for selection
   const {
@@ -358,7 +356,7 @@ export const TransactionBottomSheet = forwardRef<
           onPress={() => bottomSheetRef.current?.dismiss()}
           variant="secondary"
           size="lg"
-          borderRadius="$5"
+          borderRadius="$6"
         >
           Cancel
         </Button>

@@ -22,6 +22,7 @@ export const ProfileActionButton: React.FC<ProfileActionButtonProps> = ({
           variant="secondary"
           onPress={() => router.replace("/(tabs)/profile/seller-dashboard")}
           marginTop="$3"
+          borderRadius="$6"
           fullWidth
         >
           Seller Dashboard
@@ -32,6 +33,7 @@ export const ProfileActionButton: React.FC<ProfileActionButtonProps> = ({
           onPress={onFollowToggle}
           disabled={isLoading}
           marginTop="$3"
+          borderRadius="$6"
           fullWidth
         >
           {isLoading ? "Loading..." : isFollowing ? "Following" : "Follow"}

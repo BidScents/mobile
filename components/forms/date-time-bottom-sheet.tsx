@@ -109,7 +109,7 @@ export const DateTimeBottomSheet = forwardRef<DateTimeBottomSheetMethods, DateTi
             size="lg"
             fullWidth
             onPress={handleConfirm}
-            borderRadius="$10"
+            borderRadius="$6"
             disabled={selectedDate <= new Date()}
             mt="$4"
           >

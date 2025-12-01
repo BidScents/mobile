@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { AuctionDetails } from "@bid-scents/shared-sdk";
 import { requireAuth } from "@/utils/auth-helper";
+import { AuctionDetails } from "@bid-scents/shared-sdk";
 import * as Haptics from 'expo-haptics';
 import React, { useRef } from 'react';
 import { View } from "tamagui";
@@ -65,7 +65,7 @@ export default function AuctionButton({
           fullWidth
           onPress={handleBidPress}
           disabled={isLoading || !isActive}
-          borderRadius="$10"
+          borderRadius="$6"
         >
           {isLoading
             ? "Loading..."
