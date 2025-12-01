@@ -1,15 +1,17 @@
+import { NotificationsBottomSheet, NotificationsBottomSheetMethods } from '@/components/forms/notifications-bottom-sheet'
 import { ListingCard } from '@/components/listing/listing-card'
 import { ListingCardSkeleton } from '@/components/suspense/listing-card-skeleton'
 import { Container } from '@/components/ui/container'
 import { SearchBar } from '@/components/ui/search-bar'
 import { useHomepage } from '@/hooks/queries/use-homepage'
 import type { ListingCard as ListingCardType } from '@bid-scents/shared-sdk'
-import { ListingType } from '@bid-scents/shared-sdk'
+import { ListingType, useAuthStore } from '@bid-scents/shared-sdk'
 import { LegendList } from "@legendapp/list"
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs'
 import * as Haptics from 'expo-haptics'
+import * as Notifications from 'expo-notifications'
 import { router } from 'expo-router'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Dimensions } from 'react-native'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
 
@@ -34,6 +36,25 @@ type FeedItem =
 export default function Homepage() {
   const { data: homepage, isLoading, refetch } = useHomepage()
   const tabbarHeight = useBottomTabBarHeight();
+  const {isAuthenticated} = useAuthStore();
+  const notificationsBottomSheetRef = useRef<NotificationsBottomSheetMethods>(null)
+
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (!isAuthenticated) return;
+
+      const settings = await Notifications.getPermissionsAsync();
+      
+      // Only show if permission is undetermined (user hasn't been asked yet)
+      if (settings.status === Notifications.PermissionStatus.UNDETERMINED) {
+        setTimeout(() => {
+          notificationsBottomSheetRef.current?.present()
+        }, 2000)
+      }
+    };
+
+    checkPermissions();
+  }, [isAuthenticated]);
 
   // Navigation functions for "View All" buttons
   const handleActiveAuctionsViewAll = useCallback(() => {
@@ -225,6 +246,7 @@ export default function Homepage() {
         recycleItems
         contentContainerStyle={{ paddingBottom: tabbarHeight }}
       />
+      <NotificationsBottomSheet ref={notificationsBottomSheetRef} />
     </Container>
   )
 }
