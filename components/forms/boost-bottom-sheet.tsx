@@ -248,7 +248,7 @@ export const BoostBottomSheet = forwardRef<
                 size="md"
                 onPress={() => handleBoost('normal_boost')}
                 disabled={isLoading}
-                borderRadius="$4"
+                borderRadius="$6"
               >
                 {isLoading ? 'Processing...' : `${pricingInfo.normal.hasEnoughCredits ? 'Use credit' : 'Buy normal boost'}`}
               </Button>
@@ -270,7 +270,7 @@ export const BoostBottomSheet = forwardRef<
                 size="md"
                 onPress={() => handleBoost('premium_boost')}
                 disabled={isLoading}
-                borderRadius="$4"
+                borderRadius="$6"
               >
                 {isLoading ? 'Processing...' : `${pricingInfo.premium.hasEnoughCredits ? 'Use credit' : 'Buy premium boost'}`}
               </Button>
