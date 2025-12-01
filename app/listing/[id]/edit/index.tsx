@@ -1,5 +1,4 @@
 import { ControlledInput } from "@/components/forms/controlled-input";
-import { QuickActionBottomSheet } from "@/components/forms/quick-action-bottom-sheet";
 import { EditableImageCarousel, type EditableImageItem } from "@/components/listing/editable-image-carousel";
 import { EditListingSkeleton } from "@/components/suspense/edit-listing-skeleton";
 import { Button } from "@/components/ui/button";
@@ -22,10 +21,9 @@ import {
   type CreateListingFormData,
   type UpdateListingRequest,
 } from "@bid-scents/shared-sdk";
-import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, Dimensions } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
@@ -37,10 +35,8 @@ export default function ListingEditScreen() {
   const updateListingMutation = useUpdateListing();
   const { user } = useAuthStore();
   const { showLoading, hideLoading } = useLoadingStore();
-  const quickActionBottomSheetRef = useRef<BottomSheetModalMethods>(null);
   const colors = useThemeColors();
 
-  const [disabled, setDisabled] = useState(true);
   const [images, setImages] = useState<EditableImageItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -72,9 +68,10 @@ export default function ListingEditScreen() {
         price: listingData.price,
         starting_price: listing.auction_details?.starting_price,
         bid_increment: listing.auction_details?.bid_increment,
-        ends_at: listing.auction_details?.ends_at,
+        ends_at: listing.auction_details?.ends_at ? new Date(listing.auction_details.ends_at).toISOString() : undefined,
         batch_code: listingData.batch_code || undefined,
         buy_now_price: listing.auction_details?.buy_now_price || undefined,
+        is_extendable: listing.auction_details?.is_extendable || false,
       };
       
       reset(formData);
@@ -204,10 +201,6 @@ export default function ListingEditScreen() {
       }
     }
   };
-
-  const handleEditListing = () => {
-    quickActionBottomSheetRef.current?.present();
-  };
   
   if (isLoading || !listing || isRefetching) {
     return (
@@ -242,7 +235,6 @@ export default function ListingEditScreen() {
           flex={1}
           gap="$5"
           pb="$4"
-          onPress={disabled ? handleEditListing : undefined}
         >
             {/* Images Section */}
             <YStack gap="$3">
@@ -251,7 +243,7 @@ export default function ListingEditScreen() {
                 onImagesChange={setImages}
                 width={350}
                 height={250}
-                disabled={disabled || submitting}
+                disabled={submitting}
                 maxImages={10}
               />
             </YStack>
@@ -295,7 +287,7 @@ export default function ListingEditScreen() {
                 variant="text"
                 label="Title"
                 placeholder="Enter listing title"
-                disabled={submitting || disabled}
+                disabled={submitting}
               />
 
               <ControlledInput
@@ -304,7 +296,7 @@ export default function ListingEditScreen() {
                 variant="multiline"
                 label="Description"
                 placeholder="Describe your fragrance..."
-                disabled={submitting || disabled}
+                disabled={submitting}
                 numberOfLines={4}
               />
 
@@ -314,7 +306,7 @@ export default function ListingEditScreen() {
                 variant="text"
                 label="Brand"
                 placeholder="Enter brand name"
-                disabled={submitting || disabled}
+                disabled={submitting}
               />
 
               <ControlledInput
@@ -323,7 +315,7 @@ export default function ListingEditScreen() {
                 name="category"
                 label="Category"
                 placeholder="Select category"
-                disabled={submitting || disabled}
+                disabled={submitting}
                 options={categoryOptions}
               />
 
@@ -335,7 +327,7 @@ export default function ListingEditScreen() {
                   variant="numeric"
                   label="Price"
                   placeholder="0.00"
-                  disabled={submitting || disabled}
+                  disabled={submitting}
                 />
               )}
 
@@ -347,7 +339,7 @@ export default function ListingEditScreen() {
                     variant="numeric"
                     label="Starting Price"
                     placeholder="0.00"
-                    disabled={submitting || disabled}
+                    disabled={submitting}
                   />
 
                   <ControlledInput
@@ -356,7 +348,7 @@ export default function ListingEditScreen() {
                     variant="numeric"
                     label="Buy Now Price (Optional)"
                     placeholder="0.00"
-                    disabled={submitting || disabled}
+                    disabled={submitting}
                   />
 
                   <ControlledInput
@@ -365,7 +357,7 @@ export default function ListingEditScreen() {
                     variant="numeric"
                     label="Bid Increment"
                     placeholder="5.00"
-                    disabled={submitting || disabled}
+                    disabled={submitting}
                   />
 
                   <ControlledInput
@@ -374,7 +366,7 @@ export default function ListingEditScreen() {
                     variant="date"
                     label="End Date & Time"
                     placeholder="Select auction end time"
-                    disabled={submitting || disabled}
+                    disabled={submitting}
                   />
                 </YStack>
               )}
@@ -388,7 +380,7 @@ export default function ListingEditScreen() {
                     variant="numeric"
                     label="Volume (ml)"
                     placeholder="100"
-                    disabled={submitting || disabled}
+                    disabled={submitting}
                   />
                 </YStack>
 
@@ -399,7 +391,7 @@ export default function ListingEditScreen() {
                     variant="numeric"
                     label="Remaining %"
                     placeholder="100"
-                    disabled={submitting || disabled}
+                    disabled={submitting}
                   />
                 </YStack>
               </XStack>
@@ -410,7 +402,7 @@ export default function ListingEditScreen() {
                 variant="select"
                 label="Box Condition"
                 placeholder="Select condition"
-                disabled={submitting || disabled}
+                disabled={submitting}
                 options={boxConditionOptions}
               />
 
@@ -422,7 +414,7 @@ export default function ListingEditScreen() {
                     variant="numeric"
                     label="Quantity"
                     placeholder="1"
-                    disabled={submitting || disabled}
+                    disabled={submitting}
                   />
                 </YStack>
 
@@ -433,7 +425,7 @@ export default function ListingEditScreen() {
                     variant="numeric"
                     label="Purchase Year"
                     placeholder={new Date().getFullYear().toString()}
-                    disabled={submitting || disabled}
+                    disabled={submitting}
                   />
                 </YStack>
               </XStack>
@@ -444,35 +436,22 @@ export default function ListingEditScreen() {
                 variant="text"
                 label="Batch Code (Optional)"
                 placeholder="Enter batch code if available"
-                disabled={submitting || disabled}
+                disabled={submitting}
               />
 
               {/* Submit Button - Only shown when editing is enabled */}
-              {!disabled && (
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onPress={handleSubmit(onSubmit)}
-                  disabled={submitting || !isAnyChange}
-                  borderRadius="$10"
-                >
-                  {submitting ? "Updating Listing..." : "Update Listing"}
-                </Button>
-              )}
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onPress={handleSubmit(onSubmit)}
+                disabled={submitting || !isAnyChange}
+                borderRadius="$10"
+              >
+                {submitting ? "Updating Listing..." : "Update Listing"}
+              </Button>
           </YStack>
         </YStack>
-      
-      {/* Edit Confirmation Modal */}
-      <QuickActionBottomSheet
-        ref={quickActionBottomSheetRef}
-        title="Edit Listing"
-        subtitle="Are you sure you want to edit this listing?"
-        primaryOption="Edit"
-        secondaryOption="Cancel"
-        onSelectPrimary={() => setDisabled(false)}
-        onSelectSecondary={() => quickActionBottomSheetRef.current?.dismiss()}
-        />
     </Container>
     </KeyboardAwareScrollView>
   );

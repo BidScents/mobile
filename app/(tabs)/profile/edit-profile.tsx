@@ -1,5 +1,4 @@
 import { ControlledInput } from "@/components/forms/controlled-input";
-import { QuickActionBottomSheet } from "@/components/forms/quick-action-bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { KeyboardAwareView } from "@/components/ui/keyboard-aware-view";
@@ -11,20 +10,17 @@ import {
   useAuthStore,
   type OnboardingFormData
 } from "@bid-scents/shared-sdk";
-import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ScrollView, YStack } from "tamagui";
 
 export default function EditProfileScreen() {
   const { user } = useAuthStore();
   const editProfileMutation = useEditProfile();
-  const quickActionBottomSheetRef = useRef<BottomSheetModalMethods>(null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [disabled, setDisabled] = useState(true);
 
   const [profileImageUri, setProfileImageUri] = useState<string | null>(
     user?.profile_image_url
@@ -135,10 +131,6 @@ export default function EditProfileScreen() {
     }
   };
 
-  const handleEditProfile = () => {
-    quickActionBottomSheetRef.current?.present();
-  };
-
   return (
     <ScrollView
       backgroundColor="$background"
@@ -154,7 +146,6 @@ export default function EditProfileScreen() {
             flex={1}
             gap="$3"
             minHeight="100%"
-            onPress={disabled ? handleEditProfile : undefined}
           >
             {/* Profile Image Section */}
             <ProfilePreviewPicker
@@ -162,7 +153,7 @@ export default function EditProfileScreen() {
               coverImageUri={coverImageUri}
               onProfileImageChange={setProfileImageUri}
               onCoverImageChange={setCoverImageUri}
-              disabled={isLoading || disabled}
+              disabled={isLoading}
             />
 
             {/* Form Fields Section */}
@@ -174,7 +165,7 @@ export default function EditProfileScreen() {
                 variant="first_name"
                 label="First Name"
                 placeholder="Enter your first name"
-                disabled={isLoading || disabled}
+                disabled={isLoading}
               />
 
               <ControlledInput
@@ -183,7 +174,7 @@ export default function EditProfileScreen() {
                 variant="last_name"
                 label="Last Name"
                 placeholder="Enter your last name"
-                disabled={isLoading || disabled}
+                disabled={isLoading}
               />
 
               {/* Account Information */}
@@ -193,7 +184,7 @@ export default function EditProfileScreen() {
                 variant="username"
                 label="Username"
                 placeholder="Choose a unique username"
-                disabled={isLoading || disabled}
+                disabled={isLoading}
               />
 
               <ControlledInput
@@ -202,7 +193,7 @@ export default function EditProfileScreen() {
                 variant="username"
                 label="Location (Optional)"
                 placeholder="Enter your location"
-                disabled={isLoading || disabled}
+                disabled={isLoading}
               />
 
               <ControlledInput
@@ -211,37 +202,24 @@ export default function EditProfileScreen() {
                 variant="bio"
                 label="Bio (Optional)"
                 placeholder="Tell us a bit about yourself..."
-                disabled={isLoading || disabled}
+                disabled={isLoading}
               />
 
               {/* Submit Button - Only shown when editing is enabled */}
-              {!disabled && (
-                <Button
+              <Button
                   variant="primary"
                   size="lg"
                   fullWidth
                   onPress={handleSubmit(onSubmit)}
                   disabled={isLoading || !isAnyChange}
-                  borderRadius="$10"
+                  borderRadius="$6"
                 >
                   {isLoading ? "Updating Profile..." : "Update Profile"}
                 </Button>
-              )}
             </YStack>
           </YStack>
         </KeyboardAwareView>
       </Container>
-
-      {/* Edit Confirmation Modal */}
-      <QuickActionBottomSheet
-        ref={quickActionBottomSheetRef}
-        title="Edit Profile"
-        subtitle="Are you sure you want to edit your profile?"
-        primaryOption="Edit"
-        secondaryOption="Cancel"
-        onSelectPrimary={() => setDisabled(false)}
-        onSelectSecondary={() => quickActionBottomSheetRef.current?.dismiss()}
-      />
     </ScrollView>
   );
 }
