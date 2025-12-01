@@ -1,7 +1,7 @@
 import { useAuthStore } from '@bid-scents/shared-sdk';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Platform } from 'react-native';
 import { useAddDeviceToken } from './queries/use-notifications';
 
@@ -86,20 +86,7 @@ export function useDeviceToken() {
         fullError: error
       });
       
-      // Handle duplicate token scenarios gracefully
-      // Backend wraps PostgreSQL duplicate key errors as "Internal Server Error"
-      const isDuplicateError = 
-        error?.message?.includes('duplicate key') ||
-        error?.message?.includes('already exists') ||
-        error?.message?.includes('Internal Server Error') ||
-        error?.status === 409 ||
-        error?.status === 500;
-      
-      if (isDuplicateError) {
-        console.log('Device token likely already exists on server (duplicate/500 error), marking as registered');
-        setDeviceToken(token);
-        return true;
-      }
+      setDeviceToken(token);
       
       console.error('Failed to register device token:', error);
       return false;
@@ -183,15 +170,6 @@ export function useDeviceToken() {
     
     return await registerToken(token);
   };
-
-  // Auto-check on authentication changes and register background task
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      checkAndRegisterToken();
-      // Register background notification task for badge handling
-      // registerBackgroundNotificationTask();
-    }
-  }, [isAuthenticated, user?.id]);
 
   return {
     isChecking,
