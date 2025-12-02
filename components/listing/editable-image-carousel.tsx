@@ -281,13 +281,13 @@ export function EditableImageCarousel({
       {/* Add more images button */}
       {!disabled && images.length < maxImages && (
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           onPress={handleAddImage}
         >
           <XStack alignItems="center" gap="$2">
-            <ThemedIonicons name="add" size={16} />
-            <Text>Add More Images ({images.length}/{maxImages})</Text>
+            <ThemedIonicons name="add" size={20} />
+            <Text fontWeight="$3">Add More Images ({images.length}/{maxImages})</Text>
           </XStack>
         </Button>
       )}

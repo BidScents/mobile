@@ -222,6 +222,7 @@ export default function ListingEditScreen() {
   }
 
   return (
+    <>
     <KeyboardAwareScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ flexGrow: 1 }}
@@ -439,20 +440,25 @@ export default function ListingEditScreen() {
                 disabled={submitting}
               />
 
-              {/* Submit Button - Only shown when editing is enabled */}
-              <Button
-                variant="primary"
-                size="lg"
-                fullWidth
-                onPress={handleSubmit(onSubmit)}
-                disabled={submitting || !isAnyChange}
-                borderRadius="$6"
-              >
-                {submitting ? "Updating Listing..." : "Update Listing"}
-              </Button>
           </YStack>
         </YStack>
     </Container>
     </KeyboardAwareScrollView>
+      {/* Submit Button - Only shown when editing is enabled */}
+      {isAnyChange && (
+      <YStack position="absolute" bottom={10} left={0} right={0} padding="$4">
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
+          onPress={handleSubmit(onSubmit)}
+          disabled={submitting || !isAnyChange}
+          borderRadius="$6"
+        >
+          {submitting ? "Updating Listing..." : "Update Listing"}
+        </Button>
+      </YStack>
+      )}
+    </>
   );
 }

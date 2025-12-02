@@ -132,6 +132,7 @@ export default function EditProfileScreen() {
   };
 
   return (
+    <>
     <ScrollView
       backgroundColor="$background"
       contentInsetAdjustmentBehavior="automatic"
@@ -146,6 +147,7 @@ export default function EditProfileScreen() {
             flex={1}
             gap="$3"
             minHeight="100%"
+            pb="$4"
           >
             {/* Profile Image Section */}
             <ProfilePreviewPicker
@@ -205,21 +207,26 @@ export default function EditProfileScreen() {
                 disabled={isLoading}
               />
 
-              {/* Submit Button - Only shown when editing is enabled */}
-              <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onPress={handleSubmit(onSubmit)}
-                  disabled={isLoading || !isAnyChange}
-                  borderRadius="$6"
-                >
-                  {isLoading ? "Updating Profile..." : "Update Profile"}
-                </Button>
             </YStack>
           </YStack>
         </KeyboardAwareView>
       </Container>
     </ScrollView>
+      {/* Submit Button - Only shown when editing is enabled */}
+      {isAnyChange && (
+        <YStack position="absolute" bottom={0} left={0} right={0} padding="$4">
+        <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onPress={handleSubmit(onSubmit)}
+            disabled={isLoading || !isAnyChange}
+            borderRadius="$6"
+          >
+            {isLoading ? "Updating Profile..." : "Update Profile"}
+          </Button>
+          </YStack>
+      )}
+    </>
   );
 }
