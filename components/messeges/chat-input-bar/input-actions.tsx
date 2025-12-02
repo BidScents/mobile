@@ -16,7 +16,7 @@ export const InputActions = ({
     <>
       {showTransactionButton && (
         <TouchableOpacity onPress={onTransactionPress}>
-          <ThemedIonicons name="add-circle-outline" size={24} color="$mutedForeground" />
+          <ThemedIonicons name="pricetags-outline" size={24} color="$mutedForeground" />
         </TouchableOpacity>
       )}
       <TouchableOpacity onPress={onImagePickerPress}>

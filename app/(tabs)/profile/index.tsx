@@ -92,7 +92,9 @@ export default function ProfileScreen() {
           onPress: () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             handleSignOutUI();
-            router.replace("/(tabs)");
+            setTimeout(() => {
+              router.replace("/(tabs)");
+            }, 1000);
           },
         },
       ]);
