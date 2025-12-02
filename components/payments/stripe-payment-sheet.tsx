@@ -61,12 +61,12 @@ export const StripePaymentSheet = memo<StripePaymentSheetProps>(({
         }),
 
         // Enable Apple Pay and Google Pay for Malaysia
-        // applePay: {
-        //   merchantCountryCode: 'MY',
-        // },
+        applePay: {
+          merchantCountryCode: 'MY',
+        },
         googlePay: {
           merchantCountryCode: 'MY', // Changed to Malaysia
-          testEnv: __DEV__, // Use test environment in development
+          testEnv: false, // Use test environment in development
           currencyCode: currency.toUpperCase(),
         },
 
@@ -80,7 +80,7 @@ export const StripePaymentSheet = memo<StripePaymentSheetProps>(({
 
         // Payment method configuration for Malaysia
         // Include card, FPX, and other Malaysian payment methods
-        paymentMethodOrder: ['card', 'fpx', 'grabpay'],
+        paymentMethodOrder: ['card', 'fpx', 'grabpay', 'googlePay', 'applePay'],
 
         // UI customization
         // Use system theme colors - Stripe will adapt to device theme automatically

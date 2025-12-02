@@ -279,7 +279,7 @@ export default function RootLayout() {
   return (
     <StripeProvider
       publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
-      // merchantIdentifier="merchant.com.bidscents.app"
+      merchantIdentifier="merchant.com.bidscents.app"
       urlScheme="com.bidscents.mobile"
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
