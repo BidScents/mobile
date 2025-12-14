@@ -6,6 +6,7 @@ import {
   useAuthStore
 } from "@bid-scents/shared-sdk";
 import { router } from "expo-router";
+import { Alert } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 interface SystemReceiptMessageProps {
@@ -21,7 +22,7 @@ export function SystemReceiptMessage({ content, isBuyer, messageId, message }: S
 
   const handleConfirmReceipt = async () => {
     if (!content.is_active) return;
-    
+
     const updatedMessage: MessageResData = {
       ...message,
       content: {
@@ -29,12 +30,28 @@ export function SystemReceiptMessage({ content, isBuyer, messageId, message }: S
         is_active: false
       }
     };
+
+    Alert.alert(
+      "Confirm receipt",
+      "Are you sure you have received the item?",
+      [{
+        text: "Cancel",
+        onPress: () => {
+          
+        }
+      }, {
+        text: "Confirm",
+        onPress: async () => {
+          try {
+            await confirmReceipt.mutateAsync({ messageId, updatedMessage });
+          } catch (error) {
+            console.error("Failed to confirm receipt:", error);
+          }
+        }
+      }]
+    )
     
-    try {
-      await confirmReceipt.mutateAsync({ messageId, updatedMessage });
-    } catch (error) {
-      console.error("Failed to confirm receipt:", error);
-    }
+    
   };
 
   return (
