@@ -196,6 +196,30 @@ export function useDeleteListing() {
 }
 
 /**
+ * Mark listing as sold
+ */
+export function useMarkAsSold() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (listingId: string): Promise<void> => {
+      return DashboardService.markListingSoldV1DashboardListingListingIdMarkSoldPatch(listingId)
+    },
+    
+    onSuccess: (_, listingId) => {
+      // Invalidate specific listing cache
+      queryClient.invalidateQueries({ queryKey: queryKeys.listings.detail(listingId) })
+      
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
+      
+      // Invalidate profile listings
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.all })
+    }
+  })
+}
+
+/**
  * Settle auction transaction - sends transaction message to highest bidder
  */
 export function useSettleAuctionTransaction() {
