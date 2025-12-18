@@ -56,14 +56,14 @@ export default function Homepage() {
     checkPermissions();
   }, [isAuthenticated]);
 
-  // Navigation functions for "View All" buttons
-  const handleActiveAuctionsViewAll = useCallback(() => {
+  const handleViewAll = useCallback((type: ListingType) => {
+    // Placeholder for future implementation
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const params = new URLSearchParams();
     params.append('q', '*');
     
-    const auctionFilter = {
-      listing_types: [ListingType.AUCTION],
+    const filter = {
+      listing_types: [type],
       categories: null,
       min_price: null,
       max_price: null,
@@ -73,35 +73,7 @@ export default function Homepage() {
       seller_ids: null,
     };
     
-    params.append('filters', JSON.stringify(auctionFilter));
-    router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
-  }, []);
-
-  const handleRecentListingsViewAll = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const params = new URLSearchParams();
-    params.append('q', '*');
-    
-    router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
-  }, []);
-
-  const handleRecentSwapsViewAll = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const params = new URLSearchParams();
-    params.append('q', '*');
-    
-    const swapFilter = {
-      listing_types: [ListingType.SWAP],
-      categories: null,
-      min_price: null,
-      max_price: null,
-      min_purchase_year: null,
-      max_purchase_year: null,
-      box_conditions: null,
-      seller_ids: null,
-    };
-    
-    params.append('filters', JSON.stringify(swapFilter));
+    params.append('filters', JSON.stringify(filter));
     router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
   }, []);
 
@@ -126,8 +98,14 @@ export default function Homepage() {
         { type: 'header', title: 'Active Auctions', showViewAll: true },
         { type: 'horizontal_section', title: 'Active Auctions', listings: Array(5).fill({}) as ListingCardType[] },
         { type: 'spacer', height: 20 },
-        { type: 'header', title: 'Recent Listings', showViewAll: true },
-        { type: 'horizontal_section', title: 'Recent Listings', listings: Array(5).fill({}) as ListingCardType[] },
+        { type: 'header', title: 'Recent New', showViewAll: true },
+        { type: 'horizontal_section', title: 'Recent New', listings: Array(5).fill({}) as ListingCardType[] },
+        { type: 'spacer', height: 40 },
+        { type: 'header', title: 'Recent Decant', showViewAll: true },
+        { type: 'horizontal_section', title: 'Recent Decant', listings: Array(5).fill({}) as ListingCardType[] },
+        { type: 'spacer', height: 40 },
+        { type: 'header', title: 'Recent Preowned', showViewAll: true },
+        { type: 'horizontal_section', title: 'Recent Preowned', listings: Array(5).fill({}) as ListingCardType[] },
         { type: 'spacer', height: 40 }
       ]
     }
@@ -143,7 +121,9 @@ export default function Homepage() {
     // Dynamic sections with data
     const sections = [
       { title: 'Active Auctions', data: homepage?.recent_auctions },
-      { title: 'Recent Listings', data: homepage?.recent_listings },
+      { title: 'New', data: homepage?.recent_new },
+      { title: 'Recent Decant', data: homepage?.recent_decant },
+      { title: 'Recent Preowned', data: homepage?.recent_preowned },
       { title: 'From Sellers You Follow', data: homepage?.sellers_you_follow },
       { title: 'Recent Swaps', data: homepage?.recent_swaps }
     ]
@@ -179,11 +159,15 @@ export default function Homepage() {
         const getViewAllHandler = () => {
           switch (item.title) {
             case 'Active Auctions':
-              return handleActiveAuctionsViewAll;
-            case 'Recent Listings':
-              return handleRecentListingsViewAll;
+              return () => handleViewAll(ListingType.AUCTION);
+            case 'New':
+              return () => handleViewAll(ListingType.NEW);
+            case 'Recent Decant':
+              return () => handleViewAll(ListingType.DECANT);
+            case 'Recent Preowned':
+              return () => handleViewAll(ListingType.PREOWNED);
             case 'Recent Swaps':
-              return handleRecentSwapsViewAll;
+              return () => handleViewAll(ListingType.SWAP);
             case 'From Sellers You Follow':
               return handleSellersYouFollowViewAll;
             default:
