@@ -8,14 +8,12 @@ import { SEARCH_SORT_OPTIONS } from "@/constants/search.constants";
 import { useSearchResults } from "@/hooks/use-search-results";
 import { createEmptyFilters } from "@/utils/search.utils";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useCallback, useRef } from "react";
 import { Keyboard } from "react-native";
 
 export default function SearchResultsScreen() {
-  const tabbarHeight = useBottomTabBarHeight();
   
   const selectBottomSheetRef = useRef<BottomSheetModalMethods>(null);
   const filterBottomSheetRef = useRef<SearchFilterBottomSheetMethods>(null);
@@ -37,7 +35,6 @@ export default function SearchResultsScreen() {
 
   const {
     resetFilters,
-    syncFilters,
   } = useFilterState(filters);
 
   const handleClearFilters = () => {

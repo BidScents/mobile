@@ -41,7 +41,7 @@ import { Text, XStack, YStack } from "tamagui";
  * Default form values for creating a listing
  */
 const DEFAULT_VALUES: CreateListingFormData = {
-  type: ListingType.FIXED_PRICE,
+  type: ListingType.NEW,
   name: "",
   brand: "",
   description: "",

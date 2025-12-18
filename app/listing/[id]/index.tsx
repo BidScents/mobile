@@ -8,7 +8,7 @@ import { ListingActions } from "@/components/listing/listing-actions";
 import { ListingContent } from "@/components/listing/listing-content";
 import { ListingDetailSkeleton } from "@/components/suspense/listing-detail-skeleton";
 import { BlurBackButton } from "@/components/ui/blur-back-button";
-import Button from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ListingEditButton } from "@/components/ui/listing-edit-button";
 import { ThemedIonicons } from "@/components/ui/themed-icons";

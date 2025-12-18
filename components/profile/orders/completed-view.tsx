@@ -77,7 +77,7 @@ export default function CompletedView() {
       <ThemedIonicons
         name="bag-check-outline"
         size={64}
-        color="mutedForeground"
+        color="$mutedForeground"
       />
       <Text
         fontSize="$5"
