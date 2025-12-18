@@ -9,6 +9,8 @@ import type {
 } from '@bid-scents/shared-sdk'
 import { DashboardService } from '@bid-scents/shared-sdk'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { router } from 'expo-router'
+import { Alert } from 'react-native'
 import { queryKeys } from './query-keys'
 
 // ========================================
@@ -183,6 +185,8 @@ export function useDeleteListing() {
     },
     
     onSuccess: (_, listingId) => {
+      Alert.alert("Success", "Listing deleted successfully");
+      router.replace("/(tabs)/home");
       // Remove from specific listing cache
       queryClient.removeQueries({ queryKey: queryKeys.listings.detail(listingId) })
       
@@ -207,6 +211,8 @@ export function useMarkAsSold() {
     },
     
     onSuccess: (_, listingId) => {
+      Alert.alert("Success", "Listing marked as sold successfully");
+      router.replace("/(tabs)/profile/seller-dashboard");
       // Invalidate specific listing cache
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.detail(listingId) })
       
