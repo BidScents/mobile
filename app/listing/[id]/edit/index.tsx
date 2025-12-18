@@ -121,6 +121,7 @@ export default function ListingEditScreen() {
     if (dirtyFields.is_extendable) updateRequest.is_extendable = watch("is_extendable");
     if (dirtyFields.batch_code) updateRequest.batch_code = watch("batch_code");
     if (dirtyFields.buy_now_price) updateRequest.buy_now_price = watch("buy_now_price");
+    if (dirtyFields.type) updateRequest.listing_type = watch("type");
     
     // Note: image_urls will be handled separately in onSubmit using finalImageUrls
     
@@ -258,9 +259,10 @@ export default function ListingEditScreen() {
                 variant="select"
                 label="Listing Type"
                 placeholder="Select listing type"
-                disabled={true} // Don't allow changing listing type
-                options={listingTypeOptions}
+                disabled={listing.listing.listing_type === ListingType.AUCTION || listing.listing.listing_type === ListingType.SWAP}
+                options={listingTypeOptions.filter(option => option.value !== ListingType.AUCTION && option.value !== ListingType.SWAP)}
               />
+              {listing.listing.listing_type === ListingType.AUCTION || listing.listing.listing_type === ListingType.SWAP ?
               <XStack
                 backgroundColor="$blue2"
                 borderRadius="$6"
@@ -280,6 +282,7 @@ export default function ListingEditScreen() {
                   Listing type cannot be changed.
                 </Text>
               </XStack>
+              : null}
 
               {/* Basic Information */}
               <ControlledInput
