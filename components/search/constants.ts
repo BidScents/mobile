@@ -1,10 +1,13 @@
 import { ListingBoxCondition, ListingCategory, ListingType } from "@bid-scents/shared-sdk";
 
 export const LISTING_TYPE_LABELS = {
+  [ListingType.NEW]: "New",
+  [ListingType.AUCTION]: "Auction",
+  [ListingType.DECANT]: "Decant",
+  [ListingType.SWAP]: "Swap",
+  [ListingType.PREOWNED]: "Pre-Owned",
   [ListingType.FIXED_PRICE]: "Fixed Price",
   [ListingType.NEGOTIABLE]: "Negotiable",
-  [ListingType.AUCTION]: "Auction",
-  [ListingType.SWAP]: "Swap",
 } as const;
 
 export const CATEGORY_LABELS = {

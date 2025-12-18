@@ -1,16 +1,17 @@
 import {
-    ListingBoxCondition,
-    ListingCategory,
-    ListingType,
+  ListingBoxCondition,
+  ListingCategory,
+  ListingType,
 } from "@bid-scents/shared-sdk";
 
 /**
  * Options for listing type
  */
 export const listingTypeOptions = [
-  { label: "Fixed Price", value: ListingType.FIXED_PRICE },
-  { label: "Negotiable", value: ListingType.NEGOTIABLE },
+  { label: "New", value: ListingType.NEW },
   { label: "Auction", value: ListingType.AUCTION },
+  { label: "Used", value: ListingType.PREOWNED },
+  { label: "Decant", value: ListingType.DECANT },
   { label: "Swap", value: ListingType.SWAP },
 ];
 
