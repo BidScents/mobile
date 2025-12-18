@@ -15,7 +15,9 @@ interface ListingHeaderProps {
  */
 export function ListingHeader({ name, brand, price, listingType }: ListingHeaderProps) {
   const displayPrice = 
-    listingType === ListingType.FIXED_PRICE || listingType === ListingType.NEGOTIABLE
+    (listingType === ListingType.NEW ||
+     listingType === ListingType.PREOWNED ||
+     listingType === ListingType.DECANT)
       ? price
       : undefined;
 

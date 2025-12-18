@@ -5,12 +5,12 @@ import { currency } from "@/constants/constants";
 import { useCreateTransaction } from "@/hooks/queries/use-payments";
 import { useProfileListingsFresh } from "@/hooks/queries/use-profile";
 import { useThemeColors } from "@/hooks/use-theme-colors";
+import { listingTypeOptions } from "@/types/create-listing-types";
 import {
   ListingCard,
-  ListingType,
   ProfileTab,
   TransactionRequest,
-  useAuthStore,
+  useAuthStore
 } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
@@ -176,23 +176,7 @@ export const TransactionBottomSheet = forwardRef<
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const getListingTypeBadge = (listingType: ListingType) => {
-    switch (listingType) {
-      case ListingType.FIXED_PRICE:
-        return "Fixed Price";
-      case ListingType.NEGOTIABLE:
-        return "Negotiable";
-      case ListingType.AUCTION:
-        return "Auction";
-      case ListingType.SWAP:
-        return "Swap";
-      default:
-        return "Buy Now";
-    }
-  };
-
   const renderHeader = (listing: ListingCard) => {
-    const badge = getListingTypeBadge(listing.listing_type);
     return (
       <XStack
         position="absolute"
@@ -205,7 +189,7 @@ export const TransactionBottomSheet = forwardRef<
         paddingVertical="$1"
       >
         <Text fontSize="$1" fontWeight="500" color="$foreground">
-          {badge}
+          {listingTypeOptions.find(option => option.value === listing.listing_type)?.label || "Buy Now"}
         </Text>
       </XStack>
     );
@@ -396,7 +380,7 @@ export const TransactionBottomSheet = forwardRef<
               paddingVertical="$1.5"
             >
               <Text fontSize="$2" fontWeight="500" color="$foreground">
-                {getListingTypeBadge(selectedListing.listing_type)}
+                {listingTypeOptions.find(option => option.value === selectedListing.listing_type)?.label || "Buy Now"}
               </Text>
             </View>
           </XStack>
