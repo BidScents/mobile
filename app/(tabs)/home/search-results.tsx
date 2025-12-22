@@ -3,6 +3,7 @@ import { SearchFilterBottomSheet, SearchFilterBottomSheetMethods } from "@/compo
 import { SearchResultsHeader } from "@/components/search/search-results-header";
 import { SearchResultsList } from "@/components/search/search-results-list";
 import { useFilterState } from "@/components/search/use-filter-state";
+import UserSearchResults from "@/components/search/user-search-results";
 import { Container } from "@/components/ui/container";
 import { SEARCH_SORT_OPTIONS } from "@/constants/search.constants";
 import { useSearchResults } from "@/hooks/use-search-results";
@@ -10,13 +11,14 @@ import { createEmptyFilters } from "@/utils/search.utils";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Keyboard } from "react-native";
 
 export default function SearchResultsScreen() {
   
   const selectBottomSheetRef = useRef<BottomSheetModalMethods>(null);
   const filterBottomSheetRef = useRef<SearchFilterBottomSheetMethods>(null);
+  const [activeTab, setActiveTab] = useState<string>("listings");
 
   const {
     searchParams,
@@ -29,7 +31,6 @@ export default function SearchResultsScreen() {
     handleSearchChange,
     handleSearchSubmit,
     handleDataChange,
-    handleRefresh,
     activeFiltersCount,
   } = useSearchResults();
 
@@ -83,15 +84,18 @@ export default function SearchResultsScreen() {
         onFilterPress={handleFilterPress}
         currentSortLabel={currentSortLabel}
         onSortPress={handleSortPress}
+        activeTab={activeTab}
+        onTabPress={(key) => setActiveTab(key)}
       />
+      
 
-      {/* Search Results */}
-      <SearchResultsList 
-        searchParams={searchParams} 
-        onRefresh={handleRefresh}
-        onDataChange={handleDataChange}
-        handleClearFilters={handleClearFilters}
-      />
+      {activeTab === 'listings'? 
+        <SearchResultsList 
+          searchParams={searchParams} 
+          onDataChange={handleDataChange}
+          handleClearFilters={handleClearFilters}
+        />
+      :  <UserSearchResults query={currentSearchQuery} />}
 
       {/* Sort Bottom Sheet */}
       <SelectBottomSheet

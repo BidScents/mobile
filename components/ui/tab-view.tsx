@@ -1,6 +1,6 @@
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import * as Haptics from 'expo-haptics';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useContext } from 'react';
 import { Animated, LayoutChangeEvent } from 'react-native';
 import { Text, View, XStack } from 'tamagui';
 import { useThemeColors } from '../../hooks/use-theme-colors';
@@ -40,7 +40,7 @@ export default function TabView({
   const [containerWidth, setContainerWidth] = useState(0);
   const [loadedTabs, setLoadedTabs] = useState<Set<string>>(new Set([initialTab || tabs[0]?.key || '']));
 
-  const tabBarHeight = useBottomTabBarHeight();
+  const tabBarHeight = useContext(BottomTabBarHeightContext) || 0;
   const colors = useThemeColors();
   
   // Animation values for the indicator
