@@ -125,16 +125,15 @@ export function AnimatedTabHeader({
             flex={1}
             alignItems="center"
             onLayout={(event) => handleTabLayout(tab.key, event)}
+            onPress={() => handleTabPress(tab.key)}
           >
             <Text
               fontSize={fontSize}
               fontWeight={fontWeight}
               color={activeTabKey === tab.key ? '$foreground' : '$mutedForeground'}
-              onPress={() => handleTabPress(tab.key)}
               paddingVertical="$2"
               textAlign="center"
               lineHeight="$9"
-              hitSlop={20}
             >
               {tab.title}
             </Text>

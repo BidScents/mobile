@@ -11,7 +11,6 @@ import { SearchEmptyState } from './search-empty-state';
 
 interface SearchResultsListProps {
   searchParams: SearchRequest;
-  onRefresh?: () => void;
   onDataChange?: (data: { totalFound: number; isLoading: boolean; hasError: boolean }) => void;
   handleClearFilters?: () => void;
 }
@@ -23,7 +22,6 @@ const GAP_SIZE = 12; // Same as homepage $3 gap
 
 export const SearchResultsList = React.memo(function SearchResultsList({
   searchParams,
-  onRefresh,
   onDataChange,
   handleClearFilters
 }: SearchResultsListProps) {
@@ -73,9 +71,8 @@ export const SearchResultsList = React.memo(function SearchResultsList({
 
   // Handle refresh
   const handleRefresh = useCallback(() => {
-    onRefresh?.();
     refetch();
-  }, [refetch, onRefresh]);
+  }, [refetch]);
 
   // Render listing item
   const renderListingItem = useCallback(({ item, index }: { item: any, index: number }) => {
@@ -195,7 +192,7 @@ export const SearchResultsList = React.memo(function SearchResultsList({
 
   // Results list
   return (
-    <View flex={1}>
+    <View>
       <LegendList
         data={flatListings}
         renderItem={renderListingItem}
