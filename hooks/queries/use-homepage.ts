@@ -14,10 +14,13 @@ export const useHomepage = () => {
 
 export const useUserSearch = (query: string) => {
     return useQuery({
-        queryKey: queryKeys.userSearch,
+        queryKey: queryKeys.userSearch(query),
         queryFn: () => HomepageService.searchUsersV1HomepageUsersGet(query),
-        staleTime: 60 * 1000,
+        staleTime: 2 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
         retry: 2,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
     })
 }

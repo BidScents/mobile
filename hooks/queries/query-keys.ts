@@ -7,7 +7,7 @@ import {
 
 export const queryKeys = {
   homepage: ['homepage'] as const,
-  userSearch: ['userSearch'] as const,
+  userSearch: (query: string) => ['userSearch', query] as const,
   
   listings: {
     all: ['listings'] as const,
