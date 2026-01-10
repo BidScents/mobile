@@ -26,7 +26,7 @@ export function FileMessage({
         />
         {content.caption && (
           <View paddingVertical="$1" paddingHorizontal="$2">
-            <Text fontSize="$4" color="$foreground" marginTop="$2">
+            <Text fontSize="$4" color="$foreground" marginTop="$2" userSelect="text">
               {content.caption}
             </Text>
           </View>
@@ -51,6 +51,7 @@ export function FileMessage({
             fontWeight="500"
             color="$foreground"
             numberOfLines={1}
+            userSelect="text"
           >
             {content.file_name}
           </Text>
@@ -60,7 +61,7 @@ export function FileMessage({
         </View>
       </XStack>
       {content.caption && (
-        <Text fontSize="$3" color="$foreground" marginTop="$2">
+        <Text fontSize="$3" color="$foreground" marginTop="$2" userSelect="text">
           {content.caption}
         </Text>
       )}

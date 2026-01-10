@@ -89,12 +89,14 @@ export function ActionMessage({ content, isCurrentUser, messageId, isBuyer, mess
             fontSize="$5"
             fontWeight="600"
             color="$foreground"
+            userSelect="text"
           >
             {content.listing?.name || "Transaction Initiated"}
           </Text>
           <Text
             fontSize="$4"
             color="$foreground"
+            userSelect="text"
           >
             {content.quantity}x at {currency} {content.unit_price / 100} = {currency} {totalAmount / 100} {/* Convert back from cents */}
           </Text>

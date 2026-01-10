@@ -89,6 +89,7 @@ export function TextMessage({ content, isCurrentUser, onSellThisPress }: TextMes
             fontSize="$4"
             color="$foreground"
             lineHeight="$2"
+            userSelect="text"
           >
             {content.text}
           </Text>
@@ -106,6 +107,7 @@ export function TextMessage({ content, isCurrentUser, onSellThisPress }: TextMes
         fontSize="$4"
         color="$foreground"
         lineHeight="$2"
+        userSelect="text"
       >
         {content.text}
       </Text>

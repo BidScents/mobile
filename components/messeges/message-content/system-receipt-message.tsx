@@ -71,6 +71,7 @@ export function SystemReceiptMessage({ content, isBuyer, messageId, message }: S
           color="$foreground"
           flex={1}
           minWidth="200"
+          userSelect="text"
         >
           {isBuyer 
             ? `You have purchased ${content.listing?.name || 'this item'}, please confirm when you receive the item`

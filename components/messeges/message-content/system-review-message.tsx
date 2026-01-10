@@ -40,6 +40,7 @@ export function SystemReviewMessage({ content, isBuyer, messageId, message }: Sy
             color="$foreground"
             flex={1}
             minWidth="200"
+            userSelect="text"
           >
             {content.is_active ? "Waiting for buyer to submit review" : "Buyer has submitted review"}
           </Text>
@@ -139,6 +140,7 @@ export function SystemReviewMessage({ content, isBuyer, messageId, message }: Sy
           fontWeight="500"
           color="$foreground"
           textAlign="center"
+          userSelect="text"
         >
           Review submitted, thank you!
         </Text>
