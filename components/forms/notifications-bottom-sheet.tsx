@@ -46,9 +46,9 @@ export const NotificationsBottomSheet = forwardRef<NotificationsBottomSheetMetho
           >
             Notifications
           </Text>
-          <View onPress={() => {bottomSheetRef.current?.dismiss()}} backgroundColor="$muted" padding="$1.5" borderRadius="$10">
+          {/* <View onPress={() => {bottomSheetRef.current?.dismiss()}} backgroundColor="$muted" padding="$1.5" borderRadius="$10">
             <ThemedIonicons name="close" size={20} themeColor="foreground" />
-          </View>
+          </View> */}
         </XStack>
         <YStack marginBottom="$4">
           {/* Topmost notification */}
@@ -125,7 +125,7 @@ export const NotificationsBottomSheet = forwardRef<NotificationsBottomSheetMetho
         borderRadius="$6"
         onPress={handlePress}
         >
-          Allow Notifications
+          Continue
         </Button>
       </YStack>
     </BottomSheet>
