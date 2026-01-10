@@ -1,3 +1,6 @@
+import { useListingDetail } from "@/hooks/queries/use-listing";
+import { useChatInput } from "@/hooks/use-chat-input";
+import { useTransactionActions } from "@/hooks/use-transaction-actions";
 import * as Haptics from 'expo-haptics';
 import { useRef } from "react";
 import { Keyboard } from "react-native";
@@ -5,12 +8,9 @@ import { Input, XStack, YStack } from "tamagui";
 import { ImagePickerBottomSheet, ImagePickerBottomSheetMethods } from "../forms/image-picker-bottom-sheet";
 import { TransactionBottomSheet } from "../forms/transaction-bottom-sheet";
 import { ImagePreview } from "./chat-input-bar/image-preview";
-import { ListingPreview } from "./chat-input-bar/listing-preview";
 import { InputActions } from "./chat-input-bar/input-actions";
+import { ListingPreview } from "./chat-input-bar/listing-preview";
 import { SendButton } from "./chat-input-bar/send-button";
-import { useChatInput } from "@/hooks/use-chat-input";
-import { useTransactionActions } from "@/hooks/use-transaction-actions";
-import { useListingDetail } from "@/hooks/queries/use-listing";
 
 interface ChatInputBarProps {
   id: string;
@@ -87,7 +87,9 @@ export const ChatInputBar = ({ id, referenceListingId }: ChatInputBarProps) => {
             onSubmitEditing={selectedImages.length > 0 ? sendImageMessage : sendTextMessage}
             flex={1}
             borderRadius="$6"
-            height="$4"
+            minHeight={45}
+            maxHeight={150}
+            multiline
             fontSize="$5"
             borderWidth={0}
             backgroundColor="$muted"
