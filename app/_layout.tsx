@@ -5,6 +5,7 @@
  * Manages font loading, API configuration, and Supabase session management.
  */
 
+import { ForceUpdateModal } from "@/components/ui/force-update-modal";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { supabase } from "@/lib/supabase";
 import { handleNotificationNavigation } from "@/services/notification-navigation";
@@ -23,6 +24,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import config from "tamagui.config";
+import { useCheckForUpdate } from "../hooks/use-check-for-update";
 import { useThemeSettings } from "../hooks/use-theme-settings";
 import { AuthProvider } from "../providers/auth-provider";
 import { MessagingProvider } from "../providers/messaging-provider";
@@ -51,6 +53,9 @@ export default function RootLayout() {
 
   // Initialize theme settings on app startup to load saved preferences
   useThemeSettings();
+  
+  // Check for forced updates
+  const { isUpdateRequired, storeUrl } = useCheckForUpdate();
 
   const [fontsLoaded] = useFonts(
     Platform.OS === "android" ? ANDROID_FONTS : {}
@@ -292,6 +297,7 @@ export default function RootLayout() {
                     <BottomSheetModalProvider>
                       <AuthProvider>
                         {routes()}
+                        <ForceUpdateModal visible={isUpdateRequired} storeUrl={storeUrl} />
                         <LoadingOverlay />
                       </AuthProvider>
                     </BottomSheetModalProvider>
