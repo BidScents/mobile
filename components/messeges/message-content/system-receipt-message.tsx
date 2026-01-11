@@ -33,7 +33,7 @@ export function SystemReceiptMessage({ content, isBuyer, messageId, message }: S
 
     Alert.alert(
       "Confirm receipt",
-      "Are you sure you have received the item?",
+      "Are you sure you have received the item and are satisfied with the product?",
       [{
         text: "Cancel",
         onPress: () => {
