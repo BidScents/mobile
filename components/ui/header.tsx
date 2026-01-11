@@ -1,9 +1,13 @@
+import { ImageZoom } from "@likashefqet/react-native-image-zoom";
 import { BlurView } from "expo-blur";
-import React from "react";
+import React, { useState } from "react";
 import {
   Animated,
   ImageBackground,
+  Modal,
+  Pressable,
   StyleSheet,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View } from "tamagui";
@@ -38,6 +42,9 @@ export default function Header({
   rightIconPress?: () => void;
 }) {
   const colors = useThemeColors();
+  const [isModalVisible, setModalVisible] = useState(false);
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
   return (
     <>
       {/* Back button */}
@@ -115,40 +122,83 @@ export default function Header({
       </Animated.View>
 
       {/* Banner */}
-      <AnimatedImageBackground
-        source={{
-          uri: profile_banner_uri,
-        }}
+      <Pressable
+        onPress={() => setModalVisible(true)}
         style={{
           position: "absolute",
           left: 0,
           right: 0,
           height: header_height_expanded + header_height_narrowed,
-          transform: [
-            {
-              scale: scrollY.interpolate({
-                inputRange: [-200, 0],
-                outputRange: [5, 1],
-                extrapolateLeft: "extend",
-                extrapolateRight: "clamp",
-              }),
-            },
-          ],
+          zIndex: 0,
         }}
       >
-        <AnimatedBlurView
-          tint={colors.blurTint as any}
-          intensity={80}
-          style={{
-            ...StyleSheet.absoluteFillObject,
-            zIndex: 2,
-            opacity: scrollY.interpolate({
-              inputRange: [-50, 0, 50, 100],
-              outputRange: [1, 0, 0, 1],
-            }),
+        <AnimatedImageBackground
+          source={{
+            uri: profile_banner_uri,
           }}
-        />
-      </AnimatedImageBackground>
+          style={{
+            width: "100%",
+            height: "100%",
+            transform: [
+              {
+                scale: scrollY.interpolate({
+                  inputRange: [-200, 0],
+                  outputRange: [5, 1],
+                  extrapolateLeft: "extend",
+                  extrapolateRight: "clamp",
+                }),
+              },
+            ],
+          }}
+        >
+          <AnimatedBlurView
+            tint={colors.blurTint as any}
+            intensity={80}
+            style={{
+              ...StyleSheet.absoluteFillObject,
+              zIndex: 2,
+              opacity: scrollY.interpolate({
+                inputRange: [-50, 0, 50, 100],
+                outputRange: [1, 0, 0, 1],
+              }),
+            }}
+          />
+        </AnimatedImageBackground>
+      </Pressable>
+
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+        animationType="fade"
+      >
+        <View flex={1} backgroundColor="$background">
+          <ImageZoom
+            uri={profile_banner_uri}
+            minScale={1}
+            maxScale={5}
+            doubleTapScale={3}
+            isSingleTapEnabled
+            isDoubleTapEnabled
+            style={{ width: screenWidth, height: screenHeight }}
+            resizeMode="contain"
+          />
+          <Pressable
+            onPress={() => setModalVisible(false)}
+            style={{
+              position: "absolute",
+              top: insets.top + 10,
+              right: 20,
+              zIndex: 1,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              borderRadius: 20,
+              padding: 5,
+            }}
+          >
+            <ThemedIonicons name="close" size={20} color="$foreground" />
+          </Pressable>
+        </View>
+      </Modal>
     </>
   );
 }
