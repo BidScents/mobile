@@ -1,22 +1,19 @@
+import FastImage from "@d11/react-native-fast-image";
 import { ImageZoom } from "@likashefqet/react-native-image-zoom";
 import { BlurView } from "expo-blur";
 import React, { useState } from "react";
 import {
   Animated,
-  ImageBackground,
   Modal,
   Pressable,
   StyleSheet,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View } from "tamagui";
 import { useThemeColors } from "../../hooks/use-theme-colors";
 import { BlurBackButton } from "./blur-back-button";
 import { ThemedIonicons } from "./themed-icons";
-
-const AnimatedImageBackground =
-  Animated.createAnimatedComponent(ImageBackground);
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -38,7 +35,7 @@ export default function Header({
   header_height_narrowed: number;
   name: string;
   username: string;
-  rightIcon?: keyof typeof Ionicons.glyphMap;
+  rightIcon?: any;
   rightIconPress?: () => void;
 }) {
   const colors = useThemeColors();
@@ -132,10 +129,7 @@ export default function Header({
           zIndex: 0,
         }}
       >
-        <AnimatedImageBackground
-          source={{
-            uri: profile_banner_uri,
-          }}
+        <Animated.View
           style={{
             width: "100%",
             height: "100%",
@@ -151,6 +145,14 @@ export default function Header({
             ],
           }}
         >
+          <FastImage
+            source={{
+              uri: profile_banner_uri,
+              priority: FastImage.priority.high,
+            }}
+            style={StyleSheet.absoluteFill}
+            resizeMode={FastImage.resizeMode.cover}
+          />
           <AnimatedBlurView
             tint={colors.blurTint as any}
             intensity={80}
@@ -163,7 +165,7 @@ export default function Header({
               }),
             }}
           />
-        </AnimatedImageBackground>
+        </Animated.View>
       </Pressable>
 
       <Modal
@@ -194,6 +196,7 @@ export default function Header({
               borderRadius: 20,
               padding: 5,
             }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <ThemedIonicons name="close" size={20} color="$foreground" />
           </Pressable>
