@@ -132,6 +132,7 @@ export function ImageCarousel({
               borderRadius: 20,
               padding: 5,
             }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <ThemedIonicons name="close" size={20} color="$foreground" />
           </Pressable>

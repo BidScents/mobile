@@ -46,7 +46,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       {hasValidUrl && (
         <Modal
           visible={isModalVisible}
-          transparent={true}
+          backdropColor={colors.background}
           onRequestClose={() => setModalVisible(false)}
           animationType="fade"
         >
@@ -75,6 +75,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
                 borderRadius: 20,
                 padding: 5,
               }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <ThemedIonicons name="close" size={20} color="$foreground" />
             </Pressable>
