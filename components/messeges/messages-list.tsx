@@ -1,11 +1,12 @@
 import { useMessages } from "@/hooks/queries/use-messages";
-import { ConversationResponse, ConversationType, MessageResData, MessageType } from "@bid-scents/shared-sdk";
+import { ConversationResponse, ConversationType, MessageActionType, MessageResData, MessageType, RichConfirmReceiptActionContent, useAuthStore } from "@bid-scents/shared-sdk";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useMessagingContext } from "providers/messaging-provider";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { Text, View, YStack } from "tamagui";
 import { EmptyChatOnboarding } from "./empty-chat-onboarding";
+import { SystemReceiptMessage } from "./message-content/system-receipt-message";
 import { MessageItem } from "./message-item";
 import { ScrollLoadingIndicator } from "./scroll-loading-indicator";
 import { ScrollToBottomButton } from "./scroll-to-bottom-button";
@@ -20,10 +21,10 @@ export function MessagesList({ conversation, onSellThisPress }: MessagesListProp
   const listRef = useRef<any>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const { getTypingUsers } = useMessagingContext();
+  const { user } = useAuthStore();
 
   const typingUsers = getTypingUsers(conversation.id);
   
-  // Get infinite query for messages - automatically seeded with conversation data
   const {
     data,
     hasNextPage,
@@ -35,6 +36,42 @@ export function MessagesList({ conversation, onSellThisPress }: MessagesListProp
   
   // Flatten all pages into a single array
   const allMessages = data?.pages.flat() || [];
+
+  const activeStickyMessage = useMemo(() => {
+    return allMessages.find((message) => {
+      if (!message.content || !('is_active' in message.content) || !(message.content as any).is_active) return false;
+
+      const isSystemSender = message.sender?.id === "00000000-0000-0000-0000-000000000000";
+      
+      if (isSystemSender) {
+        const content = message.content as RichConfirmReceiptActionContent;
+        return content.action_type === MessageActionType.CONFIRM_RECEIPT;
+      }
+
+      return false;
+    });
+  }, [allMessages]);
+
+  const renderStickyMessage = useCallback(() => {
+    if (!activeStickyMessage) return null;
+
+    const isSystemSender = activeStickyMessage.sender?.id === "00000000-0000-0000-0000-000000000000";
+    
+    if (isSystemSender) {
+      const isBuyerSystem = (activeStickyMessage.content as RichConfirmReceiptActionContent).buyer_id === user?.id;
+      return (
+        <SystemReceiptMessage
+          content={activeStickyMessage.content as RichConfirmReceiptActionContent}
+          isBuyer={isBuyerSystem}
+          messageId={activeStickyMessage.id}
+          message={activeStickyMessage}
+          isSticky={true}
+        />
+      );
+    }
+    
+    return null;
+  }, [activeStickyMessage, user?.id]);
 
   // Handle loading more messages (FlashList onEndReached)
   const handleEndReached = useCallback(() => {
@@ -128,6 +165,7 @@ export function MessagesList({ conversation, onSellThisPress }: MessagesListProp
 
   return (
     <View flex={1}>
+      {renderStickyMessage()}
       <ScrollLoadingIndicator visible={showLoadingIndicator} />
       <AnimatedFlashList
         ref={listRef}
