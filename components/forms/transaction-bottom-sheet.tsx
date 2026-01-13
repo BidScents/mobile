@@ -307,7 +307,7 @@ export const TransactionBottomSheet = forwardRef<
               <Text fontSize="$4" color="$mutedForeground" textAlign="center" marginBottom="$4">
                 You don&apos;t have any active listings yet. Create your first listing to start selling.
               </Text>
-              <Button variant="primary" onPress={() => router.push('/(screens)/add-listing')}>
+              <Button variant="primary" onPress={() => {router.push('/(screens)/add-listing'); bottomSheetRef.current?.dismiss();}}>
                 Create Listing
               </Button>
             </View>
@@ -421,6 +421,30 @@ export const TransactionBottomSheet = forwardRef<
           </XStack>
         </YStack>
       )}
+
+      <XStack
+        backgroundColor="$blue2"
+        borderRadius="$6"
+        padding="$3"
+        borderWidth={1}
+        borderColor="$blue6"
+        alignItems="center"
+        gap="$2"
+      >
+        <ThemedIonicons
+          name="information-circle-outline"
+          size={20}
+          color="$blue11"
+        />
+        <Text
+          fontSize="$2"
+          color="$blue11"
+          textAlign="left"
+          fontWeight="500"
+        >
+          Add shipping to the price if agreed with the buyer.
+        </Text>
+      </XStack>
 
       {/* Form Inputs */}
       <YStack gap="$4">
