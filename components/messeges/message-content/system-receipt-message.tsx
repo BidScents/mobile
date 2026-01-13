@@ -130,7 +130,7 @@ export function SystemReceiptMessage({ content, isBuyer, messageId, message, isS
           {isBuyer 
             ? `You have purchased ${content.listing?.name || 'this item'}, please confirm when you receive the item`
             : content.is_active 
-              ? "Once Buyer confirms receipt, funds will be transfered over"
+              ? "Payment successful! Once Buyer confirms receipt, funds will be transfered over"
               : `Buyer has confirmed receipt of ${content.listing?.name || 'this item'}. Funds will be transfered over`}
         </Text>
 
