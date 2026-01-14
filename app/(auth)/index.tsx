@@ -1,6 +1,7 @@
 import { LoginBottomSheet } from '@/components/auth/login-bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
+import { useIntro } from '@/hooks/use-intro'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { router } from 'expo-router'
 import LottieView from 'lottie-react-native'
@@ -9,10 +10,15 @@ import { H1, Text, YStack } from 'tamagui'
 
 export default function WelcomeScreen() {
   const loginSheetRef = useRef<BottomSheetModalMethods>(null)
+  const { hasSeenIntro, isLoading: isIntroLoading } = useIntro();
 
   const handleGetStarted = useCallback(() => {
-    loginSheetRef.current?.present()
-  }, [])
+    if (!isIntroLoading && hasSeenIntro === false) {
+      router.push('/welcome');
+    } else {
+      loginSheetRef.current?.present();
+    }
+  }, [isIntroLoading, hasSeenIntro]);
 
   return (
     <Container backgroundColor="$background" variant="padded">

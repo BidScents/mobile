@@ -265,6 +265,7 @@ export default function RootLayout() {
         {/* Unauthenticated routes */}
         <Stack.Protected guard={!isAuthenticated}>
           <Stack.Screen name="(auth)" />
+          <Stack.Screen name="welcome" />
         </Stack.Protected>
 
         {/* Authenticated and onboarded (main app) */}
@@ -298,7 +299,7 @@ export default function RootLayout() {
                     <BottomSheetModalProvider>
                       <AuthProvider>
                         {routes()}
-                        <AnnouncementModal />
+                        {isAuthenticated && <AnnouncementModal />}
                         <ForceUpdateModal visible={isUpdateRequired} storeUrl={storeUrl} />
                         <LoadingOverlay />
                       </AuthProvider>
