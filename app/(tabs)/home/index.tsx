@@ -15,7 +15,7 @@ import * as Notifications from 'expo-notifications'
 import { router } from 'expo-router'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Dimensions } from 'react-native'
-import { ScrollView, Text, XStack, YStack } from 'tamagui'
+import { ScrollView, Text, View, XStack, YStack } from 'tamagui'
 
 const screenWidth = Dimensions.get('window').width
 const cardWidth = (screenWidth - 32 - 12) / 2; // 32 for padding, 12 for gap
@@ -277,16 +277,18 @@ export default function Homepage() {
 
   return (
     <Container
-      variant="padded"
+      variant="fullscreen"
       safeArea={false}
       backgroundColor="$background"
     >
+      <View paddingHorizontal="$4">
+
       <XStack pb="$2" width="100%" >
         <SearchBar 
           placeholder="Search listings..." 
           navigateToResults={true}
           editable={true}
-        />
+          />
       </XStack>
       <LegendList
         data={feedData}
@@ -304,8 +306,9 @@ export default function Homepage() {
         }}
         onEndReachedThreshold={0.3}
         contentContainerStyle={{ paddingBottom: tabbarHeight }}
-      />
+        />
       <NotificationsBottomSheet ref={notificationsBottomSheetRef} />
+      </View>
     </Container>
   )
 }
