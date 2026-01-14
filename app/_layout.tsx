@@ -18,6 +18,7 @@ import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import { router, Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { Alert, Platform, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -35,6 +36,9 @@ import {
   handleNoSession,
   setupAuthStateListener,
 } from "../utils/auth-events";
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 const ANDROID_FONTS = {
   "Roboto-Light": require("../assets/fonts/Roboto-Light.ttf"),
@@ -258,6 +262,9 @@ export default function RootLayout() {
   if (!fontsLoaded || !isAppReady) {
     return null;
   }
+  
+  // Hide splash screen when resources are loaded
+  SplashScreen.hideAsync();
 
   const routes = () => {
     return (
