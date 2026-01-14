@@ -5,6 +5,7 @@
  * Manages font loading, API configuration, and Supabase session management.
  */
 
+import { AnnouncementModal } from "@/components/announcements/announcement-modal";
 import { ForceUpdateModal } from "@/components/ui/force-update-modal";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { supabase } from "@/lib/supabase";
@@ -297,6 +298,7 @@ export default function RootLayout() {
                     <BottomSheetModalProvider>
                       <AuthProvider>
                         {routes()}
+                        <AnnouncementModal />
                         <ForceUpdateModal visible={isUpdateRequired} storeUrl={storeUrl} />
                         <LoadingOverlay />
                       </AuthProvider>
