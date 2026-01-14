@@ -70,6 +70,12 @@ export default function ProfileLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="welcome"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
