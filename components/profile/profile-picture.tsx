@@ -4,6 +4,7 @@ import { ImageZoom } from "@likashefqet/react-native-image-zoom";
 import React, { useState } from 'react';
 import { Modal, Pressable, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View } from "tamagui";
 import { useThemeColors } from '../../hooks/use-theme-colors';
 
 interface ProfilePictureProps {
@@ -64,21 +65,21 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
               style={{ width: screenWidth, height: screenHeight }}
               resizeMode="contain"
             />
-            <Pressable
+            <View
               onPress={() => setModalVisible(false)}
+              backgroundColor="$background"
               style={{
                 position: "absolute",
                 top: insets.top + 10,
                 right: 20,
                 zIndex: 1,
-                backgroundColor: "rgba(0,0,0,0.5)",
                 borderRadius: 20,
                 padding: 5,
               }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <ThemedIonicons name="close" size={20} color="$foreground" />
-            </Pressable>
+              <ThemedIonicons name="close" size={24} color="$foreground" />
+            </View>
           </Pressable>
         </Modal>
       )}
