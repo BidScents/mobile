@@ -285,7 +285,7 @@ export default function Homepage() {
 
       <XStack pb="$2" width="100%" >
         <SearchBar 
-          placeholder="Search listings..." 
+          placeholder="Search listings and users..." 
           navigateToResults={true}
           editable={true}
           />

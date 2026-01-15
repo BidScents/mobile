@@ -67,7 +67,7 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
           />
         </XStack>
         <SearchBar
-          placeholder="Search listings..."
+          placeholder="Search for listings and users..."
           initialValue={currentSearchQuery}
           onSearch={onSearchChange}
           onSearchSubmit={onSearchSubmit}
