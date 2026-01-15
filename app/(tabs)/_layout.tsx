@@ -96,9 +96,9 @@ export default function TabsLayout() {
           tabBarInactiveTintColor: colors.mutedForeground,
           tabBarStyle: {
             borderTopColor: colors.muted,
-            paddingTop: 8,
+            paddingTop: 6,
             backgroundColor: colors.background,
-            height: 80,
+            height: 75,
           },
         }}
         screenListeners={{
