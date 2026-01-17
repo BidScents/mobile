@@ -5,6 +5,8 @@
  * Manages font loading, API configuration, and Supabase session management.
  */
 
+import { AnnouncementModal } from "@/components/announcements/announcement-modal";
+import { ForceUpdateModal } from "@/components/ui/force-update-modal";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { supabase } from "@/lib/supabase";
 import { handleNotificationNavigation } from "@/services/notification-navigation";
@@ -16,6 +18,7 @@ import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import { router, Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { Alert, Platform, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -23,6 +26,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import config from "tamagui.config";
+import { useCheckForUpdate } from "../hooks/use-check-for-update";
 import { useThemeSettings } from "../hooks/use-theme-settings";
 import { AuthProvider } from "../providers/auth-provider";
 import { MessagingProvider } from "../providers/messaging-provider";
@@ -32,6 +36,9 @@ import {
   handleNoSession,
   setupAuthStateListener,
 } from "../utils/auth-events";
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 const ANDROID_FONTS = {
   "Roboto-Light": require("../assets/fonts/Roboto-Light.ttf"),
@@ -51,6 +58,9 @@ export default function RootLayout() {
 
   // Initialize theme settings on app startup to load saved preferences
   useThemeSettings();
+  
+  // Check for forced updates
+  const { isUpdateRequired, storeUrl } = useCheckForUpdate();
 
   const [fontsLoaded] = useFonts(
     Platform.OS === "android" ? ANDROID_FONTS : {}
@@ -252,6 +262,9 @@ export default function RootLayout() {
   if (!fontsLoaded || !isAppReady) {
     return null;
   }
+  
+  // Hide splash screen when resources are loaded
+  SplashScreen.hideAsync();
 
   const routes = () => {
     return (
@@ -292,6 +305,8 @@ export default function RootLayout() {
                     <BottomSheetModalProvider>
                       <AuthProvider>
                         {routes()}
+                        {isAuthenticated && <AnnouncementModal />}
+                        <ForceUpdateModal visible={isUpdateRequired} storeUrl={storeUrl} />
                         <LoadingOverlay />
                       </AuthProvider>
                     </BottomSheetModalProvider>

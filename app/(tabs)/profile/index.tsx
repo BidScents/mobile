@@ -63,9 +63,6 @@ export default function ProfileScreen() {
   const { user } = useAuthStore();
   const legalBottomSheetRef = useRef<LegalDocumentsBottomSheetMethods>(null);
 
-  const {session} = useAuthStore();
-  // console.log(session);
-
   const handlePress = (item: { src?: string; action?: string }) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
@@ -93,7 +90,7 @@ export default function ProfileScreen() {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             handleSignOutUI();
             setTimeout(() => {
-              router.replace("/(tabs)");
+              router.replace("/(tabs)/home");
             }, 1000);
           },
         },

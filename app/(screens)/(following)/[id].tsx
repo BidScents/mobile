@@ -19,7 +19,6 @@ export default function FollowingScreen() {
   // Flatten the paginated data with memoization for stable reference
   const flatUsers = useMemo(() => {
     const users = followingQuery.data?.pages.flatMap(page => page.users) || [];
-    console.log('Following flatUsers updated:', users.length, users);
     return users;
   }, [followingQuery.data]);
 

@@ -1,6 +1,6 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
-import { createEmptyFilters, getActiveFiltersCount } from "@/utils/search.utils";
+import { createEmptyFilters } from "@/utils/search.utils";
 import { FilterParameter, ListingBoxCondition, ListingCategory, ListingType } from "@bid-scents/shared-sdk";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import * as Haptics from "expo-haptics";
@@ -62,8 +62,6 @@ export const SearchFilterBottomSheet = forwardRef<
     resetFilters(clearedFilters);
     onFiltersChange(clearedFilters);
   };
-
-  const activeFiltersCount = getActiveFiltersCount(localFilters);
 
   return (
     <BottomSheet

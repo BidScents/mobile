@@ -40,14 +40,14 @@ export function SearchBar({
   initialValue = '',
   includeSafeArea = true,
 }: SearchBarProps) {
-  const [searchQuery, setSearchQuery] = useState(initialValue);
+  const [searchQuery, setSearchQuery] = useState(initialValue === '*' ? '' : initialValue);
   const [isFocused, setIsFocused] = useState(false);
   const insets = useSafeAreaInsets();
   
   const { searchBarFlex, cancelButtonOpacity, animateToFocused, animateToBlurred } = useSearchBarAnimation();
 
   useEffect(() => {
-    setSearchQuery(initialValue);
+    setSearchQuery(initialValue === '*' ? '' : initialValue);
   }, [initialValue]);
 
   const handleSearchChange = (text: string) => {

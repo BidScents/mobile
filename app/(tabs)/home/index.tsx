@@ -4,6 +4,8 @@ import { ListingCardSkeleton } from '@/components/suspense/listing-card-skeleton
 import { Container } from '@/components/ui/container'
 import { SearchBar } from '@/components/ui/search-bar'
 import { useHomepage } from '@/hooks/queries/use-homepage'
+import { useSearchListings } from '@/hooks/queries/use-listing'
+import { createEmptyFilters } from '@/utils/search.utils'
 import type { ListingCard as ListingCardType } from '@bid-scents/shared-sdk'
 import { ListingType, useAuthStore } from '@bid-scents/shared-sdk'
 import { LegendList } from "@legendapp/list"
@@ -13,7 +15,7 @@ import * as Notifications from 'expo-notifications'
 import { router } from 'expo-router'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Dimensions } from 'react-native'
-import { ScrollView, Text, XStack, YStack } from 'tamagui'
+import { ScrollView, Text, View, XStack, YStack } from 'tamagui'
 
 const screenWidth = Dimensions.get('window').width
 const cardWidth = (screenWidth - 32 - 12) / 2; // 32 for padding, 12 for gap
@@ -27,6 +29,8 @@ type FeedItem =
   | { type: 'header'; title: string; showViewAll?: boolean }
   | { type: 'featured_grid'; listings: ListingCardType[] }
   | { type: 'horizontal_section'; title: string; listings: ListingCardType[] }
+  | { type: 'infinite_grid_row'; listings: ListingCardType[] }
+  | { type: 'loading_footer' }
   | { type: 'spacer'; height: number }
 
 /**
@@ -34,7 +38,28 @@ type FeedItem =
  * Displays featured listings, auctions, and other content sections
  */
 export default function Homepage() {
-  const { data: homepage, isLoading, refetch } = useHomepage()
+  const { data: homepage, isLoading, refetch: refetchHomepage } = useHomepage()
+  
+  // Infinite scroll setup
+  const searchParams = useMemo(() => ({
+    q: '*',
+    filters: createEmptyFilters(),
+    sort: { field: undefined, descending: true },
+    per_page: 20
+  }), []);
+
+  const { 
+    data: searchData, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage,
+    refetch: refetchSearch 
+  } = useSearchListings(searchParams);
+
+  const infiniteListings = useMemo(() => 
+    searchData?.pages.flatMap(page => page.listings) || [], 
+  [searchData]);
+
   const tabbarHeight = useBottomTabBarHeight();
   const {isAuthenticated} = useAuthStore();
   const notificationsBottomSheetRef = useRef<NotificationsBottomSheetMethods>(null)
@@ -56,14 +81,19 @@ export default function Homepage() {
     checkPermissions();
   }, [isAuthenticated]);
 
-  // Navigation functions for "View All" buttons
-  const handleActiveAuctionsViewAll = useCallback(() => {
+  const handleRefresh = useCallback(() => {
+    refetchHomepage();
+    refetchSearch();
+  }, [refetchHomepage, refetchSearch]);
+
+  const handleViewAll = useCallback((type: ListingType) => {
+    // Placeholder for future implementation
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const params = new URLSearchParams();
     params.append('q', '*');
     
-    const auctionFilter = {
-      listing_types: [ListingType.AUCTION],
+    const filter = {
+      listing_types: [type],
       categories: null,
       min_price: null,
       max_price: null,
@@ -73,35 +103,7 @@ export default function Homepage() {
       seller_ids: null,
     };
     
-    params.append('filters', JSON.stringify(auctionFilter));
-    router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
-  }, []);
-
-  const handleRecentListingsViewAll = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const params = new URLSearchParams();
-    params.append('q', '*');
-    
-    router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
-  }, []);
-
-  const handleRecentSwapsViewAll = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const params = new URLSearchParams();
-    params.append('q', '*');
-    
-    const swapFilter = {
-      listing_types: [ListingType.SWAP],
-      categories: null,
-      min_price: null,
-      max_price: null,
-      min_purchase_year: null,
-      max_purchase_year: null,
-      box_conditions: null,
-      seller_ids: null,
-    };
-    
-    params.append('filters', JSON.stringify(swapFilter));
+    params.append('filters', JSON.stringify(filter));
     router.push(`/(tabs)/home/search-results?${params.toString()}` as any);
   }, []);
 
@@ -126,8 +128,14 @@ export default function Homepage() {
         { type: 'header', title: 'Active Auctions', showViewAll: true },
         { type: 'horizontal_section', title: 'Active Auctions', listings: Array(5).fill({}) as ListingCardType[] },
         { type: 'spacer', height: 20 },
-        { type: 'header', title: 'Recent Listings', showViewAll: true },
-        { type: 'horizontal_section', title: 'Recent Listings', listings: Array(5).fill({}) as ListingCardType[] },
+        { type: 'header', title: 'New', showViewAll: true },
+        { type: 'horizontal_section', title: 'New', listings: Array(5).fill({}) as ListingCardType[] },
+        { type: 'spacer', height: 40 },
+        { type: 'header', title: 'Decant', showViewAll: true },
+        { type: 'horizontal_section', title: 'Decant', listings: Array(5).fill({}) as ListingCardType[] },
+        { type: 'spacer', height: 40 },
+        { type: 'header', title: 'Preowned', showViewAll: true },
+        { type: 'horizontal_section', title: 'Preowned', listings: Array(5).fill({}) as ListingCardType[] },
         { type: 'spacer', height: 40 }
       ]
     }
@@ -143,9 +151,11 @@ export default function Homepage() {
     // Dynamic sections with data
     const sections = [
       { title: 'Active Auctions', data: homepage?.recent_auctions },
-      { title: 'Recent Listings', data: homepage?.recent_listings },
+      { title: 'New', data: homepage?.recent_new },
+      { title: 'Preowned', data: homepage?.recent_preowned },
+      { title: 'Decant', data: homepage?.recent_decant },
       { title: 'From Sellers You Follow', data: homepage?.sellers_you_follow },
-      { title: 'Recent Swaps', data: homepage?.recent_swaps }
+      { title: 'Swaps', data: homepage?.recent_swaps }
     ]
 
     let featuredIndex = 6
@@ -169,9 +179,28 @@ export default function Homepage() {
       }
     })
 
-    items.push({ type: 'spacer', height: 40 })
+    items.push({ type: 'spacer', height: 20 })
+
+    // Infinite Scroll Section
+    if (infiniteListings.length > 0) {
+      items.push({ type: 'header', title: 'All Listings', showViewAll: false });
+      
+      for (let i = 0; i < infiniteListings.length; i += 2) {
+        items.push({ 
+          type: 'infinite_grid_row', 
+          listings: infiniteListings.slice(i, i + 2) 
+        });
+      }
+    }
+
+    if (isFetchingNextPage) {
+      items.push({ type: 'loading_footer' });
+    } else {
+       items.push({ type: 'spacer', height: 20 });
+    }
+
     return items
-  }, [homepage, isLoading])
+  }, [homepage, isLoading, infiniteListings, isFetchingNextPage])
 
   const renderFeedItem = ({ item }: { item: FeedItem }) => {
     switch (item.type) {
@@ -179,11 +208,15 @@ export default function Homepage() {
         const getViewAllHandler = () => {
           switch (item.title) {
             case 'Active Auctions':
-              return handleActiveAuctionsViewAll;
-            case 'Recent Listings':
-              return handleRecentListingsViewAll;
-            case 'Recent Swaps':
-              return handleRecentSwapsViewAll;
+              return () => handleViewAll(ListingType.AUCTION);
+            case 'New':
+              return () => handleViewAll(ListingType.NEW);
+            case 'Decant':
+              return () => handleViewAll(ListingType.DECANT);
+            case 'Preowned':
+              return () => handleViewAll(ListingType.PREOWNED);
+            case 'Swaps':
+              return () => handleViewAll(ListingType.SWAP);
             case 'From Sellers You Follow':
               return handleSellersYouFollowViewAll;
             default:
@@ -214,6 +247,26 @@ export default function Homepage() {
       case 'horizontal_section':
         return <HorizontalListSection listings={item.listings} isLoading={isLoading} />
 
+      case 'infinite_grid_row':
+        return (
+          <XStack gap="$3" justifyContent="space-between" mb="$3">
+            {item.listings.map((listing) => (
+              <YStack key={listing.id} flex={1}>
+                <ListingCard listing={listing} />
+              </YStack>
+            ))}
+            {item.listings.length === 1 && <YStack flex={1} />}
+          </XStack>
+        )
+
+      case 'loading_footer':
+        return (
+          <XStack gap="$3" justifyContent="space-between" mb="$3">
+              <ListingCardSkeleton width={cardWidth} height={cardHeight} />
+              <ListingCardSkeleton width={cardWidth} height={cardHeight} />
+          </XStack>
+        )
+
       case 'spacer':
         return <YStack height={item.height} />
 
@@ -224,16 +277,18 @@ export default function Homepage() {
 
   return (
     <Container
-      variant="padded"
+      variant="fullscreen"
       safeArea={false}
       backgroundColor="$background"
     >
+      <View paddingHorizontal="$4">
+
       <XStack pb="$2" width="100%" >
         <SearchBar 
-          placeholder="Search listings..." 
+          placeholder="Search listings and users..." 
           navigateToResults={true}
           editable={true}
-        />
+          />
       </XStack>
       <LegendList
         data={feedData}
@@ -241,12 +296,19 @@ export default function Homepage() {
         keyExtractor={(item, index) => `${item.type}-${index}`}
         estimatedItemSize={200}
         showsVerticalScrollIndicator={false}
-        onRefresh={refetch}
+        onRefresh={handleRefresh}
         keyboardDismissMode="on-drag"
         recycleItems
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.3}
         contentContainerStyle={{ paddingBottom: tabbarHeight }}
-      />
+        />
       <NotificationsBottomSheet ref={notificationsBottomSheetRef} />
+      </View>
     </Container>
   )
 }

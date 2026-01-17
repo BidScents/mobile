@@ -64,10 +64,11 @@ export default function PendingView() {
 
   const renderEmptyState = () => (
     <View flex={1} alignItems="center" justifyContent="center" padding="$6">
-      <ThemedIonicons
-        name="cube-outline"
-        size={64}
-        color="mutedForeground"
+      <ThemedIonicons 
+        name="cube-outline" 
+        size={64} 
+        color='$mutedForeground' 
+        style={{ marginBottom: 16 }} 
       />
       <Text
         fontSize="$5"

@@ -1,18 +1,19 @@
+import FastImage from "@d11/react-native-fast-image";
+import { ImageZoom } from "@likashefqet/react-native-image-zoom";
 import { BlurView } from "expo-blur";
-import React from "react";
+import React, { useState } from "react";
 import {
   Animated,
-  ImageBackground,
+  Modal,
+  Pressable,
   StyleSheet,
+  useWindowDimensions
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View } from "tamagui";
 import { useThemeColors } from "../../hooks/use-theme-colors";
 import { BlurBackButton } from "./blur-back-button";
 import { ThemedIonicons } from "./themed-icons";
-
-const AnimatedImageBackground =
-  Animated.createAnimatedComponent(ImageBackground);
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -34,10 +35,13 @@ export default function Header({
   header_height_narrowed: number;
   name: string;
   username: string;
-  rightIcon?: keyof typeof Ionicons.glyphMap;
+  rightIcon?: any;
   rightIconPress?: () => void;
 }) {
   const colors = useThemeColors();
+  const [isModalVisible, setModalVisible] = useState(false);
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
   return (
     <>
       {/* Back button */}
@@ -115,40 +119,89 @@ export default function Header({
       </Animated.View>
 
       {/* Banner */}
-      <AnimatedImageBackground
-        source={{
-          uri: profile_banner_uri,
-        }}
+      <Pressable
+        onPress={() => setModalVisible(true)}
         style={{
           position: "absolute",
           left: 0,
           right: 0,
           height: header_height_expanded + header_height_narrowed,
-          transform: [
-            {
-              scale: scrollY.interpolate({
-                inputRange: [-200, 0],
-                outputRange: [5, 1],
-                extrapolateLeft: "extend",
-                extrapolateRight: "clamp",
-              }),
-            },
-          ],
+          zIndex: 0,
         }}
       >
-        <AnimatedBlurView
-          tint={colors.blurTint as any}
-          intensity={80}
+        <Animated.View
           style={{
-            ...StyleSheet.absoluteFillObject,
-            zIndex: 2,
-            opacity: scrollY.interpolate({
-              inputRange: [-50, 0, 50, 100],
-              outputRange: [1, 0, 0, 1],
-            }),
+            width: "100%",
+            height: "100%",
+            transform: [
+              {
+                scale: scrollY.interpolate({
+                  inputRange: [-200, 0],
+                  outputRange: [5, 1],
+                  extrapolateLeft: "extend",
+                  extrapolateRight: "clamp",
+                }),
+              },
+            ],
           }}
-        />
-      </AnimatedImageBackground>
+        >
+          <FastImage
+            source={{
+              uri: profile_banner_uri,
+              priority: FastImage.priority.high,
+            }}
+            style={StyleSheet.absoluteFill}
+            resizeMode={FastImage.resizeMode.cover}
+          />
+          <AnimatedBlurView
+            tint={colors.blurTint as any}
+            intensity={80}
+            style={{
+              ...StyleSheet.absoluteFillObject,
+              zIndex: 2,
+              opacity: scrollY.interpolate({
+                inputRange: [-50, 0, 50, 100],
+                outputRange: [1, 0, 0, 1],
+              }),
+            }}
+          />
+        </Animated.View>
+      </Pressable>
+
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+        animationType="fade"
+      >
+        <View flex={1} backgroundColor="$background">
+          <ImageZoom
+            uri={profile_banner_uri}
+            minScale={1}
+            maxScale={5}
+            doubleTapScale={3}
+            isSingleTapEnabled
+            isDoubleTapEnabled
+            style={{ width: screenWidth, height: screenHeight }}
+            resizeMode="contain"
+          />
+          <View
+            onPress={() => setModalVisible(false)}
+            backgroundColor="$background"
+            style={{
+              position: "absolute",
+              top: insets.top + 10,
+              right: 20,
+              zIndex: 1,
+              borderRadius: 20,
+              padding: 5,
+            }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <ThemedIonicons name="close" size={24} color="$foreground" />
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }

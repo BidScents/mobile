@@ -1,6 +1,9 @@
 import { FavoriteButton } from "@/components/listing/favorite-button";
+import { ThemedIonicons } from "@/components/ui/themed-icons";
+import { ImageZoom } from "@likashefqet/react-native-image-zoom";
 import { Image } from "expo-image";
-import React from "react";
+import React, { useState } from "react";
+import { Modal, Pressable, useWindowDimensions } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import Carousel, {
   ICarouselInstance,
@@ -29,6 +32,10 @@ export function ImageCarousel({
   const ref = React.useRef<ICarouselInstance>(null);
   const progress = useSharedValue<number>(0);
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const onPressPagination = (index: number) => {
     ref.current?.scrollTo({
@@ -41,6 +48,11 @@ export function ImageCarousel({
     });
   };
 
+  const openImage = (index: number) => {
+    setSelectedIndex(index);
+    setModalVisible(true);
+  };
+
   return (
     <View>
       <Carousel
@@ -49,13 +61,15 @@ export function ImageCarousel({
         height={height}
         data={imageUrls || []}
         onProgressChange={progress}
-        renderItem={({ item }) => (
-          <Image
-            source={{
-              uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${item}`,
-            }}
-            style={{ width, height }}
-          />
+        renderItem={({ item, index }) => (
+          <Pressable onPress={() => openImage(index)}>
+            <Image
+              source={{
+                uri: `${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${item}`,
+              }}
+              style={{ width, height }}
+            />
+          </Pressable>
         )}
       />
 
@@ -90,6 +104,40 @@ export function ImageCarousel({
         />
       </View>
 
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+        animationType="fade"
+      >
+        <View flex={1} backgroundColor="$background">
+          <ImageZoom
+            uri={`${process.env.EXPO_PUBLIC_IMAGE_BASE_URL}${imageUrls[selectedIndex]}`}
+            minScale={1}
+            maxScale={5}
+            doubleTapScale={3}
+            isSingleTapEnabled
+            isDoubleTapEnabled
+            style={{ width: screenWidth, height: screenHeight }}
+            resizeMode="contain"
+          />
+          <View
+            onPress={() => setModalVisible(false)}
+            backgroundColor="$background"
+            style={{
+              position: "absolute",
+              top: insets.top + 10,
+              right: 20,
+              zIndex: 1,
+              borderRadius: 20,
+              padding: 5,
+            }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <ThemedIonicons name="close" size={24} color="$foreground" />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

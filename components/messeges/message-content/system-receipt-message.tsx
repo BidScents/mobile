@@ -14,9 +14,10 @@ interface SystemReceiptMessageProps {
   isBuyer: boolean;
   messageId: string;
   message: MessageResData;
+  isSticky?: boolean;
 }
 
-export function SystemReceiptMessage({ content, isBuyer, messageId, message }: SystemReceiptMessageProps) {
+export function SystemReceiptMessage({ content, isBuyer, messageId, message, isSticky }: SystemReceiptMessageProps) {
   const confirmReceipt = useConfirmReceipt();
   const {paymentDetails} = useAuthStore()
 
@@ -33,7 +34,7 @@ export function SystemReceiptMessage({ content, isBuyer, messageId, message }: S
 
     Alert.alert(
       "Confirm receipt",
-      "Are you sure you have received the item?",
+      "Are you sure you have received the item and are satisfied with the product?",
       [{
         text: "Cancel",
         onPress: () => {
@@ -54,6 +55,59 @@ export function SystemReceiptMessage({ content, isBuyer, messageId, message }: S
     
   };
 
+  if (isSticky) {
+    return (
+      <XStack
+        backgroundColor="$background"
+        paddingVertical="$3"
+        paddingHorizontal="$4"
+        width="100%"
+        alignItems="center"
+        justifyContent="space-between"
+        borderBottomWidth={1}
+        borderColor="$borderColor"
+        gap="$3"
+      >
+        <Text
+          fontSize="$3"
+          fontWeight="500"
+          color="$foreground"
+          flex={1}
+          numberOfLines={2}
+        >
+          {isBuyer 
+            ? `Please confirm when you receive ${content.listing?.name || 'the item'}`
+            : "Waiting for buyer to confirm receipt"}
+        </Text>
+
+        {isBuyer && (
+          <Button
+            variant="primary"
+            size="sm"
+            onPress={handleConfirmReceipt}
+            disabled={!content.is_active || confirmReceipt.isPending}
+            height="$3"
+            paddingHorizontal="$3"
+          >
+            {confirmReceipt.isPending ? "..." : "Confirm"}
+          </Button>
+        )}
+
+        {!isBuyer && paymentDetails?.requires_onboarding && (
+          <Button
+            variant="outline"
+            size="sm"
+            onPress={() => router.push('/(tabs)/profile/seller-dashboard')}
+            height="$3"
+            paddingHorizontal="$3"
+          >
+            Onboard
+          </Button>
+        )}
+      </XStack>
+    );
+  }
+
   return (
     <YStack
       backgroundColor="$muted"
@@ -71,11 +125,12 @@ export function SystemReceiptMessage({ content, isBuyer, messageId, message }: S
           color="$foreground"
           flex={1}
           minWidth="200"
+          userSelect="text"
         >
           {isBuyer 
             ? `You have purchased ${content.listing?.name || 'this item'}, please confirm when you receive the item`
             : content.is_active 
-              ? "Once Buyer confirms receipt, funds will be transfered over"
+              ? "Payment successful! Once Buyer confirms receipt, funds will be transfered over"
               : `Buyer has confirmed receipt of ${content.listing?.name || 'this item'}. Funds will be transfered over`}
         </Text>
 

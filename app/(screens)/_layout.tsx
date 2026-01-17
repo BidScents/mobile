@@ -34,6 +34,12 @@ export default function ProfileLayout() {
         }}
       />
       <Stack.Screen
+        name="user/[id]"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="subscription-paywall"
         options={{
           title: "Subscriptions",

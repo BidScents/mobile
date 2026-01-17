@@ -8,11 +8,10 @@ import FastImage from "@d11/react-native-fast-image";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React from "react";
-import { GestureResponderEvent } from "react-native";
 import { Card, Text, XStack, YStack } from "tamagui";
+import { listingTypeOptions } from "types/create-listing-types";
 import { queryKeys } from "../../hooks/queries/query-keys";
 import { seedListingDetailCache } from "../../hooks/queries/use-listing";
-import { Button } from "../ui/button";
 import { CountdownTimer } from "./countdown-timer";
 import { FavoriteButton } from "./favorite-button";
 
@@ -63,25 +62,6 @@ export function ListingCard({
     router.push(`/listing/${listing.id}` as any);
   };
 
-  const handleActionPress = (e: GestureResponderEvent) => {
-    e.stopPropagation(); // Prevent card navigation
-
-    switch (listing.listing_type) {
-      case ListingType.FIXED_PRICE:
-      case ListingType.NEGOTIABLE:
-        router.push(`/chat/${listing.seller.id}` as any);
-        break;
-      case ListingType.AUCTION:
-        router.push(`/listing/${listing.id}?action=bid` as any);
-        break;
-      case ListingType.SWAP:
-        router.push(
-          `/chat/${listing.seller.id}?type=swap&listing=${listing.id}` as any
-        );
-        break;
-    }
-  };
-
   const formatPrice = (price: number): string => {
     return `${currency} ${price.toFixed(0)}`;
   };
@@ -94,11 +74,6 @@ export function ListingCard({
     return `${percentage}% full • ${volume}ml`;
   };
 
-  //   const formatNextBid = (currentBid: number): string => {
-  //     {/* TODO: use listing bid increment */}
-  //     return `${currency} ${(currentBid + 0.5).toFixed(1)}`
-  //   }
-
   const truncateDescription = (
     text: string,
     maxLength: number = 50
@@ -110,7 +85,10 @@ export function ListingCard({
 
   const renderHeader = () => {
     switch (listing.listing_type) {
-      case ListingType.FIXED_PRICE:
+      case ListingType.NEW:
+      case ListingType.PREOWNED:
+      case ListingType.DECANT:
+      case ListingType.SWAP:
         return (
           <XStack
             position="absolute"
@@ -123,24 +101,7 @@ export function ListingCard({
             paddingVertical="$2"
           >
             <Text fontSize="$2" fontWeight="500" color="$foreground">
-              Fixed Price
-            </Text>
-          </XStack>
-        );
-      case ListingType.NEGOTIABLE:
-        return (
-          <XStack
-            position="absolute"
-            top="$2"
-            left="$2"
-            backgroundColor="$muted"
-            alignItems="center"
-            borderRadius="$5"
-            paddingHorizontal="$2"
-            paddingVertical="$2"
-          >
-            <Text fontSize="$2" fontWeight="500" color="$foreground">
-              Negotiable
+              {listingTypeOptions.filter(t => t.value === listing.listing_type)[0].label}
             </Text>
           </XStack>
         );
@@ -171,24 +132,6 @@ export function ListingCard({
           </XStack>
         );
 
-      case ListingType.SWAP:
-        return (
-          <XStack
-            position="absolute"
-            top="$2"
-            left="$2"
-            backgroundColor="$muted"
-            alignItems="center"
-            borderRadius="$5"
-            paddingHorizontal="$2"
-            paddingVertical="$2"
-          >
-            <Text fontSize="$2" fontWeight="500" color="$foreground">
-              Swap
-            </Text>
-          </XStack>
-        );
-
       default:
         return (
           <XStack
@@ -211,8 +154,9 @@ export function ListingCard({
 
   const renderPriceSection = () => {
     switch (listing.listing_type) {
-      case ListingType.FIXED_PRICE:
-      case ListingType.NEGOTIABLE:
+      case ListingType.NEW:
+      case ListingType.PREOWNED:
+      case ListingType.DECANT:
         return (
           <Text fontSize="$3" fontWeight="500" color="$foreground">
             {formatPrice(listing.price)}
@@ -247,56 +191,6 @@ export function ListingCard({
           <Text fontSize="$3" fontWeight="500" color="$foreground">
             {formatPrice(listing.price)}
           </Text>
-        );
-    }
-  };
-
-  const renderActionButton = () => {
-    switch (listing.listing_type) {
-      case ListingType.FIXED_PRICE:
-      case ListingType.NEGOTIABLE:
-        return (
-          <Button
-            size="sm"
-            variant="secondary"
-            onPress={handleActionPress as any}
-          >
-            Contact Seller
-          </Button>
-        );
-
-      case ListingType.AUCTION:
-        return (
-          <Button
-            size="sm"
-            variant="secondary"
-            onPress={handleActionPress as any}
-          >
-            {/* Bid {formatNextBid(listing.current_bid || 0)} */}
-            Bid Now
-          </Button>
-        );
-
-      case ListingType.SWAP:
-        return (
-          <Button
-            size="sm"
-            variant="secondary"
-            onPress={handleActionPress as any}
-          >
-            Swap
-          </Button>
-        );
-
-      default:
-        return (
-          <Button
-            size="sm"
-            variant="secondary"
-            onPress={handleActionPress as any}
-          >
-            Contact Seller
-          </Button>
         );
     }
   };
@@ -367,9 +261,6 @@ export function ListingCard({
           {/* Dynamic price/bid/swap info section */}
           {renderPriceSection()}
         </YStack>
-
-        {/* Dynamic Action Button */}
-        {/* {renderActionButton()} */}
       </YStack>
     </Card>
   );

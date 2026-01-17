@@ -1,10 +1,13 @@
 import { ControlledInput } from "@/components/forms/controlled-input";
-import { EditableImageCarousel, type EditableImageItem } from "@/components/listing/editable-image-carousel";
+import {
+  EditableImageCarousel,
+  type EditableImageItem,
+} from "@/components/listing/editable-image-carousel";
 import { EditListingSkeleton } from "@/components/suspense/edit-listing-skeleton";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemedIonicons } from "@/components/ui/themed-icons";
-import { useUpdateListing } from "@/hooks/queries/use-dashboard";
+import { useDeleteListing, useMarkAsSold, useUpdateListing } from "@/hooks/queries/use-dashboard";
 import { useListingDetail } from "@/hooks/queries/use-listing";
 import { useThemeColors } from "@/hooks/use-theme-colors";
 import {
@@ -12,7 +15,10 @@ import {
   categoryOptions,
   listingTypeOptions,
 } from "@/types/create-listing-types";
-import { ImageUploadConfigs, uploadMultipleImages } from "@/utils/image-upload-service";
+import {
+  ImageUploadConfigs,
+  uploadMultipleImages,
+} from "@/utils/image-upload-service";
 import {
   createListingSchema,
   ListingType,
@@ -31,19 +37,27 @@ import { Text, XStack, YStack } from "tamagui";
 
 export default function ListingEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: listing, isLoading, error, isRefetching } = useListingDetail(id!);
+  const {
+    data: listing,
+    isLoading,
+    error,
+    isRefetching,
+  } = useListingDetail(id!);
   const updateListingMutation = useUpdateListing();
   const { user } = useAuthStore();
   const { showLoading, hideLoading } = useLoadingStore();
   const colors = useThemeColors();
+  const deleteListing = useDeleteListing();
+  const markAsSold = useMarkAsSold();
 
   const [images, setImages] = useState<EditableImageItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
-  const { control, handleSubmit, watch, reset, formState } = useForm<CreateListingFormData>({
-    resolver: zodResolver(createListingSchema),
-    mode: "onChange",
-  });
+  const { control, handleSubmit, watch, reset, formState } =
+    useForm<CreateListingFormData>({
+      resolver: zodResolver(createListingSchema),
+      mode: "onChange",
+    });
 
   const listingType = watch("type");
   const isAuction = listingType === ListingType.AUCTION;
@@ -68,16 +82,20 @@ export default function ListingEditScreen() {
         price: listingData.price,
         starting_price: listing.auction_details?.starting_price,
         bid_increment: listing.auction_details?.bid_increment,
-        ends_at: listing.auction_details?.ends_at ? new Date(listing.auction_details.ends_at).toISOString() : undefined,
+        ends_at: listing.auction_details?.ends_at
+          ? new Date(listing.auction_details.ends_at).toISOString()
+          : undefined,
         batch_code: listingData.batch_code || undefined,
         buy_now_price: listing.auction_details?.buy_now_price || undefined,
         is_extendable: listing.auction_details?.is_extendable || false,
       };
-      
+
       reset(formData);
-      
+
       // Initialize images
-      const existingImages: EditableImageItem[] = (listing.image_urls || []).map(url => ({
+      const existingImages: EditableImageItem[] = (
+        listing.image_urls || []
+      ).map((url) => ({
         uri: url,
         isNew: false,
         originalUrl: url,
@@ -88,14 +106,19 @@ export default function ListingEditScreen() {
 
   // Better change detection using React Hook Form's formState
   const { isDirty, dirtyFields } = formState;
-  
-  
+
   // Check if images have changed
   const originalImageUrls = listing?.image_urls || [];
-  const currentImageUrls = images.filter(img => !img.isNew).map(img => img.originalUrl || img.uri);
-  const hasNewImages = images.some(img => img.isNew);
-  const imagesReordered = JSON.stringify(originalImageUrls) !== JSON.stringify(currentImageUrls);
-  const isImagesChanged = hasNewImages || imagesReordered || originalImageUrls.length !== currentImageUrls.length;
+  const currentImageUrls = images
+    .filter((img) => !img.isNew)
+    .map((img) => img.originalUrl || img.uri);
+  const hasNewImages = images.some((img) => img.isNew);
+  const imagesReordered =
+    JSON.stringify(originalImageUrls) !== JSON.stringify(currentImageUrls);
+  const isImagesChanged =
+    hasNewImages ||
+    imagesReordered ||
+    originalImageUrls.length !== currentImageUrls.length;
 
   // Check if any form field or images have changed
   const isAnyChange = isDirty || isImagesChanged;
@@ -103,33 +126,41 @@ export default function ListingEditScreen() {
   // Helper function to get changed fields only
   const getChangedFields = () => {
     const updateRequest: UpdateListingRequest = {};
-    
+
     // Only include fields that are actually dirty
     if (dirtyFields.name) updateRequest.name = watch("name");
     if (dirtyFields.brand) updateRequest.brand = watch("brand");
-    if (dirtyFields.description) updateRequest.description = watch("description");
+    if (dirtyFields.description)
+      updateRequest.description = watch("description");
     if (dirtyFields.category) updateRequest.category = watch("category");
     if (dirtyFields.volume) updateRequest.volume = watch("volume");
-    if (dirtyFields.remaining_percentage) updateRequest.remaining_percentage = watch("remaining_percentage");
+    if (dirtyFields.remaining_percentage)
+      updateRequest.remaining_percentage = watch("remaining_percentage");
     if (dirtyFields.quantity) updateRequest.quantity = watch("quantity");
-    if (dirtyFields.purchase_year) updateRequest.purchase_year = watch("purchase_year");
-    if (dirtyFields.box_condition) updateRequest.box_condition = watch("box_condition");
+    if (dirtyFields.purchase_year)
+      updateRequest.purchase_year = watch("purchase_year");
+    if (dirtyFields.box_condition)
+      updateRequest.box_condition = watch("box_condition");
     if (dirtyFields.price) updateRequest.price = watch("price");
-    if (dirtyFields.starting_price) updateRequest.starting_price = watch("starting_price");
-    if (dirtyFields.bid_increment) updateRequest.bid_increment = watch("bid_increment");
+    if (dirtyFields.starting_price)
+      updateRequest.starting_price = watch("starting_price");
+    if (dirtyFields.bid_increment)
+      updateRequest.bid_increment = watch("bid_increment");
     if (dirtyFields.ends_at) updateRequest.ends_at = watch("ends_at");
-    if (dirtyFields.is_extendable) updateRequest.is_extendable = watch("is_extendable");
+    if (dirtyFields.is_extendable)
+      updateRequest.is_extendable = watch("is_extendable");
     if (dirtyFields.batch_code) updateRequest.batch_code = watch("batch_code");
-    if (dirtyFields.buy_now_price) updateRequest.buy_now_price = watch("buy_now_price");
-    
+    if (dirtyFields.buy_now_price)
+      updateRequest.buy_now_price = watch("buy_now_price");
+    if (dirtyFields.type) updateRequest.listing_type = watch("type");
+
     // Note: image_urls will be handled separately in onSubmit using finalImageUrls
-    
+
     return updateRequest;
   };
 
   // Handle form submission
   const onSubmit = async (data: CreateListingFormData) => {
-    
     if (!user?.id || !listing) {
       Alert.alert("Error", "Unable to update listing");
       return;
@@ -147,22 +178,26 @@ export default function ListingEditScreen() {
 
       // Step 1: Upload new images if any
       let finalImageUrls = [...currentImageUrls];
-      const newImages = images.filter(img => img.isNew);
-      
+      const newImages = images.filter((img) => img.isNew);
+
       if (newImages.length > 0) {
         const uploadResults = await uploadMultipleImages(
-          newImages.map(img => img.uri),
+          newImages.map((img) => img.uri),
           ImageUploadConfigs.listing()
         );
 
         // Add new uploaded URLs to the final array
-        const newUploadedUrls = uploadResults.map(result => `listing-images/${result.path}`);
-        
+        const newUploadedUrls = uploadResults.map(
+          (result) => `listing-images/${result.path}`
+        );
+
         // Reconstruct the final array maintaining the order from images state
         finalImageUrls = [];
         for (const image of images) {
           if (image.isNew) {
-            const uploadIndex = newImages.findIndex(newImg => newImg.uri === image.uri);
+            const uploadIndex = newImages.findIndex(
+              (newImg) => newImg.uri === image.uri
+            );
             if (uploadIndex >= 0) {
               finalImageUrls.push(newUploadedUrls[uploadIndex]);
             }
@@ -172,12 +207,12 @@ export default function ListingEditScreen() {
         }
       } else {
         // Just reorder existing images
-        finalImageUrls = images.map(img => img.originalUrl || img.uri);
+        finalImageUrls = images.map((img) => img.originalUrl || img.uri);
       }
 
       // Step 2: Prepare update request with only changed fields
       const updateRequest = getChangedFields();
-      
+
       // Include images in update request only if they have changed
       if (isImagesChanged) {
         updateRequest.image_urls = finalImageUrls;
@@ -201,16 +236,18 @@ export default function ListingEditScreen() {
       }
     }
   };
-  
+
   if (isLoading || !listing || isRefetching) {
-    return (
-      <EditListingSkeleton width={Dimensions.get("window").width} />
-    );
+    return <EditListingSkeleton width={Dimensions.get("window").width} />;
   }
 
   if (error) {
     return (
-      <Container backgroundColor="$background" safeArea={false} variant="padded">
+      <Container
+        backgroundColor="$background"
+        safeArea={false}
+        variant="padded"
+      >
         <YStack flex={1} justifyContent="center" alignItems="center">
           <Text>Error loading listing</Text>
           <Button onPress={() => router.back()} variant="secondary" mt="$4">
@@ -221,22 +258,70 @@ export default function ListingEditScreen() {
     );
   }
 
+  const confirm = (message: string, onConfirm: () => void) => {
+    Alert.alert(
+      "Confirm Action",
+      message,
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "OK", onPress: onConfirm }
+      ]
+    );
+  };
+
   return (
     <>
-    <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardShouldPersistTaps="handled"
-      bottomOffset={10}
-    >
-    <Container safeArea={false} variant="padded">
-        <YStack
-          flex={1}
-          gap="$5"
-          pb="$4"
-        >
+      <KeyboardAwareScrollView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={10}
+      >
+        <Container safeArea={false} variant="padded">
+          <YStack flex={1} gap="$5" pb="$4">
+            <XStack gap="$3" >
+              <XStack
+                alignItems="center"
+                hitSlop={20}
+                backgroundColor="$muted"
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$6"
+                gap="$2"
+                onPress={() => confirm("Are you sure you want to delete this listing?", () => deleteListing.mutate(id!))}
+                alignSelf="center"
+              >
+                <Text fontSize="$4" fontWeight="500" color="$foreground">
+                  Delete Listing
+                </Text>
+                <ThemedIonicons
+                  name="trash"
+                  size={18}
+                  color="$error"
+                />
+              </XStack>
+              <XStack
+                alignItems="center"
+                hitSlop={20}
+                backgroundColor="$muted"
+                paddingHorizontal="$3"
+                paddingVertical="$2"
+                borderRadius="$6"
+                gap="$2"
+                onPress={() => confirm("Are you sure you want to mark this listing as sold?", () => markAsSold.mutate(id!))}
+              >
+                <Text fontSize="$4" fontWeight="500" color="$foreground">
+                  Mark as Sold
+                </Text>
+                <ThemedIonicons
+                  name="checkmark-circle"
+                  size={18}
+                  color="$success"
+                />
+              </XStack>
+            </XStack>
             {/* Images Section */}
             <YStack gap="$3">
               <EditableImageCarousel
@@ -258,28 +343,42 @@ export default function ListingEditScreen() {
                 variant="select"
                 label="Listing Type"
                 placeholder="Select listing type"
-                disabled={true} // Don't allow changing listing type
-                options={listingTypeOptions}
+                disabled={
+                  listing.listing.listing_type === ListingType.AUCTION ||
+                  listing.listing.listing_type === ListingType.SWAP
+                }
+                options={listingTypeOptions.filter(
+                  (option) =>
+                    option.value !== ListingType.AUCTION &&
+                    option.value !== ListingType.SWAP
+                )}
               />
-              <XStack
-                backgroundColor="$blue2"
-                borderRadius="$6"
-                padding="$3"
-                borderWidth={1}
-                borderColor="$blue6"
-                alignItems="center"
-                gap="$2"
-              >
-                <ThemedIonicons name="information-circle-outline" size={20} color="$blue11" />
-                <Text
-                  fontSize="$3"
-                  color="$blue11"
-                  textAlign="center"
-                  fontWeight="500"
+              {listing.listing.listing_type === ListingType.AUCTION ||
+              listing.listing.listing_type === ListingType.SWAP ? (
+                <XStack
+                  backgroundColor="$blue2"
+                  borderRadius="$6"
+                  padding="$3"
+                  borderWidth={1}
+                  borderColor="$blue6"
+                  alignItems="center"
+                  gap="$2"
                 >
-                  Listing type cannot be changed.
-                </Text>
-              </XStack>
+                  <ThemedIonicons
+                    name="information-circle-outline"
+                    size={20}
+                    color="$blue11"
+                  />
+                  <Text
+                    fontSize="$3"
+                    color="$blue11"
+                    textAlign="center"
+                    fontWeight="500"
+                  >
+                    Listing type cannot be changed.
+                  </Text>
+                </XStack>
+              ) : null}
 
               {/* Basic Information */}
               <ControlledInput
@@ -439,25 +538,24 @@ export default function ListingEditScreen() {
                 placeholder="Enter batch code if available"
                 disabled={submitting}
               />
-
+            </YStack>
           </YStack>
-        </YStack>
-    </Container>
-    </KeyboardAwareScrollView>
+        </Container>
+      </KeyboardAwareScrollView>
       {/* Submit Button - Only shown when editing is enabled */}
       {isAnyChange && (
-      <YStack position="absolute" bottom={10} left={0} right={0} padding="$4">
-        <Button
-          variant="primary"
-          size="lg"
-          fullWidth
-          onPress={handleSubmit(onSubmit)}
-          disabled={submitting || !isAnyChange}
-          borderRadius="$6"
-        >
-          {submitting ? "Updating Listing..." : "Update Listing"}
-        </Button>
-      </YStack>
+        <YStack position="absolute" bottom={10} left={0} right={0} padding="$4">
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onPress={handleSubmit(onSubmit)}
+            disabled={submitting || !isAnyChange}
+            borderRadius="$6"
+          >
+            {submitting ? "Updating Listing..." : "Update Listing"}
+          </Button>
+        </YStack>
       )}
     </>
   );

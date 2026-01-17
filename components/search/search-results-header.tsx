@@ -1,7 +1,8 @@
 import { SearchBar } from "@/components/ui/search-bar";
-import { ThemedIonicons } from "../ui/themed-icons";
 import React from "react";
 import { XStack, YStack } from "tamagui";
+import { AnimatedTabHeader } from "../ui/animated-tab-header";
+import { ThemedIonicons } from "../ui/themed-icons";
 import { SearchFilterButton } from "./search-filter-button";
 import { SearchResultsCount } from "./search-results-count";
 import { SearchSortButton } from "./search-sort-button";
@@ -27,6 +28,10 @@ interface SearchResultsHeaderProps {
   // Sort button
   currentSortLabel: string;
   onSortPress: () => void;
+  
+  // Tabs
+  activeTab: string;
+  onTabPress: (key: string) => void;
 }
 
 /**
@@ -46,10 +51,12 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
   onFilterPress,
   currentSortLabel,
   onSortPress,
+  activeTab,
+  onTabPress,
 }) => {
 
   return (
-    <YStack gap="$3" paddingBottom="$2">
+    <YStack gap="$1" paddingBottom="$2">
       {/* Header with Back Button and SearchBar */}
       <XStack alignItems="center" gap="$2">
         <XStack onPress={onBackPress} hitSlop={20}>
@@ -60,7 +67,7 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
           />
         </XStack>
         <SearchBar
-          placeholder="Search listings..."
+          placeholder="Search for listings and users..."
           initialValue={currentSearchQuery}
           onSearch={onSearchChange}
           onSearchSubmit={onSearchSubmit}
@@ -70,25 +77,35 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
         />
       </XStack>
 
-      {/* Results Count, Filter and Sort Options */}
-      <XStack alignItems="center" justifyContent="space-between">
-        <SearchResultsCount
-          totalFound={totalFound}
-          isLoading={isLoading}
-          hasError={hasError}
+      <YStack gap="$3">
+        <AnimatedTabHeader
+          tabs={[ {key: "listings", title: "Listings"},{key: "users", title: "Users"},]}
+          activeTabKey={activeTab!}
+          onTabPress={(key) => onTabPress(key)}
+          headerProps={{ marginTop: "0", fontSize: "$5", paddingHorizontal: "0" }}
         />
 
-        <XStack alignItems="center" gap="$2">
-          <SearchFilterButton
-            activeFiltersCount={activeFiltersCount}
-            onPress={onFilterPress}
-          />
-          <SearchSortButton
-            currentSortLabel={currentSortLabel}
-            onPress={onSortPress}
-          />
-        </XStack>
-      </XStack>
+        {activeTab === 'listings' && (
+          <XStack alignItems="center" justifyContent="space-between">
+            <SearchResultsCount
+              totalFound={totalFound}
+              isLoading={isLoading}
+              hasError={hasError}
+            />
+
+            <XStack alignItems="center" gap="$2">
+              <SearchFilterButton
+                activeFiltersCount={activeFiltersCount}
+                onPress={onFilterPress}
+              />
+              <SearchSortButton
+                currentSortLabel={currentSortLabel}
+                onPress={onSortPress}
+              />
+            </XStack>
+          </XStack>
+        )}
+      </YStack>
     </YStack>
   );
 };

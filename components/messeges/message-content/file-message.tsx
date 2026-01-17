@@ -1,6 +1,10 @@
 import { ThemedIonicons } from "@/components/ui/themed-icons";
 import { FileContent } from "@bid-scents/shared-sdk";
 import FastImage from "@d11/react-native-fast-image";
+import { ImageZoom } from "@likashefqet/react-native-image-zoom";
+import { useState } from "react";
+import { Modal, Pressable, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, XStack } from "tamagui";
 
 interface FileMessageProps {
@@ -15,22 +19,61 @@ export function FileMessage({
   messageId,
 }: FileMessageProps) {
   const isImage = content.file_type.startsWith("image/");
+  const [isModalVisible, setModalVisible] = useState(false);
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   if (isImage) {
     return (
       <View maxWidth={200}>
-        <FastImage
-          key={`${messageId}-${content.file_url}`}
-          source={{ uri: content.file_url, priority: FastImage.priority.high }}
-          style={{ width: 200, height: 150, borderRadius: 16 }}
-        />
+        <Pressable onPress={() => setModalVisible(true)}>
+          <FastImage
+            key={`${messageId}-${content.file_url}`}
+            source={{ uri: content.file_url, priority: FastImage.priority.high }}
+            style={{ width: 200, height: 150, borderRadius: 16 }}
+          />
+        </Pressable>
         {content.caption && (
           <View paddingVertical="$1" paddingHorizontal="$2">
-            <Text fontSize="$4" color="$foreground" marginTop="$2">
+            <Text fontSize="$4" color="$foreground" marginTop="$2" userSelect="text">
               {content.caption}
             </Text>
           </View>
         )}
+        <Modal
+          visible={isModalVisible}
+          transparent={true}
+          onRequestClose={() => setModalVisible(false)}
+          animationType="fade"
+        >
+          <View flex={1} backgroundColor="$background">
+            <ImageZoom
+              uri={content.file_url}
+              minScale={1}
+              maxScale={5}
+              doubleTapScale={3}
+              isSingleTapEnabled
+              isDoubleTapEnabled
+              style={{ width: screenWidth, height: screenHeight }}
+              resizeMode="contain"
+            />
+            <View
+              onPress={() => setModalVisible(false)}
+              backgroundColor="$background"
+              style={{
+                position: "absolute",
+                top: insets.top + 10,
+                right: 20,
+                zIndex: 1,
+                borderRadius: 20,
+                padding: 5,
+              }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <ThemedIonicons name="close" size={24} color="$foreground" />
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -51,6 +94,7 @@ export function FileMessage({
             fontWeight="500"
             color="$foreground"
             numberOfLines={1}
+            userSelect="text"
           >
             {content.file_name}
           </Text>
@@ -60,7 +104,7 @@ export function FileMessage({
         </View>
       </XStack>
       {content.caption && (
-        <Text fontSize="$3" color="$foreground" marginTop="$2">
+        <Text fontSize="$3" color="$foreground" marginTop="$2" userSelect="text">
           {content.caption}
         </Text>
       )}

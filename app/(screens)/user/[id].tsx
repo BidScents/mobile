@@ -3,7 +3,7 @@ import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { View, Text } from "tamagui";
 
-export default function DetailedProfileScreen() {
+export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   if (!id) {

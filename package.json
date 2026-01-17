@@ -11,12 +11,13 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@bid-scents/shared-sdk": "^1.2.15",
+    "@bid-scents/shared-sdk": "^1.2.17",
     "@d11/react-native-fast-image": "^8.11.1",
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5.1.6",
     "@hookform/resolvers": "^5.1.1",
     "@legendapp/list": "^1.1.4",
+    "@likashefqet/react-native-image-zoom": "^4.3.0",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-community/datetimepicker": "8.4.1",
     "@react-navigation/bottom-tabs": "^7.3.10",

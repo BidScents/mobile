@@ -86,11 +86,6 @@ export const useSearchResults = () => {
     setResultsData(data);
   }, []);
 
-  // Handle refresh (maintain current filters and sort)
-  const handleRefresh = useCallback(() => {
-    // This function can be used for any refresh-specific logic if needed in the future
-  }, []);
-
   return {
     // Search parameters
     searchParams,
@@ -107,7 +102,6 @@ export const useSearchResults = () => {
     handleSearchChange,
     handleSearchSubmit,
     handleDataChange,
-    handleRefresh,
     
     // Utilities
     activeFiltersCount: getActiveFiltersCount(filters),
