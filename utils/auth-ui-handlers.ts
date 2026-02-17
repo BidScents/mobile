@@ -92,6 +92,7 @@ export const handleOAuthUI = async (provider: 'google' | 'facebook' | 'apple'): 
 
 /**
  * Handle onboarding completion with UI feedback
+ * Returns true if onboarding succeeded so the caller can trigger navigation
  */
 export const handleOnboardingUI = async (data: OnboardingFormData & {
   profileImageUri?: string
@@ -101,21 +102,15 @@ export const handleOnboardingUI = async (data: OnboardingFormData & {
 }, callbacks?: {
   onProfileImageUploaded?: (path: string) => void
   onCoverImageUploaded?: (path: string) => void
-}): Promise<void> => {
+}): Promise<boolean> => {
   try {
     const result = await AuthService.completeOnboarding(data, callbacks)
 
     if (result.success && result.profile) {
-      // Refresh complete auth state from server to get all up-to-date data
-      AuthService.refreshCurrentUser()
-
-      Alert.alert(
-        'Welcome!', 
-        'Your profile has been created successfully!',
-        [{ text: 'Continue' }] // Stack.Protected will handle navigation
-      )
+      return true
     } else {
       handleOnboardingError(result.error!)
+      return false
     }
   } catch (error: any) {
     handleOnboardingError(error.message)

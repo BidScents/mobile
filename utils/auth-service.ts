@@ -343,7 +343,8 @@ export class AuthService {
         location: data.location?.trim() || undefined,
         profile_image_url: profileImagePath,
         cover_image_url: coverImagePath,
-        bio: data.bio?.trim() || undefined
+        bio: data.bio?.trim() || undefined,
+        affiliate_code: (data as any).affiliate_code?.trim() || undefined
       })
 
       return {
