@@ -77,7 +77,7 @@ export const SettlementBottomSheet = forwardRef<
   const { data, isLoading, error, refetch } = useSettlementDetails(id, {
     enabled: isOpen
   });
-  
+
   const colors = useThemeColors();
   const settleTransaction = useSettleAuctionTransaction();
   const markNoResponse = useMarkNoResponse();
@@ -309,7 +309,7 @@ export const SettlementBottomSheet = forwardRef<
         </YStack>
 
         {/* Other Bidders */}
-        {data.top_bids.length > 1 && (
+        {data.top_bids.length > 0 && (
           <YStack>
             <ScrollView
               gap="$2"
