@@ -28,26 +28,27 @@ const onboardingData: OnboardingSlide[] = [
     icon: "card-outline",
     bullets: [
       "Secure payments between buyers and sellers",
-      "Receive payments from your sales", 
+      "Receive payments from your sales",
       "Link your bank account to receive earnings",
-
+      "Funds take ~6 business days to reach your account",
     ]
   },
   {
-    id: "2", 
+    id: "2",
     title: "Account Setup",
     description: "Provide some information to verify your identity.",
     icon: "person-outline",
     bullets: [
       "Full name or business name",
       "Email address and IC/Business number",
-      "Home address and contact details",
-      "Business details (TIN, SST if applicable)",
+      "Home address and IC number",
+      "MY TIN (if you don't have one, use 123456-A)",
+      "SST Registration (if applicable)",
     ]
   },
   {
     id: "3",
-    title: "Bank Account Linking", 
+    title: "Bank Account Linking",
     description: "Connect your bank account to receive payouts.",
     icon: "card-outline",
     bullets: [
@@ -63,8 +64,9 @@ const onboardingData: OnboardingSlide[] = [
     icon: "checkmark-circle-outline",
     bullets: [
       "Fill in statement descriptor",
-      "Add customer support phone number", 
+      "Add customer support phone number",
       "Profile review (up to 10 minutes)",
+      "Stripe may require 2FA (download Google Authenticator or Duo Mobile)",
     ]
   }
 ];
@@ -123,8 +125,8 @@ export function OnboardingGuideCarousel({ onComplete, onSkip, loading }: Onboard
         {/* Bullets */}
         {item.bullets && (
           <YStack gap="$3" alignSelf="stretch">
-            {item.bullets.map((bullet, index) => (
-              <XStack key={index} gap="$2" alignItems="center" justifyContent="center">
+            {item.bullets.map((bullet, idx) => (
+              <XStack key={idx} gap="$2" alignItems="center" justifyContent="center">
                 <ThemedIonicons name="radio-button-on-outline" size={16} color="$blue11" />
                 <Text
                   fontSize="$4"
@@ -135,6 +137,29 @@ export function OnboardingGuideCarousel({ onComplete, onSkip, loading }: Onboard
                 </Text>
               </XStack>
             ))}
+          </YStack>
+        )}
+
+        {/* TIN Highlight Callout for Account Setup slide */}
+        {item.id === "2" && (
+          <YStack
+            backgroundColor="$yellow3"
+            borderRadius="$4"
+            padding="$3"
+            alignSelf="stretch"
+            gap="$1"
+          >
+            <XStack gap="$2" alignItems="center">
+              <ThemedIonicons name="information-circle" size={18} color="$yellow10" />
+              <Text fontSize="$3" fontWeight="600" color="$foreground">
+                TIN Tip
+              </Text>
+            </XStack>
+            <Text fontSize="$3" color="$foreground" lineHeight="$3">
+              If you don't have a TIN number, enter{" "}
+              <Text fontWeight="700" fontSize="$3">123456-A</Text>{" "}
+              as a placeholder.
+            </Text>
           </YStack>
         )}
       </YStack>
@@ -165,7 +190,7 @@ export function OnboardingGuideCarousel({ onComplete, onSkip, loading }: Onboard
         <Carousel
           ref={carouselRef}
           width={SCREEN_WIDTH - 32}
-          height={320}
+          height={400}
           data={onboardingData}
           onProgressChange={(offsetProgress, absoluteProgress) => {
             progress.value = absoluteProgress;
