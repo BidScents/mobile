@@ -8,6 +8,7 @@ interface ListingActionsProps {
   listingId: string;
   auctionDetails?: AuctionDetails | null | undefined;
   isCurrentUserHighestBidder?: boolean;
+  isTemporarilyDisabled?: boolean;
   isLoading: boolean;
   onContactSeller: () => void;
 }
@@ -21,6 +22,7 @@ export function ListingActions({
   listingId,
   auctionDetails,
   isCurrentUserHighestBidder,
+  isTemporarilyDisabled = false,
   isLoading, 
   onContactSeller 
 }: ListingActionsProps) {
@@ -32,6 +34,7 @@ export function ListingActions({
       auctionDetails={auctionDetails}
       isCurrentUserHighestBidder={isCurrentUserHighestBidder}
       isActive={auctionActive}
+      isTemporarilyDisabled={isTemporarilyDisabled}
       isLoading={isLoading}
       contactSeller={() => onContactSeller()}
     />

@@ -47,6 +47,7 @@ export function SystemReceiptMessage({ content, isBuyer, messageId, message, isS
             await confirmReceipt.mutateAsync({ messageId, updatedMessage });
           } catch (error) {
             console.error("Failed to confirm receipt:", error);
+            console.log(JSON.stringify(error, null, 2));
           }
         }
       }]

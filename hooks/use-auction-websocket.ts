@@ -1,7 +1,9 @@
 import { BidResData, useAuthStore, WSBidResponse, WSExtensionResponse, WSJoinResponse, WSType } from '@bid-scents/shared-sdk'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:8000'
+const RECONNECT_BASE_DELAY_MS = 1000
+const RECONNECT_MAX_DELAY_MS = 15000
 
 /**
  * Configuration options for the auction WebSocket hook
@@ -69,7 +71,11 @@ export function useAuctionWebSocket({
   onExtension
 }: UseAuctionWebSocketOptions): UseAuctionWebSocketReturn {
   const wsRef = useRef<WebSocket | null>(null)
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const reconnectAttemptsRef = useRef(0)
+  const shouldReconnectRef = useRef(false)
   const { session } = useAuthStore()
+  const [isConnected, setIsConnected] = useState(false)
 
   // Store callbacks in refs to avoid useEffect dependencies
   const callbacksRef = useRef({
@@ -89,62 +95,135 @@ export function useAuctionWebSocket({
     onExtension
   }
 
+  const clearReconnectTimer = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+      reconnectTimeoutRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    shouldReconnectRef.current = enabled && !!listingId && !!session?.access_token
+  }, [enabled, listingId, session?.access_token])
+
   useEffect(() => {
     if (!enabled || !listingId || !session?.access_token) {
+      shouldReconnectRef.current = false
+      clearReconnectTimer()
+      reconnectAttemptsRef.current = 0
+      setIsConnected(false)
+
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
       return
     }
 
-    // Create WebSocket connection without token in URL
+    let isDisposed = false
     const wsUrl = `${WS_BASE_URL}/v1/auctions/${listingId}`
-    const ws = new WebSocket(wsUrl)
-    wsRef.current = ws
+    const accessToken = session.access_token
 
-    ws.onopen = () => {
-      console.log(`Connected to auction WebSocket for listing ${listingId}`)
-      // Send JWT token as first message (backend expects plain token string)
-      ws.send(session.access_token)
-      // Trigger onConnect after sending auth
-      callbacksRef.current.onConnect?.()
+    const scheduleReconnect = () => {
+      if (!shouldReconnectRef.current || isDisposed || reconnectTimeoutRef.current) {
+        return
+      }
+
+      const attempt = reconnectAttemptsRef.current
+      const delay = Math.min(RECONNECT_BASE_DELAY_MS * 2 ** attempt, RECONNECT_MAX_DELAY_MS)
+      reconnectAttemptsRef.current = attempt + 1
+
+      reconnectTimeoutRef.current = setTimeout(() => {
+        reconnectTimeoutRef.current = null
+        connect()
+      }, delay)
     }
 
-    ws.onclose = () => {
-      console.log(`Disconnected from auction WebSocket for listing ${listingId}`)
-      callbacksRef.current.onDisconnect?.()
-    }
+    const connect = () => {
+      if (!shouldReconnectRef.current || isDisposed) {
+        return
+      }
 
-    ws.onmessage = (event) => {
-      try {
-        const message: WSBidResponse | WSJoinResponse | WSExtensionResponse = JSON.parse(event.data)
-        
-        if (message.type === WSType.JOIN) {
-          const joinMessage = message as WSJoinResponse
-          console.log('Viewer count updated:', joinMessage.current_viewers)
-          callbacksRef.current.onViewerCount?.(joinMessage.current_viewers)
-        } else if (message.type === WSType.BID) {
-          const bidMessage = message as WSBidResponse
-          console.log('New bid received:', bidMessage.data)
-          callbacksRef.current.onBid?.(bidMessage.data)
-        } else if (message.type === WSType.AUCTION_EXTENDED) {
-          const extensionMessage = message as WSExtensionResponse
-          console.log('Auction extended, new end time:', extensionMessage.new_end_time)
-          callbacksRef.current.onExtension?.(extensionMessage.new_end_time)
+      const ws = new WebSocket(wsUrl)
+      wsRef.current = ws
+
+      ws.onopen = () => {
+        if (isDisposed || wsRef.current !== ws) {
+          return
         }
-      } catch (error) {
-        console.error('Failed to parse WebSocket message:', error)
+        console.log(`Connected to auction WebSocket for listing ${listingId}`)
+        reconnectAttemptsRef.current = 0
+        setIsConnected(true)
+        try {
+          // Send JWT token as first message (backend expects plain token string)
+          ws.send(accessToken)
+          callbacksRef.current.onConnect?.()
+        } catch (error) {
+          console.error('Failed to authenticate auction WebSocket:', error)
+          ws.close()
+        }
+      }
+
+      ws.onclose = () => {
+        if (wsRef.current === ws) {
+          wsRef.current = null
+        }
+        if (isDisposed) {
+          return
+        }
+        console.log(`Disconnected from auction WebSocket for listing ${listingId}`)
+        setIsConnected(false)
+        callbacksRef.current.onDisconnect?.()
+        scheduleReconnect()
+      }
+
+      ws.onmessage = (event) => {
+        try {
+          const message: WSBidResponse | WSJoinResponse | WSExtensionResponse = JSON.parse(event.data)
+          
+          if (message.type === WSType.JOIN) {
+            const joinMessage = message as WSJoinResponse
+            console.log('Viewer count updated:', joinMessage.current_viewers)
+            callbacksRef.current.onViewerCount?.(joinMessage.current_viewers)
+          } else if (message.type === WSType.BID) {
+            const bidMessage = message as WSBidResponse
+            console.log('New bid received:', bidMessage.data)
+            callbacksRef.current.onBid?.(bidMessage.data)
+          } else if (message.type === WSType.AUCTION_EXTENDED) {
+            const extensionMessage = message as WSExtensionResponse
+            console.log('Auction extended, new end time:', extensionMessage.new_end_time)
+            callbacksRef.current.onExtension?.(extensionMessage.new_end_time)
+          }
+        } catch (error) {
+          console.error('Failed to parse WebSocket message:', error)
+        }
+      }
+
+      ws.onerror = (error) => {
+        console.error('Auction WebSocket error:', error)
+        // Force close so reconnect is handled through onclose
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+          ws.close()
+        }
       }
     }
 
-    ws.onerror = (error) => {
-      console.error('Auction WebSocket error:', error)
-    }
+    connect()
 
-    // Cleanup on unmount
     return () => {
-      ws.close()
+      isDisposed = true
+      shouldReconnectRef.current = false
+      clearReconnectTimer()
+      reconnectAttemptsRef.current = 0
+      setIsConnected(false)
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
     }
-  }, [enabled, listingId, session?.access_token]) // Depend on enabled state, listing ID, and session
+  }, [enabled, listingId, session?.access_token, clearReconnectTimer])
 
   return {
-    isConnected: wsRef.current?.readyState === WebSocket.OPEN
+    isConnected
   }
 }
