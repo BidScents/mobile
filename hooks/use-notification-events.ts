@@ -1,5 +1,8 @@
+import { NotificationType } from '@bid-scents/shared-sdk';
+import { useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
+import { queryKeys } from './queries/query-keys';
 import { handleNotificationNavigation } from '../services/notification-navigation';
 
 // Configure notification behavior
@@ -22,9 +25,86 @@ Notifications.setNotificationHandler({
  * - Navigation delegation
  */
 export function useNotificationEvents() {
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     let notificationListener: Notifications.EventSubscription;
     let responseListener: Notifications.EventSubscription;
+
+    const AUCTION_NOTIFICATION_TYPES = new Set<string>([
+      NotificationType.AUCTION_EXTENSION,
+      NotificationType.LISTING_BID,
+      NotificationType.OUTBID,
+      NotificationType.AUCTION_EXPIRY,
+    ]);
+
+    const parseMaybeJson = (value: unknown): any => {
+      if (typeof value !== "string") {
+        return value;
+      }
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    };
+
+    const extractListingId = (data: any): string | null => {
+      if (!data || typeof data !== "object") return null;
+
+      const parsedContent = parseMaybeJson(data.content);
+      const parsedData = parseMaybeJson(data.data);
+
+      const candidates = [
+        data.listing_id,
+        data.listingId,
+        data.listing?.id,
+        typeof data.listing === "string" ? data.listing : null,
+        parsedContent?.listing_id,
+        parsedContent?.listingId,
+        parsedContent?.listing?.id,
+        parsedData?.listing_id,
+        parsedData?.listingId,
+        parsedData?.listing?.id,
+        data.notification?.content?.listing?.id,
+      ];
+
+      const listingId = candidates.find((candidate) => typeof candidate === "string" && candidate.length > 0);
+      return listingId || null;
+    };
+
+    const extractType = (data: any): string | null => {
+      if (!data || typeof data !== "object") return null;
+
+      const parsedContent = parseMaybeJson(data.content);
+      const parsedData = parseMaybeJson(data.data);
+
+      const candidates = [
+        data.type,
+        data.notification_type,
+        data.event_type,
+        parsedContent?.type,
+        parsedContent?.notification_type,
+        parsedData?.type,
+        parsedData?.notification_type,
+      ];
+
+      const type = candidates.find((candidate) => typeof candidate === "string" && candidate.length > 0);
+      return type ? type.toLowerCase() : null;
+    };
+
+    const syncListingIfAuctionEvent = async (notificationData: any) => {
+      const listingId = extractListingId(notificationData);
+      if (!listingId) return;
+
+      const notificationType = extractType(notificationData);
+      if (notificationType && !AUCTION_NOTIFICATION_TYPES.has(notificationType)) return;
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+        refetchType: "active",
+      });
+    };
 
     const setupEventListeners = async () => {
       try {
@@ -34,6 +114,7 @@ export function useNotificationEvents() {
         // Listen for notifications received while app is foregrounded
         notificationListener = Notifications.addNotificationReceivedListener(async notification => {
           console.log('Notification received while app open:', notification);
+          await syncListingIfAuctionEvent(notification.request.content.data);
           
           // Handle in-app notification display here
           // The system notification won't show when app is active
@@ -46,6 +127,7 @@ export function useNotificationEvents() {
 
           // Delegate navigation to service
           const notificationData = response.notification.request.content.data;
+          await syncListingIfAuctionEvent(notificationData);
           handleNotificationNavigation(notificationData);
         });
 
@@ -61,7 +143,7 @@ export function useNotificationEvents() {
       notificationListener?.remove();
       responseListener?.remove();
     };
-  }, []);
+  }, [queryClient]);
 
   return {
     // Badge management methods

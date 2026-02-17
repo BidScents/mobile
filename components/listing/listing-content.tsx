@@ -7,6 +7,7 @@ import { DescriptionSkeleton } from "../suspense/description-skeleton";
 import { ListingDetailsSkeleton } from "../suspense/listing-details-skeleton";
 import { ShowMoreText } from "../ui/show-more-text";
 import { AuctionSection } from "./auction-section";
+import { BuyerProtectionCard } from "./buyer-protection-card";
 import { CommentsHeader } from "./comments-header";
 import { CommentsSection } from "./comments-section";
 import { ListingDetailsSection } from "./listing-details-section";
@@ -127,6 +128,8 @@ export function ListingContent({
           ) : null}
         </>
       )}
+
+      <BuyerProtectionCard />
 
       {/* Comments Section */}
       <View gap="$4">

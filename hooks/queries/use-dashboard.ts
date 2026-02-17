@@ -232,17 +232,17 @@ export function useSettleAuctionTransaction() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (listingId: string): Promise<MessageResData> => {
-      return DashboardService.settleAuctionTransactionV1DashboardAuctionsListingIdTransactionPost(listingId)
+    mutationFn: async ({ listingId, shippingFee }: { listingId: string; shippingFee?: number }): Promise<MessageResData> => {
+      return DashboardService.settleAuctionTransactionV1DashboardAuctionsListingIdTransactionPost(listingId, shippingFee)
     },
-    
-    onSuccess: (data, listingId) => {
+
+    onSuccess: (data, variables) => {
       // Invalidate settlement details for this auction
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.settlement(listingId) })
-      
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.settlement(variables.listingId) })
+
       // Invalidate messages (new transaction message created)
       queryClient.invalidateQueries({ queryKey: queryKeys.messages.all })
-      
+
       // Invalidate dashboard auctions
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.auctions })
     }

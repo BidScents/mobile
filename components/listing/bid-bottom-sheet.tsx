@@ -1,6 +1,7 @@
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { currency } from "@/constants/constants";
+import { isAuctionActive } from "@/utils/countdown";
 import { AuctionDetails } from "@bid-scents/shared-sdk";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
@@ -26,12 +27,14 @@ export interface BidBottomSheetProps {
   isCurrentUserHighestBidder?: boolean;
   /** Whether the auction is still active */
   isActive?: boolean;
+  /** Whether bidding is temporarily disabled while latest state is being verified */
+  isTemporarilyDisabled?: boolean;
 }
 
 export const BidBottomSheet = forwardRef<
   BidBottomSheetMethods,
   BidBottomSheetProps
->(({ listingId, auctionDetails, isCurrentUserHighestBidder = false, isActive = true }, ref) => {
+>(({ listingId, auctionDetails, isCurrentUserHighestBidder = false, isActive = true, isTemporarilyDisabled = false }, ref) => {
   const colors = useThemeColors();
   const [bidAmount, setBidAmount] = useState("");
   
@@ -51,6 +54,7 @@ export const BidBottomSheet = forwardRef<
   const minimumBid = currentBid + bidIncrement;
   const numericBidAmount = parseFloat(bidAmount) || 0;
   const isValidBid = bidAmount.trim().length > 0 && numericBidAmount >= minimumBid && !isCurrentUserHighestBidder;
+  const canPlaceBid = isActive && !isTemporarilyDisabled;
   const hasWon = !isActive && isCurrentUserHighestBidder;
   
   const bidInputStyles = [
@@ -99,6 +103,18 @@ export const BidBottomSheet = forwardRef<
 
   const handlePlaceBid = async () => {
     if (!isValidBid) return;
+    if (!canPlaceBid) {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert("Auction Unavailable", "Bidding is temporarily unavailable for this auction.");
+      return;
+    }
+
+    const latestEndsAt = auctionDetails?.ends_at;
+    if (!latestEndsAt || !isAuctionActive(latestEndsAt)) {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert("Auction Ended", "This auction has already ended.");
+      return;
+    }
 
     // Client-side validation: prevent API call if user is already highest bidder
     if (isCurrentUserHighestBidder) {
@@ -237,7 +253,7 @@ export const BidBottomSheet = forwardRef<
           variant={hasWon || isCurrentUserHighestBidder ? "secondary" : "primary"}
           size="lg"
           fullWidth
-          disabled={(!isValidBid || isLoading) && !hasWon && !isCurrentUserHighestBidder}
+          disabled={(!isValidBid || isLoading || !canPlaceBid) && !hasWon && !isCurrentUserHighestBidder}
           borderRadius="$6"
           marginTop="auto"
         >

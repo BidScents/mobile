@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Text, XStack } from "tamagui";
 import {
   TimeLeft,
@@ -21,20 +21,22 @@ export function CountdownTimer({
   onExpired,
   size = "medium",
 }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
-  const [hasEnded, setHasEnded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(() =>
+    calculateTimeLeft(endTime)
+  );
+  const wasExpiredRef = useRef<boolean>(timeLeft === null);
 
   useEffect(() => {
     const updateTimer = () => {
       const time = calculateTimeLeft(endTime);
+      const hasExpired = time === null;
 
-      if (!time) {
-        setHasEnded(true);
-        setTimeLeft(null);
+      if (hasExpired && !wasExpiredRef.current) {
         onExpired?.();
-      } else {
-        setTimeLeft(time);
       }
+
+      wasExpiredRef.current = hasExpired;
+      setTimeLeft(time);
     };
 
     // Initial calculation
@@ -51,7 +53,7 @@ export function CountdownTimer({
     large: "$4",
   }[size];
 
-  if (hasEnded) {
+  if (!timeLeft) {
     return (
       <XStack
         backgroundColor="$muted"
@@ -62,22 +64,6 @@ export function CountdownTimer({
       >
         <Text fontSize={textSize} color="$foreground" fontWeight="500">
           Ended
-        </Text>
-      </XStack>
-    );
-  }
-
-  if (!timeLeft) {
-    return (
-      <XStack
-        backgroundColor="$muted"
-        alignItems="center"
-        borderRadius="$5"
-        paddingHorizontal="$2"
-        paddingVertical="$2"
-      >
-        <Text fontSize={textSize} color="$mutedForeground">
-          Loading...
         </Text>
       </XStack>
     );

@@ -1,6 +1,6 @@
 /**
  * Simplified Onboarding Screen Component
- * 
+ *
  * Clean onboarding screen using the ProfilePreviewPicker component.
  * All image picking logic is now contained within the preview component.
  * Features:
@@ -9,6 +9,7 @@
  * - Comprehensive error handling
  * - Loading states and user feedback
  * - Username validation on form submission
+ * - Affiliate code support
  */
 
 import { ControlledInput } from '@/components/forms/controlled-input'
@@ -16,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { KeyboardAwareView } from '@/components/ui/keyboard-aware-view'
 import { ProfilePreviewPicker } from '@/components/ui/profile-preview-picker'
+import { AuthService } from '@/utils/auth-service'
 import { handleOnboardingUI } from '@/utils/auth-ui-handlers'
 import { onboardingSchema, useAuthStore, type OnboardingFormData } from '@bid-scents/shared-sdk'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -43,6 +45,7 @@ const DEFAULT_VALUES: OnboardingFormData = {
   username: '',
   location: '',
   bio: '',
+  affiliate_code: '',
   profile_image_url: undefined,
   cover_image_url: undefined,
 }
@@ -93,6 +96,7 @@ export default function OnboardingScreen() {
         username: '',
         location: '',
         bio: '',
+        affiliate_code: '',
         profile_image_url: undefined,
         cover_image_url: undefined,
       })
@@ -101,13 +105,13 @@ export default function OnboardingScreen() {
 
   /**
    * Handle form submission
-   * 
+   *
    * Includes pre-uploaded photo paths to prevent re-upload on retry.
    * Manages loading state and delegates logic to utility function.
    */
   const onSubmit = async (data: OnboardingFormData) => {
     setIsLoading(true)
-    
+
     try {
       // Create extended data with local image URIs and uploaded paths
       const extendedData: ExtendedOnboardingData = {
@@ -118,10 +122,14 @@ export default function OnboardingScreen() {
         uploadedCoverImagePath: uploadedCoverImagePath || undefined
       }
 
-      await handleOnboardingUI(extendedData, {
+      const success = await handleOnboardingUI(extendedData, {
         onProfileImageUploaded: setUploadedProfileImagePath,
         onCoverImageUploaded: setUploadedCoverImagePath
       })
+
+      if (success) {
+        AuthService.refreshCurrentUser()
+      }
     } catch (error) {
       // Error handling is done in the utility function
       // Loading state is cleared here regardless of outcome
@@ -133,13 +141,13 @@ export default function OnboardingScreen() {
   return (
     <Container backgroundColor="$background" safeArea={['top']} variant="padded">
       <KeyboardAwareView backgroundColor="$background">
-        <ScrollView 
+        <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <YStack flex={1} gap="$5" minHeight="100%">
+          <YStack flex={1} gap="$5" minHeight="100%" mb="$8">
             {/* Profile Preview with Image Picking */}
             <ProfilePreviewPicker
               profileImageUri={profileImageUri}
@@ -148,13 +156,13 @@ export default function OnboardingScreen() {
               onCoverImageChange={handleCoverImageChange}
               disabled={isLoading}
             />
-              
+
             {/* Header Text */}
             <YStack gap="$2">
               <Text color="$foreground" fontSize="$8" fontWeight="600">
                 Your Profile
               </Text>
-              
+
               <Text color="$mutedForeground" fontSize="$4" lineHeight="$4">
                 Add your details to personalize your experience.
               </Text>
@@ -206,10 +214,19 @@ export default function OnboardingScreen() {
                 placeholder="Tell us a bit about yourself..."
                 disabled={isLoading}
               />
+
+              <ControlledInput
+                control={control}
+                name="affiliate_code"
+                variant="username"
+                label="Affiliate Code (Optional)"
+                placeholder="Enter affiliate code"
+                disabled={isLoading}
+              />
             </YStack>
           </YStack>
         </ScrollView>
-        
+
         {/* Submit Button - Fixed at bottom */}
         <Button
           variant="primary"

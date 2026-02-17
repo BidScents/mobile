@@ -2,7 +2,7 @@ import { BidResData, HomepageResponse, ListingDetailsResponse } from '@bid-scent
 import { useQueryClient } from '@tanstack/react-query'
 import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { queryKeys } from './queries/query-keys'
 
 /**
@@ -52,6 +52,45 @@ export function useAuctionWebSocketHandlers({
   viewerCountRef
 }: UseAuctionWebSocketHandlersOptions): UseAuctionWebSocketHandlersReturn {
   const queryClient = useQueryClient()
+  const lastReconcileAtRef = useRef(0)
+  const reconcileTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (reconcileTimeoutRef.current) {
+        clearTimeout(reconcileTimeoutRef.current)
+        reconcileTimeoutRef.current = null
+      }
+    }
+  }, [])
+
+  const reconcileListingDetails = useCallback(() => {
+    const throttleMs = 1000
+    const now = Date.now()
+    const elapsed = now - lastReconcileAtRef.current
+
+    const execute = () => {
+      lastReconcileAtRef.current = Date.now()
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+        refetchType: 'active',
+      })
+    }
+
+    if (elapsed >= throttleMs) {
+      execute()
+      return
+    }
+
+    if (reconcileTimeoutRef.current) {
+      return
+    }
+
+    reconcileTimeoutRef.current = setTimeout(() => {
+      reconcileTimeoutRef.current = null
+      execute()
+    }, throttleMs - elapsed)
+  }, [listingId, queryClient])
 
   /**
    * Handles connection establishment
@@ -86,6 +125,7 @@ export function useAuctionWebSocketHandlers({
 
     // Skip processing if it's the current user's own bid
     if (bidData.bidder?.id === currentUserId) {
+      reconcileListingDetails()
       return
     }
 
@@ -123,31 +163,24 @@ export function useAuctionWebSocketHandlers({
         queryKeys.homepage,
         (old) => {
           if (!old) return old;
+          const updateListing = (listing: any) =>
+            listing.id === listingId
+              ? { ...listing, bid_count: bidData.bid_count, current_bid: bidData.amount }
+              : listing;
           return {
             ...old,
-            featured: (old.featured || []).map((listing) =>
-              listing.id === listingId
-                ? { ...listing, bid_count: bidData.bid_count, current_bid: bidData.amount }
-                : listing
-            ),
-            recent_auctions: (old.recent_auctions || []).map((listing) =>
-              listing.id === listingId
-                ? { ...listing, bid_count: bidData.bid_count, current_bid: bidData.amount }
-                : listing
-            ),
-            recent_listings: (old.recent_listings || []).map((listing) =>
-              listing.id === listingId
-                ? { ...listing, bid_count: bidData.bid_count, current_bid: bidData.amount }
-                : listing
-            ),
-            sellers_you_follow: (old.sellers_you_follow || []).map((listing) =>
-              listing.id === listingId
-                ? { ...listing, bid_count: bidData.bid_count, current_bid: bidData.amount }
-                : listing
-            ),
+            featured: (old.featured || []).map(updateListing),
+            recent_auctions: (old.recent_auctions || []).map(updateListing),
+            recent_new: (old.recent_new || []).map(updateListing),
+            recent_preowned: (old.recent_preowned || []).map(updateListing),
+            recent_decant: (old.recent_decant || []).map(updateListing),
+            sellers_you_follow: (old.sellers_you_follow || []).map(updateListing),
+            recent_swaps: (old.recent_swaps || []).map(updateListing),
           };
         }
       );
+
+    reconcileListingDetails()
 
     // Show toast notification for new bid
     await Notifications.scheduleNotificationAsync({
@@ -158,7 +191,7 @@ export function useAuctionWebSocketHandlers({
       },
       trigger: null, // Show immediately
     })
-  }, [currentUserId, queryClient, listingId])
+  }, [currentUserId, queryClient, listingId, reconcileListingDetails])
 
   /**
    * Handles auction extension updates by optimistically updating cached listing data
@@ -187,7 +220,8 @@ export function useAuctionWebSocketHandlers({
 
     // Note: Push notification is already sent by backend to all bidders and seller
     // No need to show additional toast notification here
-  }, [queryClient, listingId])
+    reconcileListingDetails()
+  }, [queryClient, listingId, reconcileListingDetails])
 
   return {
     handleConnect,

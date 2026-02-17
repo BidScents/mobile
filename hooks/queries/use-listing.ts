@@ -250,33 +250,19 @@ export function updateHomepageFavoriteCount(
     queryKeys.homepage,
     (old) => {
       if (!old) return old;
+      const updateListing = (listing: ListingCard) =>
+        listing.id === listingId
+          ? { ...listing, favorites_count: newCount }
+          : listing;
       return {
         ...old,
-        featured: (old.featured || []).map((listing) =>
-          listing.id === listingId
-            ? { ...listing, favorites_count: newCount }
-            : listing
-        ),
-        recent_auctions: (old.recent_auctions || []).map((listing) =>
-          listing.id === listingId
-            ? { ...listing, favorites_count: newCount }
-            : listing
-        ),
-        recent_listings: (old.recent_listings || []).map((listing) =>
-          listing.id === listingId
-            ? { ...listing, favorites_count: newCount }
-            : listing
-        ),
-        sellers_you_follow: (old.sellers_you_follow || []).map((listing) =>
-          listing.id === listingId
-            ? { ...listing, favorites_count: newCount }
-            : listing
-        ),
-        recent_swaps: (old.recent_swaps || []).map((listing) =>
-          listing.id === listingId
-            ? { ...listing, favorites_count: newCount }
-            : listing
-        ),
+        featured: (old.featured || []).map(updateListing),
+        recent_auctions: (old.recent_auctions || []).map(updateListing),
+        recent_new: (old.recent_new || []).map(updateListing),
+        recent_preowned: (old.recent_preowned || []).map(updateListing),
+        recent_decant: (old.recent_decant || []).map(updateListing),
+        sellers_you_follow: (old.sellers_you_follow || []).map(updateListing),
+        recent_swaps: (old.recent_swaps || []).map(updateListing),
       };
     }
   );
@@ -693,13 +679,11 @@ export function usePlaceBid() {
 
       return { previousData };
     },
-    // onSuccess: (response: BidResponse, { listingId }) => {
-    //   // Invalidate and refetch to get the real bid data from server
-    //   // This ensures we have the correct bid ID, timestamps, and any server-side updates
-    //   queryClient.invalidateQueries({
-    //     queryKey: queryKeys.listings.detail(listingId),
-    //   });
-    // },
+    onSuccess: (_response, { listingId }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
+    },
     onError: (err, { listingId }, context) => {
       // Rollback optimistic update on error
       if (context?.previousData) {

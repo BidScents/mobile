@@ -8,7 +8,9 @@ import {
   useSettleAuctionTransaction,
   useSettlementDetails,
 } from "@/hooks/queries/use-dashboard";
+import { useThemeColors } from "@/hooks/use-theme-colors";
 import { calculateTimeLeft, formatTimeLeft } from "@/utils/countdown";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { router } from "expo-router";
 import React, {
@@ -17,8 +19,8 @@ import React, {
   useImperativeHandle,
   useState,
 } from "react";
-import { Alert } from "react-native";
-import { ScrollView, Text, XStack, YStack } from "tamagui";
+import { Alert, StyleSheet } from "react-native";
+import { ScrollView, Text, View, XStack, YStack } from "tamagui";
 import { CountdownTicker } from "../listing/countdown-ticker";
 
 export interface SettlementBottomSheetMethods {
@@ -75,10 +77,12 @@ export const SettlementBottomSheet = forwardRef<
   const { data, isLoading, error, refetch } = useSettlementDetails(id, {
     enabled: isOpen
   });
-  
+
+  const colors = useThemeColors();
   const settleTransaction = useSettleAuctionTransaction();
   const markNoResponse = useMarkNoResponse();
   const [showAllBidders, setShowAllBidders] = useState(false);
+  const [shippingFee, setShippingFee] = useState<string>("");
 
   const { timeLeft, isExpired } = useCountdown(
     data?.settlement_deadline || null
@@ -104,7 +108,8 @@ export const SettlementBottomSheet = forwardRef<
     if (!data?.top_bids?.[0]) return;
 
     try {
-      await settleTransaction.mutateAsync(id);
+      const feeInCents = shippingFee ? Math.round(parseFloat(shippingFee) * 100) : undefined;
+      await settleTransaction.mutateAsync({ listingId: id, shippingFee: feeInCents });
       refetch(); // Refresh data after settlement starts
     } catch (error) {
       Alert.alert("Error", "Failed to start settlement. Please try again.");
@@ -304,7 +309,7 @@ export const SettlementBottomSheet = forwardRef<
         </YStack>
 
         {/* Other Bidders */}
-        {data.top_bids.length > 1 && (
+        {data.top_bids.length > 0 && (
           <YStack>
             <ScrollView
               gap="$2"
@@ -359,6 +364,65 @@ export const SettlementBottomSheet = forwardRef<
           </YStack>
         )}
 
+        {/* Delivery Charges Input */}
+        {!hasActiveSettlement && (
+          <YStack gap="$2">
+            <Text fontSize="$4" fontWeight="500" color="$foreground">
+              Delivery Charges (Optional)
+            </Text>
+            <Text fontSize="$3" color="$mutedForeground">
+              Shipping fee added to the winning bid amount
+            </Text>
+            <View
+              borderRadius="$4"
+              backgroundColor="$muted"
+            >
+              <BottomSheetTextInput
+                style={[
+                  settlementStyles.textInput,
+                  {
+                    backgroundColor: "transparent",
+                    color: colors.foreground,
+                  },
+                ]}
+                placeholder="0.00"
+                placeholderTextColor={colors.placeholder}
+                value={shippingFee}
+                onChangeText={(text) => {
+                  if (text === "" || /^\d*\.?\d{0,2}$/.test(text)) {
+                    setShippingFee(text);
+                  }
+                }}
+                keyboardType="decimal-pad"
+              />
+            </View>
+            {/* Price Summary */}
+            {shippingFee && parseFloat(shippingFee) > 0 && data?.top_bids?.[0] && (
+              <YStack
+                backgroundColor="$blue2"
+                borderRadius="$4"
+                padding="$3"
+                gap="$1"
+              >
+                <XStack justifyContent="space-between">
+                  <Text fontSize="$3" color="$mutedForeground">Bid</Text>
+                  <Text fontSize="$3" color="$foreground">{currency} {data.top_bids[0].amount.toFixed(2)}</Text>
+                </XStack>
+                <XStack justifyContent="space-between">
+                  <Text fontSize="$3" color="$mutedForeground">Shipping</Text>
+                  <Text fontSize="$3" color="$foreground">{currency} {parseFloat(shippingFee).toFixed(2)}</Text>
+                </XStack>
+                <XStack justifyContent="space-between" borderTopWidth={1} borderTopColor="$blue4" paddingTop="$1" marginTop="$1">
+                  <Text fontSize="$4" fontWeight="600" color="$foreground">Total</Text>
+                  <Text fontSize="$4" fontWeight="600" color="$foreground">
+                    {currency} {(data.top_bids[0].amount + parseFloat(shippingFee)).toFixed(2)}
+                  </Text>
+                </XStack>
+              </YStack>
+            )}
+          </YStack>
+        )}
+
         {/* Action Buttons */}
         <YStack gap="$3" marginTop="$2">
           {!hasActiveSettlement ? (
@@ -404,3 +468,14 @@ export const SettlementBottomSheet = forwardRef<
 });
 
 SettlementBottomSheet.displayName = "SettlementBottomSheet";
+
+const settlementStyles = StyleSheet.create({
+  textInput: {
+    fontSize: 16,
+    lineHeight: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 18,
+    minHeight: 48,
+  },
+});

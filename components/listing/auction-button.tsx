@@ -13,6 +13,8 @@ interface AuctionButtonProps {
   auctionDetails: AuctionDetails | null | undefined;
   /** Whether the auction is currently active */
   isActive?: boolean;
+  /** Whether bidding is temporarily disabled while validating latest auction state */
+  isTemporarilyDisabled?: boolean;
   /** Whether data is currently loading */
   isLoading?: boolean;
   /** Whether the current user is the highest bidder */
@@ -28,6 +30,7 @@ export default function AuctionButton({
   listingId,
   auctionDetails,
   isActive = true,
+  isTemporarilyDisabled = false,
   isLoading = false,
   isCurrentUserHighestBidder = false,
   contactSeller
@@ -40,7 +43,7 @@ export default function AuctionButton({
       return;
     }
 
-    if (!isActive || isLoading) return;
+    if (!isActive || isLoading || isTemporarilyDisabled) return;
     
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     bidBottomSheetRef.current?.present();
@@ -64,7 +67,7 @@ export default function AuctionButton({
           size="lg"
           fullWidth
           onPress={handleBidPress}
-          disabled={isLoading || !isActive}
+          disabled={isLoading || !isActive || isTemporarilyDisabled}
           borderRadius="$6"
         >
           {isLoading
@@ -85,6 +88,7 @@ export default function AuctionButton({
         auctionDetails={auctionDetails}
         isCurrentUserHighestBidder={isCurrentUserHighestBidder}
         isActive={isActive}
+        isTemporarilyDisabled={isTemporarilyDisabled}
       />
     </>
   );

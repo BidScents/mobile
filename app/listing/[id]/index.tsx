@@ -3,6 +3,7 @@ import { useContactSeller } from ".../../hooks/queries/use-messages";
 import { useAuctionWebSocket } from ".../../hooks/use-auction-websocket";
 import { useAuctionWebSocketHandlers } from ".../../hooks/use-auction-websocket-handlers";
 import { isCurrentUserHighestBidder as checkIsCurrentUserHighestBidder } from ".../../utils/auction-helpers";
+import { isAuctionActive } from "@/utils/countdown";
 import { ImageCarousel } from "@/components/listing/image-carousel";
 import { ListingActions } from "@/components/listing/listing-actions";
 import { ListingContent } from "@/components/listing/listing-content";
@@ -26,7 +27,7 @@ import { Text, View } from "tamagui";
 export default function ListingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { data: listing, isLoading, error, isFetching } = useListingDetail(id!);
+  const { data: listing, isLoading, error, isFetching, refetch } = useListingDetail(id!);
   const { user } = useAuthStore();
   const contactSellerMutation = useContactSeller();
 
@@ -40,6 +41,8 @@ export default function ListingScreen() {
   
   // Track app state for WebSocket connection management
   const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState);
+  const [isVerifyingAuctionEnd, setIsVerifyingAuctionEnd] = useState(false);
+  const lastVerifiedEndsAtRef = useRef<string | null>(null);
 
   // Set up AppState listener for WebSocket lifecycle management
   useEffect(() => {
@@ -49,6 +52,39 @@ export default function ListingScreen() {
 
     return () => subscription.remove();
   }, []);
+
+  useEffect(() => {
+    setIsVerifyingAuctionEnd(false);
+    lastVerifiedEndsAtRef.current = null;
+  }, [id]);
+
+  // Lock bidding immediately on local expiry, then verify once with server.
+  useEffect(() => {
+    const isAuctionListing = listing?.listing?.listing_type === "AUCTION";
+    const endsAt = listing?.auction_details?.ends_at;
+
+    if (!isAuctionListing || !endsAt) {
+      setIsVerifyingAuctionEnd(false);
+      return;
+    }
+
+    const endedLocally = !isAuctionActive(endsAt);
+    if (!endedLocally) {
+      setIsVerifyingAuctionEnd(false);
+      return;
+    }
+
+    if (isVerifyingAuctionEnd || lastVerifiedEndsAtRef.current === endsAt) {
+      return;
+    }
+
+    lastVerifiedEndsAtRef.current = endsAt;
+    setIsVerifyingAuctionEnd(true);
+
+    void refetch().finally(() => {
+      setIsVerifyingAuctionEnd(false);
+    });
+  }, [listing?.listing?.listing_type, listing?.auction_details?.ends_at, isVerifyingAuctionEnd, refetch]);
 
   // Determine if WebSocket should connect for auction listings
   const shouldConnectToAuction = useMemo(() => {
@@ -108,7 +144,7 @@ export default function ListingScreen() {
         //show an error toast here
       },
     });
-  }, [listing?.seller?.id, contactSellerMutation, router]);
+  }, [listing?.seller?.id, listing?.listing?.id, contactSellerMutation, router]);
 
   // Show skeleton only if no data at all (no seeded cache)
   if (isLoading) {
@@ -223,6 +259,7 @@ export default function ListingScreen() {
           listingId={listing.listing.id}
           auctionDetails={listing.auction_details}
           isCurrentUserHighestBidder={isCurrentUserHighestBidder}
+          isTemporarilyDisabled={isVerifyingAuctionEnd}
           isLoading={isLoading || (listing as any)?.__seeded === true || contactSellerMutation.isPending}
           onContactSeller={handleContactSeller}
         />
