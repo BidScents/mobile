@@ -2,7 +2,7 @@
   "expo": {
     "name": "BidScents",
     "slug": "bidscents",
-    "version": "1.5",
+    "version": "1.6",
     "orientation": "portrait",
     "icon": "./assets/icons/ios-light.png",
     "scheme": "com.bidscents.mobile",
